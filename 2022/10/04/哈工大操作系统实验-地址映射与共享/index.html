@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="参考文章 Linux进程间通信（六）：共享内存 shmget()、shmat()、shmdt()、shmctl()  操作系统实验七 地址映射与共享(哈工大李治军)  必备知识要点1 共享内存顾名思义，共享内存就是允许两个不相关的进程访问同一个逻辑内存。共享内存是在两个正在运行的进程之间共享和传递数据的一种非常有效的方式。不同进程之间共享的内存通常安排为同一段物理内存。如果某个进程向共享内存写入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="哈工大操作系统实验--地址映射与共享">
+<meta property="og:url" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/index.html">
+<meta property="og:site_name" content="Xiunian">
+<meta property="og:description" content="参考文章 Linux进程间通信（六）：共享内存 shmget()、shmat()、shmdt()、shmctl()  操作系统实验七 地址映射与共享(哈工大李治军)  必备知识要点1 共享内存顾名思义，共享内存就是允许两个不相关的进程访问同一个逻辑内存。共享内存是在两个正在运行的进程之间共享和传递数据的一种非常有效的方式。不同进程之间共享的内存通常安排为同一段物理内存。如果某个进程向共享内存写入">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://doc.shiyanlou.com/userid19614labid573time1424086247964">
+<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/d3d839723b44d3e6a9407cbbd684d976.png">
+<meta property="article:published_time" content="2022-10-04T02:56:01.000Z">
+<meta property="article:modified_time" content="2022-10-04T02:58:16.614Z">
+<meta property="article:author" content="Xiunian">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://doc.shiyanlou.com/userid19614labid573time1424086247964">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>哈工大操作系统实验--地址映射与共享 | Xiunian</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Xiunian</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Xiunian">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Xiunian">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          哈工大操作系统实验--地址映射与共享
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-10-04 10:56:01 / 修改时间：10:58:16" itemprop="dateCreated datePublished" datetime="2022-10-04T10:56:01+08:00">2022-10-04</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>参考文章</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/52php/p/5861372.html">Linux进程间通信（六）：共享内存 shmget()、shmat()、shmdt()、shmctl() </a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/leoabcd12/article/details/121581308">操作系统实验七 地址映射与共享(哈工大李治军)</a></p>
+</blockquote>
+<h2 id="必备知识"><a href="#必备知识" class="headerlink" title="必备知识"></a>必备知识</h2><h4 id="要点1-共享内存"><a href="#要点1-共享内存" class="headerlink" title="要点1 共享内存"></a>要点1 共享内存</h4><p>顾名思义，共享内存就是<u>允许两个不相关的进程访问同一个逻辑内存</u>。共享内存是在两个正在运行的进程之间<u>共享和传递数据</u>的一种非常有效的方式。不同进程之间共享的内存通常安排为<u>同一段物理内存</u>。如果某个进程向共享内存写入数据，所做的改动将立即影响到可以访问同一段共享内存的任何其他进程。</p>
+<p>注：共享内存并未提供同步机制，所以我们需要用信号量来实现同步。</p>
+<p>Linux提供了一组接口用于使用共享内存，它们声明在头文件 sys/shm.h 中。</p>
+<h5 id="1-shmget"><a href="#1-shmget" class="headerlink" title="1.shmget"></a>1.shmget</h5><p>程序先通过调用shmget()函数并提供一个键，再由系统生成一个相应的共享内存标识符（shmget()函数的返回值）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">shmget</span><span class="params">(<span class="type">key_t</span> key, <span class="type">size_t</span> size, <span class="type">int</span> shmflg)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>key为共享内存段名字，size为大小，shmflg是权限标志</p>
+<p>注：</p>
+<p>① key：<u><strong>非0整数</strong></u>，共享内存段的命名</p>
+<p>② shmflag：作用与open函数的mode参数一样，比如IPC_CREAT，或连接</p>
+<p>共享内存的权限标志与文件的读写权限一样，举例来说，0644表示允许一个进程创建的共享内存被内存创建者所拥有的进程向共享内存读取和写入数据，同时其他用户创建的进程只能读取共享内存</p>
+<p>③ return：成功时返回一个与key相关的<u>共享内存标识符</u>（非负整数）。调用失败返回-1</p>
+<p>不相关的进程可以<u>返回值（共享内存标识符）访问同一共享内存</u>。</p>
+<h5 id="2-shmat"><a href="#2-shmat" class="headerlink" title="2.shmat"></a>2.shmat</h5><p>第一次创建完共享内存时，它还不能被任何进程访问，需要shmat启动对该共享内存的访问，并把共享内存连接到当前进程的地址空间。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *<span class="title function_">shmat</span><span class="params">(<span class="type">int</span> shm_id, <span class="type">const</span> <span class="type">void</span> *shm_addr, <span class="type">int</span> shmflg)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>① shm_id：共享内存标识符</p>
+<p>② shm_addr：指定共享内存连接到当前进程中的地址位置，通常为空，表示<u>让系统来选择</u>共享内存的地址</p>
+<p>③ shm_flg：一组标志位，通常为0</p>
+<p>④ return：成功时返回一个<u><strong>指向共享内存第一个字节</strong></u>的指针，失败返回-1</p>
+<h5 id="3-shmdt"><a href="#3-shmdt" class="headerlink" title="3.shmdt"></a>3.shmdt</h5><p>用于将共享内存从当前进程中分离，使该共享内存对当前进程不再可用。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">shmdt</span><span class="params">(<span class="type">const</span> <span class="type">void</span> *shmaddr)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>① shmaddr：shmat返回的共享内存指针</p>
+<p>② return：成功0，失败1</p>
+<h5 id="4-shmctl"><a href="#4-shmctl" class="headerlink" title="4.shmctl"></a>4.shmctl</h5><p>用来控制共享内存</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">shmctl</span><span class="params">(<span class="type">int</span> shm_id, <span class="type">int</span> command, <span class="keyword">struct</span> shmid_ds *buf)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>① shm_id：共享内存标识符</p>
+<p>② command：要采取的操作，它可以取下面的三个值 ：</p>
+<ul>
+<li>IPC_STAT：把shmid_ds结构中的数据设置为共享内存的当前关联值，即用共享内存的当前关联值覆盖shmid_ds的值。</li>
+<li>IPC_SET：如果进程有足够的权限，就把共享内存的当前关联值设置为shmid_ds结构中给出的值</li>
+<li>IPC_RMID：删除共享内存段</li>
+</ul>
+<p>③ buf：结构指针</p>
+<p>shmid_ds结构 至少包括以下成员：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">shmid_ds</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="type">uid_t</span> shm_perm.uid;</span><br><span class="line">    <span class="type">uid_t</span> shm_perm.gid;</span><br><span class="line">    <span class="type">mode_t</span> shm_perm.mode;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="实验1-在Ubuntu下编写程序“基于共享内存的生产者消费者模型”"><a href="#实验1-在Ubuntu下编写程序“基于共享内存的生产者消费者模型”" class="headerlink" title="实验1 在Ubuntu下编写程序“基于共享内存的生产者消费者模型”"></a>实验1 在Ubuntu下编写程序“基于共享内存的生产者消费者模型”</h2><blockquote>
+<p>本项实验在 Ubuntu 下完成，与信号量实验中的 <code>pc.c</code> 的功能要求基本一致，仅有两点不同：</p>
+<ul>
+<li>不用文件做缓冲区，而是使用共享内存；</li>
+<li>生产者和消费者分别是不同的程序。生产者是 producer.c，消费者是 consumer.c。两个程序都是单进程的，通过信号量和缓冲区进行通信。</li>
+</ul>
+<p>Linux 下，可以通过 <code>shmget()</code> 和 <code>shmat()</code> 两个系统调用使用共享内存。</p>
+</blockquote>
+<p>直接上代码。感觉比文件操作简单多了2333</p>
+<p>consumer.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/shm.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">sem_t</span>* empty;</span><br><span class="line"><span class="type">sem_t</span>* full;</span><br><span class="line"><span class="type">sem_t</span>* mutex;</span><br><span class="line"><span class="type">char</span>* p;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">Consumer</span><span class="params">()</span>&#123;</span><br><span class="line">	sem_wait(full);</span><br><span class="line">	sem_wait(mutex);</span><br><span class="line">	<span class="type">char</span> s[<span class="number">5</span>]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line">	<span class="comment">//there read s from buffer...</span></span><br><span class="line">	<span class="built_in">memcpy</span>(s,p,<span class="keyword">sizeof</span>(<span class="type">char</span>)*<span class="number">4</span>);</span><br><span class="line">	p+=<span class="number">4</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;%d : %s&quot;</span>,getpid(),s);</span><br><span class="line">	sem_post(mutex);</span><br><span class="line">	sem_post(empty);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	empty=sem_open(<span class="string">&quot;empty&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">10</span>);</span><br><span class="line">	full=sem_open(<span class="string">&quot;full&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">0</span>);</span><br><span class="line">	mutex=sem_open(<span class="string">&quot;mutex&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">1</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="type">int</span> shm_id=shmget(<span class="number">521</span>,<span class="keyword">sizeof</span>(<span class="type">char</span>)*<span class="number">4</span>*<span class="number">600</span>,<span class="number">0644</span>|IPC_CREAT);</span><br><span class="line">	<span class="type">char</span>* shm=(<span class="type">char</span>*)shmat(shm_id,<span class="literal">NULL</span>,<span class="number">0</span>);</span><br><span class="line">	p=shm;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> cnt=<span class="number">500</span>;</span><br><span class="line">	<span class="keyword">while</span>(cnt--)&#123;</span><br><span class="line">		Consumer();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	shmdt(shm);</span><br><span class="line">	shmctl(shm_id,IPC_RMID,<span class="number">0</span>);</span><br><span class="line">	sem_unlink(<span class="string">&quot;mutex&quot;</span>);</span><br><span class="line">	sem_unlink(<span class="string">&quot;full&quot;</span>);</span><br><span class="line">	sem_unlink(<span class="string">&quot;empty&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>producer.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/shm.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">sem_t</span>* empty;</span><br><span class="line"><span class="type">sem_t</span>* full;</span><br><span class="line"><span class="type">sem_t</span>* mutex;</span><br><span class="line"><span class="type">char</span>* p;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">Producer</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="type">char</span> s[<span class="number">5</span>]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line">	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;=<span class="number">500</span>;i++)&#123;</span><br><span class="line">		sem_wait(empty);</span><br><span class="line">		sem_wait(mutex);</span><br><span class="line">		<span class="built_in">sprintf</span>(s,<span class="string">&quot;%03d\n&quot;</span>,i);</span><br><span class="line">		<span class="comment">//there write s into buffer...</span></span><br><span class="line">		<span class="built_in">memcpy</span>(p,s,<span class="keyword">sizeof</span>(<span class="type">char</span>)*<span class="number">4</span>);</span><br><span class="line">		p+=<span class="number">4</span>;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Write into success!%s\n&quot;</span>,s);</span><br><span class="line">		sem_post(mutex);</span><br><span class="line">		sem_post(full);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	empty=sem_open(<span class="string">&quot;empty&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">10</span>);</span><br><span class="line">	full=sem_open(<span class="string">&quot;full&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">0</span>);</span><br><span class="line">	mutex=sem_open(<span class="string">&quot;mutex&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">1</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="type">int</span> shm_id=shmget(<span class="number">521</span>,<span class="keyword">sizeof</span>(<span class="type">char</span>)*<span class="number">4</span>*<span class="number">600</span>,<span class="number">0644</span>|IPC_CREAT);</span><br><span class="line">	<span class="type">char</span>* shm=(<span class="type">char</span>*)shmat(shm_id,<span class="literal">NULL</span>,<span class="number">0</span>);</span><br><span class="line">	p=shm;</span><br><span class="line"></span><br><span class="line">	Producer();</span><br><span class="line"></span><br><span class="line">	shmdt(shm);</span><br><span class="line">	shmctl(shm_id,IPC_RMID,<span class="number">0</span>);</span><br><span class="line">	sem_unlink(<span class="string">&quot;mutex&quot;</span>);</span><br><span class="line">	sem_unlink(<span class="string">&quot;full&quot;</span>);</span><br><span class="line">	sem_unlink(<span class="string">&quot;empty&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译运行指令</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gcc -o producer producer.c -pthread</span><br><span class="line">gcc -o consumer consumer.c -pthread</span><br><span class="line">./producer &gt; p.txt &amp;</span><br><span class="line">./consumer &gt; c.txt</span><br></pre></td></tr></table></figure>
+
+<p>运行结果c.txt（仅展示部分）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">27696 : 000</span><br><span class="line">27696 : 001</span><br><span class="line">27696 : 002</span><br><span class="line">27696 : 003</span><br><span class="line">27696 : 004</span><br><span class="line">27696 : 005</span><br><span class="line">27696 : 006</span><br><span class="line">27696 : 007</span><br><span class="line">27696 : 008</span><br><span class="line">27696 : 009</span><br><span class="line">27696 : 010</span><br><span class="line">27696 : 011</span><br><span class="line">27696 : 012</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="实验2-在Linux0-11实现共享内存"><a href="#实验2-在Linux0-11实现共享内存" class="headerlink" title="实验2 在Linux0.11实现共享内存"></a>实验2 在Linux0.11实现共享内存</h2><blockquote>
+<p>进程之间可以通过页共享进行通信，被共享的页叫做共享内存，结构如下图所示：</p>
+<p><img src="https://doc.shiyanlou.com/userid19614labid573time1424086247964" alt="图片描述信息"></p>
+<p>本部分实验内容是在 Linux 0.11 上实现上述页面共享，并将上一部分实现的 producer.c 和 consumer.c 移植过来，验证页面共享的有效性。</p>
+</blockquote>
+<blockquote>
+<p>具体要求在 <code>mm/shm.c</code> 中实现 <code>shmget()</code> 和 <code>shmat()</code> 两个系统调用。它们能支持 <code>producer.c</code> 和 <code>consumer.c</code> 的运行即可，不需要完整地实现 POSIX 所规定的功能。</p>
+<ul>
+<li>shmget()</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">shmget</span><span class="params">(<span class="type">key_t</span> key, <span class="type">size_t</span> size, <span class="type">int</span> shmflg)</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>shmget()</code> 会新建/打开一页内存，并返回该页共享内存的 shmid（该块共享内存在操作系统内部的 id）。</p>
+<p>所有使用同一块共享内存的进程都要使用相同的 key 参数。</p>
+<p>如果 key 所对应的共享内存已经建立，则直接返回 <code>shmid</code>。如果 size 超过一页内存的大小，返回 <code>-1</code>，并置 <code>errno</code> 为 <code>EINVAL</code>。如果系统无空闲内存，返回 -1，并置 <code>errno</code> 为 <code>ENOMEM</code>。</p>
+<p><code>shmflg</code> 参数可忽略。</p>
+<ul>
+<li>shmat()</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *<span class="title function_">shmat</span><span class="params">(<span class="type">int</span> shmid, <span class="type">const</span> <span class="type">void</span> *shmaddr, <span class="type">int</span> shmflg)</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>shmat()</code> 会将 <code>shmid</code> 指定的共享页面映射到当前进程的虚拟地址空间中，并将其首地址返回。</p>
+<p>如果 <code>shmid</code> 非法，返回 <code>-1</code>，并置 <code>errno</code> 为 <code>EINVAL</code>。</p>
+<p><code>shmaddr</code> 和 <code>shmflg</code> 参数可忽略。</p>
+</blockquote>
+<p>思路：</p>
+<p>1.shmget：由其论述，我们可以知道，我们需要建立一个映射表，其中成员为结构体({key_t key,size_t size,unsigned long page})，每次只需查找映射表，如果有对应key则返回下标，如果没有则新建页表，填入映射体，再返回对应下标。</p>
+<p>以下为了图省事，对映射表的实现进行了简化，把key直接当做int类型，作为映射表下标，映射表成员为page，unsigned long。</p>
+<p>2.shmat：</p>
+<p>首先由指导书的提示：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 建立线性地址和物理地址的映射</span></span><br><span class="line">put_page(tmp, address);</span><br></pre></td></tr></table></figure>
+
+<p>我们知道在shmat中，要建立shmget得到的共享物理页面与其虚拟地址的映射，就需要使用这个put_page函数。</p>
+<p>但是put_page函数的参数为页和address。页就是我们的shm_map[key]，address=虚拟地址+段基址。那么如何得到虚拟地址呢？</p>
+<p>通过指导书的提示：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">code_base = get_base(current-&gt;ldt[<span class="number">1</span>]);</span><br><span class="line">data_base = code_base;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 数据段基址 = 代码段基址</span></span><br><span class="line">set_base(current-&gt;ldt[<span class="number">1</span>],code_base);</span><br><span class="line">set_limit(current-&gt;ldt[<span class="number">1</span>],code_limit);</span><br><span class="line">set_base(current-&gt;ldt[<span class="number">2</span>],data_base);</span><br><span class="line">set_limit(current-&gt;ldt[<span class="number">2</span>],data_limit);</span><br><span class="line">__asm__(<span class="string">&quot;pushl $0x17\n\tpop %%fs&quot;</span>:: );</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从数据段的末尾开始</span></span><br><span class="line">data_base += data_limit;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 向前处理</span></span><br><span class="line"><span class="keyword">for</span> (i=MAX_ARG_PAGES<span class="number">-1</span> ; i&gt;=<span class="number">0</span> ; i--) &#123;</span><br><span class="line">    <span class="comment">// 一次处理一页</span></span><br><span class="line">    data_base -= PAGE_SIZE;</span><br><span class="line">    <span class="comment">// 建立线性地址到物理页的映射</span></span><br><span class="line">    <span class="keyword">if</span> (page[i]) put_page(page[i],data_base);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再结合所学知识，我们可以知道几点：</p>
+<p>① 数据段的基址可由current-&gt;ldt[2]给出 ② address=虚拟地址+段基址 ③ 我们需要分配给当前共享内存一段空闲的虚拟地址段</p>
+<p>则该小段空闲数据段的虚拟地址就是我们的return值，address=return+data_base。</p>
+<p>问题就转化成了如何获取一段空闲数据段。</p>
+<p>我们由下图：</p>
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/d3d839723b44d3e6a9407cbbd684d976.png" class> 
+
+<p>可知，brk指针指向堆区顶部，即空闲堆的起始位置。因而我们可以用这段空间作为我们要的空闲数据段，当前brk即为虚拟地址。</p>
+<p>我们的页有PAGE_SIZE那么大，因而自然也就要用PAGE_SIZE那么大的空闲数据段了。</p>
+<p>解说完毕，以下上代码~</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __LIBRARY__</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/sched.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/mm.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> shm_map[<span class="number">600</span>];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">sys_shmget</span><span class="params">(<span class="type">int</span> key,<span class="type">size_t</span> size,<span class="type">int</span> shmflg)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(key&lt;<span class="number">0</span>||key&gt;=<span class="number">600</span>)	<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	<span class="keyword">if</span>(shm_map[key]!=<span class="number">0</span>)	<span class="keyword">return</span> key;</span><br><span class="line">	</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> tmp=get_free_page();</span><br><span class="line">	shm_map[key]=tmp;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> key;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span>* <span class="title function_">sys_shmat</span><span class="params">(<span class="type">int</span> shmid,<span class="type">const</span> <span class="type">void</span>* shmaddr,<span class="type">int</span> shmflg)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(shmid&lt;<span class="number">0</span>||shmid&gt;=<span class="number">600</span>)	<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> page=shm_map[shmid];</span><br><span class="line">	<span class="comment">//得到数据段的基址 </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> data_base=get_base(current-&gt;ldt[<span class="number">2</span>]);</span><br><span class="line">	<span class="comment">//brk指针指向空闲数据段的开始 </span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> brk=current-&gt;brk+data_base;</span><br><span class="line">	current-&gt;brk+=PAGE_SIZE;</span><br><span class="line">	<span class="comment">//建立内存映射 </span></span><br><span class="line">	put_page(page,brk);</span><br><span class="line">	<span class="keyword">return</span> (<span class="type">void</span>*)(brk-data_base);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/02/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E4%BF%A1%E5%8F%B7%E9%87%8F/" rel="prev" title="哈工大操作系统实验--信号量">
+      <i class="fa fa-chevron-left"></i> 哈工大操作系统实验--信号量
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%85%E5%A4%87%E7%9F%A5%E8%AF%86"><span class="nav-number">1.</span> <span class="nav-text">必备知识</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A6%81%E7%82%B91-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="nav-number">1.0.1.</span> <span class="nav-text">要点1 共享内存</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-shmget"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">1.shmget</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-shmat"><span class="nav-number">1.0.1.2.</span> <span class="nav-text">2.shmat</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-shmdt"><span class="nav-number">1.0.1.3.</span> <span class="nav-text">3.shmdt</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-shmctl"><span class="nav-number">1.0.1.4.</span> <span class="nav-text">4.shmctl</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C1-%E5%9C%A8Ubuntu%E4%B8%8B%E7%BC%96%E5%86%99%E7%A8%8B%E5%BA%8F%E2%80%9C%E5%9F%BA%E4%BA%8E%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E7%9A%84%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B%E2%80%9D"><span class="nav-number">2.</span> <span class="nav-text">实验1 在Ubuntu下编写程序“基于共享内存的生产者消费者模型”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C2-%E5%9C%A8Linux0-11%E5%AE%9E%E7%8E%B0%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="nav-number">3.</span> <span class="nav-text">实验2 在Linux0.11实现共享内存</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Xiunian</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiunian</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
