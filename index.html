@@ -295,7 +295,7 @@
 <p>则该小段空闲数据段的虚拟地址就是我们的return值，address=return+data_base。</p>
 <p>问题就转化成了如何获取一段空闲数据段。</p>
 <p>我们由下图：</p>
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/d3d839723b44d3e6a9407cbbd684d976.png" class> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C-%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB/d3d839723b44d3e6a9407cbbd684d976.png" class> 
 
 <p>可知，brk指针指向堆区顶部，即空闲堆的起始位置。因而我们可以用这段空间作为我们要的空闲数据段，当前brk即为虚拟地址。</p>
 <p>我们的页有PAGE_SIZE那么大，因而自然也就要用PAGE_SIZE那么大的空闲数据段了。</p>
