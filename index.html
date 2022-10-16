@@ -170,7 +170,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-10-16 10:58:09 / 修改时间：11:16:18" itemprop="dateCreated datePublished" datetime="2022-10-16T10:58:09+08:00">2022-10-16</time>
+              <time title="创建时间：2022-10-16 10:58:09 / 修改时间：11:39:07" itemprop="dateCreated datePublished" datetime="2022-10-16T10:58:09+08:00">2022-10-16</time>
             </span>
 
           
@@ -506,6 +506,19 @@
 <p>事实证明确实人家也觉得无参比较合理（</p>
 </li>
 <li><h5 id="sublist"><a href="#sublist" class="headerlink" title="sublist"></a>sublist</h5><p>LinkedList用了从AbstractList继承来的sublist相关类和方法，没有特别的优化，其sublist不可序列化，且not cloneable。</p>
+</li>
+<li><h5 id="transient的三个成员变量"><a href="#transient的三个成员变量" class="headerlink" title="transient的三个成员变量"></a>transient的三个成员变量</h5><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/74080097/in-java-linkedlist-why-the-first-last-and-size-variable-are-transient">In Java LinkedList, why the “first”, “last” and “size” variable are transient?</a></p>
+<blockquote>
+<p>LinkedList provide its own method for serializing and de-serializing. </p>
+<p>When serializing, it only writes the size, and the values of the list.</p>
+<p>When deserializing, it reads the size, then <strong>build</strong> the list from scratch, each node for each value at a time. </p>
+<p>If the author <strong>did not provide their own read and write methods,</strong> then they would need to make size, first, and last non-transient. They would also need to make the Node class serializable.</p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/25926012/as-all-the-member-variables-of-java-linkedlist-is-transient-what-will-be-the-us">As all the member variables of java LinkedList is transient, what will be the use of implementing Serializable?</a></p>
+<blockquote>
+<p>Otherwise serializing would be by default, which would be recursive, and for a large list would easily blow the stack. </p>
+</blockquote>
+<p>意思就是序列化时不记录这些信息，反序列化时会重新构建。还有说如果用默认的序列化方法是递归的可能爆栈？还有我觉得有一点可能是如果把所有node都序列化了，可能反序列化后，本来分配到那段内存空间要是被占用了，但指针值不变还是会有问题？等待之后解答。</p>
 </li>
 </ol>
 <h3 id="Vector"><a href="#Vector" class="headerlink" title="Vector"></a>Vector</h3><blockquote>
