@@ -170,7 +170,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-10-22 15:00:36 / 修改时间：15:04:37" itemprop="dateCreated datePublished" datetime="2022-10-22T15:00:36+08:00">2022-10-22</time>
+              <time title="创建时间：2022-10-22 15:00:36 / 修改时间：18:03:34" itemprop="dateCreated datePublished" datetime="2022-10-22T15:00:36+08:00">2022-10-22</time>
             </span>
 
           
@@ -397,13 +397,13 @@
 </blockquote>
 <p>都使用了modcount进行并发检查，都具有fail-fast的特点（关于此的详细解说，可见AbstractList第四点和List第二点），因而只允许在迭代中使用迭代器的remove方法进行结构性改变。【注意：对于LinkedHashMap中access order排序，get方法也是structural modification，因而也只能通过迭代器的next方法获取元素】</p>
 </li>
-<li><h4 id="not-synchronized"><a href="#not-synchronized" class="headerlink" title="not synchronized"></a>not synchronized</h4><p>上面介绍到的几个类，除了Vector外，都是线程不同步的。可以用此方式让其线程同步。</p>
+<li><h3 id="not-synchronized"><a href="#not-synchronized" class="headerlink" title="not synchronized"></a>not synchronized</h3><p>上面介绍到的几个类，除了Vector外，都是线程不同步的。可以用此方式让其线程同步。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Map</span> <span class="variable">m</span> <span class="operator">=</span> Collections.synchronizedMap(<span class="keyword">new</span> <span class="title class_">LinkedHashMap</span>(...));</span><br></pre></td></tr></table></figure></li>
-<li><h4 id="是否允许null"><a href="#是否允许null" class="headerlink" title="是否允许null"></a>是否允许null</h4><p>除了TreeSet、TreeMap之外，都是允许空（key/value）的</p>
+<li><h3 id="是否允许null"><a href="#是否允许null" class="headerlink" title="是否允许null"></a>是否允许null</h3><p>除了TreeSet、TreeMap之外，都是允许空（key/value）的</p>
 </li>
-<li><h4 id="是否有序"><a href="#是否有序" class="headerlink" title="是否有序"></a>是否有序</h4><p>List都是插入序，HashSet无需，HashMap也无序（但其实算是有内部桶序的），LinkedHashMap有插入序和LRU序（依靠内部增加简单队列的消耗），TreeSet有序，TreeMap有序【这俩靠红黑树的遍历顺序（二叉搜索树嘛）】。</p>
+<li><h3 id="是否有序"><a href="#是否有序" class="headerlink" title="是否有序"></a>是否有序</h3><p>List都是插入序，HashSet无需，HashMap也无序（但其实算是有内部桶序的），LinkedHashMap有插入序和LRU序（依靠内部增加简单队列的消耗），TreeSet有序，TreeMap有序【这俩靠红黑树的遍历顺序（二叉搜索树嘛）】。</p>
 </li>
-<li><h4 id="实现的约定接口"><a href="#实现的约定接口" class="headerlink" title="实现的约定接口"></a>实现的约定接口</h4><p>都Cloneable，Serializable</p>
+<li><h3 id="实现的约定接口"><a href="#实现的约定接口" class="headerlink" title="实现的约定接口"></a>实现的约定接口</h3><p>都Cloneable，Serializable</p>
 <p>ArrayList/Vector：RandomAccess</p>
 </li>
 </ol>
