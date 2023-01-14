@@ -27,56 +27,56 @@
 <meta property="og:site_name" content="修年">
 <meta property="og:description" content="部分地方的翻译和表格来源参考：xv6指导书翻译 实验官网：6.S081 记得结合书本的笔记阅读，这里只记录了一点看心情觉得想记就记的东西以及实验感想。  Operating system interface本节大概是在讲操作系统的接口问题，系统调用占了很大一部分。    系统调用 描述    int fork() 创建一个进程，返回子进程的PID   int exit(int status) 终">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/note/image-20230105153458808.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/note/image-20230105164146100.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/note/image-20230105162505574.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/note/image-20230105170701334.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/note/image-20230105171327076.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230105172110475.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230105173019159.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230105173820813.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230105173845317.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230105174832400.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230106172133338.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230109234930690.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230107232802540.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230107233741922.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230108011824655.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230108012316631.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230108013156116.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230108013849664.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230109153937459.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230109151346780.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/p3.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230109222917346.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230109225700837.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230109234930690.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230110010651653.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/v2-0c2603da4c8102e46ae390a0d0b1191d_1440w.webp">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230110225359361.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230110231020570.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230111000329475.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230111004330079.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230111004500827.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230114011100370.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/p3.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230111203357767.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230111224927837.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/format,png.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230111232323444.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230112012358601.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230112010749756.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230113002057893.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230113002434093.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230113002542335.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230113005100895.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/xv6/image-20230113012355740.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105153458808.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105164146100.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105162505574.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105170701334.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105171327076.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105172110475.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105173019159.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105173820813.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105173845317.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105174832400.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230106172133338.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109234930690.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230107232802540.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230107233741922.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230108011824655.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230108012316631.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230108013156116.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230108013849664.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109153937459.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109151346780.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/p3.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109222917346.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109225700837.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109234930690.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230110010651653.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/v2-0c2603da4c8102e46ae390a0d0b1191d_1440w.jpg">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230110225359361.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230110231020570.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111000329475.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111004330079.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111004500827.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230114011100370.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/p3.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111203357767.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111224927837.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/format,png.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111232323444.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230112012358601.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230112010749756.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113002057893.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113002434093.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113002542335.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113005100895.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113012355740.png">
 <meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
-<meta property="article:modified_time" content="2023-01-14T06:58:07.961Z">
+<meta property="article:modified_time" content="2023-01-14T07:02:22.603Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/aWorkStorage/hexo/blog/source_posts/note/image-20230105153458808.png">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230105153458808.png">
 
 <link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6/">
 
@@ -226,7 +226,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-01-14 14:58:07" itemprop="dateModified" datetime="2023-01-14T14:58:07+08:00">2023-01-14</time>
+                <time title="修改时间：2023-01-14 15:02:22" itemprop="dateModified" datetime="2023-01-14T15:02:22+08:00">2023-01-14</time>
               </span>
 
           
@@ -476,7 +476,8 @@
 <p>在这里记个强制方法：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -elf | grep qemu</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\note\image-20230105153458808.png" alt="image-20230105153458808"></p>
+<img src="/2023/01/10/xv6/image-20230105153458808.png" class>
+
 <p>记住第二个的pid</p>
 <p>然后</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kill 3303</span><br></pre></td></tr></table></figure>
@@ -490,11 +491,12 @@
 
 <h3 id="实验内容"><a href="#实验内容" class="headerlink" title="实验内容"></a>实验内容</h3><h4 id="编写sleep-c"><a href="#编写sleep-c" class="headerlink" title="编写sleep.c"></a>编写sleep.c</h4><blockquote>
 <p>Implement the UNIX program <code>sleep</code> for xv6; your <code>sleep</code> should pause for a user-specified number of ticks. A tick is a notion of time defined by the xv6 kernel, namely the time between two interrupts from the timer chip. Your solution should be in the file <code>user/sleep.c</code>.</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\note\image-20230105164146100.png" alt="image-20230105164146100"></p>
+<img src="/2023/01/10/xv6/image-20230105164146100.png" class>
 </blockquote>
 <h5 id="体会"><a href="#体会" class="headerlink" title="体会"></a>体会</h5><h6 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h6><p>注意，他要求我们实现的sleep的参数是<strong>ticks的数量</strong>，不是秒数。我花了半天找时钟周期大小这个参数在哪，找了许久没找到，估计是没考虑到这一点。</p>
 <p>比如说，我翻了一下linux0.11的源码，在include/linux/time.h下有这句：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\note\image-20230105162505574.png" alt="image-20230105162505574"></p>
+<img src="/2023/01/10/xv6/image-20230105162505574.png" class>
+
 <p>说明了时钟频率大小。在xv6好像没有看到对这个的显式说明。</p>
 <h6 id="系统调用过程"><a href="#系统调用过程" class="headerlink" title="系统调用过程"></a>系统调用过程</h6><p>感受了一下xv6的系统调用过程，跟linux0.11还是很相像的。</p>
 <p>这个好像是lab2的内容，我暂且先在此放下我体会到的感受。</p>
@@ -502,16 +504,20 @@
 <li><p>xv6</p>
 <p>首先是从用户态到内核态的切换。</p>
 <p>在user/user.h中有各个系统调用外化的函数签名。在用户程序中调用里面的函数签名，就会执行【说实话，我没看懂为什么这里会知道要从user.h跳到usys.S中执行，也许是Makefile里有写？】user/usys.S中对应的汇编代码，比如说这种：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\note\image-20230105170701334.png" alt="image-20230105170701334"></p>
+<img src="/2023/01/10/xv6/image-20230105170701334.png" class>
+
 <p>然后这个SYS_close这种，其实是系统调用号宏，被定义在kernel/syscall.h中：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\note\image-20230105171327076.png" alt="image-20230105171327076"></p>
+<img src="/2023/01/10/xv6/image-20230105171327076.png" class>
+
 <p><code>li a7,SYS_call</code>就是把SYS_call的值放入a7寄存器，大概就是传参的意思。<code>ecall</code>是从用户态转到内核态的指令。这样一来，就完成了从用户态到内核态的切换。</p>
 <p>然后是在内核态的执行。</p>
 <p>切换到内核态之后的执行步骤跟linux0.11可以说是完全一样。</p>
 <p>首先应该是会去执行kernel/syscall.c中的syscall函数，具体应该是通过ecall引发0x80中断，然后查表得知这个syscall是中断处理函数</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230105172110475.png" alt="image-20230105172110475"></p>
+<img src="/2023/01/10/xv6/image-20230105172110475.png" class>
+
 <p>可以看到，syscall获取了a7里的参数，然后查了系统调用表</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230105173019159.png" alt="image-20230105173019159"></p>
+<img src="/2023/01/10/xv6/image-20230105173019159.png" class>
+
 <p>然后去sysproc.c文件下执行相应的sys_xxx函数。这个函数指针用得真是牛逼。</p>
 <p>再然后，sys_xxx函数中会从栈中取出调用参数，再跳转到xxx(args)函数中去（这些xxx函数一般在kernel中以单独文件形式出现）。</p>
 <p>这样一来，就完成了一次系统调用。</p>
@@ -519,13 +525,16 @@
 <li><p>linux0.11</p>
 <p>首先是用户态到内核态的切换。</p>
 <p>在用户态中比方说调用system call close()，则会调用lib/close.c下的：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230105173820813.png" alt="image-20230105173820813"></p>
+<img src="/2023/01/10/xv6/image-20230105173820813.png" class>
+
 <p>展开这个宏之后，是这样的：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230105173845317.png" alt="image-20230105173845317"></p>
+<img src="/2023/01/10/xv6/image-20230105173845317.png" class>
+
 <p>具体意思就是把close的系统调用号存入参数寄存器，然后引发0x80中断，进入内核态。</p>
 <p>然后是在内核态的执行。</p>
 <p>查表会得知sys_call函数是0x80中断的中断处理函数，然后就会根据参数里的系统调用名字去找系统调用表执行</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230105174832400.png" alt="image-20230105174832400"></p>
+<img src="/2023/01/10/xv6/image-20230105174832400.png" class>
+
 <p>这部分跟xv6差不多，不再赘述</p>
 </li>
 </ol>
@@ -589,11 +598,13 @@
 
 <p>可以看到，合格的argv的形式应该是：参1 参2 参3 “\0”，最后一个元素要以”\0”标志结束。</p>
 <p>这个应该是编写者约定俗成的。在user/sh.c的parseexec，大概445行左右：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230106172133338.png" alt="image-20230106172133338"></p>
+<img src="/2023/01/10/xv6/image-20230106172133338.png" class>
+
 <p>shell处理命令时是会默认把最后一个清零的。</p>
 <blockquote>
 <p>确实，后面在学内存的时候，用户空间的构成如图所示：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230109234930690.png" alt="image-20230109234930690"></p>
+<img src="/2023/01/10/xv6/image-20230109234930690.png" class>
+
 <p>可以看到栈那边，参数列完了之后是会有一个用以terminate的空指针的</p>
 </blockquote>
 <h5 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;user/user.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/param.h&quot;</span></span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="comment">// for(int i=0;i&lt;argc;i++)	fprintf(1,&quot;argv[%d] = %s\n&quot;,i,argv[i]);</span></span><br><span class="line">    <span class="comment">//之所以写得这么曲折，是因为数组是const指针不能变值</span></span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">512</span>];</span><br><span class="line">    <span class="type">char</span>* buf = buffer; </span><br><span class="line">    <span class="type">char</span>* start = buf;</span><br><span class="line">    <span class="comment">//如果xargs没有参数，就开启复读模式</span></span><br><span class="line">    <span class="keyword">if</span>(argc &lt;= <span class="number">1</span>)&#123;</span><br><span class="line">		<span class="type">int</span> n;</span><br><span class="line">		<span class="keyword">while</span>((n = read(<span class="number">0</span>,buf,<span class="number">512</span>)))&#123;</span><br><span class="line">	    	write(<span class="number">1</span>,buf,n);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//这个必须写在外面，不能定义在下面的if体里，不然出了作用域就会被回收，不能作为参数的一员参与进exec，会变成很可怕的乱码。</span></span><br><span class="line">    <span class="type">char</span> tmp[<span class="number">512</span>];</span><br><span class="line">    <span class="comment">//MAXARG为定义在kernel/param.h下的参数，代表参数最多值</span></span><br><span class="line">    <span class="type">char</span>* new_argv[MAXARG] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">    argc--;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;argc; i++)&#123;</span><br><span class="line">		new_argv[i] = argv[i+<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span>(read(<span class="number">0</span>,buf,<span class="number">1</span>))&#123;</span><br><span class="line">        <span class="comment">//fprintf(1,&quot;buf[0] is : %c\n&quot;,buf[0]);</span></span><br><span class="line">        <span class="keyword">if</span>(buf[<span class="number">0</span>] == <span class="string">&#x27;\n&#x27;</span>)&#123;</span><br><span class="line">            <span class="built_in">memcpy</span>(tmp,start,buf-start);</span><br><span class="line">            tmp[buf-start] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">            new_argv[i++] = tmp;</span><br><span class="line">            argc++;</span><br><span class="line">            buf = start;</span><br><span class="line">           <span class="comment">// fprintf(1,&quot;tmp is :%s\n&quot;,tmp);</span></span><br><span class="line">            <span class="comment">//fprintf(1,&quot;new_argv[i-1] is :%s\n&quot;,new_argv[i-1]);</span></span><br><span class="line">        &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">            buf ++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">   <span class="comment">// fprintf(1,&quot;argc = %d\n&quot;,argc);</span></span><br><span class="line">    <span class="keyword">if</span>(fork() == <span class="number">0</span>)&#123;</span><br><span class="line">    	exec(new_argv[<span class="number">0</span>],new_argv);</span><br><span class="line">    &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">		wait(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -615,7 +626,8 @@
 <h2 id="Kernel-organization"><a href="#Kernel-organization" class="headerlink" title="Kernel organization"></a>Kernel organization</h2><h3 id="宏内核与微内核"><a href="#宏内核与微内核" class="headerlink" title="宏内核与微内核"></a>宏内核与微内核</h3><p>操作系统一个很重要的设计问题就是，哪部分的代码需要run在内核态，哪部分的需要run在用户态。</p>
 <p>如果将操作系统所有系统调用统统都在内核态run，这种设计方式就叫宏内核<em>monolithic kernel</em>。</p>
 <p>如果仅将系统调用中必要的部分在内核态run，其他部分都在用户态run，并且采取Client/Server这样的异步通信方式，这种设计方式就叫微内核<em>microkernel</em>。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230107232802540.png" alt="image-20230107232802540"></p>
+<img src="/2023/01/10/xv6/image-20230107232802540.png" class>
+
 <blockquote>
 <p>由于客户/服务器（Client/Server）模式，具有非常多的优点，故在单机<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%BE%AE%E5%86%85%E6%A0%B8">微内核</a>操作系统中几乎无一例外地都采用客户/服务器模式，将操作系统中最基本的部分放入内核中，而把操作系统的绝大部分功能都放在微内核外面的一组服务器(<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E8%BF%9B%E7%A8%8B">进程</a>)中实现。</p>
 </blockquote>
@@ -743,7 +755,8 @@
 <p>为了帮助加强隔离，进程抽象给程序提供了一种错觉，即它有自己的专用机器。进程为程序提供了一个看起来像是私有内存系统或地址空间的东西，其他进程不能读取或写入。进程还为程序提供了看起来像是自己的CPU来执行程序的指令。</p>
 <p>Xv6使用页表（由硬件实现）为每个进程提供自己的地址空间。RISC-V页表将虚拟地址（RISC-V指令操纵的地址）转换（或“映射”）为物理地址（CPU芯片发送到主存储器的地址）。</p>
 <p>每个进程也有自己的页表，页表中记录了以虚拟地址0开始的内存区域。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230107233741922.png" alt="image-20230107233741922"></p>
+<img src="/2023/01/10/xv6/image-20230107233741922.png" class>
+
 <p>xv6内核为每个进程维护许多状态片段，并将它们聚集到一个<code>proc</code>(*<strong>kernel/proc.h*</strong>:86)结构体中。一个进程最重要的内核状态片段是它的页表、内核栈区和运行状态。我们将使用符号<code>p-&gt;xxx</code>来引用<code>proc</code>结构体的元素；例如，<code>p-&gt;pagetable</code>是一个指向该进程页表的指针。</p>
 <blockquote>
 <p>这应该相当于pcb表。</p>
@@ -804,9 +817,11 @@
 <h5 id="读入bootsect-s"><a href="#读入bootsect-s" class="headerlink" title="读入bootsect.s"></a>读入bootsect.s</h5><p>加载程序的512个字节被读入到内存从<code>0x7c00</code>开始的一段内存中，并且BIOS设置<code>CS=07c0,ip=0</code>，开始执行加载程序的每一条指令。</p>
 <h5 id="bootsect-s"><a href="#bootsect-s" class="headerlink" title="bootsect.s"></a>bootsect.s</h5><p>加载程序的代码为<code>bootsect.s</code>。在<code>bootsect.s</code>中，首先将自身从<code>7c00</code>处移动到了<code>9000</code>处【留下空间放操作系统】，然后分别依次读取磁盘的<u>setup</u>和<u>system</u>模块，最后bootsect将控制权转交给setup。</p>
 <h5 id="setup-s"><a href="#setup-s" class="headerlink" title="setup.s"></a>setup.s</h5><p>setup首先获取操作系统运行的<strong>必要硬件参数</strong>。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230108011824655.png" alt="image-20230108011824655"></p>
+<img src="/2023/01/10/xv6/image-20230108011824655.png" class>
+
 <p>再然后，<u>将system代码移到0地址</u>。然后，我们就需要进入system代码块。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230108012316631.png" alt="image-20230108012316631"></p>
+<img src="/2023/01/10/xv6/image-20230108012316631.png" class>
+
 <p>最后一句jmpi指令本来应该是要跳到system代码段首0地址处的的，可此处却跳到了80处，这显然不合理。但它写的肯定是没错的。之所以会有这样的矛盾，是因为setup在此之前，还做了一件事情：<strong>改变寻址方式</strong>。jmpi上面的那条mov指令便做了这点。</p>
 <p>我们之前的寻址方式一直是<code>cs&lt;&lt;4+ip</code>。但是这东西只能是16位的内存，<u>无法满足寻址需求</u>。故而setup要从16位切换到32位。32位模式也叫保护模式。</p>
 <blockquote>
@@ -815,14 +830,15 @@
 <p>在保护模式下，寻址方式发生了改变。此时cs不再代表基址，而是表示地址在gdb表<code>global description table</code>中的偏移下标。真正的基址放在表项中。cs被称为selector，从表中取得基址，再和ip加在一起得到地址。</p>
 <blockquote>
 <p>gdt表的内容由setup初始化</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230108013156116.png" alt="image-20230108013156116"></p>
+<img src="/2023/01/10/xv6/image-20230108013156116.png" class>
 </blockquote>
 <p>这样一来，就正确跳到了system模块。</p>
 <h4 id="操作系统初始化-1"><a href="#操作系统初始化-1" class="headerlink" title="操作系统初始化"></a>操作系统初始化</h4><h5 id="head-s"><a href="#head-s" class="headerlink" title="head.s"></a>head.s</h5><p>跳到system第一个文件，也就是head.s去执行。</p>
 <p>head.s也是在保护模式下进行的，是在保护模式下的初始化。</p>
 <p>head.s建立了真正的gdt表，然后就要跳转到main.c执行初始化和Shell的启动。此处有汇编语言和C语言的转化，也就是push参数然后push main的地址。</p>
 <h5 id="main-c-1"><a href="#main-c-1" class="headerlink" title="main.c"></a>main.c</h5><p>对各种东西的初始化。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230108013849664.png" alt="image-20230108013849664"></p>
+<img src="/2023/01/10/xv6/image-20230108013849664.png" class>
+
 <p>最后完成从内核态到用户态的切换。</p>
 <h4 id="感想-1"><a href="#感想-1" class="headerlink" title="感想"></a>感想</h4><blockquote>
 <p>linux0.11的启动的具体思路是：</p>
@@ -909,7 +925,8 @@
 </blockquote>
 <h2 id="Paging-hardware"><a href="#Paging-hardware" class="headerlink" title="Paging hardware"></a>Paging hardware</h2><h3 id="为什么需要页表"><a href="#为什么需要页表" class="headerlink" title="为什么需要页表"></a>为什么需要页表</h3><p>将主存储器以及各种外设接口卡里面内置的存储器连接起来，就形成了内存地址空间。内存地址空间中的地址是真实的物理地址。RISC-V架构的指令使用的地址是虚拟地址。为了通过指令中的虚拟地址访问到真实的物理内存，需要进行从虚拟地址到物理地址的转换。从虚拟地址到物理地址的转换，就需要通过页表来实现。</p>
 <h3 id="页表组成"><a href="#页表组成" class="headerlink" title="页表组成"></a>页表组成</h3><h4 id="页表项"><a href="#页表项" class="headerlink" title="页表项"></a>页表项</h4><p>页表由页表项PTE（Page Table Entries）构成，每个页表项由44位的PPN（Physical Page Number）和一些参数flag组成。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230109153937459.png" alt="image-20230109153937459"></p>
+<img src="/2023/01/10/xv6/image-20230109153937459.png" class>
+
 <blockquote>
 <p>Each PTE contains flflag bits that tell the paging hardware how the associated virtual address is allowed to be used. <strong>PTE_V</strong> indicates whether the PTE is <u>present</u>: if it is not set, a reference to the page causes an exception (i.e. is not allowed). <strong>PTE_R</strong> controls whether instructions are allowed to <u>read</u> to the page. PTE_W controls whether instructions are allowed to write to the page. <strong>PTE_X</strong> controls whether the CPU may interpret the content of the page <u>as instructions and execute them</u>. <strong>PTE_U</strong> controls whether instructions in <u>user</u> mode are allowed to <u>access</u> the page; if PTE_U is not set, the PTE can be used only in supervisor mode.</p>
 <p>这个表项的几个参数定义在kernel/riscv.h中的341行左右。</p>
@@ -917,17 +934,20 @@
 <p>虚拟地址有64bit，其中25bits未使用，39bits包含了27位的PTE索引号以及12位的offset。</p>
 <p>物理地址有56位，由PPN和offset拼接组成。</p>
 <h4 id="单页表和多级页表"><a href="#单页表和多级页表" class="headerlink" title="单页表和多级页表"></a>单页表和多级页表</h4><p>以单页表为例，物理地址形成过程如下图所示。</p>
-<p>![屏幕截图 2023-01-09 143707](D:\aWorkStorage\hexo\blog\source_posts\xv6\屏幕截图 2023-01-09 143707.png)</p>
+
+
 <p><u>每个页表项PTE索引着一页</u>。因而，每一页的大小为2^12=4096B。单页表中PTE的索引号有2^27个，因而单页表中表项有134217728个，即可以代表134217728页。页表实际上也是以页的形式存储的。因而单页表需要的存储空间为(2^27x7)/2^12=2^15x7=229376页。</p>
 <p>RISC-V架构中真实情况是会有三级页表。三级页表结构相比于单级页表结构，会占据更多的<strong>物理存储空间</strong>。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230109151346780.png" alt="image-20230109151346780"></p>
+<img src="/2023/01/10/xv6/image-20230109151346780.png" class>
+
 <p><u>每个页表项PTE索引着一页，这一页可能代表着另一个页表，也可能代表着内存中需要的指令和数据</u>。因而，每一页的大小为2^12=4096B。三页表中，一级页表中PTE的索引号有512个，可以代表的物理内存页数有512x515x512=2^27页，即可以代表134217728页。页表实际上也是以页的形式存储的，一个页表有2^9x7个字节，可以存储在1页中。因而三页表需要的存储空间为1+2^9+2^18 = 262657页。</p>
 <p>三级页表结构相比于单级页表结构，可以节省更多<strong>内存空间</strong>。</p>
 <blockquote>
 <p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/fuyuande/article/details/117616433">页表是啥以及为啥多级页表能够节省空间</a></p>
 </blockquote>
 <p>考虑到这样一个进程：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70.png" alt="watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70"></p>
+<img src="/2023/01/10/xv6/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70.png" class>
+
 <p>进程使用页表时，需要将整个页表读入内存。</p>
 <p>如果使用单级页表，尽管一个进程仅使用到页表中的某两项，也需要把整个页表都读入内存，光是页表就占据了2^15x7x4k/2^20 约为1G的内存空间。</p>
 <p>如果使用三级页表，一个进程需要用到某两页。假设这两页存储在不同的二级页表中，则只需要读入1+2+2=5页 约为20K的内存空间。</p>
@@ -938,7 +958,8 @@
 <p>这里为了方便，就把三级页表省略了，只留下va和pa的对比</p>
 </blockquote>
 <p>每个进程都有一个用户级别的页表。xv6给内核提供了一个单独的内核地址空间的页表。其层级映射关系如下：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\p3.png" alt="p3"></p>
+<img src="/2023/01/10/xv6/p3.png" class>
+
 <p>在kernel/memlayout.h中正记录了这些参数：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Physical memory layout</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// qemu -machine virt is set up like this,</span></span><br><span class="line"><span class="comment">// based on qemu&#x27;s hw/riscv/virt.c:</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 00001000 -- boot ROM, provided by qemu</span></span><br><span class="line"><span class="comment">// 02000000 -- CLINT</span></span><br><span class="line"><span class="comment">// 0C000000 -- PLIC</span></span><br><span class="line"><span class="comment">// 10000000 -- uart0 </span></span><br><span class="line"><span class="comment">// 10001000 -- virtio disk </span></span><br><span class="line"><span class="comment">// 80000000 -- boot ROM jumps here in machine mode</span></span><br><span class="line"><span class="comment">//             -kernel loads the kernel here</span></span><br><span class="line"><span class="comment">// unused RAM after 80000000.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// the kernel uses physical memory thus:</span></span><br><span class="line"><span class="comment">// 80000000 -- entry.S, then kernel text and data</span></span><br><span class="line"><span class="comment">// end -- start of kernel page allocation area</span></span><br><span class="line"><span class="comment">// PHYSTOP -- end RAM used by the kernel</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// qemu puts UART registers here in physical memory.</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> UART0 0x10000000L</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> UART0_IRQ 10</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// virtio mmio interface</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VIRTIO0 0x10001000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VIRTIO0_IRQ 1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// core local interruptor (CLINT), which contains the timer.</span></span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
 
@@ -980,7 +1001,8 @@
 <p>其中sfence_vma()的用途是强制更新TLB的旧页表，类似于Java volatile的作用。</p>
 <blockquote>
 <p>附上书里的详细解释：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230109222917346.png" alt="image-20230109222917346"></p>
+<img src="/2023/01/10/xv6/image-20230109222917346.png" class>
+
 <p>TLB与页表类似于cache与主存的关系。TLB保存了页表的一部分。</p>
 <p>【我怎么感觉怪怪的啊？因为TLB既然是高速缓存，那么读写页表也应该优先从TLB读写。所以说，会陈旧的应该是主存中的页表，而不是TLB中的页表。但是，书里是说，改完页表必须通知TLB更改。也就是说，读写页表不是从TLB读写的，那该是从哪里？是TLB以外的free memory吗？</p>
 <p>不过，要是从多CPU的角度思考，说不定他这个意思是某个CPU的TLB变了，需要通知其他所有CPU的TLB也变。虽然不同CPU当前执行的进程是不一样的，使用的页表项不一样，切换进程的时候也会把用户地址空间的页表项flush掉。但是内核地址空间的页表项一般是不会随着进程切换而flush掉的。所以内核页表修改就需要手动多CPU同步。</p>
@@ -991,7 +1013,8 @@
 <p>The kernel must allocate and free physical memory at run-time for page tables, user memory, kernel stacks, and pipe buffers.</p>
 </blockquote>
 <p>用的是这段空闲内存：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230109225700837.png" alt="image-20230109225700837"></p>
+<img src="/2023/01/10/xv6/image-20230109225700837.png" class>
+
 <blockquote>
 <p> It keeps track of which pages are free by threading a <strong>linked list</strong> through the pages themselves.</p>
 </blockquote>
@@ -1011,7 +1034,8 @@
 <blockquote>
 <p>The stack is a single page, and is shown with the initial contents as created by exec. Strings containing the command-line arguments, as well as an array of pointers to them, are at the very top of the stack. Just under that are values that allow a program to start at main as if the function main(argc, argv) had just been called.</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230109234930690.png" alt="image-20230109234930690"></p>
+<img src="/2023/01/10/xv6/image-20230109234930690.png" class>
+
 <h2 id="Code-sbrk"><a href="#Code-sbrk" class="headerlink" title="Code: sbrk"></a>Code: sbrk</h2><blockquote>
 <p>Sbrk is the <strong>system call</strong> for a process to <strong>shrink or grow</strong> its memory. The system call is implemented by the function growproc (kernel/proc.c:239).</p>
 </blockquote>
@@ -1025,7 +1049,8 @@
 </blockquote>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">exec</span><span class="params">(<span class="type">char</span> *path, <span class="type">char</span> **argv)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *s, *last;</span><br><span class="line">  <span class="type">int</span> i, off;</span><br><span class="line">  uint64 argc, sz = <span class="number">0</span>, sp, ustack[MAXARG], stackbase;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">elfhdr</span> <span class="title">elf</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">inode</span> *<span class="title">ip</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proghdr</span> <span class="title">ph</span>;</span></span><br><span class="line">  <span class="type">pagetable_t</span> pagetable = <span class="number">0</span>, oldpagetable;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line"></span><br><span class="line">  <span class="comment">//开始打开文件的意思吧（</span></span><br><span class="line">  begin_op();</span><br><span class="line"></span><br><span class="line">  <span class="comment">//ip是一个inode</span></span><br><span class="line">  <span class="comment">//打开路径为path的文件</span></span><br><span class="line">  <span class="keyword">if</span>((ip = namei(path)) == <span class="number">0</span>)&#123;</span><br><span class="line">    end_op();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//暂时锁住文件，别人不许动</span></span><br><span class="line">  ilock(ip);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//之后应该就是把文件读入内存吧</span></span><br><span class="line">  <span class="comment">// Check ELF header</span></span><br><span class="line">  <span class="keyword">if</span>(readi(ip, <span class="number">0</span>, (uint64)&amp;elf, <span class="number">0</span>, <span class="keyword">sizeof</span>(elf)) != <span class="keyword">sizeof</span>(elf))</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(elf.magic != ELF_MAGIC)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//分配新页表</span></span><br><span class="line">  <span class="keyword">if</span>((pagetable = proc_pagetable(p)) == <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//elfhd应该指的是可执行文件头</span></span><br><span class="line">  <span class="comment">// Load program into memory.</span></span><br><span class="line">  <span class="keyword">for</span>(i=<span class="number">0</span>, off=elf.phoff; i&lt;elf.phnum; i++, off+=<span class="keyword">sizeof</span>(ph))&#123;</span><br><span class="line">    <span class="keyword">if</span>(readi(ip, <span class="number">0</span>, (uint64)&amp;ph, off, <span class="keyword">sizeof</span>(ph)) != <span class="keyword">sizeof</span>(ph))</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="keyword">if</span>(ph.type != ELF_PROG_LOAD)</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">    <span class="keyword">if</span>(ph.memsz &lt; ph.filesz)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="keyword">if</span>(ph.vaddr + ph.memsz &lt; ph.vaddr)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="keyword">if</span>(ph.vaddr % PGSIZE != <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="comment">//总之顺利读到了</span></span><br><span class="line">    uint64 sz1;</span><br><span class="line">    <span class="comment">//读到了就给它分配新空间并且填入页表</span></span><br><span class="line">    <span class="keyword">if</span>((sz1 = uvmalloc(pagetable, sz, ph.vaddr + ph.memsz, flags2perm(ph.flags))) == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    sz = sz1;</span><br><span class="line">    <span class="keyword">if</span>(loadseg(pagetable, ph.vaddr, ip, ph.off, ph.filesz) &lt; <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//在这里解锁</span></span><br><span class="line">  iunlockput(ip);</span><br><span class="line">  end_op();</span><br><span class="line">  ip = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  p = myproc();</span><br><span class="line">  uint64 oldsz = p-&gt;sz;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//读完文件，开始造一个新的用户栈【fork之后用户栈是不会清空的】</span></span><br><span class="line">  <span class="comment">// Allocate two pages at the next page boundary.</span></span><br><span class="line">  <span class="comment">// Make the first inaccessible as a stack guard.</span></span><br><span class="line">  <span class="comment">// Use the second as the user stack.</span></span><br><span class="line">  sz = PGROUNDUP(sz);</span><br><span class="line">  uint64 sz1;</span><br><span class="line">  <span class="keyword">if</span>((sz1 = uvmalloc(pagetable, sz, sz + <span class="number">2</span>*PGSIZE, PTE_W)) == <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line">  sz = sz1;</span><br><span class="line">  <span class="comment">// mark a PTE invalid for user access.造guard page</span></span><br><span class="line">  uvmclear(pagetable, sz<span class="number">-2</span>*PGSIZE);</span><br><span class="line">  <span class="comment">// sp为栈顶</span></span><br><span class="line">  sp = sz;</span><br><span class="line">  <span class="comment">// 应该指的是栈尾</span></span><br><span class="line">  stackbase = sp - PGSIZE;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 开始往栈中填入执行参数</span></span><br><span class="line">  <span class="comment">// Push argument strings, prepare rest of stack in ustack.</span></span><br><span class="line">  <span class="keyword">for</span>(argc = <span class="number">0</span>; argv[argc]; argc++) &#123;</span><br><span class="line">    <span class="keyword">if</span>(argc &gt;= MAXARG)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    sp -= <span class="built_in">strlen</span>(argv[argc]) + <span class="number">1</span>;</span><br><span class="line">    sp -= sp % <span class="number">16</span>; <span class="comment">// riscv sp must be 16-byte aligned</span></span><br><span class="line">    <span class="keyword">if</span>(sp &lt; stackbase)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="comment">//argv来自用户空间，所以需要使用copyout</span></span><br><span class="line">    <span class="keyword">if</span>(copyout(pagetable, sp, argv[argc], <span class="built_in">strlen</span>(argv[argc]) + <span class="number">1</span>) &lt; <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="comment">//这什么东西</span></span><br><span class="line">    <span class="comment">//exec一次将参数中的一个字符串复制到栈顶，并在ustack中记录指向它们的指针</span></span><br><span class="line">    ustack[argc] = sp;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//放置空指针</span></span><br><span class="line">  ustack[argc] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// push the array of argv[] pointers.</span></span><br><span class="line">  sp -= (argc+<span class="number">1</span>) * <span class="keyword">sizeof</span>(uint64);</span><br><span class="line">  sp -= sp % <span class="number">16</span>;</span><br><span class="line">  <span class="keyword">if</span>(sp &lt; stackbase)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line">  <span class="keyword">if</span>(copyout(pagetable, sp, (<span class="type">char</span> *)ustack, (argc+<span class="number">1</span>)*<span class="keyword">sizeof</span>(uint64)) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// arguments to user main(argc, argv)</span></span><br><span class="line">  <span class="comment">// argc is returned via the system call return</span></span><br><span class="line">  <span class="comment">// value, which goes in a0.</span></span><br><span class="line">  p-&gt;trapframe-&gt;a1 = sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Save program name for debugging.</span></span><br><span class="line">  <span class="keyword">for</span>(last=s=path; *s; s++)</span><br><span class="line">    <span class="keyword">if</span>(*s == <span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">      last = s+<span class="number">1</span>;</span><br><span class="line">  safestrcpy(p-&gt;name, last, <span class="keyword">sizeof</span>(p-&gt;name));</span><br><span class="line">   </span><br><span class="line">  <span class="comment">//只有成功了才会来到这，才会覆盖掉旧的内存镜像</span></span><br><span class="line">  <span class="comment">// Commit to the user image.</span></span><br><span class="line">  oldpagetable = p-&gt;pagetable;</span><br><span class="line">  p-&gt;pagetable = pagetable;</span><br><span class="line">  p-&gt;sz = sz;</span><br><span class="line">  p-&gt;trapframe-&gt;epc = elf.entry;  <span class="comment">// initial program counter = main</span></span><br><span class="line">  p-&gt;trapframe-&gt;sp = sp; <span class="comment">// initial stack pointer</span></span><br><span class="line">  proc_freepagetable(oldpagetable, oldsz);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> argc; <span class="comment">// this ends up in a0, the first argument to main(argc, argv)</span></span><br><span class="line"></span><br><span class="line"> bad:</span><br><span class="line">  <span class="comment">//释放新镜像，不改变旧镜像</span></span><br><span class="line">  <span class="keyword">if</span>(pagetable)</span><br><span class="line">    proc_freepagetable(pagetable, sz);</span><br><span class="line">  <span class="keyword">if</span>(ip)&#123;</span><br><span class="line">    iunlockput(ip);</span><br><span class="line">    end_op();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="Real-world-1"><a href="#Real-world-1" class="headerlink" title="Real world"></a>Real world</h2><p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230110010651653.png" alt="image-20230110010651653"></p>
+<h2 id="Real-world-1"><a href="#Real-world-1" class="headerlink" title="Real world"></a>Real world</h2><img src="/2023/01/10/xv6/image-20230110010651653.png" class>
+
 <p>xv6内核缺少一个类似<code>malloc</code>可以为小对象提供内存的分配器，这使得内核无法使用需要动态分配的复杂数据结构。【确实，感觉一分配就是一页（】</p>
 <p>内存分配是一个长期的热门话题，基本问题是有效使用有限的内存并为将来的未知请求做好准备。今天，人们更关心速度而不是空间效率。此外，一个更复杂的内核可能会分配许多不同大小的小块，而不是（如xv6中）只有4096字节的块；一个真正的内核分配器需要处理小分配和大分配。</p>
 <h2 id="Lab-2"><a href="#Lab-2" class="headerlink" title="Lab"></a>Lab</h2><blockquote>
@@ -1041,7 +1066,8 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> USYSCALL (TRAPFRAME - PGSIZE)</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">usyscall</span>&#123;</span></span><br><span class="line">  <span class="type">int</span> pid;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>用户的ugetpid只找到了一个截图：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\v2-0c2603da4c8102e46ae390a0d0b1191d_1440w.webp" alt="v2-0c2603da4c8102e46ae390a0d0b1191d_1440w"></p>
+<img src="/2023/01/10/xv6/v2-0c2603da4c8102e46ae390a0d0b1191d_1440w.jpg" class>
+
 <p>恕我愚钝实在不知道该把这段代码放在哪orz于是接下来写的东西就没有自测。</p>
 <h5 id="panic-freewalk-leaf"><a href="#panic-freewalk-leaf" class="headerlink" title="panic:freewalk leaf"></a>panic:freewalk leaf</h5><p>一开始写好代码准备启动xv6的时候爆出了这么一个panic，搜了一下得到如下解答：</p>
 <blockquote>
@@ -1049,7 +1075,8 @@
 <p>这时运行会发现freewalk函数panic：<code>freewalk: leaf</code>，这是因为freewalk希望所有虚拟地址已经被解绑并释放对应的物理空间了，该函数只负责释放页表。</p>
 </blockquote>
 <p>让我得知freewalk在vm.c下面【吐槽，我一开始还以为是自由自在地走（，看到这个才反应过来是free walk，跟页表有关的】。结合freewalk的代码</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230110225359361.png" alt="image-20230110225359361"></p>
+<img src="/2023/01/10/xv6/image-20230110225359361.png" class>
+
 <p>可以知道，造成这个panic的原因是需要手动释放页表项。而在这里</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in proc.c  freeproc()</span></span><br><span class="line"><span class="keyword">if</span>(p-&gt;usyscall)</span><br><span class="line">    kfree((<span class="type">void</span>*)p-&gt;usyscall);</span><br><span class="line">  p-&gt;usyscall = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
 
@@ -1077,12 +1104,14 @@
 <p>Define a function called <code>vmprint()</code>. </p>
 <p>It should take a <code>pagetable_t</code> argument, and print that pagetable in the format described below. </p>
 <p>Insert <code>if(p-&gt;pid==1) vmprint(p-&gt;pagetable)</code> in exec.c just before the <code>return argc</code>, to print the first process’s page table. </p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230110231020570.png" alt="image-20230110231020570"></p>
+<img src="/2023/01/10/xv6/image-20230110231020570.png" class>
+
 <p>The first line displays the argument to <code>vmprint</code>. After that there is a <strong>line for each PTE</strong>, including PTEs that refer to page-table pages deeper in the tree. Each PTE line is indented by a number of <code>&quot; ..&quot;</code> that indicates its depth in the tree. </p>
 <p>Each PTE line shows the PTE <strong>index</strong> in its page-table page, the <strong>pte bits</strong>, and the <strong>physical address extracted from the PTE</strong>. <u>Don’t print PTEs that are not valid</u>. </p>
 <p>In the above example, the top-level page-table page has mappings for entries 0 and 255. The next level down for entry 0 has only index 0 mapped, and the bottom-level for that index 0 has entries 0, 1, and 2 mapped.</p>
 </blockquote>
-<h4 id="感想-5"><a href="#感想-5" class="headerlink" title="感想"></a>感想</h4><p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230111000329475.png" alt="image-20230111000329475"></p>
+<h4 id="感想-5"><a href="#感想-5" class="headerlink" title="感想"></a>感想</h4><img src="/2023/01/10/xv6/image-20230111000329475.png" class>
+
 <p>很可惜，我在上面检索<code>freewalk leaf</code>到底是什么东西的时候，不小心看到了这题需要去参照freewalk这个提示【悲】其实我觉得这点还是需要绕点弯才能想到的，可能直接想到有点难【谁知道呢，世界线已经变动了】。</p>
 <p>它这个打印页表其实最主要是考查如何遍历页表，这让人想起了walk这样的东西。但是walk是根据虚拟地址一级级找PTE的，中间很多地方会被跳过。有没有一个过程会在做事的时候遍历整个页表呢？答案是，这个过程就是释放页表的过程。释放页表才会一个个地看是否需要释放。释放页表的函数是freewalk，因而这道题参考freewalk的代码即可。</p>
 <p>我觉得从“遍历页表”联想到“释放页表”这点是很巧的。不过也不会很突兀，毕竟学数据结构时就知道释放就需要遍历，逆向思维有点难但问题不大。</p>
@@ -1106,9 +1135,11 @@
 
 <p>page0就填程序。这里重点说明一下为什么page1和page2分别是guard page和stack。</p>
 <p>按照它的那个算术关系，stack和guard page的虚拟内存位置关系应该是这样的：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230111004330079.png" alt="image-20230111004330079"></p>
+<img src="/2023/01/10/xv6/image-20230111004330079.png" class>
+
 <p>那为什么最后在页表中，变成了page1是gurad page，page2是stack这样上下颠倒了呢？看vm.c中的uvmalloc就能明白。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230111004500827.png" alt="image-20230111004500827"></p>
+<img src="/2023/01/10/xv6/image-20230111004500827.png" class>
+
 <p>在253行设置了新映射。可以看到，这里设置映射的顺序是sz-&gt;sz+PGSIZE，也即先设置guard page的映射，再设置stack的映射。所以，这两位才会上下颠倒了。</p>
 <h3 id="Detecting-which-pages-have-been-accessed"><a href="#Detecting-which-pages-have-been-accessed" class="headerlink" title="Detecting which pages have been accessed"></a>Detecting which pages have been accessed</h3><blockquote>
 <p>Some garbage collectors (a form of automatic memory management) can benefit from information about <strong>which pages have been accessed (read or write)</strong>. In this part of the lab, you will add a new feature to xv6 that detects and reports this information to userspace by inspecting <strong>the access bits in the RISC-V page table.</strong> The RISC-V hardware page walker marks these bits in the <strong>PTE</strong> whenever it resolves a TLB miss.</p>
@@ -1151,7 +1182,8 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in vm.c</span></span><br><span class="line"><span class="type">pagetable_t</span></span><br><span class="line"><span class="title function_">perproc_kvminit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">  p-&gt;kpgtbl = (<span class="type">pagetable_t</span>) kalloc();</span><br><span class="line">  <span class="built_in">memset</span>(p-&gt;kpgtbl, <span class="number">0</span>, PGSIZE);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// uart registers</span></span><br><span class="line">  pkvmmap(p-&gt;kpgtbl,UART0, UART0, PGSIZE, PTE_R | PTE_W);</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">return</span> pt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这样会死得很惨，爆出如下panic：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230114011100370.png" alt="image-20230114011100370"></p>
+<img src="/2023/01/10/xv6/image-20230114011100370.png" class>
+
 <p>通过hints的调试贴士</p>
 <blockquote>
 <p>A missing page table mapping will likely cause the kernel to encounter a page fault. It will print an error that includes <code>sepc=0x00000000XXXXXXXX</code>. You can find out where the fault occurred by searching for <code>XXXXXXXX</code> in <code>kernel/kernel.asm</code>.</p>
@@ -1252,11 +1284,13 @@
 <h2 id="Traps-from-user-space"><a href="#Traps-from-user-space" class="headerlink" title="Traps from user space"></a>Traps from user space</h2><p>从用户态来的trap会经历怎么样的过程？</p>
 <p>前面说到，下面需要进行页表的切换，页表的切换必然是接下来要做的指令的某个环节。那么为了让页表切换之后，CPU还知道要从哪里取指执行，<strong>就要让某段物理内存在内核空间和用户空间的虚拟地址一样</strong>。这样，不论页表是用户的还是内核的，都可以通过同样的虚拟地址访问到该段存放指令的物理内存从而继续执行。</p>
 <p>这段虚拟地址就是<strong>trampoline</strong>。它在内核页表和用户页表都位于MAXVA的位置。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\p3.png" alt="p3"></p>
+<img src="/2023/01/10/xv6/p3.png" class>
+
 <p>stevc存储的正是trampoline段中的uservec。</p>
 <h3 id="uservec"><a href="#uservec" class="headerlink" title="uservec"></a>uservec</h3><p>sscratch里面存的是trapframe的值。</p>
 <p>trapframe存在于用户空间中，并且每个进程的trapframe所处位置固定是在trampoline下方。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230111203357767.png" alt="image-20230111203357767"></p>
+<img src="/2023/01/10/xv6/image-20230111203357767.png" class>
+
 <p>首先将寄存器的值都存入trapframe中；然后，再从trapframe中读取内核栈指针、当前CPUid，下一步要跳转的usertrap的地址，以及内核页表。最后，uservec切换到内核页表，并且jmp到usertrap。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">#in kernel/trampoline.S</span><br><span class="line">	.section trampsec</span><br><span class="line">.globl trampoline</span><br><span class="line">trampoline:</span><br><span class="line">.align 4</span><br><span class="line">.globl uservec</span><br><span class="line">uservec:    </span><br><span class="line">	#</span><br><span class="line">        # trap.c sets stvec to point here, so</span><br><span class="line">        # traps from user space start here,</span><br><span class="line">        # in supervisor mode, but with a</span><br><span class="line">        # user page table.</span><br><span class="line">        #</span><br><span class="line">        # sscratch points to where the process&#x27;s p-&gt;trapframe is</span><br><span class="line">        # mapped into user space, at TRAPFRAME.</span><br><span class="line">        #</span><br><span class="line">        </span><br><span class="line">		# swap a0 and sscratch</span><br><span class="line">        # so that a0 is TRAPFRAME</span><br><span class="line">        csrrw a0, sscratch, a0</span><br><span class="line"></span><br><span class="line">        # save the user registers in TRAPFRAME</span><br><span class="line">        sd ra, 40(a0)</span><br><span class="line">        sd sp, 48(a0)</span><br><span class="line">        # ...</span><br><span class="line">        sd t6, 280(a0)</span><br><span class="line"></span><br><span class="line">		# save the user a0 in p-&gt;trapframe-&gt;a0</span><br><span class="line">        csrr t0, sscratch</span><br><span class="line">        sd t0, 112(a0)</span><br><span class="line"></span><br><span class="line">        # restore kernel stack pointer from p-&gt;trapframe-&gt;kernel_sp</span><br><span class="line">        # 完成了内核栈的切换</span><br><span class="line">        ld sp, 8(a0)</span><br><span class="line"></span><br><span class="line">        # make tp hold the current hartid, from p-&gt;trapframe-&gt;kernel_hartid</span><br><span class="line">        ld tp, 32(a0)</span><br><span class="line"></span><br><span class="line">        # load the address of usertrap(), p-&gt;trapframe-&gt;kernel_trap</span><br><span class="line">        ld t0, 16(a0)</span><br><span class="line"></span><br><span class="line">        # restore kernel page table from p-&gt;trapframe-&gt;kernel_satp</span><br><span class="line">        ld t1, 0(a0)</span><br><span class="line">        # 这里完成了页表的切换</span><br><span class="line">        csrw satp, t1</span><br><span class="line">        sfence.vma zero, zero</span><br><span class="line"></span><br><span class="line">        # a0 is no longer valid, since the kernel page</span><br><span class="line">        # table does not specially map p-&gt;tf.</span><br><span class="line"></span><br><span class="line">        # jump to usertrap(), which does not return</span><br><span class="line">        jr t0</span><br></pre></td></tr></table></figure>
 
@@ -1309,7 +1343,8 @@
 <li><p>被inline掉了</p>
 </li>
 <li><p>0x64A</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230111224927837.png" alt="image-20230111224927837"></p>
+<img src="/2023/01/10/xv6/image-20230111224927837.png" class>
+
 <p>auipc的作用是把立即数左移12位，低12位补0，和pc相加赋给指定寄存器。这里立即数是0，指定寄存器是ra，即ra=pc=0x30=48。jalr作用是跳转到立即数+指定寄存器处并且把ra的值+8。因此jalr会跳转1562+48=1594=0x64A处，观察汇编代码可知确实在000000000000064a处。</p>
 </li>
 <li><p>0x38</p>
@@ -1320,8 +1355,7 @@
 
 <p>What is the output? <a target="_blank" rel="noopener" href="http://web.cs.mun.ca/~michael/c/ascii-table.html">Here’s an ASCII table</a> that maps bytes to characters.</p>
 <p>The output depends on that fact that the RISC-V is <strong>little-endian</strong>. If the RISC-V were instead big-endian what would you set <code>i</code> to in order to yield the same output? Would you need to change <code>57616</code> to a different value?</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\format,png.png" alt="format,png"></p>
-</blockquote>
+<img src="/2023/01/10/xv6/format,png.png" class></blockquote>
 </li>
 <li><p>取决于寄存器a2（第3个参数）的值。</p>
 </li>
@@ -1329,7 +1363,8 @@
 <h4 id="体会-3"><a href="#体会-3" class="headerlink" title="体会"></a>体会</h4><p>我超。。差不多都不会（2345），更可怕的是不会查文档，不知道从哪里看RISC-V指令集的内容，救。果然真的太弱了。</p>
 <h3 id="Backtrace"><a href="#Backtrace" class="headerlink" title="Backtrace"></a>Backtrace</h3><blockquote>
 <p>For debugging it is often useful to have a backtrace: a list of the function calls on the stack above the point at which the error occurred.</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230111232323444.png" alt="image-20230111232323444"></p>
+<img src="/2023/01/10/xv6/image-20230111232323444.png" class>
+
 <p>The compiler puts in each stack frame a frame pointer that holds the address of the caller’s frame pointer. Your <code>backtrace</code> should use these frame pointers to walk up the stack and print the saved return address in each stack frame.</p>
 </blockquote>
 <blockquote>
@@ -1352,13 +1387,14 @@
 <h5 id="存储在s0中的栈帧指针"><a href="#存储在s0中的栈帧指针" class="headerlink" title="存储在s0中的栈帧指针"></a>存储在s0中的栈帧指针</h5><p>这个应该是risc-v的约定成俗的特性。我搜了一下risc-v的栈帧指针保存在哪个寄存器，看到了这样一篇文章：</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/dai_xiangjun/article/details/126541174">risc-v 栈分析</a></p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230112012358601.png" alt="image-20230112012358601"></p>
+<img src="/2023/01/10/xv6/image-20230112012358601.png" class>
 </blockquote>
 <p>这个信息没有放在题干提示，是在考察信息检索能力吗（</p>
 <blockquote>
 <p>首先，我看完题目就麻了，不知道从何下手。我知道首先得知道栈的结构，比如说<code>The compiler puts in each stack frame a frame pointer that holds the address of the caller&#39;s frame pointer.</code>这句话说的那个pointer到底存在了栈的哪块位置，又存在了哪个寄存器。我看了提示才知道，是存在s0寄存器的。这是怎么看出来的？我完全想不到怎么就拐到s0了。</p>
 </blockquote>
-<h5 id="栈的结构与栈帧的理解"><a href="#栈的结构与栈帧的理解" class="headerlink" title="栈的结构与栈帧的理解"></a>栈的结构与栈帧的理解</h5><p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230112010749756.png" alt="image-20230112010749756"></p>
+<h5 id="栈的结构与栈帧的理解"><a href="#栈的结构与栈帧的理解" class="headerlink" title="栈的结构与栈帧的理解"></a>栈的结构与栈帧的理解</h5><img src="/2023/01/10/xv6/image-20230112010749756.png" class>
+
 <p>这是来自hint的栈结构。整个栈存储在一页中，由高地址向低地址增长。栈帧代表了一次函数调用，其中会存储如函数名、函数参数、局部变量等等信息。有几次函数调用就有几个栈帧，栈由栈帧组成。</p>
 <p>s0中存储的栈帧指针fp指向的是栈帧的最高地址，如图fp所示。</p>
 <blockquote>
@@ -1394,19 +1430,23 @@
 <p>可知，我们可以用ticks表示当前系统滴答数。这样，我们就可以在proc域里维护一个变量lasttick，记录上一次执行handler时的滴答数。每次在时钟中断时检测，所以需要写在<code>kernel/trap.c</code>中的<code>usertrap</code>中。</p>
 <h6 id="part-4"><a href="#part-4" class="headerlink" title="part 4"></a>part 4</h6><p>然后，是怎么从usertrap出来跳到指定程序结束点。在书中，我们知道，sepc寄存器保存了中断前原程序的下一个执行点，sepc的备份存储在了proc域中的栈帧中。当中断返回时（在usertrapret中），会从栈帧中的epc字段读取sepc的备份赋值给sepc，再由sret帮助我们跳转到原程序点。因而，如果想要改变跳转点，我们只需要修改<code>p-&gt;trapframe-&gt;epc</code>就行。</p>
 <h6 id="part-5"><a href="#part-5" class="headerlink" title="part 5"></a>part 5</h6><p>最后，是如何从periodic回到原程序执行点。</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230113002057893.png" alt="image-20230113002057893"></p>
+<img src="/2023/01/10/xv6/image-20230113002057893.png" class>
+
 <p>这是每次进行时钟中断时的栈情况和执行代码链：t1-&gt;trampoline-&gt;usertrap-&gt;handler。</p>
 <p>再然后，handler调用了sigreturn，用户栈中就会产生sigreturn的栈帧：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230113002434093.png" alt="image-20230113002434093"></p>
+<img src="/2023/01/10/xv6/image-20230113002434093.png" class>
+
 <p>此时，如果sigreturn执行完，就会在这样的情况下执行handler的ret指令：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230113002542335.png" alt="image-20230113002542335"></p>
+<img src="/2023/01/10/xv6/image-20230113002542335.png" class>
+
 <p>ret指令会把栈帧弄走，也就是说会直接回到某个错误的地方去。这显然不大合适。所以，我们要做的，就是在sigreturn之后，<u>不执行handler的ret指令，也不执行sigreturn的ret指令，而是直接恢复到时钟中断前的上下文</u>。时钟中断前的上下文，会因在handler中调用sigreturn系统调用，而被<strong>覆盖</strong>，因而，我们就需要记录时钟中断前的上下文，也即在proc域中保存trapframe的一份拷贝savedtrap，每次时钟中断都更新一次savedtrap，然后在sigreturn调用的时候将proc原本的trapframe替换为savedtrap即可。这样一来，就完成了这道题。</p>
 <h5 id="感想-9"><a href="#感想-9" class="headerlink" title="感想"></a>感想</h5><p>这题目确实最终代码看起来完全不难，但是非常地拷打。。。。我前前后后修修补补差不多一共花了五个小时之久。</p>
 <p>计时怎么计，以及使用trapframe-&gt;epc来跳转这两点还是很容易想到的【话虽如此，其实也很曲折】。主要难点还是在怎么恢复现场。怎么说呢，我花了这么久做实验，但是实际笔记却写不出个鬼来，足以看出其复杂程度。</p>
 <p>我主要还是思维固化了点，一直在想，怎么确保它正确返回现场。我一开始以为proc域保存一个寄存器状态，且只用在一开始设置定时函数也即sigalarm的时候保存一次就行了，并且认为其是epc。然而实际操作后发现usertrap崩了，并且epc中存储的并不是程序被时钟中断的地方，而是各种神奇的地方，具体我也忘了，反正不能行。我印象最深刻的是有一次停在了usys.S中的sigreturn的最后一个ret处。我就在想，也许是栈出了问题。于是我就想着直接在sigreturn的时候把epc指向栈帧中的return address，直接回到原执行段。我百度了一下，确实有这么个寄存器ra，存储着return address。于是我就把proc域的状态换成了ra，依然仅保存一次，最后发现还是不行，程序在test0之后就异常终止了，main也回不去，十分古怪，十分匪夷所思。我实在没忍住，百度了一下大家怎么做的，发现大家压根没有我这样的二选一的烦恼，是直接保存整个栈帧。而且也不是仅保存一次，而是每次时钟中断触发都保存一次。我觉得十分奇怪震惊，但此时已是差不多晚饭时间，我就先去吃了个饭（）</p>
 <p>回来之后，我细细画了图【向正确思路part5中的那样】，发现我原来那个只保存两者之一，且都只保存一次的方式，确实完全不能行。但是，我发现两个一起保存，并且每次时钟中断保存的方法，似乎能行，而且，比保存一整个栈帧要聪明得多。于是我就去试了，发现还是不行。我再细想了一遍，发现，如果想回去原程序的现场，除了ra和epc，还有一个很重要的东西需要保存，那就是——用户栈指针sp！</p>
 <p>也就是说，<strong>只需保存ra、epc、sp，就可以保证回到正确的时钟中断前的位置</strong>：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230113005100895.png" alt="image-20230113005100895"></p>
+<img src="/2023/01/10/xv6/image-20230113005100895.png" class>
+
 <p>此为handler中sigreturn执行完要返回时的状态。</p>
 <p>当处在handler中时，sp的值为sigreturn处的栈帧。执行系统调用时，proc域中的上下文被覆盖，也即时钟中断前的上下文被覆盖。如果此时不对栈帧中的sp进行恢复，仅恢复ra和epc，在从sigreturn返回到epc对应处也即t1，t1执行ret想回到main的时候，就会回不去，而是回到了sigreturn要回的位置，也即handler的位置，然后不知不觉就寄了。所以，就需要防止sp被覆盖。因而，再保存一个状态sp，就可以保障回到正确的地方了。测试出来，kernel确实不再会panic了。</p>
 <p>但是由于运行时很多除这三个以外的寄存器都被改过了，回是回得去，接下来干的活就不一定对了。因此为了保险以及通用性以及便利性来看，还是像别人那样直接保存栈帧比较ok。</p>
@@ -1414,7 +1454,8 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usertrap:unexpected cause scause = <span class="number">0x0c</span></span><br></pre></td></tr></table></figure>
 
 <p>我留意了一下是什么意思。网上搜索得，scause=12，说明这是一个instruction page fault，而这个缺页错误说明了什么？：</p>
-<p><img src="/2023/01/10/xv6/aWorkStorage\hexo\blog\source_posts\xv6\image-20230113012355740.png" alt="image-20230113012355740"></p>
+<img src="/2023/01/10/xv6/image-20230113012355740.png" class>
+
 <p>这样，一切都明朗了。出现了scause=0x0c的意思就是说pc里的值不恰当，也就是说上面错误的方法都会跳转到错误的地方去。</p>
 <h4 id="代码-10"><a href="#代码-10" class="headerlink" title="代码"></a>代码</h4><h5 id="sigalarm-c"><a href="#sigalarm-c" class="headerlink" title="sigalarm.c"></a>sigalarm.c</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;param.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;memlayout.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;riscv.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;spinlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;proc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;defs.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> </span><br><span class="line"><span class="title function_">sigalarm</span><span class="params">(<span class="type">int</span> intervel,<span class="type">void</span>* handler)</span></span><br><span class="line">&#123;</span><br><span class="line">   </span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">    p-&gt;interval = intervel;</span><br><span class="line">    p-&gt;handler = handler;</span><br><span class="line">    acquire(&amp;tickslock);</span><br><span class="line">    p-&gt;lasttick = ticks;</span><br><span class="line">    release(&amp;tickslock);</span><br><span class="line">    <span class="keyword">if</span>(handler == <span class="number">0</span> &amp;&amp; intervel == <span class="number">0</span>)&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    memmove(p-&gt;savetrap,p-&gt;trapframe,<span class="keyword">sizeof</span>(<span class="keyword">struct</span> trapframe));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">sigreturn</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">    memmove(p-&gt;trapframe,p-&gt;savetrap,<span class="keyword">sizeof</span>(<span class="keyword">struct</span> trapframe));</span><br><span class="line">    p-&gt;flag = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
