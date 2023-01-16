@@ -176,7 +176,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-01-16 22:59:59" itemprop="dateModified" datetime="2023-01-16T22:59:59+08:00">2023-01-16</time>
+                <time title="修改时间：2023-01-17 00:04:32" itemprop="dateModified" datetime="2023-01-17T00:04:32+08:00">2023-01-17</time>
               </span>
 
           
@@ -949,15 +949,22 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Switch h/w page table register to the kernel&#x27;s page table,</span></span><br><span class="line"><span class="comment">// and enable paging.</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kvminithart</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// wait for any previous writes to the page table memory to finish.</span></span><br><span class="line">  sfence_vma();</span><br><span class="line"></span><br><span class="line">  w_satp(MAKE_SATP(kernel_pagetable));</span><br><span class="line"></span><br><span class="line">  <span class="comment">// flush stale entries from the TLB.</span></span><br><span class="line">  sfence_vma();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>其中sfence_vma()的用途是强制更新TLB的旧页表，类似于Java volatile的作用。</p>
-<blockquote>
-<p>附上书里的详细解释：</p>
+<h6 id="疑问"><a href="#疑问" class="headerlink" title="疑问"></a>疑问</h6><p>附上书里的详细解释：</p>
 <img src="/2023/01/10/xv6/image-20230109222917346.png" class>
 
 <p>TLB与页表类似于cache与主存的关系。TLB保存了页表的一部分。</p>
-<p>【我怎么感觉怪怪的啊？因为TLB既然是高速缓存，那么读写页表也应该优先从TLB读写。所以说，会陈旧的应该是主存中的页表，而不是TLB中的页表。但是，书里是说，改完页表必须通知TLB更改。也就是说，读写页表不是从TLB读写的，那该是从哪里？是TLB以外的free memory吗？</p>
+<h6 id="我的错误想法"><a href="#我的错误想法" class="headerlink" title="我的错误想法"></a>我的错误想法</h6><p>我怎么感觉怪怪的啊？因为TLB既然是高速缓存，那么读写页表也应该优先从TLB读写【注：应该就是从这里开始错的hhh写应该是直接写入页表】。所以说，会陈旧的应该是主存中的页表，而不是TLB中的页表。但是，书里是说，改完页表必须通知TLB更改。也就是说，读写页表不是从TLB读写的，那该是从哪里？是TLB以外的free memory吗？</p>
 <p>不过，要是从多CPU的角度思考，说不定他这个意思是某个CPU的TLB变了，需要通知其他所有CPU的TLB也变。虽然不同CPU当前执行的进程是不一样的，使用的页表项不一样，切换进程的时候也会把用户地址空间的页表项flush掉。但是内核地址空间的页表项一般是不会随着进程切换而flush掉的。所以内核页表修改就需要手动多CPU同步。</p>
-<p>我认为多CPU角度考虑更加合理，因为它最后说了，xv6会在内核页表init后flush，以及在从内核态切换回用户态的时候flush。这两个（好像）都影响内核页表比较多，所以就需要手动flush一下。】</p>
-</blockquote>
+<p>我认为多CPU角度考虑更加合理，因为它最后说了，xv6会在内核页表init后flush，以及在从内核态切换回用户态的时候flush。这两个（好像）都影响内核页表比较多，所以就需要手动flush一下。</p>
+<h6 id="解答"><a href="#解答" class="headerlink" title="解答"></a>解答</h6><p>之后学了缺页异常后，可以发现这里其实是没问题的。</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq">计算机体系结构 – 虚拟内存</a></p>
+<img src="/2023/01/10/xv6/v2-e15454bf032baa4dc088b6e41ed4f4a4_1440w.jpg" class>
+
+<p>页表的管理（创建、更新、删除等）是由操作系统负责的。地址转换时，页表检索是由硬件内存管理单元（Memory Management Unit, MMU）负责的。MMU通常由两部分构成：表查找单元（Table Walk Unit, TWU）和转换旁路缓冲（Translation Lookaside Buffer, TLB）[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq#ref_2">2]</a>。TWU负责链式的访问PDE、PTE，完成上述的查表过程。</p>
+<p>应用多级页表之后，想要完成一次地址转换，需要访问多级目录和页表，这么多次的内存访问会严重降低性能。</p>
+<p>为了优化地址转换速度，人们在MMU中增加了一块高速cache，专门用来缓存虚拟地址到物理地址的映射，这块cache就是TLB[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq#ref_7">7]</a>[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq#ref_8">8]</a>。MMU在做地址转换的时候，会先检索TLB，如果命中则直接返回对应的物理地址，如果不命中则会调用TWU查找页表。</p>
+<p>TLB中缓存的是虚拟地址到物理地址映射。然而，多级页表的查找是一个链式的过程，对于在虚拟地址空间中连续的两个页，它们的各级目录项可能都是一样的，只有最后一级页号不一样。查找完第一个虚拟页之后，我们可以将相同的前级目录项都缓存起来。查找第二个虚拟页时，可以直接使用缓存好的前几级目录项，节省查找时间。这种缓存叫做Page Structure Cache[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq#ref_9">9]</a>。</p>
+<p>而当TLB和MMU中都没有该物理页，就会发生缺页异常。但是<strong>操作系统仅会对页表更新</strong>，而不会被TLB更新。故而，TBL中数据可能陈旧，需要手动flush。</p>
 <h2 id="Physical-memory-allocation"><a href="#Physical-memory-allocation" class="headerlink" title="Physical memory allocation"></a>Physical memory allocation</h2><p>在内核运行的时候，需要申请很多空间用来存放各种数据。</p>
 <blockquote>
 <p>The kernel must allocate and free physical memory at run-time for page tables, user memory, kernel stacks, and pipe buffers.</p>
@@ -1820,19 +1827,27 @@
 <p>由于<code>sleep</code>的工作方式（见第7章），Xv6有许多包含每个进程的锁（每个<code>struct proc</code>中的锁）在内的长度为2的锁顺序链。例如，<code>consoleintr</code> (*<strong>kernel/console.c*</strong>:138)是处理键入字符的中断例程。当换行符到达时，任何等待控制台输入的进程都应该被唤醒。为此，<code>consoleintr</code>在调用<code>wakeup</code>时持有<code>cons.lock</code>，<code>wakeup</code>获取等待进程的锁以唤醒它。因此，全局避免死锁的锁顺序包括必须在任何进程锁之前获取<code>cons.lock</code>的规则。【这段不怎么能看懂，学完第七章再回来看看】</p>
 <p>文件系统代码包含xv6最长的锁链。例如，创建一个文件需要同时持有目录上的锁、新文件inode上的锁、磁盘块缓冲区上的锁、磁盘驱动程序的<code>vdisk_lock</code>和调用进程的<code>p-&gt;lock</code>。为了避免死锁，文件系统代码总是按照前一句中提到的顺序获取锁。</p>
 </blockquote>
-<h2 id="Locks-and-interrupt-handlers"><a href="#Locks-and-interrupt-handlers" class="headerlink" title="Locks and interrupt handlers"></a>Locks and interrupt handlers</h2><p>关于这段我有一个疑问，明天再看看：</p>
+<h2 id="Locks-and-interrupt-handlers"><a href="#Locks-and-interrupt-handlers" class="headerlink" title="Locks and interrupt handlers"></a>Locks and interrupt handlers</h2><h3 id="一个尚未解决的疑问"><a href="#一个尚未解决的疑问" class="headerlink" title="一个尚未解决的疑问"></a>一个尚未解决的疑问</h3><p>关于这段我有一个疑问，明天再看看：</p>
 <blockquote>
 <p>Xv6更保守：当CPU获取任何锁时，xv6总是禁用该CPU上的中断。中断仍然可能发生在其他CPU上，此时中断的<code>acquire</code>可以等待线程释放自旋锁；由于不在同一CPU上，不会造成死锁。</p>
 </blockquote>
 <p>在处理时钟中断的trap.c中：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/trap.c devintr()</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(scause == <span class="number">0x8000000000000001</span>L)&#123;</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">if</span>(cpuid() == <span class="number">0</span>)&#123;</span><br><span class="line">      clockintr();</span><br><span class="line">    &#125;</span><br><span class="line">        </span><br><span class="line">    w_sip(r_sip() &amp; ~<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">  &#125; </span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">clockintr</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;tickslock);</span><br><span class="line">  ticks++;</span><br><span class="line">  wakeup(&amp;ticks);</span><br><span class="line">  release(&amp;tickslock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/trap.c devintr()</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(scause == <span class="number">0x8000000000000001</span>L)&#123;</span><br><span class="line">        </span><br><span class="line">    <span class="comment">// 这里！！</span></span><br><span class="line">    <span class="comment">// in kernel/trap.c devintr()</span></span><br><span class="line">    <span class="keyword">if</span>(cpuid() == <span class="number">0</span>)&#123;</span><br><span class="line">      clockintr();</span><br><span class="line">    &#125;</span><br><span class="line">        </span><br><span class="line">    w_sip(r_sip() &amp; ~<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">  &#125; </span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">clockintr</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;tickslock);</span><br><span class="line">  ticks++;</span><br><span class="line">  wakeup(&amp;ticks);</span><br><span class="line">  release(&amp;tickslock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可见只有CPU0才会进入clockintr【因为要求cpuid==0】，锁住ticks引起ticks递增。</p>
 <p>而当sys_sleep获得锁之后，其结束循环的条件是ticks - ticks0 &lt; n:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_sleep</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> n;</span><br><span class="line">  uint ticks0;</span><br><span class="line">  <span class="keyword">if</span>(argint(<span class="number">0</span>, &amp;n) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  acquire(&amp;tickslock);</span><br><span class="line">  ticks0 = ticks;</span><br><span class="line">  <span class="keyword">while</span>(ticks - ticks0 &lt; n)&#123;</span><br><span class="line">    <span class="keyword">if</span>(myproc()-&gt;killed)&#123;</span><br><span class="line">      release(&amp;tickslock);</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    sleep(&amp;ticks, &amp;tickslock);</span><br><span class="line">  &#125;</span><br><span class="line">  release(&amp;tickslock);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>也就是说，便会出现这么个情况：</p>
-<p>sys_sleep在CPU2运行，且先获取了tickslock的锁。这时候，ticks将会停止增长，sys_sleep结束循环的条件将无法结束。为啥呢？可以分为CPU0和其他CPU两方面来说。对于CPU0，它可以进入clockintr的代码段，但是由于锁已经被获取，所以就只能一直在那边死锁等待；对于其他CPU来说，压根执行不了那段增加ticks的代码段，所以ticks压根不会增加。这样一来不还是造成了死锁吗？我不明白。。。</p>
+<p>我认为，这会导致死锁情况。假设计算机为多CPU，且从零开始依次递增编号。对该死锁情况的讨论，可以分为以下两类：</p>
+<ol>
+<li><p>sys_sleep在CPU2（或者其他编号非零的CPU）运行，且先获取了tickslock的锁。这时候，ticks将会停止增长，sys_sleep结束循环的条件将无法结束。</p>
+<p>理由：对于CPU0，它可以进入clockintr的代码段，但是由于锁已经被获取，所以就只能一直在那边死锁等待；对于其他CPU来说，压根执行不了那段增加ticks的代码段，所以ticks压根不会增加。这样一来，CPU2进程等待ticks增加，从而获取结束循环的条件；CPU0等待CPU2进程结束，从而使得ticks增加，就造成了死锁。</p>
+</li>
+<li><p>sys_sleep在CPU0运行，且先获取了tickslock的锁。这时候，ticks将会停止增长，sys_sleep结束循环的条件将无法结束。</p>
+<p>理由：由于xv6会在获取锁和释放锁期间关闭中断，因而CPU0无法进行时钟中断而发生进程的切换，只能一直在sys_sleep中等待，所以ticks更不可能增加，造成了死锁。</p>
+</li>
+</ol>
+<p>暂时没有很充分的理由反驳这两点。。。</p>
 
       
     </div>
