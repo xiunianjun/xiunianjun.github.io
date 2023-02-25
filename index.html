@@ -170,7 +170,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2023-02-25 22:19:00 / 修改时间：22:21:38" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time>
+              <time title="创建时间：2023-02-25 22:19:00 / 修改时间：23:35:52" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time>
             </span>
 
           
@@ -279,6 +279,21 @@
 <p>这个实验我前前后后总共做了大概有9h+……写我下面放上来的屎山代码可能大概用了5h+。我总共使用了140+行代码实现我的核心函数<code>push_substring</code>。</p>
 <p>整个过程，包括思路和代码都十分复杂，但最后的表现相比于别人好像也没好到哪去，让我不禁怀疑自己是不是想错了……以及，这样的复杂性也给我带来很多担忧，担心会不会在以后的实验因为这个的bug而寄，毕竟我在写笔记的同时都已经找到了不止一个bug了（）希望人没事。</p>
 <p>总而言之，先把我的思路和一步步的代码拆解放上来吧。</p>
+<h2 id="为什么我的思路那么复杂"><a href="#为什么我的思路那么复杂" class="headerlink" title="为什么我的思路那么复杂"></a>为什么我的思路那么复杂</h2><p>看了<a target="_blank" rel="noopener" href="https://github.com/shootfirst/CS144/">感恩</a>的代码，我发现我俩的大题思路其实差不多是一模一样的，都是先进行两轮的区间合并，然后再处理但为啥我看起来就那么复杂呢？</p>
+<p>一是题意理解问题。</p>
+<p>我发现他对<code>_capacity</code>的理解跟我的理解不一样emmm……</p>
+<p>额好像怪我没认真看指导书的图。</p>
+<img src="/2023/02/25/cs144/image-20230225232723083-1677339210527-2.png" class>
+
+<p>我理解的capacity：绿色部分和红色部分的净含量</p>
+<p>似乎是真正的capacity：绿色部分+红色部分+空部分的净含量？？也就是说capacity只是一个跟index差不多的索引下标？？…………</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// out of bound</span></span><br><span class="line"><span class="keyword">if</span> (start &gt;= hope_to_rec + _capacity - _output.<span class="built_in">buffer_size</span>()) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说我能过测试是因为偶然吗，笑一笑算了家人们。明天再放修正后代码吧【晕倒】</p>
+<p>二是代码规范问题。</p>
+<p>首先他代码规范性强，看起来非常舒服。其次他会用类似<code>upper_bound()</code>这样的函数（反观我压根没想起来），这样就显得比我的循环简洁了很多很多。</p>
+<p>首先他的代码规范确实做得很好</p>
+<p>第二他还会用upper_bound这样的函数（反观我压根没想起来），这样就显得比我的</p>
 <h2 id="我的思路"><a href="#我的思路" class="headerlink" title="我的思路"></a>我的思路</h2><p>我们要做的，是将零散的数据包拼接成完整的字节流，并且将整流过的数据送入<code>ByteStream</code>中，这通过核心函数<code>push_substring</code>实现。我们可以先来看看<code>push_substring</code>的定义：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">StreamReassembler::push_substring</span><span class="params">(<span class="type">const</span> string &amp;data, <span class="type">const</span> <span class="type">size_t</span> index, <span class="type">const</span> <span class="type">bool</span> eof)</span> </span>;</span><br></pre></td></tr></table></figure>
 
