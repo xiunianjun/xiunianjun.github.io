@@ -38,6 +38,7 @@
 <meta property="article:published_time" content="2022-10-04T03:10:57.000Z">
 <meta property="article:modified_time" content="2022-10-06T03:10:57.000Z">
 <meta property="article:author" content="修年">
+<meta property="article:tag" content="labs">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/userid19614labid573time1424086247964.png">
 
@@ -131,6 +132,11 @@
     <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
   </ul>
 </nav>
 
@@ -162,7 +168,7 @@
     <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/images/head.png">
       <meta itemprop="name" content="修年">
       <meta itemprop="description" content="">
     </span>
@@ -485,7 +491,7 @@
 <li><p>（1）建立 <code>/proc</code> 目录；建立 <code>/proc</code> 目录下的各个结点。本实验只建立 <code>/proc/psinfo</code>。</p>
 </li>
 <li><p>（2）建立目录和结点分别需要调用 <code>mkdir()</code> 和 <code>mknod()</code> 系统调用。因为初始化时已经在用户态，所以不能直接调用 <code>sys_mkdir()</code> 和 <code>sys_mknod()</code>。必须在初始化代码所在文件中实现这两个系统调用的用户态接口。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __LIBRARY__</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __LIBRARY__</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">  </span><br><span class="line">_syscall2(<span class="type">int</span>,mkdir,<span class="type">const</span> <span class="type">char</span>*,name,<span class="type">mode_t</span>,mode);</span><br><span class="line">_syscall3(<span class="type">int</span>,mknod,<span class="type">const</span> <span class="type">char</span>*,filename,<span class="type">mode_t</span>,mode,<span class="type">dev_t</span>,dev);</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __LIBRARY__</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __LIBRARY__</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">      </span><br><span class="line">_syscall2(<span class="type">int</span>,mkdir,<span class="type">const</span> <span class="type">char</span>*,name,<span class="type">mode_t</span>,mode);</span><br><span class="line">_syscall3(<span class="type">int</span>,mknod,<span class="type">const</span> <span class="type">char</span>*,filename,<span class="type">mode_t</span>,mode,<span class="type">dev_t</span>,dev);</span><br></pre></td></tr></table></figure>
 
 <p><code>mkdir()</code> 时 mode 参数的值可以是 “0755”（对应 <code>rwxr-xr-x</code>），表示只允许 root 用户改写此目录，其它人只能进入和读取此目录。</p>
 <p>procfs 是一个只读文件系统，所以用 <code>mknod()</code> 建立 psinfo 结点时，必须通过 mode 参数将其设为只读。建议使用 <code>S_IFPROC|0444</code> 做为 mode 值，表示这是一个 proc 文件，权限为 0444（r–r–r–），对所有用户只读。</p>
@@ -583,6 +589,9 @@
     
 
       <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/labs/" rel="tag"># labs</a>
+          </div>
 
         
 
@@ -658,6 +667,8 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
   <p class="site-author-name" itemprop="name">修年</p>
   <div class="site-description" itemprop="description"></div>
 </div>
@@ -671,8 +682,10 @@
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">标签</span>
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
 </div>
