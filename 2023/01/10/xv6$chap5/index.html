@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Interrupts and device drivers A driver is the code in an operating system that manages a particular device:   configures the device hardware tells the device to perform operations handles the resultin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="xv6$chap1">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap5/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="Interrupts and device drivers A driver is the code in an operating system that manages a particular device:   configures the device hardware tells the device to perform operations handles the resultin">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230115160523827.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230115170107044.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230220234406239.png">
+<meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
+<meta property="article:modified_time" content="2023-02-26T06:18:28.564Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230115160523827.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6$chap5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>xv6$chap1 | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          xv6$chap1
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-02-26 14:18:28" itemprop="dateModified" datetime="2023-02-26T14:18:28+08:00">2023-02-26</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Interrupts-and-device-drivers"><a href="#Interrupts-and-device-drivers" class="headerlink" title="Interrupts and device drivers"></a>Interrupts and device drivers</h1><blockquote>
+<p>A <em>driver</em> is the code in an operating system that manages a particular device: </p>
+<ol>
+<li><strong>configures</strong> the device hardware</li>
+<li>tells the device to perform <strong>operations</strong></li>
+<li>handles the resulting <strong>interrupts</strong></li>
+<li><strong>interacts</strong> with <strong>processes</strong> that may be waiting for I/O from the device</li>
+</ol>
+<p>Driver code can be tricky because a driver executes <strong>concurrently</strong> with the device that it manages. </p>
+<p>In addition, the driver must understand the device’s <strong>hardware interface</strong>, which can be complex and poorly documented.</p>
+</blockquote>
+<p>如果devices需要让操作系统对某些事情做出响应，就要采取中断的方法。在<code>kerneltrap</code>中，内核响应中断，并且根据设备类型来决定中断处理函数。</p>
+<blockquote>
+<p><img src="/2023/01/10/xv6/image-20230115160523827.png" alt="image-20230115160523827"></p>
+<p>这段对设备中断的概述总结得非常到位</p>
+<p>也就是说，一个device driver可以分为两部分实现，一部分是接收请求，然后开启read/write；另一部分是接收中断，这个中断有可能是设备完成IO，也可能是设备需要IO，它会通知设备具体怎么做，它也会唤醒恰当的进程。</p>
+</blockquote>
+<h2 id="Code-Console-input"><a href="#Code-Console-input" class="headerlink" title="Code: Console input"></a>Code: Console input</h2><p>console driver是driver structure的一个实现案例。</p>
+<h3 id="上层逻辑"><a href="#上层逻辑" class="headerlink" title="上层逻辑"></a>上层逻辑</h3><p>shell获取用户输入console的信息是通过系统调用<code>read()</code>实现的。read通过文件描述符，最终转向<code>consoleread()</code>来实现具体的逻辑。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in file.c fileread()</span></span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span>(f-&gt;type == FD_DEVICE)&#123;</span><br><span class="line">    <span class="keyword">if</span>(f-&gt;major &lt; <span class="number">0</span> || f-&gt;major &gt;= NDEV || !devsw[f-&gt;major].read)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    r = devsw[f-&gt;major].read(<span class="number">1</span>, addr, n);<span class="comment">// 在这里转向console</span></span><br><span class="line">  &#125; </span><br><span class="line"><span class="comment">// in console.c consoleinit()</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">consoleinit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  initlock(&amp;cons.lock, <span class="string">&quot;cons&quot;</span>);</span><br><span class="line"></span><br><span class="line">  uartinit();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 在这里完成devsw的初始化</span></span><br><span class="line">  <span class="comment">// connect read and write system calls</span></span><br><span class="line">  <span class="comment">// to consoleread and consolewrite.</span></span><br><span class="line">  devsw[CONSOLE].read = consoleread;</span><br><span class="line">  devsw[CONSOLE].write = consolewrite;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对console的读写事实上是对cons结构体里buf的读写。这个buf则是由底层逻辑管理的。<code>consoleread()</code>每次读取buf中的一行，当未读满一行且无字符输入时会阻塞，直到底层逻辑将字符放入buf。读满了一行后，<code>consoleread</code>将该行copy进用户空间，随后返回<code>read</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/console.c </span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INPUT_BUF_SIZE 128</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="type">char</span> buf[INPUT_BUF_SIZE];</span><br><span class="line">  uint r;  <span class="comment">// Read index</span></span><br><span class="line">  uint w;  <span class="comment">// Write index</span></span><br><span class="line">  uint e;  <span class="comment">// Edit index</span></span><br><span class="line">&#125; cons;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// user read()s from the console go here.</span></span><br><span class="line"><span class="comment">// copy (up to) a whole input line to dst.</span></span><br><span class="line"><span class="comment">// user_dist indicates whether dst is a user</span></span><br><span class="line"><span class="comment">// or kernel address.</span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">consoleread</span><span class="params">(<span class="type">int</span> user_dst, uint64 dst, <span class="type">int</span> n)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint target;</span><br><span class="line">  <span class="type">int</span> c;</span><br><span class="line">  <span class="type">char</span> cbuf;</span><br><span class="line"></span><br><span class="line">  target = n;</span><br><span class="line">  acquire(&amp;cons.lock);</span><br><span class="line">  <span class="keyword">while</span>(n &gt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="comment">// wait until interrupt handler has put some</span></span><br><span class="line">    <span class="comment">// input into cons.buffer.</span></span><br><span class="line">    <span class="comment">// read和write的index一样，说明此时没有数据输入，阻塞</span></span><br><span class="line">    <span class="keyword">while</span>(cons.r == cons.w)&#123;</span><br><span class="line">      <span class="keyword">if</span>(killed(myproc()))&#123;</span><br><span class="line">        release(&amp;cons.lock);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      sleep(&amp;cons.r, &amp;cons.lock);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 产生数据输入，接收数据</span></span><br><span class="line">    c = cons.buf[cons.r++ % INPUT_BUF_SIZE];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(c == C(<span class="string">&#x27;D&#x27;</span>))&#123;  <span class="comment">// end-of-file</span></span><br><span class="line">      <span class="keyword">if</span>(n &lt; target)&#123;</span><br><span class="line">        <span class="comment">// Save ^D for next time, to make sure</span></span><br><span class="line">        <span class="comment">// caller gets a 0-byte result.</span></span><br><span class="line">        <span class="comment">// 这样下一次也能访问到eof</span></span><br><span class="line">        cons.r--;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// copy the input byte to the user-space buffer.</span></span><br><span class="line">    cbuf = c;</span><br><span class="line">    <span class="keyword">if</span>(either_copyout(user_dst, dst, &amp;cbuf, <span class="number">1</span>) == <span class="number">-1</span>)</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    dst++;</span><br><span class="line">    --n;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(c == <span class="string">&#x27;\n&#x27;</span>)&#123;</span><br><span class="line">      <span class="comment">// a whole line has arrived, return to</span></span><br><span class="line">      <span class="comment">// the user-level read().</span></span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  release(&amp;cons.lock);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> target - n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="底层逻辑"><a href="#底层逻辑" class="headerlink" title="底层逻辑"></a>底层逻辑</h3><p>底层逻辑维护了与上层逻辑交互的buf。</p>
+<p>console接收数据对buf的读，是通过中断来实现的。</p>
+<p>当用户输入字符，UART硬件检测到读，会向操作系统发送中断。中断在<code>kerneltrap()</code>中被接收处理，然后通过<code>devintr()</code>对该中断分门别类地进行转发。console的转发路径为devintr-&gt;uartintr-&gt;consoleintr。</p>
+<h4 id="UART"><a href="#UART" class="headerlink" title="UART"></a>UART</h4><p> UART的全称是Universal Asynchronous Receiver and Transmitter，即异步发送和接收。它的软件上的表示形式是<em>a set of memory-mapped control registers</em>。CPU通过物理地址与这些寄存器交互，也即它们跟RAM是同一个地址空间。在xv6中，UART的地址空间从<code>UART0</code>(0x1000 0000)开始。这些寄存器地址关于<code>UART0</code>的偏移量定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// the UART control registers.</span></span><br><span class="line"><span class="comment">// some have different meanings for read vs write.</span></span><br><span class="line"><span class="comment">// see http://byterunner.com/16550.html</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RHR 0                 <span class="comment">// 接收寄存器receive holding register (for input bytes)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> THR 0                 <span class="comment">// 发送寄存器transmit holding register (for output bytes)</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IER 1                 <span class="comment">// 开关中断寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IER_RX_ENABLE (1&lt;&lt;0)  <span class="comment">// 如果该位被设置，则在接收寄存器有数据，即想向外界发送数据时，UART会搓出一个中断</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IER_TX_ENABLE (1&lt;&lt;1)  <span class="comment">// 如果该位被设置，则在发送寄存器有数据，即外界向硬件发送数据时，UART会搓出一个中断</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FCR 2                 <span class="comment">// FIFO control register</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FCR_FIFO_ENABLE (1&lt;&lt;0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FCR_FIFO_CLEAR (3&lt;&lt;1) <span class="comment">// clear the content of the two FIFOs</span></span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LCR 3                 <span class="comment">// line control register</span></span></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LSR 5                 <span class="comment">// line status register</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LSR_RX_READY (1&lt;&lt;0)   <span class="comment">// input is waiting to be read from RHR</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LSR_TX_IDLE (1&lt;&lt;5)    <span class="comment">// THR can accept another character to send</span></span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><img src="/2023/01/10/xv6/image-20230115170107044.png" alt="image-20230115170107044"></p>
+<p>例如，LSR寄存器包含指示输入字符是否正在等待软件读取的位。这些字符（如果有的话）可用于从RHR寄存器读取。每次读取一个字符，UART硬件都会从等待字符的内部FIFO寄存器中删除它，并在FIFO为空时清除LSR中的“就绪”位。UART传输硬件在很大程度上独立于接收硬件；如果软件向THR写入一个字节，则UART传输该字节。</p>
+</blockquote>
+<h4 id="kerneltrap"><a href="#kerneltrap" class="headerlink" title="kerneltrap"></a>kerneltrap</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kerneltrap()</span></span><br><span class="line">  <span class="comment">// 在此处的devintr对不同的设备进行不同的处理方式</span></span><br><span class="line">  <span class="keyword">if</span>((which_dev = devintr()) == <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;scause %p\n&quot;</span>, scause);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;sepc=%p stval=%p\n&quot;</span>, r_sepc(), r_stval());</span><br><span class="line">    panic(<span class="string">&quot;kerneltrap&quot;</span>);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="devintr"><a href="#devintr" class="headerlink" title="devintr"></a>devintr</h4><p>devintr处在<code>trap.c</code>中，作用是对中断归类，然后分门别类地转发到下一层级的handler。</p>
+<blockquote>
+<p>注：</p>
+<ol>
+<li><p>外中断和内中断</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Cheatscat/article/details/77869600">外部中断和内部中断详解</a></p>
+<p>根据中断源的不同，可以把中断分为硬件中断和软件中断两大类，而硬件中断又可以分为外部中断和内部中断两类。</p>
+<p>外部中断一般是指由计算机外设发出的中断请求，如：键盘中断、打印机中断、定时器中断等。外部中断是可以屏蔽的中断，也就是说，利用中断控制器<strong>可以屏蔽</strong>这些外部设备的中断请求。</p>
+<p>内部中断是指因硬件出错（如突然掉电、奇偶校验错等）或运算出错（除数为零、运算溢出、单步中断等）所引起的中断。内部中断是<strong>不可屏蔽</strong>的中断。</p>
+<p> 软件中断其实并不是真正的中断，它们只是可被调用执行的一般程序。例如：ROM BIOS中的各种外部设备管理中断服务程序（键盘管理中断、显示器管理中断、打印机管理 中断等，）以及DOS的系统功能调用（INT 21H）等都是软件中断。【比如说系统调用之类的】</p>
+</li>
+</ol>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// check if it&#x27;s an external interrupt or software interrupt,</span></span><br><span class="line"><span class="comment">// and handle it.</span></span><br><span class="line"><span class="comment">// returns 2 if timer interrupt,</span></span><br><span class="line"><span class="comment">// 1 if other device,</span></span><br><span class="line"><span class="comment">// 0 if not recognized.</span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">devintr</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 获取scause，辨析中断类型</span></span><br><span class="line">  uint64 scause = r_scause();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 如果来自外中断（在这里应该只指device interrupt）</span></span><br><span class="line">  <span class="keyword">if</span>((scause &amp; <span class="number">0x8000000000000000</span>L) &amp;&amp;</span><br><span class="line">     (scause &amp; <span class="number">0xff</span>) == <span class="number">9</span>)&#123;</span><br><span class="line">    <span class="comment">// this is a supervisor external interrupt, via PLIC.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// irq indicates which device interrupted.</span></span><br><span class="line">    <span class="comment">// 通过PLIC硬件获取中断设备信息</span></span><br><span class="line">    <span class="type">int</span> irq = plic_claim();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 分别转发</span></span><br><span class="line">    <span class="keyword">if</span>(irq == UART0_IRQ)&#123;</span><br><span class="line">      uartintr();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(irq == VIRTIO0_IRQ)&#123;</span><br><span class="line">      virtio_disk_intr();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(irq)&#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;unexpected interrupt irq=%d\n&quot;</span>, irq);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 中断处理完成了，可以再次开启中断</span></span><br><span class="line">    <span class="comment">// the PLIC allows each device to raise at most one</span></span><br><span class="line">    <span class="comment">// interrupt at a time; tell the PLIC the device is</span></span><br><span class="line">    <span class="comment">// now allowed to interrupt again.</span></span><br><span class="line">    <span class="keyword">if</span>(irq)</span><br><span class="line">      plic_complete(irq);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  <span class="comment">// 来自时钟中断</span></span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span>(scause == <span class="number">0x8000000000000001</span>L)&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="uartintr"><a href="#uartintr" class="headerlink" title="uartintr"></a>uartintr</h4><p>这代码其实乍一看是看不懂的，这是因为uartintr不止负责读中断。它还负责另一个中断（发送区空余中断），下面会细说。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// handle a uart interrupt, raised because input has</span></span><br><span class="line"><span class="comment">// arrived, or the uart is ready for more output, or</span></span><br><span class="line"><span class="comment">// both. called from devintr().</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">uartintr</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// read and process incoming characters.</span></span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">    <span class="type">int</span> c = uartgetc();</span><br><span class="line">    <span class="comment">// return -1 if none is waiting,说明读完了</span></span><br><span class="line">    <span class="keyword">if</span>(c == <span class="number">-1</span>)</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="comment">// 每读入一个字符就转交给console</span></span><br><span class="line">    consoleintr(c);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// send buffered characters.</span></span><br><span class="line">  acquire(&amp;uart_tx_lock);</span><br><span class="line">  uartstart();</span><br><span class="line">  release(&amp;uart_tx_lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="consoleintr"><a href="#consoleintr" class="headerlink" title="consoleintr"></a>consoleintr</h4><p>向buf中放入字符c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">consoleintr</span><span class="params">(<span class="type">int</span> c)</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;cons.lock);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span>(c)&#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="title function_">C</span><span class="params">(<span class="string">&#x27;P&#x27;</span>)</span>:  <span class="comment">// Print process list.</span></span><br><span class="line">      <span class="comment">// ...一堆特殊情况处理...</span></span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">        <span class="title function_">if</span><span class="params">(c != <span class="number">0</span> &amp;&amp; cons.e-cons.r &lt; INPUT_BUF_SIZE)</span>&#123;</span><br><span class="line">          c = (c == <span class="string">&#x27;\r&#x27;</span>) ? <span class="string">&#x27;\n&#x27;</span> : c;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// echo back to the user.</span></span><br><span class="line">          consputc(c);</span><br><span class="line"></span><br><span class="line">          <span class="comment">// store for consumption by consoleread().</span></span><br><span class="line">          cons.buf[cons.e++ % INPUT_BUF_SIZE] = c;</span><br><span class="line"></span><br><span class="line">          <span class="keyword">if</span>(c == <span class="string">&#x27;\n&#x27;</span> || c == C(<span class="string">&#x27;D&#x27;</span>) || cons.e-cons.r == INPUT_BUF_SIZE)&#123;</span><br><span class="line">            <span class="comment">// wake up consoleread() if a whole line (or end-of-file)</span></span><br><span class="line">            <span class="comment">// has arrived.</span></span><br><span class="line">            <span class="comment">// 中断处理并不会做很多事情，只是会与缓冲区交互</span></span><br><span class="line">            <span class="comment">// 涉及到复杂的事情，比如说将数据拷贝到用户空间</span></span><br><span class="line">            <span class="comment">//就唤醒上层逻辑来做</span></span><br><span class="line">            cons.w = cons.e;</span><br><span class="line">            wakeup(&amp;cons.r);</span><br><span class="line">          &#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    	<span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  release(&amp;cons.lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Code-Console-output"><a href="#Code-Console-output" class="headerlink" title="Code: Console output"></a>Code: Console output</h2><p>外部通过write这个系统调用来对console写。</p>
+<h3 id="uartputc"><a href="#uartputc" class="headerlink" title="uartputc"></a>uartputc</h3><p>最先到达这里。</p>
+<p>uart内置了一个缓冲区。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> uart_tx_buf[UART_TX_BUF_SIZE];</span><br></pre></td></tr></table></figure>
+
+<p>用户仅需通过uartputc对buf进行写入即可，具体的buf数据向UART转移由uartputc通过调用uartstart实现。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// add a character to the output buffer and tell the</span></span><br><span class="line"><span class="comment">// UART to start sending if it isn&#x27;t already.</span></span><br><span class="line"><span class="comment">// blocks if the output buffer is full.缓冲区满则阻塞</span></span><br><span class="line"><span class="comment">// because it may block, it can&#x27;t be called</span></span><br><span class="line"><span class="comment">// from interrupts; it&#x27;s only suitable for use</span></span><br><span class="line"><span class="comment">// by write().这段话很有意思，说它由于会阻塞所以最好别在中断的时候用。</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">uartputc</span><span class="params">(<span class="type">int</span> c)</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;uart_tx_lock);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(panicked)&#123;</span><br><span class="line">    <span class="keyword">for</span>(;;)</span><br><span class="line">      ;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 阻塞</span></span><br><span class="line">  <span class="keyword">while</span>(uart_tx_w == uart_tx_r + UART_TX_BUF_SIZE)&#123;</span><br><span class="line">    <span class="comment">// buffer is full.</span></span><br><span class="line">    <span class="comment">// wait for uartstart() to open up space in the buffer.</span></span><br><span class="line">    sleep(&amp;uart_tx_r, &amp;uart_tx_lock);</span><br><span class="line">  &#125;</span><br><span class="line">  uart_tx_buf[uart_tx_w % UART_TX_BUF_SIZE] = c;</span><br><span class="line">  uart_tx_w += <span class="number">1</span>;</span><br><span class="line">  uartstart();</span><br><span class="line">  release(&amp;uart_tx_lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="uartstart"><a href="#uartstart" class="headerlink" title="uartstart"></a>uartstart</h3><p>uartstart的作用是从缓冲区取数据向UART硬件发送。不阻塞。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// if the UART is idle, and a character is waiting</span></span><br><span class="line"><span class="comment">// in the transmit buffer, send it.</span></span><br><span class="line"><span class="comment">// caller must hold uart_tx_lock.</span></span><br><span class="line"><span class="comment">// called from both the top- and bottom-half.</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">uartstart</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">    <span class="keyword">if</span>(uart_tx_w == uart_tx_r)&#123;</span><br><span class="line">      <span class="comment">// transmit buffer is empty.</span></span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>((ReadReg(LSR) &amp; LSR_TX_IDLE) == <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="comment">// the UART transmit holding register is full,</span></span><br><span class="line">      <span class="comment">// so we cannot give it another byte.</span></span><br><span class="line">      <span class="comment">// it will interrupt when it&#x27;s ready for a new byte.</span></span><br><span class="line">      <span class="comment">// 当缓冲区满没有选择阻塞，而是先结束</span></span><br><span class="line">      <span class="comment">// 当UART硬件准备好继续接收的时候，UART会发送transmit complete中断，到时候会再继续从buf读取</span></span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 一个字符一个字符写</span></span><br><span class="line">    <span class="type">int</span> c = uart_tx_buf[uart_tx_r % UART_TX_BUF_SIZE];</span><br><span class="line">    uart_tx_r += <span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// maybe uartputc() is waiting for space in the buffer.</span></span><br><span class="line">    wakeup(&amp;uart_tx_r);</span><br><span class="line">    </span><br><span class="line">    WriteReg(THR, c);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当传输过程非常流畅，UART硬件没有阻塞时，以上的代码就能完美阐述发送的过程。但是当UART硬件的transmit阻塞时，过程就会有许多改动。</p>
+<h3 id="transmit-complete-interrupt"><a href="#transmit-complete-interrupt" class="headerlink" title="transmit complete interrupt"></a>transmit complete interrupt</h3><p>在<code>uartstart</code>中，当UART硬件的transmit满，<code>uartstart</code>就直接return了。</p>
+<p>当UART硬件的transmit空，就会发送transmit complete中断。中断在kerneltrap被接收，经过devintr转发，最终来到了uartintr：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// handle a uart interrupt, raised because input has</span></span><br><span class="line"><span class="comment">// arrived, or the uart is ready for more output, or</span></span><br><span class="line"><span class="comment">// both. called from devintr().</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">uartintr</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// read and process incoming characters.</span></span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">    <span class="type">int</span> c = uartgetc();</span><br><span class="line">    <span class="keyword">if</span>(c == <span class="number">-1</span>)</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    consoleintr(c);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// send buffered characters.</span></span><br><span class="line">  acquire(&amp;uart_tx_lock);</span><br><span class="line">  uartstart();</span><br><span class="line">  release(&amp;uart_tx_lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时，第一个while循环会直接退出，因为压根没有get到字符。所以，这时候，就会去执行uartstart，然后继续读未完成读取的缓冲区。</p>
+<p>等到所有都读完了，最后一次发送transmit complete中断时，会在uartstart进入该分支：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(uart_tx_w == uart_tx_r)&#123;</span><br><span class="line">  <span class="comment">// transmit buffer is empty.</span></span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后就不会再发送transmit中断了。</p>
+<p>感觉这点是真的牛逼。uartintr这个函数完美兼顾了两种情况【这也归功于uartstart做得很健壮】：1. 外部输入数据到console，2. 接收数据未结束，继续接收</p>
+<h2 id="Concurrency-in-drivers"><a href="#Concurrency-in-drivers" class="headerlink" title="Concurrency in drivers"></a>Concurrency in drivers</h2><p>用户进程与设备之间的读写交流，比如说上面的console，重点依靠于<code>uart_tx_buf</code>和<code>cons.buf</code>这两个的正确性。因而，就需要保障它们的并发安全。在上面的代码中，使用到这两个的地方都被锁保护着。</p>
+<p>在kernel中还需要格外注意的一点并发是，一个进程A在等待来自设备的中断，但此时另一个进程B在运行。这时候设备发出中断信号，CPU转入中断处理程序处理中断。此时，中断处理程序的执行不应该涉及到当前被中断进程的代码。例如，中断处理程序不能安全地使用当前进程的页表调用<code>copyout</code>（页表正是跟当前进程息息相关的）。中断处理程序通常做相对较少的工作（例如，只需将输入数据复制到缓冲区），并唤醒上半部分代码来完成其余工作。</p>
+<h2 id="Timer-interrupts"><a href="#Timer-interrupts" class="headerlink" title="Timer interrupts"></a>Timer interrupts</h2><blockquote>
+<p>Xv6 uses timer interrupts to maintain its clock and to enable it to switch among compute-bound processes; the <strong>yield</strong> calls in usertrap and kerneltrap cause this switching.</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/trap.c usertrap()</span></span><br><span class="line">  <span class="comment">// give up the CPU if this is a timer interrupt.</span></span><br><span class="line">  <span class="keyword">if</span>(which_dev == <span class="number">2</span>)</span><br><span class="line">    yield();</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/trap.c kerneltrap()</span></span><br><span class="line">  <span class="comment">// give up the CPU if this is a timer interrupt.</span></span><br><span class="line">  <span class="keyword">if</span>(which_dev == <span class="number">2</span> &amp;&amp; myproc() != <span class="number">0</span> &amp;&amp; myproc()-&gt;state == RUNNING)</span><br><span class="line">    yield();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>RISC-V requires that timer interrupts be taken in machine mode, not supervisor mode. As a result, xv6 handles timer interrupts completely separately from the trap mechanism laid out above.</p>
+</blockquote>
+<p>xv6启动时调用过<code>start.c</code>。<code>start.c</code>处于机器态，并准备向内核态过渡。<code>start.c</code>中就对时钟进行了初始化<code>timeinit()</code>。要做的有以下几件事：</p>
+<ol>
+<li>program the <strong>CLINT</strong> hardware (core-local interruptor) to generate an interrupt after a certain delay. </li>
+<li>set up a <strong>scratch</strong> area  to help the timer interrupt handler save registers and the address of the CLINT registers</li>
+<li>start sets mtvec to timervec and <strong>enables</strong> timer interrupts.</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// arrange to receive timer interrupts.</span></span><br><span class="line"><span class="comment">// they will arrive in machine mode at</span></span><br><span class="line"><span class="comment">// at timervec in kernelvec.S,</span></span><br><span class="line"><span class="comment">// which turns them into software interrupts for</span></span><br><span class="line"><span class="comment">// devintr() in trap.c.</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">timerinit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// each CPU has a separate source of timer interrupts.</span></span><br><span class="line">  <span class="type">int</span> id = r_mhartid();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// ask the CLINT for a timer interrupt.</span></span><br><span class="line">  <span class="type">int</span> interval = <span class="number">1000000</span>; <span class="comment">// cycles; about 1/10th second in qemu.</span></span><br><span class="line">  *(uint64*)CLINT_MTIMECMP(id) = *(uint64*)CLINT_MTIME + interval;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// prepare information in scratch[] for timervec.</span></span><br><span class="line">  <span class="comment">// scratch[0..2] : space for timervec to save registers.</span></span><br><span class="line">  <span class="comment">// scratch[3] : address of CLINT MTIMECMP register.</span></span><br><span class="line">  <span class="comment">// scratch[4] : desired interval (in cycles) between timer interrupts.</span></span><br><span class="line">  uint64 *scratch = &amp;timer_scratch[id][<span class="number">0</span>];</span><br><span class="line">  scratch[<span class="number">3</span>] = CLINT_MTIMECMP(id);</span><br><span class="line">  scratch[<span class="number">4</span>] = interval;</span><br><span class="line">  w_mscratch((uint64)scratch);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// set the machine-mode trap handler.</span></span><br><span class="line">  w_mtvec((uint64)timervec);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// enable machine-mode interrupts.</span></span><br><span class="line">  w_mstatus(r_mstatus() | MSTATUS_MIE);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// enable machine-mode timer interrupts.</span></span><br><span class="line">  w_mie(r_mie() | MIE_MTIE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>计时器中断处理程序必须保证不干扰中断的内核代码。基本策略是处理程序要求RISC-V发出“软件中断”并立即返回。RISC-V用普通陷阱机制将软件中断传递给内核，并允许内核禁用它们。处理由定时器中断产生的软件中断的代码可以在<code>devintr</code> (<strong>kernel/trap.c</strong>:204)中看到：</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/trap.c devintr()</span></span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span>(scause == <span class="number">0x8000000000000001</span>L)&#123;</span><br><span class="line">    <span class="comment">// software interrupt from a machine-mode timer interrupt,</span></span><br><span class="line">    <span class="comment">// forwarded by timervec in kernelvec.S.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 只看其中一个CPU的时钟中断计数的意思吗？确实，要是好几个一起来加倍了非常不合理</span></span><br><span class="line">    <span class="keyword">if</span>(cpuid() == <span class="number">0</span>)&#123;</span><br><span class="line">      clockintr();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// acknowledge the software interrupt by clearing</span></span><br><span class="line">    <span class="comment">// the SSIP bit in sip.</span></span><br><span class="line">    w_sip(r_sip() &amp; ~<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">  &#125; </span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">clockintr</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;tickslock);</span><br><span class="line">  ticks++;</span><br><span class="line">  wakeup(&amp;ticks);</span><br><span class="line">  release(&amp;tickslock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意，<code>w_sip(r_sip() &amp; ~2);</code>就对应着“RISC-V用普通陷阱机制将软件中断传递给内核”。【应该吧个人理解】</p>
+<blockquote>
+<p>来源：<a target="_blank" rel="noopener" href="https://www.bookstack.cn/books/rCore_tutorial_doc">rCore 手册（rCore tutorial doc）</a></p>
+<p><strong>riscv 中的中断寄存器</strong></p>
+<p>S 态的中断寄存器主要有 <strong>sie</strong>（Supervisor Interrupt Enable，监管中断使能）, <strong>sip</strong> （Supervisor Interrupt Pending，监管中断待处理）两个，其中 s 表示 S 态，i 表示中断， e/p 表示 enable (使能)/ pending (提交申请)。 处理的中断分为三种：</p>
+<ol>
+<li>SI(Software Interrupt)，软件中断</li>
+<li>TI(Timer Interrupt)，时钟中断</li>
+<li>EI(External Interrupt)，外部中断</li>
+</ol>
+<p>比如 <code>sie</code> 有一个 <code>STIE</code> 位， 对应 <code>sip</code> 有一个 <code>STIP</code> 位，与时钟中断 TI 有关。当硬件决定触发时钟中断时，会将 <code>STIP</code> 设置为 1，当一条指令执行完毕后，如果发现 <code>STIP</code> 为 1，此时如果时钟中断使能，即 <code>sie</code> 的 <code>STIE</code> 位也为 1 ，就会进入 S 态时钟中断的处理程序。</p>
+<p>可能SSIP跟这里的STIP差不多吧，都是时钟中断的标志。如果把SSIP clear掉，那么则说明不是时钟中断了，而是软中断了。</p>
+</blockquote>
+<h2 id="Real-world"><a href="#Real-world" class="headerlink" title="Real world"></a>Real world</h2><blockquote>
+<p>UART驱动程序读取UART控制寄存器，一次检索一字节的数据；因为软件驱动数据移动，这种模式被称为程序I/O（<strong>Programmed I/O</strong>）。程序I/O很简单，但速度太慢，无法在高数据速率下使用。需要高速移动大量数据的设备通常使用直接内存访问（<strong>DMA</strong>）。DMA设备硬件直接将传入数据写入内存，并从内存中读取传出数据。现代磁盘和网络设备使用DMA。DMA设备的驱动程序将在RAM中准备数据，然后使用对控制寄存器的单次写入来告诉设备处理准备好的数据。</p>
+<p>当一个设备在不可预知的时间需要注意时，中断是有意义的，而且不是太频繁。但是中断有很高的CPU开销。因此，如网络和磁盘控制器的高速设备，使用一些技巧减少中断需求。一个技巧是对整批传入或传出的请求发出单个中断。另一个技巧是驱动程序完全禁用中断，并定期检查设备是否需要注意。这种技术被称为轮询（<strong>polling</strong>）。如果设备执行操作非常快，轮询是有意义的，但是如果设备大部分空闲，轮询会浪费CPU时间。一些驱动程序根据当前设备负载在轮询和中断之间动态切换。</p>
+<p>UART驱动程序首先将传入的数据复制到内核中的缓冲区，然后复制到用户空间。这在低数据速率下是可行的，但是这种双重复制会显著降低快速生成或消耗数据的设备的性能。一些操作系统能够直接在用户空间缓冲区和设备硬件之间移动数据，通常带有DMA。</p>
+</blockquote>
+<h2 id="Lab-networking"><a href="#Lab-networking" class="headerlink" title="Lab: networking"></a>Lab: networking</h2><blockquote>
+<p>In this lab you will write an xv6 device driver for a network interface card (NIC).</p>
+<p>这个概述光是听起来就让人觉得热血沸腾。网络的本质其实就是IO设备，这一点我一直觉得很牛逼，而现在我居然要亲手实现网络……That’s very cool.</p>
+</blockquote>
+<blockquote>
+<p>On this emulated LAN, xv6 (the “guest”) has an IP address of 10.0.2.15. </p>
+<p>Qemu also arranges for the computer running qemu to appear on the LAN with IP address 10.0.2.2. </p>
+<p>When xv6 uses the E1000 to send a packet to 10.0.2.2, qemu delivers the packet to the appropriate application on the (real) computer on which you’re running qemu (the “host”).</p>
+</blockquote>
+<blockquote>
+<p>We’ve added some files to the xv6 repository for this lab. </p>
+<p>The file <code>kernel/e1000.c</code> contains <strong>initialization</strong> code for the E1000 as well as empty functions for transmitting and receiving packets, which <strong>you’ll fill in</strong>. </p>
+<p><code>kernel/e1000_dev.h</code> contains definitions for registers and flag bits defined by the E1000 and described in the Intel E1000 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2020/readings/8254x_GBe_SDM.pdf">Software Developer’s Manual</a>. </p>
+<p><code>kernel/net.c</code> and <code>kernel/net.h</code> contain a simple network stack that implements the <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Internet_Protocol">IP</a>, <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/User_Datagram_Protocol">UDP</a>, and <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Address_Resolution_Protocol">ARP</a> protocols. </p>
+<p>These files also contain code for a flexible data structure to hold packets, called an <code>mbuf</code>. </p>
+<p>Finally, <code>kernel/pci.c</code> contains code that searches for an E1000 card on the PCI bus when xv6 boots.</p>
+</blockquote>
+<blockquote>
+<p>Your job：</p>
+<p>Your job is to complete <code>e1000_transmit()</code> and <code>e1000_recv()</code>, both in <code>kernel/e1000.c</code>, so that the driver can transmit and receive packets. You are done when <code>make grade</code> says your solution passes all the tests. </p>
+</blockquote>
+<h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><p>说实话，一开始看题的时候真是感觉非常地哈人……但其实文档看着看着，心中也逐渐有了个大概，最后再结合下指导书的提示【当然不是后面那些保姆级的Hints】，最后写的也就八九不离十了。总体上来说，我觉得这次实验的代码还是很简单的，它主要难在<strong>探究过程</strong>，也就是从一开始什么也不懂，然后去阅读硬件设备的文档，结合代码尝试去理解，最后一步步写出来的过程。本次实验耗时六小时，我觉得肯定有不少于一半，甚至可能达到2/3的时间都耗费在理解上。这种从零开始探究的过程给了我很大的收获，同时也稍微提高了我面对挫折的能力。</p>
+<p>这个实验确实设计得很有教育意义。除了我上面说的它锻炼了我的能力以外，它其实还具有比较深刻的<strong>工业意义</strong>。在看书的时候，书中这么写道：</p>
+<blockquote>
+<p>In addition, the driver must understand the device’s <strong>hardware interface</strong>, which can be complex and poorly documented.</p>
+</blockquote>
+<p>本次实验正是上述描述的简化版：E1000的文档很详细，并且我们只用掌握一部分它的功能就行了。但虽然简化了，其探究过程的内在逻辑还是不会改变的。</p>
+<p>总之，我很喜欢这次实验的设计。我的评价是牛逼。</p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><h4 id="正确思路"><a href="#正确思路" class="headerlink" title="正确思路"></a>正确思路</h4><p>Hints写得很详细，不做赘述了。主要就是明确一下数据结构的问题：</p>
+<ol>
+<li><p>rx_ring和tx_ring是两个分开的队列</p>
+<p>它们只是结构一模一样，都是阴影部分表示software持有，白色部分表示硬件持有。</p>
+<p>因而，对于rx来说，白色部分表示需要传给协议栈的包，因而我们需要把白色部分转化为阴影部分；对于tx来说，白色部分表示网卡将要发送的包，因而我们需要把阴影部分转化为白色部分。</p>
+<p><img src="/2023/01/10/xv6/image-20230220234406239.png" alt="image-20230220234406239"></p>
+</li>
+<li><p>rx_mbufs和tx_mbufs</p>
+<p>一开始不知道这俩是啥，后来才意识到，这俩和第1点的那俩其实是下标一一对应的关系。也就是说rx_ring[i]这个descriptor接收到的数据存在rx_mbufs[i]，tx_ring[i]要发送的数据存在tx_mbufs[i]。知道了这个之后，代码就简单了。</p>
+<blockquote>
+<p>忏悔：我一开始真没反应过来。计网我记得是有一模一样的结构的，看来算是白做了2333</p>
+</blockquote>
+</li>
+</ol>
+<h4 id="个人的推理过程"><a href="#个人的推理过程" class="headerlink" title="个人的推理过程"></a>个人的推理过程</h4><p>一开始就先懵懵懂懂地看指导书，直到看到这句话：</p>
+<blockquote>
+<p>Browse the E1000 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2020/readings/8254x_GBe_SDM.pdf">Software Developer’s Manual</a>. </p>
+</blockquote>
+<p>然后我这时连自己要干什么都迷迷糊糊，但姑且还是按他下面说的，准备先浏览第二章了。然而，我发现要我看我也还是看不懂啊，所以我就直接放弃了。【<strong>经验1：看不懂就算了，别死磕了</strong>】</p>
+<p>我放弃了第二章后，就再次从头开始细细看了一遍这句话之前的指导书，也结合了一下它给的代码。这次总算是差不多弄懂这次要做什么了：</p>
+<p>实现<strong>driver</strong>的两个函数，从而实现对网卡进行数据的取出和送入。数据是eth frame。数据取出后要通过<code>net_rx</code>传递给上层协议栈。数据是<code>mbuf</code>类型的。</p>
+<p>所以我们只需实现协议栈最底下的部分，也即从网卡读写数据，其他一些别的东西比如协议栈什么的都已经写好了。</p>
+<p>但是那些什么<code>rx_ring</code>，还有各种奇奇怪怪的寄存器，我都看不懂，所以我就去看第三章了。初次略过一遍感觉还是一脸懵逼不知道干什么，但我带着“我们要做的是driver”这样的想法，在第二遍细看的时候有意区分开什么是网卡硬件帮我们做的，什么是我们的driver软件需要做的（<strong>经验2：明确要做什么。我们需要做的是软件部分，它的文档一般会说Software should XXX，密切关注这部分就行</strong>），就差不多有了点实现的雏形：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> recv:</span><br><span class="line">  <span class="comment">// 通过net_rx，网络包可以发送到udp顶层.</span></span><br><span class="line">  <span class="comment">// 所以说，我们在这里的目的就是，通过与硬件网卡e1000进行交互，</span></span><br><span class="line">  <span class="comment">// 取出e1000所接收到的数据包，检查数据的完整性，然后再把数据封装进mbuf结构体中，再通过net_rx传到上层</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 取出数据包</span></span><br><span class="line">  <span class="comment">// 数据包存储在网卡的缓冲区中</span></span><br><span class="line">  <span class="comment">// 一是获取网卡缓冲区长度的长度</span></span><br><span class="line">  <span class="comment">// 网卡缓冲区长度存储在RCTL.BSIZE &amp; RCTL.BSEX中</span></span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment">   *RCTL.BSEX = 0b:</span></span><br><span class="line"><span class="comment">00b = 2048 Bytes.</span></span><br><span class="line"><span class="comment">01b = 1024 Bytes.</span></span><br><span class="line"><span class="comment">10b = 512 Bytes.</span></span><br><span class="line"><span class="comment">1b1 = 256 Bytes.</span></span><br><span class="line"><span class="comment">RCTL.BSEX = 1b:</span></span><br><span class="line"><span class="comment">00b = Reserved; software should not program this value.</span></span><br><span class="line"><span class="comment">01b = 16384 Bytes.</span></span><br><span class="line"><span class="comment">10b = 8192 Bytes.</span></span><br><span class="line"><span class="comment">11b = 4096 Bytes</span></span><br><span class="line"><span class="comment">   *</span></span><br><span class="line"><span class="comment">   * */</span></span><br><span class="line">  <span class="comment">// 二是获取数据包存放在哪个地址</span></span><br><span class="line">  <span class="comment">// 数据包的buffer cache的地址存储在descriptor的字段中</span></span><br><span class="line">  <span class="comment">// 必须读取多个descriptor以确定跨越多个接收缓冲区的数据包的完整长度。</span></span><br><span class="line">  <span class="comment">// 那么我们要读取的这些descriptor存放在哪呢？</span></span><br><span class="line">  <span class="comment">// 看文档，似乎差不多意思是这些descriptor被以环形队列的形式组织在一起，也许正是</span></span><br><span class="line">  <span class="comment">// 本文件内的rx_ring这个数组。</span></span><br><span class="line">  <span class="comment">// 当有descriptor到达e1000，e1000就会把它从host memory中取出来，存入到descriptor ring</span></span><br><span class="line">  <span class="comment">// 也即我们rx_ring数组</span></span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">  <span class="comment">// 所以我们要做的，就是遍历rx_ring数组，如果rx_ring数组中的元素是used的，那么表明它就是数据包的一部分</span></span><br><span class="line">  <span class="comment">// 也即它地址所指向的buf里存放的是数据包的一部分数据</span></span><br><span class="line">  <span class="comment">// </span></span><br><span class="line">  <span class="comment">// 那么我们怎么知道这个rx_ring的元素有没有used，以及它是第几个呢?</span></span><br><span class="line">  <span class="comment">// 检查descriptor有没有used：status字段不为全0则为used</span></span><br><span class="line">  <span class="comment">// 并且硬件要求，我们在发现这个descriptor的status不为0，并且用完这个descriptor之后，需要将</span></span><br><span class="line">  <span class="comment">// 其status字段置零，以供硬件使用</span></span><br><span class="line">  <span class="comment">// Status information indicates whether the descriptor has been used and whether the referenced </span></span><br><span class="line">  <span class="comment">// buffer is the last one for the packet.</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 三是获取数据包的数据</span></span><br><span class="line">  <span class="comment">// 我们需要获取decriptor的该字段，然后再从这个地址读取数据包数据</span></span><br><span class="line">  <span class="comment">// 网卡和内存统一编址，这个数据实际上就是网卡的buffer</span></span><br><span class="line">  <span class="comment">// 我们应该直接通过read这个系统调用就可以对其进行读写了</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// check数据包</span></span><br><span class="line">  <span class="comment">// 检查RDESC.ERRORS位，如果包发生了错误，再检查，如果发现RCTL.SBP、RCTL.UPE/MPE都被标记，</span></span><br><span class="line">  <span class="comment">// 就接收这个包，否则直接丢弃</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到，跟正确思路虽然很多细节理解上有点问题，但是大体框架还是大差不差。然后再阅读指导书：</p>
+<blockquote>
+<p>When the E1000 receives each packet from the ethernet, <strong>it first DMAs the packet to the mbuf pointed to by the next RX (receive) ring descriptor, and then generates an interrupt</strong>. 【这句话可得知，<code>descriptor</code>们存放在代码中的<code>rx_ring</code>中。】</p>
+<p>Your <code>e1000_recv()</code> code must <strong>scan</strong> the RX ring and <strong>deliver each</strong> new packet’s mbuf to the network stack (in <code>net.c</code>) by calling <code>net_rx()</code>. You will then need to <strong>allocate</strong> a new mbuf and place it into the descriptor, so that when the E1000 reaches that point in the RX ring again it finds a fresh buffer into which to DMA a new packet.</p>
+</blockquote>
+<p>就差不多是正确思路了。<code>transmit</code>的实现也是同理</p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><blockquote>
+<p>以下代码不知道为什么过不了test，我跟别人的逻辑一模一样也还是不行emmm</p>
+<p>它的问题是，不会接收到外界的返ping，导致进程一直等待网卡IO，所以kerneltrap一直触发不了，无法正常网卡读写，从而导致<code>fileread</code>会一直处于sleep等待状态，整个系统就沉睡了【】我感觉应该是<code>transmit</code>没发成功。</p>
+<p>等以后有精力再来看看吧。</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">e1000_transmit</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;e1000_lock);</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tx_desc</span> <span class="title">tx</span> =</span> tx_ring[regs[E1000_TDT]];</span><br><span class="line">  <span class="keyword">if</span>((tx.status &amp; <span class="number">1</span>) == <span class="number">0</span>)&#123;</span><br><span class="line">    release(&amp;e1000_lock);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span>(tx_mbufs[regs[E1000_TDT]] != <span class="number">0</span>)    mbuffree(tx_mbufs[regs[E1000_TDT]]);</span><br><span class="line">  tx.addr = (uint64) m-&gt;head;</span><br><span class="line">  tx.length = m-&gt;len;</span><br><span class="line">  tx.status |= <span class="number">1</span>;<span class="comment">// EOP</span></span><br><span class="line">  tx.cmd |= <span class="number">1</span>;<span class="comment">//EOP</span></span><br><span class="line">  tx.cmd |= <span class="number">8</span>;<span class="comment">//RS</span></span><br><span class="line">  tx_mbufs[regs[E1000_TDT]] = m;</span><br><span class="line">  regs[E1000_TDT] = (regs[E1000_TDT]+<span class="number">1</span>)%TX_RING_SIZE;</span><br><span class="line">  <span class="comment">// printf(&quot;send successful!\n&quot;);</span></span><br><span class="line">  release(&amp;e1000_lock);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">e1000_recv</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;go into e1000_recv\n&quot;</span>);</span><br><span class="line">  acquire(&amp;e1000_lock);</span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">  <span class="comment">//while(regs[E1000_RDT]!=regs[E1000_RDH])&#123;</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;go into while\n&quot;</span>);</span><br><span class="line">    regs[E1000_RDT] = (regs[E1000_RDT] + <span class="number">1</span>)%RX_RING_SIZE;</span><br><span class="line">    <span class="type">int</span> i=regs[E1000_RDT];</span><br><span class="line">    <span class="keyword">if</span>(rx_ring[i].status != <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="comment">// 包含所需数据包</span></span><br><span class="line">      <span class="comment">// 检查是否发生了错误</span></span><br><span class="line">      <span class="comment">//if((rx_ring[i].status &amp; 1) !=0 &amp;&amp; (rx_ring[i].status &amp; 2) != 0)&#123;</span></span><br><span class="line">  <span class="comment">//      // error字段有效</span></span><br><span class="line">  <span class="comment">//    if(rx_ring[i].errors != 0)&#123;</span></span><br><span class="line">          <span class="comment">// 发生错误，直接丢弃</span></span><br><span class="line">  <span class="comment">//      goto end;</span></span><br><span class="line">  <span class="comment">//    &#125;</span></span><br><span class="line">      <span class="keyword">if</span>((rx_ring[i].status &amp; <span class="number">1</span>) == <span class="number">0</span>)&#123;</span><br><span class="line">      release(&amp;e1000_lock);</span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 将地址对应数据包发送</span></span><br><span class="line">      <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span>* <span class="title">m</span> =</span> rx_mbufs[i];</span><br><span class="line">      m-&gt;len = rx_ring[i].length;</span><br><span class="line">      net_rx(m);</span><br><span class="line">    rx_ring[i].status = <span class="number">0</span>;</span><br><span class="line">      <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span>* <span class="title">mbuf</span> =</span> mbufalloc(MBUF_DEFAULT_HEADROOM);</span><br><span class="line">      rx_ring[i].addr = (uint64) mbuf-&gt;head;</span><br><span class="line">      rx_mbufs[i] = mbuf;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  release(&amp;e1000_lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6$chap6/" rel="prev" title="xv6$chap1">
+      <i class="fa fa-chevron-left"></i> xv6$chap1
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6$chap4/" rel="next" title="xv6$chap1">
+      xv6$chap1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Interrupts-and-device-drivers"><span class="nav-number">1.</span> <span class="nav-text">Interrupts and device drivers</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-Console-input"><span class="nav-number">1.1.</span> <span class="nav-text">Code: Console input</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8A%E5%B1%82%E9%80%BB%E8%BE%91"><span class="nav-number">1.1.1.</span> <span class="nav-text">上层逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%95%E5%B1%82%E9%80%BB%E8%BE%91"><span class="nav-number">1.1.2.</span> <span class="nav-text">底层逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UART"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">UART</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kerneltrap"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">kerneltrap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#devintr"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">devintr</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#uartintr"><span class="nav-number">1.1.2.4.</span> <span class="nav-text">uartintr</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#consoleintr"><span class="nav-number">1.1.2.5.</span> <span class="nav-text">consoleintr</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-Console-output"><span class="nav-number">1.2.</span> <span class="nav-text">Code: Console output</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#uartputc"><span class="nav-number">1.2.1.</span> <span class="nav-text">uartputc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#uartstart"><span class="nav-number">1.2.2.</span> <span class="nav-text">uartstart</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#transmit-complete-interrupt"><span class="nav-number">1.2.3.</span> <span class="nav-text">transmit complete interrupt</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Concurrency-in-drivers"><span class="nav-number">1.3.</span> <span class="nav-text">Concurrency in drivers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Timer-interrupts"><span class="nav-number">1.4.</span> <span class="nav-text">Timer interrupts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Real-world"><span class="nav-number">1.5.</span> <span class="nav-text">Real world</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-networking"><span class="nav-number">1.6.</span> <span class="nav-text">Lab: networking</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%9F%E6%83%B3"><span class="nav-number">1.6.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF"><span class="nav-number">1.6.2.</span> <span class="nav-text">思路</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A3%E7%A1%AE%E6%80%9D%E8%B7%AF"><span class="nav-number">1.6.2.1.</span> <span class="nav-text">正确思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%AA%E4%BA%BA%E7%9A%84%E6%8E%A8%E7%90%86%E8%BF%87%E7%A8%8B"><span class="nav-number">1.6.2.2.</span> <span class="nav-text">个人的推理过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.6.3.</span> <span class="nav-text">代码</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Operating system oganization Before you start coding, read Chapter 2 of the xv6 book, and Sections 4.3 and 4.4 of Chapter 4, and related source files:  The user-space code for systems calls is in user">
+<meta property="og:type" content="article">
+<meta property="og:title" content="xv6$chap1">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap2/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="Operating system oganization Before you start coding, read Chapter 2 of the xv6 book, and Sections 4.3 and 4.4 of Chapter 4, and related source files:  The user-space code for systems calls is in user">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230107232802540.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230107233741922.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230121162324747.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230108011824655.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230108012316631.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230108013156116.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230108013849664.png">
+<meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
+<meta property="article:modified_time" content="2023-02-26T06:03:03.322Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230107232802540.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6$chap2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>xv6$chap1 | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          xv6$chap1
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-02-26 14:03:03" itemprop="dateModified" datetime="2023-02-26T14:03:03+08:00">2023-02-26</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Operating-system-oganization"><a href="#Operating-system-oganization" class="headerlink" title="Operating system oganization"></a>Operating system oganization</h1><blockquote>
+<p>Before you start coding, read Chapter 2 of the <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/xv6/book-riscv-rev1.pdf">xv6 book</a>, and Sections 4.3 and 4.4 of Chapter 4, and related source files:</p>
+<ul>
+<li>The user-space code for systems calls is in <code>user/user.h</code> and <code>user/usys.pl</code>.</li>
+<li>The kernel-space code is <code>kernel/syscall.h</code>, kernel/syscall.c.</li>
+<li>The process-related code is <code>kernel/proc.h</code> and <code>kernel/proc.c</code>.</li>
+</ul>
+</blockquote>
+<p>这章主要是讲了操作系统为了兼顾并发性、隔离性、交互性做出的基本架构。</p>
+<h2 id="Kernel-organization"><a href="#Kernel-organization" class="headerlink" title="Kernel organization"></a>Kernel organization</h2><h3 id="宏内核与微内核"><a href="#宏内核与微内核" class="headerlink" title="宏内核与微内核"></a>宏内核与微内核</h3><p>操作系统一个很重要的设计问题就是，哪部分的代码需要run在内核态，哪部分的需要run在用户态。</p>
+<p>如果将操作系统所有系统调用统统都在内核态run，这种设计方式就叫宏内核<em>monolithic kernel</em>。</p>
+<p>如果仅将系统调用中必要的部分在内核态run，其他部分都在用户态run，并且采取Client/Server这样的异步通信方式，这种设计方式就叫微内核<em>microkernel</em>。</p>
+<p><img src="/2023/01/10/xv6/image-20230107232802540.png" alt="image-20230107232802540"></p>
+<blockquote>
+<p>由于客户/服务器（Client/Server）模式，具有非常多的优点，故在单机<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%BE%AE%E5%86%85%E6%A0%B8">微内核</a>操作系统中几乎无一例外地都采用客户/服务器模式，将操作系统中最基本的部分放入内核中，而把操作系统的绝大部分功能都放在微内核外面的一组服务器(<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E8%BF%9B%E7%A8%8B">进程</a>)中实现。</p>
+</blockquote>
+<p>在微内核中，内核接口由一些用于启动应用程序、发送消息、访问设备硬件等的低级功能组成。这种组织允许内核相对简单，因为大多数操作系统驻留在用户级服务器中。</p>
+<p>像大多数Unix操作系统一样，Xv6是作为一个宏内核实现的。因此，xv6内核接口对应于操作系统接口，内核实现了完整的操作系统。</p>
+<h3 id="Code-xv6-organization"><a href="#Code-xv6-organization" class="headerlink" title="Code: xv6 organization"></a>Code: xv6 organization</h3><p>XV6的源代码位于<code>kernel</code>子目录中，源代码按照模块化的概念划分为多个文件，图2.2列出了这些文件，模块间的接口都被定义在了<code>def.h</code>（<code>kernel/defs.h</code>）。</p>
+<table>
+<thead>
+<tr>
+<th><strong>文件</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>bio.c</strong></td>
+<td>文件系统的磁盘块缓存</td>
+</tr>
+<tr>
+<td><strong>console.c</strong></td>
+<td>连接到用户的键盘和屏幕</td>
+</tr>
+<tr>
+<td><strong>entry.S</strong></td>
+<td>首次启动指令</td>
+</tr>
+<tr>
+<td><strong>exec.c</strong></td>
+<td><code>exec()</code>系统调用</td>
+</tr>
+<tr>
+<td><strong>file.c</strong></td>
+<td>文件描述符支持</td>
+</tr>
+<tr>
+<td><strong>fs.c</strong></td>
+<td>文件系统</td>
+</tr>
+<tr>
+<td><strong>kalloc.c</strong></td>
+<td>物理页面分配器</td>
+</tr>
+<tr>
+<td><strong>kernelvec.S</strong></td>
+<td>处理来自内核的陷入指令以及计时器中断</td>
+</tr>
+<tr>
+<td><strong>log.c</strong></td>
+<td>文件系统日志记录以及崩溃修复</td>
+</tr>
+<tr>
+<td><strong>main.c</strong></td>
+<td>在启动过程中控制其他模块初始化</td>
+</tr>
+<tr>
+<td><strong>pipe.c</strong></td>
+<td>管道</td>
+</tr>
+<tr>
+<td><strong>plic.c</strong></td>
+<td>RISC-V中断控制器</td>
+</tr>
+<tr>
+<td><strong>printf.c</strong></td>
+<td>格式化输出到控制台</td>
+</tr>
+<tr>
+<td><strong>proc.c</strong></td>
+<td>进程和调度</td>
+</tr>
+<tr>
+<td><strong>sleeplock.c</strong></td>
+<td>Locks that yield the CPU</td>
+</tr>
+<tr>
+<td><strong>spinlock.c</strong></td>
+<td>Locks that don’t yield the CPU.</td>
+</tr>
+<tr>
+<td><strong>start.c</strong></td>
+<td>早期机器模式启动代码</td>
+</tr>
+<tr>
+<td><strong>string.c</strong></td>
+<td>字符串和字节数组库</td>
+</tr>
+<tr>
+<td><strong>swtch.c</strong></td>
+<td>线程切换</td>
+</tr>
+<tr>
+<td><strong>syscall.c</strong></td>
+<td>Dispatch system calls to handling function.</td>
+</tr>
+<tr>
+<td><strong>sysfile.c</strong></td>
+<td>文件相关的系统调用</td>
+</tr>
+<tr>
+<td><strong>sysproc.c</strong></td>
+<td>进程相关的系统调用</td>
+</tr>
+<tr>
+<td><strong>trampoline.S</strong></td>
+<td>用于在用户和内核之间切换的汇编代码</td>
+</tr>
+<tr>
+<td><strong>trap.c</strong></td>
+<td>对陷入指令和中断进行处理并返回的C代码</td>
+</tr>
+<tr>
+<td><strong>uart.c</strong></td>
+<td>串口控制台设备驱动程序</td>
+</tr>
+<tr>
+<td><strong>virtio_disk.c</strong></td>
+<td>磁盘设备驱动程序</td>
+</tr>
+<tr>
+<td><strong>vm.c</strong></td>
+<td>管理页表和地址空间</td>
+</tr>
+</tbody></table>
+<p> <strong>图2.2：XV6内核源文件</strong></p>
+<h2 id="Process-overview"><a href="#Process-overview" class="headerlink" title="Process overview"></a>Process overview</h2><p>内核用来实现进程的机制包括用户态内核态标志、地址空间和进程的时间切片。</p>
+<p>为了帮助加强隔离，进程抽象给程序提供了一种错觉，即它有自己的专用机器。进程为程序提供了一个看起来像是私有内存系统或地址空间的东西，其他进程不能读取或写入。进程还为程序提供了看起来像是自己的CPU来执行程序的指令。</p>
+<p>Xv6使用页表（由硬件实现）为每个进程提供自己的地址空间。RISC-V页表将虚拟地址（RISC-V指令操纵的地址）转换（或“映射”）为物理地址（CPU芯片发送到主存储器的地址）。</p>
+<p>每个进程也有自己的页表，页表中记录了以虚拟地址0开始的内存区域。</p>
+<p><img src="/2023/01/10/xv6/image-20230107233741922.png" alt="image-20230107233741922"></p>
+<p>xv6内核为每个进程维护许多状态片段，并将它们聚集到一个<code>proc</code>(*<strong>kernel/proc.h*</strong>:86)结构体中。一个进程最重要的内核状态片段是它的页表、内核栈区和运行状态。我们将使用符号<code>p-&gt;xxx</code>来引用<code>proc</code>结构体的元素；例如，<code>p-&gt;pagetable</code>是一个指向该进程页表的指针。</p>
+<blockquote>
+<p>这应该相当于pcb表。</p>
+</blockquote>
+<h2 id="Code-starting-xv6-and-the-fifirst-process"><a href="#Code-starting-xv6-and-the-fifirst-process" class="headerlink" title="Code: starting xv6 and the fifirst process"></a>Code: starting xv6 and the fifirst process</h2><p>看完一遍说实话还乱乱的。。。。我整理整理跟linux的对比学习一下吧。</p>
+<h3 id="xv6"><a href="#xv6" class="headerlink" title="xv6"></a>xv6</h3><h4 id="加载操作系统"><a href="#加载操作系统" class="headerlink" title="加载操作系统"></a>加载操作系统</h4><p>系统加电，启动BIOS初始化硬件 -&gt; BIOS从<u>引导扇区</u>将加载程序读入内存 -&gt; 加载程序将操作系统镜像读入内存RAM。</p>
+<blockquote>
+<p>这个过程由qemu模拟。</p>
+<p>首先会通过<code>mkfs</code>造出操作系统镜像。然后由qemu将引导扇区，也即下面的filesys这图里的第0块：</p>
+<p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747"></p>
+<p>读入到主存中，然后开始执行引导扇区的程序，下同。</p>
+</blockquote>
+<p><code>boot loader</code>目的是把xv6加载进内存到<code>0x8000 0000</code>，然后跳转到xv6初始化程序。</p>
+<blockquote>
+<p>The reason it places the kernel at <code>0x80000000</code> rather than <code>0x0</code> is because the address range <code>0x0:0x80000000</code> contains <strong>I/O devices</strong>.</p>
+</blockquote>
+<h4 id="操作系统初始化"><a href="#操作系统初始化" class="headerlink" title="操作系统初始化"></a>操作系统初始化</h4><h5 id="entry-S配置栈空间"><a href="#entry-S配置栈空间" class="headerlink" title="entry.S配置栈空间"></a>entry.S配置栈空间</h5><p>此时，目前的机器状态是，1.没有开启地址映射，也即虚拟地址=真实物理地址。2.运行在machine mode</p>
+<p>xv6会在<code>kernel/entry.S</code>下的这里开始执行，目的是<strong>配置好栈</strong>，以开始C语言代码<code>start.c</code>的执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">.global _entry</span><br><span class="line">_entry:</span><br><span class="line">        # set up a stack for C.</span><br><span class="line">        # 这段主要是在计算栈顶指针sp</span><br><span class="line">        # stack0 is declared in start.c,</span><br><span class="line">        # with a 4096-byte stack per CPU.</span><br><span class="line">        # sp = stack0 + (hartid * 4096)</span><br><span class="line">        la sp, stack0</span><br><span class="line">        li a0, 1024*4</span><br><span class="line">        csrr a1, mhartid</span><br><span class="line">        addi a1, a1, 1</span><br><span class="line">        mul a0, a0, a1</span><br><span class="line">        add sp, sp, a0</span><br><span class="line">        # 已经有栈了，就可以开始执行C语言代码了</span><br><span class="line">        # jump to start()</span><br><span class="line">        call start</span><br></pre></td></tr></table></figure>
+
+<p>其中start0：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__attribute__ ((aligned (<span class="number">16</span>))) <span class="type">char</span> stack0[<span class="number">4096</span> * NCPU];</span><br></pre></td></tr></table></figure>
+
+<h5 id="start-c"><a href="#start-c" class="headerlink" title="start.c"></a>start.c</h5><p>在start.c中，我们的任务是在machine mode下，获取machine mode才能访问到的硬件参数，做在machine mode 下才能做的时钟初始化【 it programs the clock chip to generate timer interrupts】，然后进行machine mode到内核态的切换，最后跳转到main.c进行操作系统的初始化和第一个进程的启动。</p>
+<p>而其中，如果想从machine mode切换到内核态，就需要使用<code>mret</code>指令。但是mret指令除了会切换mode之外，还有一个“ret”的作用，并且是从machine mode ret到内核态。</p>
+<blockquote>
+<p>This instruction( mret ) is most often used to return from a previous call from supervisor mode to machine mode.</p>
+</blockquote>
+<p>所以，我们实际上可以把最后两步连起来，用mret一个指令就完成。也即，mret指令既完成了从machine mode到内核态的切换，又完成了从start.c到main.c的跳转。</p>
+<p>这其实很容易，只需在栈中将调用者（此时应该是entry.S）的地址替换为main.c的地址，并且将调用者的mode改为内核态，这样就ok了。</p>
+<blockquote>
+<p> it sets the <strong>previous privilege mode</strong> to supervisor in the register mstatus, it sets the <strong>return address</strong> to main by writing main’s address into the register mepc, <strong>disables virtual address translation in supervisor mode</strong> by writing 0 into the page-table register satp, and <strong>delegates all interrupts and exceptions to supervisor mode</strong></p>
+<p> 后面两点不大明白。为什么为了mret，就还得让内核态跟machine mode一样关闭虚拟地址映射，还得把什么中断和异常委托给内核态【这个委托是完全没搞懂是什么意思】？？</p>
+</blockquote>
+<p>代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// entry.S jumps here in machine mode on stack0.</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">start</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">//修改调用者为内核态</span></span><br><span class="line">  <span class="comment">// set M Previous Privilege mode to Supervisor, for mret.</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">long</span> x = r_mstatus();</span><br><span class="line">  x &amp;= ~MSTATUS_MPP_MASK;</span><br><span class="line">  x |= MSTATUS_MPP_S;</span><br><span class="line">  w_mstatus(x);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// set M Exception Program Counter to main, for mret.</span></span><br><span class="line">  <span class="comment">// requires gcc -mcmodel=medany</span></span><br><span class="line">  w_mepc((uint64)main);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// disable paging for now.</span></span><br><span class="line">  w_satp(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// delegate all interrupts and exceptions to supervisor mode.</span></span><br><span class="line">  w_medeleg(<span class="number">0xffff</span>);</span><br><span class="line">  w_mideleg(<span class="number">0xffff</span>);</span><br><span class="line">  w_sie(r_sie() | SIE_SEIE | SIE_STIE | SIE_SSIE);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// configure Physical Memory Protection to give supervisor mode</span></span><br><span class="line">  <span class="comment">// access to all of physical memory.</span></span><br><span class="line">  w_pmpaddr0(<span class="number">0x3fffffffffffff</span>ull);</span><br><span class="line">  w_pmpcfg0(<span class="number">0xf</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// ask for clock interrupts.</span></span><br><span class="line">  timerinit();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// keep each CPU&#x27;s hartid in its tp register, for cpuid().</span></span><br><span class="line">  <span class="type">int</span> id = r_mhartid();</span><br><span class="line">  w_tp(id);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// switch to supervisor mode and jump to main().</span></span><br><span class="line">  <span class="keyword">asm</span> <span class="title function_">volatile</span><span class="params">(<span class="string">&quot;mret&quot;</span>)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="main-c"><a href="#main-c" class="headerlink" title="main.c"></a>main.c</h5><p>main.c的作用是做很多很多init。其中，它通过<code>userinit();</code>来创建第一个进程，这个第一个进程再由main调用<code>scheduler()</code>来被调度执行。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(cpuid() == <span class="number">0</span>)&#123;</span><br><span class="line">    consoleinit();</span><br><span class="line">    printfinit();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;xv6 kernel is booting\n&quot;</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">	<span class="comment">//...很多很多init</span></span><br><span class="line">    userinit();      <span class="comment">// first user process</span></span><br><span class="line">    __sync_synchronize();</span><br><span class="line">    started = <span class="number">1</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">while</span>(started == <span class="number">0</span>)</span><br><span class="line">      ;</span><br><span class="line">    __sync_synchronize();</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    RISC-V的处理器对底层提供了一种特殊的抽象,Hardware Thread,简称为Hart。简单来说,Hart是真实物理CPU(bare metal)提供的一种模拟</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;hart %d starting\n&quot;</span>, cpuid());</span><br><span class="line">    kvminithart();    <span class="comment">// turn on paging</span></span><br><span class="line">    trapinithart();   <span class="comment">// install kernel trap vector</span></span><br><span class="line">    plicinithart();   <span class="comment">// ask PLIC for device interrupts</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//调用第一个scheduler，完成对scheduler线程的初始化，并且调度去执行第一个进程</span></span><br><span class="line">  scheduler();        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：关于里面的cpuid，我查了一下，指的是CPU的序列号，用来唯一标识cpu的。我想这个if架构的目的应该跟<code>fork()==0</code>差不多。也就是说，一开始的那个init仅有<code>cpuid==0</code>的CPU执行，其他的CPU就乖乖wait，只有CPU0执行初始化的程序。等到CPU0执行完所有init，才置标记位start=1，然后通过锁<code>__sync_synchronize();</code>开始抢占调度，轮流初始化自己。</p>
+</blockquote>
+<h5 id="proc-c中的userinit"><a href="#proc-c中的userinit" class="headerlink" title="proc.c中的userinit()"></a>proc.c中的userinit()</h5><p>userinit的作用就是新创建一个进程信息proc，然后开始给第一个程序（initcode）填信息填入proc。这个进程创建完后，在main中的scheduler被调度执行。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">userinit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span>;</span></span><br><span class="line"></span><br><span class="line">  p = allocproc();</span><br><span class="line">  initproc = p;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 申请一页，将initcode的指令和数据放进去</span></span><br><span class="line">  <span class="comment">// allocate one user page and copy initcode&#x27;s instructions</span></span><br><span class="line">  <span class="comment">// and data into it.</span></span><br><span class="line">  uvmfirst(p-&gt;pagetable, initcode, <span class="keyword">sizeof</span>(initcode));</span><br><span class="line">  p-&gt;sz = PGSIZE;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//为内核态到用户态的转变做准备</span></span><br><span class="line">  <span class="comment">// prepare for the very first &quot;return&quot; from kernel to user.</span></span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment">  Trap Frame是指中断、自陷、异常进入内核后,在堆栈上形成的一种数据结构</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">  p-&gt;trapframe-&gt;epc = <span class="number">0</span>;      <span class="comment">// user program counter</span></span><br><span class="line">  p-&gt;trapframe-&gt;sp = PGSIZE;  <span class="comment">// user stack pointer</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 修改进程名</span></span><br><span class="line">  safestrcpy(p-&gt;name, <span class="string">&quot;initcode&quot;</span>, <span class="keyword">sizeof</span>(p-&gt;name));</span><br><span class="line">  p-&gt;cwd = namei(<span class="string">&quot;/&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//这个也许是为了能被优先调度</span></span><br><span class="line">  p-&gt;state = RUNNABLE;</span><br><span class="line"></span><br><span class="line">  release(&amp;p-&gt;lock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="initcode-S"><a href="#initcode-S" class="headerlink" title="initcode.S"></a>initcode.S</h5><p>以上程序都位于<code>kernel/</code>下。这个位于<code>user/</code>下。</p>
+<p>它调用exec系统调用进入了内核态。当exec完成后，它就跳转到了用户态<code>user/init.c</code>中。【这里估计又用了修改返回地址的trick】</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">.globl start</span><br><span class="line">start:</span><br><span class="line">        la a0, init</span><br><span class="line">        la a1, argv</span><br><span class="line">        li a7, SYS_exec</span><br><span class="line">        ecall</span><br><span class="line"># char init[] = &quot;/init\0&quot;;</span><br><span class="line">init:</span><br><span class="line">  .string &quot;/init\0&quot;</span><br><span class="line"></span><br><span class="line"># char *argv[] = &#123; init, 0 &#125;;</span><br><span class="line">.p2align 2</span><br><span class="line">argv:</span><br><span class="line">  .long init</span><br><span class="line">  .long 0</span><br></pre></td></tr></table></figure>
+
+<h5 id="init-c"><a href="#init-c" class="headerlink" title="init.c"></a>init.c</h5><p>在init.c中，创建了console设备文件，打开了012文件描述符，并且fork了一个子进程，开始执行shell。这样一来，操作系统就完成了全部的启动。</p>
+<h4 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h4><blockquote>
+<p>我的疑点有三个：</p>
+<ol>
+<li>见start.c</li>
+<li>是怎么完成从内核态到用户态的切换的？是执行了return就会自动切换吗？userinit中设置了initcode的信息为用户态的，然后就直接能进入用户态，这里感觉有点模糊。</li>
+<li>什么时候开启地址映射的？</li>
+</ol>
+<p>除了这些外，都是很清晰明了的，步骤十分直接且有理由：</p>
+<p>加载操作系统——为了能执行C语言需要一个栈，所以得执行造一个的代码，然后再进入C语言zone——做点machine mode才能做的事，然后从machine mode切换到内核态——做点内核态才能做的事，从内核态切换到用户态</p>
+</blockquote>
+<h3 id="linux0-11"><a href="#linux0-11" class="headerlink" title="linux0.11"></a>linux0.11</h3><p>bootsect -&gt; setup -&gt; head.s -&gt;main.c</p>
+<h4 id="加载操作系统-1"><a href="#加载操作系统-1" class="headerlink" title="加载操作系统"></a>加载操作系统</h4><p>系统加电，启动BIOS初始化硬件 -&gt; BIOS从<u>引导扇区</u>将加载程序读入内存 -&gt; 加载程序将操作系统镜像读入内存RAM。</p>
+<p>其中，第二三步做进一步的细化。</p>
+<h5 id="读入bootsect-s"><a href="#读入bootsect-s" class="headerlink" title="读入bootsect.s"></a>读入bootsect.s</h5><p>加载程序的512个字节被读入到内存从<code>0x7c00</code>开始的一段内存中，并且BIOS设置<code>CS=07c0,ip=0</code>，开始执行加载程序的每一条指令。</p>
+<h5 id="bootsect-s"><a href="#bootsect-s" class="headerlink" title="bootsect.s"></a>bootsect.s</h5><p>加载程序的代码为<code>bootsect.s</code>。在<code>bootsect.s</code>中，首先将自身从<code>7c00</code>处移动到了<code>9000</code>处【留下空间放操作系统】，然后分别依次读取磁盘的<u>setup</u>和<u>system</u>模块，最后bootsect将控制权转交给setup。</p>
+<h5 id="setup-s"><a href="#setup-s" class="headerlink" title="setup.s"></a>setup.s</h5><p>setup首先获取操作系统运行的<strong>必要硬件参数</strong>。</p>
+<p><img src="/2023/01/10/xv6/image-20230108011824655.png" alt="image-20230108011824655"></p>
+<p>再然后，<u>将system代码移到0地址</u>。然后，我们就需要进入system代码块。</p>
+<p><img src="/2023/01/10/xv6/image-20230108012316631.png" alt="image-20230108012316631"></p>
+<p>最后一句jmpi指令本来应该是要跳到system代码段首0地址处的的，可此处却跳到了80处，这显然不合理。但它写的肯定是没错的。之所以会有这样的矛盾，是因为setup在此之前，还做了一件事情：<strong>改变寻址方式</strong>。jmpi上面的那条mov指令便做了这点。</p>
+<p>我们之前的寻址方式一直是<code>cs&lt;&lt;4+ip</code>。但是这东西只能是16位的内存，<u>无法满足寻址需求</u>。故而setup要从16位切换到32位。32位模式也叫保护模式。</p>
+<blockquote>
+<p>至于怎么切的呢？要注意到一点，改变寻址方式也即改变cs和ip的地址计算方法，也即换一条硬件电路实现。计算机给我们提供了一个简单的方式操纵保护模式的转变，即修改cr0寄存器的内容。</p>
+</blockquote>
+<p>在保护模式下，寻址方式发生了改变。此时cs不再代表基址，而是表示地址在gdb表<code>global description table</code>中的偏移下标。真正的基址放在表项中。cs被称为selector，从表中取得基址，再和ip加在一起得到地址。</p>
+<blockquote>
+<p>gdt表的内容由setup初始化</p>
+<p><img src="/2023/01/10/xv6/image-20230108013156116.png" alt="image-20230108013156116"></p>
+</blockquote>
+<p>这样一来，就正确跳到了system模块。</p>
+<h4 id="操作系统初始化-1"><a href="#操作系统初始化-1" class="headerlink" title="操作系统初始化"></a>操作系统初始化</h4><h5 id="head-s"><a href="#head-s" class="headerlink" title="head.s"></a>head.s</h5><p>跳到system第一个文件，也就是head.s去执行。</p>
+<p>head.s也是在保护模式下进行的，是在保护模式下的初始化。</p>
+<p>head.s建立了真正的gdt表，然后就要跳转到main.c执行初始化和Shell的启动。此处有汇编语言和C语言的转化，也就是push参数然后push main的地址。</p>
+<h5 id="main-c-1"><a href="#main-c-1" class="headerlink" title="main.c"></a>main.c</h5><p>对各种东西的初始化。</p>
+<p><img src="/2023/01/10/xv6/image-20230108013849664.png" alt="image-20230108013849664"></p>
+<p>最后完成从内核态到用户态的切换。</p>
+<h4 id="感想-1"><a href="#感想-1" class="headerlink" title="感想"></a>感想</h4><blockquote>
+<p>linux0.11的启动的具体思路是：</p>
+<p>加载操作系统，获取硬件参数，进入保护模式，跳转到操作系统第一行代码——操作系统初始化，切换到用户态</p>
+<p>linux0.11相比于xv6更加复杂，上课的时候隐藏了很多实现细节但依旧理解很费劲（。</p>
+<p>这两个步骤思路其实都是差不多的，区别在于linux0.11好像没有machine mode这个概念。感觉也不能锐评什么，因为看完了感觉两个都很有道理，两个都一样很难懂（。</p>
+<p>不过linux0.11这里进入保护模式后改变寻址方式是因为机器问题（好像是），xv6难道也是因为硬件问题吗？因为一开始的时候操作系统还未进行内存分页页表初始化，所以用不了地址映射？有待学习。</p>
+<p>关于保护模式，可以看看这篇文章，今天太晚了先睡了：</p>
+<p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_15082498/5527746"><strong>Linux从头学08：Linux 是如何保护内核代码的？【从实模式到保护模式】</strong></a></p>
+</blockquote>
+<h2 id="Real-world"><a href="#Real-world" class="headerlink" title="Real world"></a>Real world</h2><p>现实中，大多数操作系统都会兼顾宏内核与微内核。</p>
+<p>大多数操作系统都支持与xv6类似的process进程概念，也有很多系统还支持线程概念。</p>
+<h2 id="Lab-system-calls"><a href="#Lab-system-calls" class="headerlink" title="Lab system calls"></a>Lab system calls</h2><blockquote>
+<p>To start the lab, switch to the syscall branch:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git fetch</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git checkout syscall</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make clean</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<h3 id="trace"><a href="#trace" class="headerlink" title="trace"></a>trace</h3><blockquote>
+<p>In this assignment you will add a system call tracing feature that may help you when debugging later labs.</p>
+<p>You’ll create a new <code>trace</code> system call that will control tracing. It should take <strong>one argument,</strong> an integer “mask”, whose bits specify which system calls to trace. </p>
+<p>For example, to trace the fork system call, a program calls <code>trace(1 &lt;&lt; SYS_fork)</code>. You have to modify the xv6 kernel to <strong>print out a line when each system call is about to return</strong>. The line should contain the <strong>process id</strong>, the <strong>name</strong> of the system call and the <strong>return value</strong>; you don’t need to print the system call arguments. </p>
+<p>The <code>trace</code> system call should enable tracing for the process that calls it and any children that it subsequently forks, but should not affect other processes.</p>
+</blockquote>
+<h4 id="感想-2"><a href="#感想-2" class="headerlink" title="感想"></a>感想</h4><p>一开始为了把trace做得封装性良好一些尽量不改别的代码，想了好久好久，最后就只能想出，在syscall.c获取系统调用返回值处加个条件打印，在trace中维护一个map，映射进程pid和进程当前的mask，并且给外界提供查询当前进程是否对某个系统调用有mask作为syscall条件打印的接口。</p>
+<p>这个最后还是失败了，失败的点在于不知道要创建多大的数组来作为map映射所有进程，因为pid分配估计是递增的，是会超过最大进程数的，所以pid会是多少是不确定的。还有一点就是fork之后子进程不能自动继承父进程的mask，还得手动调用一下trace，这更加不封装了（。</p>
+<p>总之先放上我原来的代码吧。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/syscall.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;param.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;memlayout.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;riscv.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;spinlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;proc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;syscall.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;defs.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//...</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">strcpy</span><span class="params">(<span class="type">char</span>* buf,<span class="type">const</span> <span class="type">char</span>* tmp)</span>&#123;</span><br><span class="line"> <span class="type">int</span> i=<span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span>((*tmp)!=<span class="string">&#x27;\0&#x27;</span>)&#123;</span><br><span class="line">    buf[i++] = *tmp;</span><br><span class="line">    tmp++;</span><br><span class="line">  &#125;  </span><br><span class="line">  buf[i] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">getname</span><span class="params">(<span class="type">int</span> callid,<span class="type">char</span>* buf)</span>&#123;</span><br><span class="line">  <span class="keyword">switch</span>(callid)&#123;</span><br><span class="line">    <span class="keyword">case</span> SYS_fork: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;fork&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_exit: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;exit&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_wait: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;wait&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_pipe: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;pipe&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_read: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;read&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_kill: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;kill&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_exec: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;exec&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_fstat: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;fstat&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_chdir: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;chdir&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_dup: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;dup&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_getpid: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;getpid&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_sbrk: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;sbrk&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_sleep: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;sleep&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_uptime: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;uptime&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_open: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;open&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_write: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;write&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_mknod: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;mknod&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_unlink: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;unlink&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_link: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;link&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_mkdir: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;mkdir&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_close: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;close&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_trace: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;trace&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>: <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">syscall</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> num;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line"></span><br><span class="line">  num = p-&gt;trapframe-&gt;a7;</span><br><span class="line">  <span class="keyword">if</span>(num &gt; <span class="number">0</span> &amp;&amp; num &lt; NELEM(syscalls) &amp;&amp; syscalls[num]) &#123;</span><br><span class="line">    p-&gt;trapframe-&gt;a0 = syscalls[num]();</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">32</span>];</span><br><span class="line">    getname(num,buf);</span><br><span class="line">    <span class="comment">// 在此处添加条件打印</span></span><br><span class="line">    <span class="keyword">if</span>(istraced(num))</span><br><span class="line">    	<span class="built_in">printf</span>(<span class="string">&quot;syscall %s -&gt; %d\n&quot;</span>,buf,p-&gt;trapframe-&gt;a0);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d %s: unknown sys call %d\n&quot;</span>,</span><br><span class="line">            p-&gt;pid, p-&gt;name, num);</span><br><span class="line">    p-&gt;trapframe-&gt;a0 = <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/trace.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;param.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;memlayout.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;riscv.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;spinlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;proc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;defs.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;elf.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> m_mask[NPROC];</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">trace</span><span class="params">(<span class="type">int</span> mask)</span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">    m_mask[p-&gt;pid] = mask;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//提供给外界查询的接口</span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">istraced</span><span class="params">(<span class="type">int</span> callid)</span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">    <span class="comment">//printf(&quot;from trace ,pid = %d\n&quot;,p-&gt;pid);</span></span><br><span class="line">    <span class="keyword">if</span>(((m_mask[p-&gt;pid] &gt;&gt; callid) &amp; <span class="number">1</span>) == <span class="number">1</span>)&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">    	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是按照hints修改后的正确代码。</p>
+<h4 id="代码步骤"><a href="#代码步骤" class="headerlink" title="代码步骤"></a>代码步骤</h4><p>实际上，标答跟我的思路差不多，只不过它没有像我一样创建数组作为map，而是在proc结构体里添加了一个属性，这本质上也是利用了map。</p>
+<h5 id="在各种文件添加签名"><a href="#在各种文件添加签名" class="headerlink" title="在各种文件添加签名"></a>在各种文件添加签名</h5><h6 id="user-user-h"><a href="#user-user-h" class="headerlink" title="user/user.h"></a>user/user.h</h6><h6 id="user-usys-pl"><a href="#user-usys-pl" class="headerlink" title="user/usys.pl"></a>user/usys.pl</h6><h6 id="syscall-h"><a href="#syscall-h" class="headerlink" title="syscall.h"></a>syscall.h</h6><p>添加系统调用号</p>
+<h6 id="syscall-c"><a href="#syscall-c" class="headerlink" title="syscall.c"></a>syscall.c</h6><p>添加系统调用号和sys_trace映射</p>
+<h6 id="修改Makefile"><a href="#修改Makefile" class="headerlink" title="修改Makefile"></a>修改Makefile</h6><ol>
+<li>在第一个OBJS添加trace.o</li>
+<li>在UPROGS添加user中的trace</li>
+</ol>
+<h5 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h5><h6 id="修改proc-h"><a href="#修改proc-h" class="headerlink" title="修改proc.h"></a>修改proc.h</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Per-process state</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> &#123;</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="type">int</span> mask; <span class="comment">//记录trace的mask</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h6 id="编写trace-c"><a href="#编写trace-c" class="headerlink" title="编写trace.c"></a>编写trace.c</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;param.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;memlayout.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;riscv.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;spinlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;proc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;defs.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;elf.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">trace</span><span class="params">(<span class="type">int</span> mask)</span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">    p-&gt;mask = mask;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">istraced</span><span class="params">(<span class="type">int</span> callid)</span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">    <span class="keyword">if</span>(((p-&gt;mask &gt;&gt; callid) &amp; <span class="number">1</span>) == <span class="number">1</span>)&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">    	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="修改syscall-c"><a href="#修改syscall-c" class="headerlink" title="修改syscall.c"></a>修改syscall.c</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in kernel/syscall.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;param.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;memlayout.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;riscv.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;spinlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;proc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;syscall.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;defs.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//...</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">strcpy</span><span class="params">(<span class="type">char</span>* buf,<span class="type">const</span> <span class="type">char</span>* tmp)</span>&#123;</span><br><span class="line"> <span class="type">int</span> i=<span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span>((*tmp)!=<span class="string">&#x27;\0&#x27;</span>)&#123;</span><br><span class="line">    buf[i++] = *tmp;</span><br><span class="line">    tmp++;</span><br><span class="line">  &#125;  </span><br><span class="line">  buf[i] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">getname</span><span class="params">(<span class="type">int</span> callid,<span class="type">char</span>* buf)</span>&#123;</span><br><span class="line">  <span class="keyword">switch</span>(callid)&#123;</span><br><span class="line">    <span class="keyword">case</span> SYS_fork: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;fork&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_exit: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;exit&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_wait: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;wait&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_pipe: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;pipe&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_read: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;read&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_kill: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;kill&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_exec: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;exec&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_fstat: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;fstat&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_chdir: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;chdir&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_dup: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;dup&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_getpid: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;getpid&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_sbrk: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;sbrk&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_sleep: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;sleep&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_uptime: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;uptime&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_open: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;open&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_write: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;write&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_mknod: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;mknod&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_unlink: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;unlink&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_link: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;link&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_mkdir: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;mkdir&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_close: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;close&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SYS_trace: <span class="built_in">strcpy</span>(buf,<span class="string">&quot;trace&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>: <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">syscall</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> num;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line"></span><br><span class="line">  num = p-&gt;trapframe-&gt;a7;</span><br><span class="line">  <span class="keyword">if</span>(num &gt; <span class="number">0</span> &amp;&amp; num &lt; NELEM(syscalls) &amp;&amp; syscalls[num]) &#123;</span><br><span class="line">    p-&gt;trapframe-&gt;a0 = syscalls[num]();</span><br><span class="line">    <span class="type">char</span> buf[<span class="number">32</span>];</span><br><span class="line">    getname(num,buf);</span><br><span class="line">    <span class="comment">// 在此处添加条件打印</span></span><br><span class="line">    <span class="keyword">if</span>(istraced(num))</span><br><span class="line">    	<span class="built_in">printf</span>(<span class="string">&quot;syscall %s -&gt; %d\n&quot;</span>,buf,p-&gt;trapframe-&gt;a0);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d %s: unknown sys call %d\n&quot;</span>,</span><br><span class="line">            p-&gt;pid, p-&gt;name, num);</span><br><span class="line">    p-&gt;trapframe-&gt;a0 = <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="在sysproc-c中添加系统调用"><a href="#在sysproc-c中添加系统调用" class="headerlink" title="在sysproc.c中添加系统调用"></a>在sysproc.c中添加系统调用</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_trace</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> mask;</span><br><span class="line">  <span class="keyword">if</span>(argint(<span class="number">0</span>,&amp;mask)&lt;<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  trace(mask);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="在defs-h中添加需要public的函数签名"><a href="#在defs-h中添加需要public的函数签名" class="headerlink" title="在defs.h中添加需要public的函数签名"></a>在defs.h中添加需要public的函数签名</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// trace.c</span></span><br><span class="line"><span class="type">int</span>		<span class="title function_">trace</span><span class="params">(<span class="type">int</span>)</span>;</span><br><span class="line"><span class="type">int</span>		<span class="title function_">istraced</span><span class="params">(<span class="type">int</span>)</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="sysinfotest"><a href="#sysinfotest" class="headerlink" title="sysinfotest"></a>sysinfotest</h3><blockquote>
+<p>In this assignment you will add a system call, <code>sysinfo</code>, that collects information about the running system. </p>
+<p>The system call takes one argument: a pointer to a <code>struct sysinfo</code> (see <code>kernel/sysinfo.h</code>). </p>
+<p>The kernel should fill out the fields of this struct: the <code>freemem</code> field should be set to the number of bytes of free memory, and the <code>nproc</code> field should be set to the number of processes whose <code>state</code> is not <code>UNUSED</code>. </p>
+<p>We provide a test program <code>sysinfotest</code>; you pass this assignment if it prints “sysinfotest: OK”.</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/sysinfo.h</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sysinfo</span> &#123;</span></span><br><span class="line">  uint64 freemem;   <span class="comment">// amount of free memory (bytes)</span></span><br><span class="line">  uint64 nproc;     <span class="comment">// number of process</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="感想-3"><a href="#感想-3" class="headerlink" title="感想"></a>感想</h4><h4 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h4><p>系统调用要做的事情同上。</p>
+<p>有一个我在hit实验没想到，在这里<strong>依然没有想到</strong>的点是，参数的指针来自用户空间，所以不能直接对其指向的空间进行写入，需要借助copyout函数。</p>
+<p>还有一件事，就是不知道该怎么统计free mem的数量，后来在hints提示下才知道要去kalloc.c中找。【之前只找过了vm.c】这里其实是很后悔提前看了提示的。我应该先去看一下上面关于kernel各个文件用途的笔记，再去继续自己找的，不能太过依赖提示。</p>
+<p>还有一点做的不好的地方是，标答是选择了将两个计数函数放在各自的文件中，我是选择直接将成员变量在头文件中extern 公开出来，比如说在proc.h中这么写：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> <span class="title">proc</span>[<span class="title">NPROC</span>];</span></span><br></pre></td></tr></table></figure>
+
+<p>hints采取了比我封装性更好的操作，这也是非常顺理成章的，我没有想到这样真是有点惭愧（。</p>
+<p>总而言之，这个还是挺简单的，就是我很后悔我心浮气躁看了提示，要不然收获会更多。</p>
+<h5 id="sysinfo-c"><a href="#sysinfo-c" class="headerlink" title="sysinfo.c"></a>sysinfo.c</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;param.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;memlayout.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;riscv.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;spinlock.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;proc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;defs.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;elf.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sysinfo.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> </span><br><span class="line"><span class="title function_">sysinfo</span><span class="params">(<span class="keyword">struct</span> sysinfo* info)</span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sysinfo</span> <span class="title">res</span>;</span></span><br><span class="line">  res.nproc = countproc();</span><br><span class="line">  res.freemem = countfree();</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line">  <span class="keyword">if</span>(copyout(p-&gt;pagetable, (uint64)info,(<span class="type">char</span> *)(&amp;res), <span class="keyword">sizeof</span>(res)) != <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="sysproc-c中"><a href="#sysproc-c中" class="headerlink" title="sysproc.c中"></a>sysproc.c中</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_sysinfo</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">  uint64 addr;</span><br><span class="line">  <span class="keyword">if</span>(argaddr(<span class="number">0</span>, &amp;addr) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> sysinfo((<span class="keyword">struct</span> sysinfo*)addr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="kalloc-c中"><a href="#kalloc-c中" class="headerlink" title="kalloc.c中"></a>kalloc.c中</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 采用的是链表结构，run代表一页</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">run</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="comment">// 指向第一个空闲页</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span> *<span class="title">freelist</span>;</span></span><br><span class="line">&#125; kmem;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> </span><br><span class="line"><span class="title function_">countfree</span><span class="params">()</span>&#123;</span><br><span class="line">  <span class="type">int</span> npage = <span class="number">0</span>;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">run</span>* <span class="title">r</span> =</span> kmem.freelist;</span><br><span class="line">  <span class="keyword">while</span>(r)&#123;</span><br><span class="line">    r = r-&gt;next;</span><br><span class="line">    npage++;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> npage*PGSIZE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="proc-c中"><a href="#proc-c中" class="headerlink" title="proc.c中"></a>proc.c中</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> <span class="title">proc</span>[<span class="title">NPROC</span>];</span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">countproc</span><span class="params">()</span>&#123;</span><br><span class="line">  <span class="type">int</span> nproc = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;NPROC;i++)&#123;</span><br><span class="line">      <span class="keyword">if</span>(proc[i].state != UNUSED)&#123;</span><br><span class="line">	  nproc++;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> nproc;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="附加题"><a href="#附加题" class="headerlink" title="附加题"></a>附加题</h4><h5 id="trace-plus"><a href="#trace-plus" class="headerlink" title="trace plus"></a>trace plus</h5><blockquote>
+<p>Print the system call arguments for traced system calls.</p>
+</blockquote>
+<p>这个实现起来要说简单也简单，麻烦也麻烦。这里就先摆了【实际上尝试了半小时发现太烦了看别人写的也不大满意就放弃了】</p>
+<h5 id="sysinfo-plus"><a href="#sysinfo-plus" class="headerlink" title="sysinfo plus"></a>sysinfo plus</h5><blockquote>
+<p>Compute the load average and export it through sysinfo</p>
+</blockquote>
+<p>说实话没太看懂，不就加个 running process/ncpu就行了吗？</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6$chap3/" rel="prev" title="xv6$chap1">
+      <i class="fa fa-chevron-left"></i> xv6$chap1
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6$chap1/" rel="next" title="xv6$chap1">
+      xv6$chap1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Operating-system-oganization"><span class="nav-number">1.</span> <span class="nav-text">Operating system oganization</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kernel-organization"><span class="nav-number">1.1.</span> <span class="nav-text">Kernel organization</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8F%E5%86%85%E6%A0%B8%E4%B8%8E%E5%BE%AE%E5%86%85%E6%A0%B8"><span class="nav-number">1.1.1.</span> <span class="nav-text">宏内核与微内核</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-xv6-organization"><span class="nav-number">1.1.2.</span> <span class="nav-text">Code: xv6 organization</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Process-overview"><span class="nav-number">1.2.</span> <span class="nav-text">Process overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-starting-xv6-and-the-fifirst-process"><span class="nav-number">1.3.</span> <span class="nav-text">Code: starting xv6 and the fifirst process</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#xv6"><span class="nav-number">1.3.1.</span> <span class="nav-text">xv6</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">加载操作系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">操作系统初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#entry-S%E9%85%8D%E7%BD%AE%E6%A0%88%E7%A9%BA%E9%97%B4"><span class="nav-number">1.3.1.2.1.</span> <span class="nav-text">entry.S配置栈空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#start-c"><span class="nav-number">1.3.1.2.2.</span> <span class="nav-text">start.c</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#main-c"><span class="nav-number">1.3.1.2.3.</span> <span class="nav-text">main.c</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#proc-c%E4%B8%AD%E7%9A%84userinit"><span class="nav-number">1.3.1.2.4.</span> <span class="nav-text">proc.c中的userinit()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#initcode-S"><span class="nav-number">1.3.1.2.5.</span> <span class="nav-text">initcode.S</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#init-c"><span class="nav-number">1.3.1.2.6.</span> <span class="nav-text">init.c</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">感想</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#linux0-11"><span class="nav-number">1.3.2.</span> <span class="nav-text">linux0.11</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-1"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">加载操作系统</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%BB%E5%85%A5bootsect-s"><span class="nav-number">1.3.2.1.1.</span> <span class="nav-text">读入bootsect.s</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#bootsect-s"><span class="nav-number">1.3.2.1.2.</span> <span class="nav-text">bootsect.s</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#setup-s"><span class="nav-number">1.3.2.1.3.</span> <span class="nav-text">setup.s</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96-1"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">操作系统初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#head-s"><span class="nav-number">1.3.2.2.1.</span> <span class="nav-text">head.s</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#main-c-1"><span class="nav-number">1.3.2.2.2.</span> <span class="nav-text">main.c</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-1"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">感想</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Real-world"><span class="nav-number">1.4.</span> <span class="nav-text">Real world</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-system-calls"><span class="nav-number">1.5.</span> <span class="nav-text">Lab system calls</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#trace"><span class="nav-number">1.5.1.</span> <span class="nav-text">trace</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-2"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">代码步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9C%A8%E5%90%84%E7%A7%8D%E6%96%87%E4%BB%B6%E6%B7%BB%E5%8A%A0%E7%AD%BE%E5%90%8D"><span class="nav-number">1.5.1.2.1.</span> <span class="nav-text">在各种文件添加签名</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#user-user-h"><span class="nav-number">1.5.1.2.1.1.</span> <span class="nav-text">user&#x2F;user.h</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#user-usys-pl"><span class="nav-number">1.5.1.2.1.2.</span> <span class="nav-text">user&#x2F;usys.pl</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#syscall-h"><span class="nav-number">1.5.1.2.1.3.</span> <span class="nav-text">syscall.h</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#syscall-c"><span class="nav-number">1.5.1.2.1.4.</span> <span class="nav-text">syscall.c</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9Makefile"><span class="nav-number">1.5.1.2.1.5.</span> <span class="nav-text">修改Makefile</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.5.1.2.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9proc-h"><span class="nav-number">1.5.1.2.2.1.</span> <span class="nav-text">修改proc.h</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%BC%96%E5%86%99trace-c"><span class="nav-number">1.5.1.2.2.2.</span> <span class="nav-text">编写trace.c</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9syscall-c"><span class="nav-number">1.5.1.2.2.3.</span> <span class="nav-text">修改syscall.c</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%9C%A8sysproc-c%E4%B8%AD%E6%B7%BB%E5%8A%A0%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-number">1.5.1.2.2.4.</span> <span class="nav-text">在sysproc.c中添加系统调用</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%9C%A8defs-h%E4%B8%AD%E6%B7%BB%E5%8A%A0%E9%9C%80%E8%A6%81public%E7%9A%84%E5%87%BD%E6%95%B0%E7%AD%BE%E5%90%8D"><span class="nav-number">1.5.1.2.2.5.</span> <span class="nav-text">在defs.h中添加需要public的函数签名</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sysinfotest"><span class="nav-number">1.5.2.</span> <span class="nav-text">sysinfotest</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-3"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#sysinfo-c"><span class="nav-number">1.5.2.2.1.</span> <span class="nav-text">sysinfo.c</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sysproc-c%E4%B8%AD"><span class="nav-number">1.5.2.2.2.</span> <span class="nav-text">sysproc.c中</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#kalloc-c%E4%B8%AD"><span class="nav-number">1.5.2.2.3.</span> <span class="nav-text">kalloc.c中</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#proc-c%E4%B8%AD"><span class="nav-number">1.5.2.2.4.</span> <span class="nav-text">proc.c中</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%84%E5%8A%A0%E9%A2%98"><span class="nav-number">1.5.2.3.</span> <span class="nav-text">附加题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#trace-plus"><span class="nav-number">1.5.2.3.1.</span> <span class="nav-text">trace plus</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sysinfo-plus"><span class="nav-number">1.5.2.3.2.</span> <span class="nav-text">sysinfo plus</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

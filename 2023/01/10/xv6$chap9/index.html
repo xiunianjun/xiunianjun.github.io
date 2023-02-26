@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="其他的对实验未涉及的思考由mkfs引发的对虚拟机的学习 懂了！VMware&#x2F;KVM&#x2F;Docker原来是这么回事儿这篇文章对虚拟化、虚拟机技术讲解很到位，写得通俗易懂，非常值得一看 KVM 的「基于内核的虚拟机」是什么意思？这篇文章对QEMU-KVM架构进行了详细的介绍。还有这篇文章对应的知乎问题下面的高赞回答有机会也可以去看看。 QEMU&#x2F;KVM原理概述这篇文章前面的原理和上面那个差不多，后面有使">
+<meta property="og:type" content="article">
+<meta property="og:title" content="xv6$chap1">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap9/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="其他的对实验未涉及的思考由mkfs引发的对虚拟机的学习 懂了！VMware&#x2F;KVM&#x2F;Docker原来是这么回事儿这篇文章对虚拟化、虚拟机技术讲解很到位，写得通俗易懂，非常值得一看 KVM 的「基于内核的虚拟机」是什么意思？这篇文章对QEMU-KVM架构进行了详细的介绍。还有这篇文章对应的知乎问题下面的高赞回答有机会也可以去看看。 QEMU&#x2F;KVM原理概述这篇文章前面的原理和上面那个差不多，后面有使">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/640.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/640-1676793944101-7.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230219160725978.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/v2-249a3f162de88198bbe415110fc71c7f_1440w.jpg">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/v2-9377a260d034d2904b1807d3fe53dcd9_1440w.jpg">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/v2-942e1ed598eed3d401d00e4719224d27_1440w.jpg">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/v2-555d017ce5b65457f98617a5fdf232af_1440w.jpg">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230121162324747.png">
+<meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
+<meta property="article:modified_time" content="2023-02-26T06:23:46.190Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/640.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6$chap9/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>xv6$chap1 | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          xv6$chap1
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-02-26 14:23:46" itemprop="dateModified" datetime="2023-02-26T14:23:46+08:00">2023-02-26</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="其他的对实验未涉及的思考"><a href="#其他的对实验未涉及的思考" class="headerlink" title="其他的对实验未涉及的思考"></a>其他的对实验未涉及的思考</h1><h2 id="由mkfs引发的对虚拟机的学习"><a href="#由mkfs引发的对虚拟机的学习" class="headerlink" title="由mkfs引发的对虚拟机的学习"></a>由mkfs引发的对虚拟机的学习</h2><blockquote>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU0OTE4MzYzMw==&mid=2247489645&idx=5&sn=a6ad41806effb6bc8ff4815f4eab968a&chksm=fbb29193ccc51885348ce6dfb81661ecc17cd271bf6fb79a78a656b49d4eccaa9de7606c01cc&scene=27">懂了！VMware/KVM/Docker原来是这么回事儿</a>这篇文章对虚拟化、虚拟机技术讲解很到位，写得通俗易懂，非常值得一看</p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/24123210/answer/2852910075">KVM 的「基于内核的虚拟机」是什么意思？</a>这篇文章对QEMU-KVM架构进行了详细的介绍。还有这篇文章对应的知乎问题下面的高赞回答有机会也可以去看看。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hbuxiaofei/article/details/113556046">QEMU/KVM原理概述</a>这篇文章前面的原理和上面那个差不多，后面有使用kvm做一个精简内核的实例，有兴趣/有精力/有需要可以看看。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_23924713/article/details/126080325">MIT6.S081操作系统实验——操作系统是如何在qemu虚拟机中启动的？</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Mumu3w/article/details/54173069">xv6分析–mkfs源代码注释</a></p>
+</blockquote>
+<p>以前只是知道，xv6是运行在qemu提供的虚拟环境之上的。qemu是什么，怎么虚拟的，虚拟机和宿主机是怎么交互的，这些一概不通。今天心血来潮想研究下qemu，虚拟机啥的到底是什么玩意，虽然看得有些猪脑过载，但还是写下一些个人的整理。</p>
+<h3 id="qemu"><a href="#qemu" class="headerlink" title="qemu"></a>qemu</h3><h4 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h4><p>在了解qemu之前，可以先了解一下虚拟化的思想。</p>
+<h5 id="虚拟化"><a href="#虚拟化" class="headerlink" title="虚拟化"></a>虚拟化</h5><blockquote>
+<p>虚拟化的主要思想是，通过分层将底层的复杂、难用的资源虚拟抽象成简单、易用的资源，<strong>提供给上层</strong>使用。</p>
+<p>本质上，计算机的发展过程也是虚拟化不断发展的过程，底层的资源或者通过<strong>空间的分割</strong>，或者通过<strong>时间的分割</strong>，将下层的资源通过一种简单易用的方式转换成另一种资源，提供给上层使用。</p>
+<p>虚拟化可分为以下几方面：</p>
+<ol>
+<li><strong>CPU抽象</strong>：机器码、汇编语言到C语言、再到高级语言的不断虚拟的过程</li>
+<li><strong>存储抽象</strong>：操作系统通过文件和目录抽象</li>
+<li><strong>网络抽象</strong>：TCP/IP协议栈模型将网卡设备中传递的二进制数据，经过网络层、传输层的抽象后，为应用程序提供了便捷的网络包处理接口，而无需关心底层的IP路由、分片等细节</li>
+<li><strong>进程抽象</strong>：操作系统通过进程抽象为不同的应用程序提供了安全隔离的执行环境，并且有着独立的CPU和内存等资源</li>
+</ol>
+</blockquote>
+<p>虚拟化的思想实际上就是我以前一直称为“抽象”的思想，以接口的形式逐层向上服务。</p>
+<h5 id="虚拟机"><a href="#虚拟机" class="headerlink" title="虚拟机"></a>虚拟机</h5><blockquote>
+<p>虚拟机的核心能力在于<strong>提供一个执行环境</strong>（隐藏底层细节），并在其中完成用户的指定任务。</p>
+</blockquote>
+<blockquote>
+<p>虚拟机有多种不同的<strong>形式</strong>，包括提供指令执行环境的进程、模拟器和高级语言虚拟机，或者是提供一个完整的系统环境的系统虚拟机。</p>
+</blockquote>
+<h6 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h6><p>进程实际上就是一种虚拟机。</p>
+<blockquote>
+<p>进程可以看作是一组<strong>资源的集合</strong>，有自己<strong>独立</strong>的进程地址空间以及<strong>独立</strong>的CPU和寄存器，执行程序员编写的指令，完成一定的任务。</p>
+<p>操作系统可以创建多个进程，每一个进程都可以看成一个<strong>独立的虚拟机</strong>，它们在执行指令、访问内存的时候并不会相互影响影响。</p>
+</blockquote>
+<h6 id="模拟器"><a href="#模拟器" class="headerlink" title="模拟器"></a>模拟器</h6><h6 id="高级语言虚拟机"><a href="#高级语言虚拟机" class="headerlink" title="高级语言虚拟机"></a>高级语言虚拟机</h6><h6 id="系统虚拟机"><a href="#系统虚拟机" class="headerlink" title="系统虚拟机"></a>系统虚拟机</h6><blockquote>
+<p>通过<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=%E7%B3%BB%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22answer%22,%22sourceId%22:2852910075%7D">系统虚拟化技术</a>，能够在<strong>单个的宿主机硬件平台上运行多个虚拟机</strong>，每个虚拟机都有着完整的虚拟机硬件，如虚拟的CPU、内存、虚拟的外设等，并且虚拟机之间能够实现完整的隔离。</p>
+<p>在系统虚拟化中，管理全局物理资源的软件叫作<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9B%91%E6%8E%A7%E5%99%A8&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22answer%22,%22sourceId%22:2852910075%7D">虚拟机监控器</a>（Virtual Machine Monitor，VMM），<u>VMM之于虚拟机就如同操作系统之于进程</u>，VMM利用时分复用或者空分复用的办法将硬件资源在各个虚拟机之间进行分配。</p>
+</blockquote>
+<h5 id="qemu-1"><a href="#qemu-1" class="headerlink" title="qemu"></a>qemu</h5><p>可以看到，qemu就是一种虚拟机。它可以模拟虚拟机硬件，为操作系统提供虚拟硬件环境，从而能够让不同的操作系统能够在不同主机硬件上执行。</p>
+<h4 id="qemu-kvm架构"><a href="#qemu-kvm架构" class="headerlink" title="qemu-kvm架构"></a>qemu-kvm架构</h4><h5 id="诞生的原因"><a href="#诞生的原因" class="headerlink" title="诞生的原因"></a>诞生的原因</h5><blockquote>
+<p>其对于虚拟化技术的优化，以及发展的前因后果，具体可以看<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU0OTE4MzYzMw==&mid=2247489645&idx=5&sn=a6ad41806effb6bc8ff4815f4eab968a&chksm=fbb29193ccc51885348ce6dfb81661ecc17cd271bf6fb79a78a656b49d4eccaa9de7606c01cc&scene=27">懂了！VMware/KVM/Docker原来是这么回事儿</a>这篇文章。</p>
+<p>概括来讲，大致有以下几个要点：</p>
+</blockquote>
+<h6 id="两种虚拟化方案"><a href="#两种虚拟化方案" class="headerlink" title="两种虚拟化方案"></a>两种虚拟化方案</h6><p><img src="/2023/01/10/xv6/640.png" alt="640"></p>
+<p><img src="/2023/01/10/xv6/640-1676793944101-7.png" alt="640-1676793944101-7"></p>
+<h6 id="实现上述的虚拟化方案"><a href="#实现上述的虚拟化方案" class="headerlink" title="实现上述的虚拟化方案"></a>实现上述的虚拟化方案</h6><p>一个典型的做法是——<code>陷阱 &amp; 模拟</code>技术</p>
+<p>什么意思？<strong>简单来说就是正常情况下直接把虚拟机中的代码指令放到物理的CPU上去执行，一旦执行到一些敏感指令，就触发异常，控制流程交给VMM，由VMM来进行对应的处理，以此来营造出一个虚拟的计算机环境。</strong></p>
+<h6 id="x86架构的问题"><a href="#x86架构的问题" class="headerlink" title="x86架构的问题"></a>x86架构的问题</h6><p>x86架构使得上述做法用不了了。因为它引入了四种权限</p>
+<p><img src="/2023/01/10/xv6/image-20230219160725978.png" alt="image-20230219160725978"></p>
+<h6 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h6><ol>
+<li><p>全虚拟化</p>
+<p>VMware的二进制翻译技术、QEMU的模拟指令集</p>
+</li>
+<li><p>半虚拟化</p>
+</li>
+<li><p>硬件辅助虚拟化</p>
+<p>硬件辅助虚拟化细节较为复杂，简单来说，新一代CPU在原先的Ring0-Ring3四种工作状态之下，再引入了一个叫工作模式的概念，有<code>VMX root operation</code>和<code>VMX non-root operation</code>两种模式，每种模式都具有完整的Ring0-Ring3四种工作状态，前者是VMM运行的模式，后者是虚拟机中的OS运行的模式。</p>
+<p>qemu-kvm架构正是借助于此实现的。</p>
+</li>
+</ol>
+<h6 id="kvm"><a href="#kvm" class="headerlink" title="kvm"></a>kvm</h6><p>kvm就是借助硬件辅助虚拟化诞生的。可以把kvm看作是一堆系统调用。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.redhat.com/zh/topics/virtualization/what-is-KVM">什么是 KVM？</a></p>
+<p>KVM本身是一个<strong>内核模块</strong>，它导出了一系列的<strong>接口</strong>到用户空间，用户态程序可以使用这些接口创建虚拟机。</p>
+<p>具体而言，KVM 可帮助您将 Linux 转变为<a target="_blank" rel="noopener" href="https://www.redhat.com/zh/topics/virtualization/what-is-a-hypervisor">虚拟机监控程序</a>，使主机计算机能够运行多个隔离的虚拟环境，即虚拟客户机或虚拟机（VM）。【也即，虚拟机—进程，KVM—操作系统】</p>
+</blockquote>
+<blockquote>
+<p>在虚拟化底层技术上，<u>KVM和VMware后续版本一样</u>，都是基于<strong>硬件辅助虚拟化</strong>实现。不同的是VMware作为独立的第三方软件可以安装在Linux、Windows、MacOS等多种不同的操作系统之上，而KVM作为一项虚拟化技术已经<strong>集成</strong>到Linux内核之中，可以认为Linux内核本身就是一个HyperVisor，这也是KVM名字的含义，因此该技术只能在Linux服务器上使用。</p>
+</blockquote>
+<h6 id="qemu-kvm"><a href="#qemu-kvm" class="headerlink" title="qemu-kvm"></a>qemu-kvm</h6><p>KVM本身基于硬件辅助虚拟化，仅仅实现CPU和内存的虚拟化，但一台计算机不仅仅有CPU和内存，还需要各种各样的I/O设备，不过KVM不负责这些。这个时候，QEMU就和KVM搭上了线，经过改造后的QEMU，负责外部设备的虚拟，KVM负责底层执行引擎和内存的虚拟，两者彼此互补，成为新一代云计算虚拟化方案的宠儿。</p>
+<h5 id="qemu-kvm总体架构"><a href="#qemu-kvm总体架构" class="headerlink" title="qemu-kvm总体架构"></a>qemu-kvm总体架构</h5><p>KVM只负责最核心的<strong>CPU虚拟化和内存虚拟化</strong>部分；QEMU作为其用户态组件，负责完成<strong>大量外设的模拟</strong>。</p>
+<p><img src="/2023/01/10/xv6/v2-249a3f162de88198bbe415110fc71c7f_1440w.jpg" alt="v2-249a3f162de88198bbe415110fc71c7f_1440w"></p>
+<h6 id="VMX-root和VMX-non-root"><a href="#VMX-root和VMX-non-root" class="headerlink" title="VMX root和VMX non root"></a>VMX root和VMX non root</h6><blockquote>
+<p>VMX root是宿主机模式，此时CPU在运行包括QEMU在内的普通进程和宿主机的操作系统内核；</p>
+<p>VMX non-root是<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A8%A1%E5%BC%8F&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22answer%22,%22sourceId%22:2852910075%7D">虚拟机模式</a>，此时CPU在运行虚拟机中的用户程序和操作系统代码。</p>
+</blockquote>
+<p>也就是说，虚拟机的程序，包括用户程序和内核程序，都运行在non-root模式。宿主机的所有程序，包括用户程序【包括qemu】和内核程序【包括kvm】，都运行在root模式。</p>
+<h6 id="qemu层（左上）"><a href="#qemu层（左上）" class="headerlink" title="qemu层（左上）"></a>qemu层（左上）</h6><p>上面说到，qemu负责的是大量外设的模拟。它具体要做以下几件事：</p>
+<blockquote>
+<p>初始化虚拟机：</p>
+<ol>
+<li><p>创建模拟的芯片组</p>
+</li>
+<li><p>创建<strong>CPU线程</strong>来表示虚拟机的CPU</p>
+<p>QEMU在初始化虚拟机的CPU线程时，首先设置好相应的虚拟CPU寄存器的值，然后调用KVM的接口将虚拟机运行起来，这样CPU线程就会被调度在物理CPU上执行虚拟机的代码。</p>
+</li>
+<li><p><strong>在QEMU的虚拟地址空间中分配空间作为虚拟机的物理地址</strong></p>
+</li>
+<li><p>根据用户在命令行<strong>指定的设备</strong>为虚拟机创建对应的虚拟设备【如各种IO设备】</p>
+</li>
+</ol>
+<p>虚拟机运行时：</p>
+<ol>
+<li><p>监听多种事件</p>
+<p>包括虚拟机对设备的I/O访问、用户对虚拟机管理界面、虚拟设备对应的宿主机上的一些I/O事件（比如虚拟机网络数据的接收）等</p>
+</li>
+<li><p>调用函数处理</p>
+</li>
+</ol>
+</blockquote>
+<p>可以看到，qemu确实利用了宿主机的各种资源，提供了一个很完美的硬件环境。其资源对应关系为：</p>
+<p>虚拟机的CPU——宿主机的一个线程</p>
+<p>虚拟机的物理地址——qemu在宿主机的虚拟地址</p>
+<p>虚拟机对硬件设备的访问 —→ 对qemu的访问 </p>
+<h6 id="kvm层（下方）"><a href="#kvm层（下方）" class="headerlink" title="kvm层（下方）"></a>kvm层（下方）</h6><p>它大概做了两件事：</p>
+<ol>
+<li><p>给qemu提供运行时的参数</p>
+<p>通过“/dev/kvm”设备，比如CPU个数、内存布局、运行等。</p>
+</li>
+<li><p>截获VM Exit事件【下面会讲，用来完成虚拟机和硬件环境的交互】并进行处理。</p>
+</li>
+</ol>
+<h6 id="虚拟机层（右上）"><a href="#虚拟机层（右上）" class="headerlink" title="虚拟机层（右上）"></a>虚拟机层（右上）</h6><ol>
+<li><p>CPU——QEMU进程中的一个线程</p>
+<p>通过QEMU和KVM的相互协作，虚拟机的线程会被宿主机操作系统正常调度，<strong>直接执行虚拟机中的代码</strong></p>
+</li>
+<li><p>物理地址——QEMU进程中的虚拟地址</p>
+</li>
+<li><p>设备——QEMU实现</p>
+<p>在运行过程中，虚拟机操作系统通过设备的I/O端口（Port IO、PIO）或者MMIO（Memory Mapped I/O）进行交互，<strong>KVM会截获这个请求</strong>【也即VM Exit，下面会讲】，大多数时候KVM会将请求分发到用户空间的QEMU进程中，由<strong>QEMU处理</strong>这些I/O请求</p>
+</li>
+</ol>
+<h5 id="虚拟机在QEMU-KVM架构的执行方法"><a href="#虚拟机在QEMU-KVM架构的执行方法" class="headerlink" title="虚拟机在QEMU-KVM架构的执行方法"></a>虚拟机在QEMU-KVM架构的执行方法</h5><h6 id="状态管理虚拟化"><a href="#状态管理虚拟化" class="headerlink" title="状态管理虚拟化"></a>状态管理虚拟化</h6><p>虚拟机肯定是会与它的硬件环境进行交互的，它的硬件环境也就是QEMU—KVM。</p>
+<p>虚拟机的用户程序和内核程序都是直接由宿主机的操作系统正常调度，我们可以将其看作虚拟态。QEMU—KVM可以看作是宿主机的进程，我们可以将其看作宿主态。因而，当虚拟机一些事情希望由QEMU—KVM来做，我们就需要从虚拟态转移到宿主态。</p>
+<p>听起来有没有感觉很耳熟？是的，“从用户态陷入内核态”，跟这个的原理是一样的。</p>
+<p>因而，虚拟机与硬件环境交互，实际上是虚拟态和宿主态状态的转换，如下图：</p>
+<p><img src="/2023/01/10/xv6/v2-9377a260d034d2904b1807d3fe53dcd9_1440w.jpg" alt="v2-9377a260d034d2904b1807d3fe53dcd9_1440w"></p>
+<p><strong>VM Exit</strong></p>
+<p>当虚拟机中的代码是敏感指令或者说满足了一定的退出条件时，CPU会从虚拟态退出到KVM，这叫作VM Exit。</p>
+<p>这就像在用户态执行指令陷入内核一样。</p>
+<p>VM Exit首先陷入到KVM中进行处理，如果KVM无法处理，比如说虚拟机写了设备的寄存器地址，那么KVM会将这个写操作分派到QEMU中进行处理。</p>
+<p><strong>VM Entry</strong></p>
+<p>当KVM或者QEMU处好了退出事件之后，又可以将CPU置于虚拟态以运行虚拟机代码，这叫作VM Entry。</p>
+<h6 id="内存管理虚拟化"><a href="#内存管理虚拟化" class="headerlink" title="内存管理虚拟化"></a>内存管理虚拟化</h6><blockquote>
+<p>QEMU在初始化的时候会通过<code>mmap</code>分配虚拟内存空间作为虚拟机的物理内存，【感觉思路打开，物理内存与文件对应了起来】QEMU在不断更新内存布局的过程中会持续调用KVM接口通知内核KVM模块虚拟机的内存分布。</p>
+</blockquote>
+<p>虚拟机在运行过程中，首先需要将虚拟机的虚拟地址（Guest Virtual Address，GVA）转换成虚拟机的物理地址（Guest Physical Address，GPA），然后将虚拟机的物理地址转换成宿主机的虚拟地址（Host Virtual Address，HVA），最终转换成宿主机的物理地址（Host Physical Address，HPA）。</p>
+<p>整个寻址过程由硬件实现，具体实现方式为扩展页表（Extended Page Table，EPT）。</p>
+<p>在支持EPT的环境中，虚拟机在<strong>第一次访问内存的时候就会陷入到KVM</strong>，KVM会<strong>逐渐建立</strong>起所谓的EPT页面【lazy思想贯穿始终，还是该叫自适应？】。这样虚拟机的虚拟CPU在后面访问虚拟机虚拟内存地址的时候，首先会被转换为虚拟机物理地址，接着会查找EPT页表，然后得到宿主机物理地址。【有种TLB的感觉】</p>
+<p><img src="/2023/01/10/xv6/v2-942e1ed598eed3d401d00e4719224d27_1440w.jpg" alt="v2-942e1ed598eed3d401d00e4719224d27_1440w"></p>
+<h6 id="外设管理虚拟化"><a href="#外设管理虚拟化" class="headerlink" title="外设管理虚拟化"></a>外设管理虚拟化</h6><p>设备模拟的本质是要为虚拟机提供一个<strong>与物理设备接口完全一致的虚拟接口</strong>。</p>
+<p>虚拟机中的操作系统与设备进行的数据交互或者由QEMU和（或）KVM完成，或者由宿主机上对应的后端设备完成。</p>
+<p>QEMU在初始化过程中会创建好模拟芯片组和必要的模拟设备，包括南北桥芯片、PCI根总线、ISA根总线等总线系统，以及各种PCI设备、ISA设备等。</p>
+<p>外设虚拟化主要有如下几种方式：</p>
+<ol>
+<li><p>纯软件模拟（完全虚拟化）</p>
+<p>QEMU最早的方案，虚拟机内核不用做任何修改，每一次对设备的寄存器读写都会陷入到KVM，进而到QEMU，QEMU再对这些请求进行处理并模拟硬件行为。</p>
+<p>软件模拟会导致非常多的QEMU/KVM接入，效率低下。</p>
+</li>
+<li><p>virtio设备（半虚拟化）</p>
+<p>virtio设备是一类特殊的设备，并没有对应的物理设备，所以需要虚拟机内部操作系统安装特殊的virtio驱动。</p>
+<p>相比软件模拟，virtio方案提高了虚拟设备的性能。</p>
+</li>
+<li><p>设备直通</p>
+<p>将物理硬件设备直接挂到虚拟机上，虚拟机直接与物理设备交互，尽可能在I/O路径上减少QEMU/KVM的参与。</p>
+<p>设备直通经常搭配硬件虚拟化支持技术SRIOV（Single Root I/O Virtualization，单根输入/输出虚拟化）使用，SRIOV能够将单个的物理硬件高效地虚拟出多个虚拟硬件。</p>
+</li>
+</ol>
+<p><img src="/2023/01/10/xv6/v2-555d017ce5b65457f98617a5fdf232af_1440w.jpg" alt="v2-555d017ce5b65457f98617a5fdf232af_1440w"></p>
+<h6 id="中断处理虚拟化"><a href="#中断处理虚拟化" class="headerlink" title="中断处理虚拟化"></a>中断处理虚拟化</h6><p>操作系统通过写设备的I/O端口或者MMIO地址来与设备交互，设备通过发送中断来通知操作系统事件。</p>
+<p>QEMU/KVM一方面需要完成这项<strong>中断设备的模拟</strong>，另一方面需要模拟<strong>中断的请求处理</strong>。</p>
+<blockquote>
+<p>QEMU支持单CPU的Intel 8259中断控制器以及SMP的I/O APIC（I/O Advanced Programmable Interrupt Controller）和LAPIC（Local Advanced Programmable Interrupt Controller）中断控制器。在这种方式下，虚拟外设通过QEMU向虚拟机注入中断，需要先陷入到KVM，然后由KVM向虚拟机注入中断，这是一个非常费时的操作。</p>
+<p>为了提高虚拟机的效率，KVM自己也实现了中断控制器Intel 8259、I/O APIC以及LAPIC。用户可以有选择地让QEMU或者KVM模拟全部中断控制器，也可以让QEMU模拟Intel 8259中断控制器和I/O APIC，让KVM模拟LAPIC。</p>
+</blockquote>
+<h4 id="xv6的全启动运行过程梳理"><a href="#xv6的全启动运行过程梳理" class="headerlink" title="xv6的全启动运行过程梳理"></a>xv6的全启动运行过程梳理</h4><p>介绍完上述的qemu虚拟化，接下来就可以对xv6的全启动进行一个梳理了。</p>
+<p>首先，在宿主机执行<code>make qemu</code>。</p>
+<p>在<code>Makefile</code>中可以看到：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">qemu: $K/kernel fs.img</span></span><br><span class="line">        <span class="variable">$(QEMU)</span> <span class="variable">$(QEMUOPTS)</span></span><br><span class="line">QEMU = qemu-system-riscv64</span><br></pre></td></tr></table></figure>
+
+<p>在log中可以看到：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">mkfs/mkfs fs.img README user/xargstest.sh user/_cat user/_echo user/_forktest user/_grep user/_init user/_kill user/_ln user/_ls user/_mkdir user/_rm user/_sh user/_stressfs user/_usertests user/_grind user/_wc user/_zombie user/_mmaptest</span><br><span class="line">...</span><br><span class="line">qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0</span><br><span class="line"></span><br><span class="line">xv6 kernel is booting</span><br><span class="line"></span><br><span class="line">hart 2 starting</span><br><span class="line">hart 1 starting</span><br><span class="line">init: starting sh</span><br><span class="line"><span class="meta prompt_">$</span></span><br></pre></td></tr></table></figure>
+
+<p>具体的<code>Makefile</code>相关内容我不大了解，但结合输出，我想大概是先通过<code>riscv64-linux-gnu-gcc</code>编译链接完所有文件，然后再执行<code>mkfs</code>产生<code>fs.img</code>镜像（<code>mkfs</code>后面那些东西应该是文件参数，对应于源码中的读取可执行程序进磁盘的部分），最后再运行<code>qemu-system-riscv64</code>开始对虚拟机进行boot。</p>
+<p>boot直至启动后的所有代码，都是通过QEMU-KVM架构处理，直接运行在宿主机的CPU上的。其余的各种管理，可以详见小标题<code>虚拟机在QEMU-KVM架构的执行方法</code>。</p>
+<h4 id="mkfs的作用及源码解读"><a href="#mkfs的作用及源码解读" class="headerlink" title="mkfs的作用及源码解读"></a>mkfs的作用及源码解读</h4><h5 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h5><p>上面的知识表明，<strong>操作系统的启动在于文件系统初始化之后</strong>，这是因为操作系统本身的启动代码，放在磁盘映像<code>fs.img</code>中，而<code>fs.img</code>正是由文件系统初始化时弄出来的。也就是说，<strong>文件系统是操作系统的爸爸</strong>。【我以前一直以为是反过来的】</p>
+<p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747"></p>
+<blockquote>
+<p>图中的boot块就是操作系统的引导扇区。</p>
+</blockquote>
+<p>而<code>mkfs</code>的作用，正是把宿主机提供的<strong>虚拟地址空间作为虚拟磁盘</strong>，把虚拟地址空间划分为如上图所示的地址结构。<strong>它是运行在宿主机当中的</strong>。有了<code>mkfs</code>，才能有我们的虚拟机。</p>
+<h5 id="代码解读"><a href="#代码解读" class="headerlink" title="代码解读"></a>代码解读</h5><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Mumu3w/article/details/54173069">xv6分析–mkfs源代码注释</a></p>
+<p>yysy这个就写得很好了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/21/JavaWeb/" rel="prev" title="JavaWeb">
+      <i class="fa fa-chevron-left"></i> JavaWeb
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6$chap8/" rel="next" title="xv6$chap1">
+      xv6$chap1 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%9A%84%E5%AF%B9%E5%AE%9E%E9%AA%8C%E6%9C%AA%E6%B6%89%E5%8F%8A%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">1.</span> <span class="nav-text">其他的对实验未涉及的思考</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B1mkfs%E5%BC%95%E5%8F%91%E7%9A%84%E5%AF%B9%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.1.</span> <span class="nav-text">由mkfs引发的对虚拟机的学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#qemu"><span class="nav-number">1.1.1.</span> <span class="nav-text">qemu</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.1.1.</span> <span class="nav-text">虚拟化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">1.1.1.1.2.</span> <span class="nav-text">虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.1.1.1.2.1.</span> <span class="nav-text">进程</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E5%99%A8"><span class="nav-number">1.1.1.1.2.2.</span> <span class="nav-text">模拟器</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E8%AF%AD%E8%A8%80%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">1.1.1.1.2.3.</span> <span class="nav-text">高级语言虚拟机</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">1.1.1.1.2.4.</span> <span class="nav-text">系统虚拟机</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#qemu-1"><span class="nav-number">1.1.1.1.3.</span> <span class="nav-text">qemu</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#qemu-kvm%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">qemu-kvm架构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%9E%E7%94%9F%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.1.1.2.1.</span> <span class="nav-text">诞生的原因</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E8%99%9A%E6%8B%9F%E5%8C%96%E6%96%B9%E6%A1%88"><span class="nav-number">1.1.1.2.1.1.</span> <span class="nav-text">两种虚拟化方案</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%8A%E8%BF%B0%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8C%96%E6%96%B9%E6%A1%88"><span class="nav-number">1.1.1.2.1.2.</span> <span class="nav-text">实现上述的虚拟化方案</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#x86%E6%9E%B6%E6%9E%84%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.1.2.1.3.</span> <span class="nav-text">x86架构的问题</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.2.1.4.</span> <span class="nav-text">解决方法</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#kvm"><span class="nav-number">1.1.1.2.1.5.</span> <span class="nav-text">kvm</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#qemu-kvm"><span class="nav-number">1.1.1.2.1.6.</span> <span class="nav-text">qemu-kvm</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#qemu-kvm%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.1.2.2.</span> <span class="nav-text">qemu-kvm总体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#VMX-root%E5%92%8CVMX-non-root"><span class="nav-number">1.1.1.2.2.1.</span> <span class="nav-text">VMX root和VMX non root</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#qemu%E5%B1%82%EF%BC%88%E5%B7%A6%E4%B8%8A%EF%BC%89"><span class="nav-number">1.1.1.2.2.2.</span> <span class="nav-text">qemu层（左上）</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#kvm%E5%B1%82%EF%BC%88%E4%B8%8B%E6%96%B9%EF%BC%89"><span class="nav-number">1.1.1.2.2.3.</span> <span class="nav-text">kvm层（下方）</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%B1%82%EF%BC%88%E5%8F%B3%E4%B8%8A%EF%BC%89"><span class="nav-number">1.1.1.2.2.4.</span> <span class="nav-text">虚拟机层（右上）</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%9C%A8QEMU-KVM%E6%9E%B6%E6%9E%84%E7%9A%84%E6%89%A7%E8%A1%8C%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.2.3.</span> <span class="nav-text">虚拟机在QEMU-KVM架构的执行方法</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.2.3.1.</span> <span class="nav-text">状态管理虚拟化</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.2.3.2.</span> <span class="nav-text">内存管理虚拟化</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%A4%96%E8%AE%BE%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.2.3.3.</span> <span class="nav-text">外设管理虚拟化</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.2.3.4.</span> <span class="nav-text">中断处理虚拟化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#xv6%E7%9A%84%E5%85%A8%E5%90%AF%E5%8A%A8%E8%BF%90%E8%A1%8C%E8%BF%87%E7%A8%8B%E6%A2%B3%E7%90%86"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">xv6的全启动运行过程梳理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mkfs%E7%9A%84%E4%BD%9C%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">mkfs的作用及源码解读</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.1.4.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%A3%E8%AF%BB"><span class="nav-number">1.1.1.4.2.</span> <span class="nav-text">代码解读</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
