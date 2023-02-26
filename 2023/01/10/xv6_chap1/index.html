@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Operating system interface本节大概是在讲操作系统的接口，系统调用占了很大一部分。    系统调用 描述    int fork() 创建一个进程，返回子进程的PID   int exit(int status) 终止当前进程，并将状态报告给wait()函数。无返回   int wait(int *status) 等待一个子进程退出; 将退出状态存入*status; 返回子">
+<meta property="og:type" content="article">
+<meta property="og:title" content="xv6">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6_chap1/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="Operating system interface本节大概是在讲操作系统的接口，系统调用占了很大一部分。    系统调用 描述    int fork() 创建一个进程，返回子进程的PID   int exit(int status) 终止当前进程，并将状态报告给wait()函数。无返回   int wait(int *status) 等待一个子进程退出; 将退出状态存入*status; 返回子">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
+<meta property="article:modified_time" content="2023-02-26T04:48:34.625Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6_chap1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>xv6 | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6_chap1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          xv6
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-02-26 12:48:34" itemprop="dateModified" datetime="2023-02-26T12:48:34+08:00">2023-02-26</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Operating-system-interface"><a href="#Operating-system-interface" class="headerlink" title="Operating system interface"></a>Operating system interface</h1><p>本节大概是在讲操作系统的接口，系统调用占了很大一部分。</p>
+<table>
+<thead>
+<tr>
+<th><strong>系统调用</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>int fork()</code></td>
+<td>创建一个进程，返回子进程的PID</td>
+</tr>
+<tr>
+<td><code>int exit(int status)</code></td>
+<td>终止当前进程，并将状态报告给wait()函数。无返回</td>
+</tr>
+<tr>
+<td><code>int wait(int *status)</code></td>
+<td>等待一个子进程退出; 将退出状态存入*status; 返回子进程PID。</td>
+</tr>
+<tr>
+<td><code>int kill(int pid)</code></td>
+<td>终止对应PID的进程，返回0，或返回-1表示错误</td>
+</tr>
+<tr>
+<td><code>int getpid()</code></td>
+<td>返回当前进程的PID</td>
+</tr>
+<tr>
+<td><code>int sleep(int n)</code></td>
+<td>暂停n个时钟节拍</td>
+</tr>
+<tr>
+<td><code>int exec(char *file, char *argv[])</code></td>
+<td>加载一个文件并使用参数执行它; 只有在出错时才返回</td>
+</tr>
+<tr>
+<td><code>char *sbrk(int n)</code></td>
+<td>按n 字节增长进程的内存。返回新内存的开始</td>
+</tr>
+<tr>
+<td><code>int open(char *file, int flags)</code></td>
+<td>打开一个文件；flags表示read/write；返回一个fd（文件描述符）</td>
+</tr>
+<tr>
+<td><code>int write(int fd, char *buf, int n)</code></td>
+<td>从buf 写n 个字节到文件描述符fd; 返回n</td>
+</tr>
+<tr>
+<td><code>int read(int fd, char *buf, int n)</code></td>
+<td>将n 个字节读入buf；返回读取的字节数；如果文件结束，返回0</td>
+</tr>
+<tr>
+<td><code>int close(int fd)</code></td>
+<td>释放打开的文件fd</td>
+</tr>
+<tr>
+<td><code>int dup(int fd)</code></td>
+<td>返回一个新的文件描述符，指向与fd 相同的文件</td>
+</tr>
+<tr>
+<td><code>int pipe(int p[])</code></td>
+<td>创建一个管道，把read/write文件描述符放在p[0]和p[1]中</td>
+</tr>
+<tr>
+<td><code>int chdir(char *dir)</code></td>
+<td>改变当前的工作目录</td>
+</tr>
+<tr>
+<td><code>int mkdir(char *dir)</code></td>
+<td>创建一个新目录</td>
+</tr>
+<tr>
+<td><code>int mknod(char *file, int, int)</code></td>
+<td>创建一个设备文件</td>
+</tr>
+<tr>
+<td><code>int fstat(int fd, struct stat *st)</code></td>
+<td>将打开文件fd的信息放入*st</td>
+</tr>
+<tr>
+<td><code>int stat(char *file, struct stat *st)</code></td>
+<td>将指定名称的文件信息放入*st</td>
+</tr>
+<tr>
+<td><code>int link(char *file1, char *file2)</code></td>
+<td>为文件file1创建另一个名称(file2)</td>
+</tr>
+<tr>
+<td><code>int unlink(char *file)</code></td>
+<td>删除一个文件</td>
+</tr>
+</tbody></table>
+<p> 表1.2：xv6系统调用（除非另外声明，这些系统调用返回0表示无误，返回-1表示出错）</p>
+<h2 id="Process-and-memory"><a href="#Process-and-memory" class="headerlink" title="Process and memory"></a>Process and memory</h2><h3 id="fork"><a href="#fork" class="headerlink" title="fork"></a>fork</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span>(pid &gt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;parent: child&#x27;s pid = %d\n&quot;</span>,pid);</span><br><span class="line">    pid = wait(<span class="number">0</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;child %d is done.\n&quot;</span>,pid);</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span>(pid == <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;child : exiting\n&quot;</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;fork error\n&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是一个利用fork的返回值对于父子进程来说不同这一特点进行编写的例程。其中比较不熟的还是wait(0)这一句的用法。这点具体可以看书中笔记和上面的系统调用表。</p>
+<h3 id="exec"><a href="#exec" class="headerlink" title="exec"></a>exec</h3><p>exec是一个系统调用，它跟exe文件被执行的原理密切相关。当程序调用exec，就会跳转到exec参数文件去执行，原程序exec下面的指令都不再被执行，除非exec因错误而退出。</p>
+<h3 id="exec与fork"><a href="#exec与fork" class="headerlink" title="exec与fork"></a>exec与fork</h3><p>由shell的源码中main函数这一段</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Read and run input commands.</span></span><br><span class="line"><span class="keyword">while</span>(getcmd(buf, <span class="keyword">sizeof</span>(buf)) &gt;= <span class="number">0</span>)&#123;</span><br><span class="line">  <span class="keyword">if</span>(buf[<span class="number">0</span>] == <span class="string">&#x27;c&#x27;</span> &amp;&amp; buf[<span class="number">1</span>] == <span class="string">&#x27;d&#x27;</span> &amp;&amp; buf[<span class="number">2</span>] == <span class="string">&#x27; &#x27;</span>)&#123;</span><br><span class="line">    <span class="comment">// Chdir must be called by the parent, not the child.</span></span><br><span class="line">    buf[<span class="built_in">strlen</span>(buf)<span class="number">-1</span>] = <span class="number">0</span>;  <span class="comment">// chop \n</span></span><br><span class="line">    <span class="keyword">if</span>(chdir(buf+<span class="number">3</span>) &lt; <span class="number">0</span>)</span><br><span class="line">      <span class="built_in">fprintf</span>(<span class="number">2</span>, <span class="string">&quot;cannot cd %s\n&quot;</span>, buf+<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span>(fork1() == <span class="number">0</span>)</span><br><span class="line">    runcmd(parsecmd(buf));</span><br><span class="line">  wait(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">exit</span>(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">runcmd</span><span class="params">(<span class="keyword">struct</span> cmd *cmd)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(cmd == <span class="number">0</span>)</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span>(cmd-&gt;type)&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">case</span> EXEC:</span><br><span class="line">    ecmd = (<span class="keyword">struct</span> execcmd*)cmd;</span><br><span class="line">    exec(ecmd-&gt;argv[<span class="number">0</span>], ecmd-&gt;argv);</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>, <span class="string">&quot;exec %s failed\n&quot;</span>, ecmd-&gt;argv[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">    ...</span><br><span class="line">        </span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到shell其实本质上就是这样的架构架构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">	<span class="keyword">if</span>(读到了command&amp;&amp;fork()==<span class="number">0</span>)&#123;</span><br><span class="line">        exec(command);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;失败信息&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    wait(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也即父进程创建出子进程来执行command，并且父进程等待子进程执行完再继续等待输入。</p>
+<p>可以看到，fork和exec的使用是非常紧密的，联合使用也是非常顺理成章的。那么，如果干从fork的exec的对于内存管理的原理来讲，就会不免产生一点问题。</p>
+<blockquote>
+<p>问题描述：</p>
+<p>fork的内存原理，实质上是开辟一片新的与父进程等大的内存空间，然后把父进程的数据都copy一份进这个新内存空间。exec的原理是用一片可以容纳得下文件指令及其所需空间的内存空间去替代调用进程原有的那片内存空间。</p>
+<p>可以看到，如果fork和exec接连使用，理论上其实是会产生一点浪费的，fork创建子进程复制完了一片内存空间，这片新复制的内存空间又马上被扔掉了，取而代之的用的是exec的内存空间。</p>
+</blockquote>
+<p>为了解决这个问题，kernel使用了copy-on-write技术优化。</p>
+<h2 id="I-O-and-File-descriptors"><a href="#I-O-and-File-descriptors" class="headerlink" title="I/O and File descriptors"></a>I/O and File descriptors</h2><h3 id="文件描述符"><a href="#文件描述符" class="headerlink" title="文件描述符"></a>文件描述符</h3><p>句柄就是一个int值，它代表了一个由内核管理的，可以被进程读写的对象.</p>
+<blockquote>
+<p>A process may obtain a file descriptor by opening a <strong>file</strong>, <strong>directory</strong>, or <strong>device</strong>, or by creating a <strong>pipe</strong>, or by <strong>duplicating</strong> an existing descriptor.</p>
+</blockquote>
+<p>每个进程的其三个句柄有默认值：</p>
+<blockquote>
+<p>By convention, a process reads from file descriptor 0 (standard input), writes output to file descriptor 1 (standard output), and writes error messages to file descriptor 2 (standard error). </p>
+</blockquote>
+<p>句柄0对应着standard input，1对应着standard output，2对应着standard error。</p>
+<h3 id="read、write"><a href="#read、write" class="headerlink" title="read、write"></a>read、write</h3><p>read和write的参数都是句柄，buf，读/写长度。都会导致文件指针的移动。使用如下例程【类似cat的原理】：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> buf[<span class="number">512</span>];</span><br><span class="line"><span class="type">int</span> n;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(;;)&#123;</span><br><span class="line">    n = read(<span class="number">0</span>);<span class="comment">//从标准输入读</span></span><br><span class="line">    <span class="keyword">if</span>(n == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(n &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="number">2</span>,<span class="string">&quot;read error\n&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(write(<span class="number">1</span>,buf,n) != n)&#123;<span class="comment">//向标准输出写</span></span><br><span class="line">        <span class="built_in">fprintf</span>(<span class="number">2</span>,<span class="string">&quot;write error\n&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="close"><a href="#close" class="headerlink" title="close"></a>close</h3><p>close函数释放了一个句柄，以后它释放掉的这个句柄就可以被用来表示别的文件了。</p>
+<h3 id="open"><a href="#open" class="headerlink" title="open"></a>open</h3><p>open函数会给参数的file分配一个句柄。这个句柄通常是目前空闲的句柄中值最小的那个。</p>
+<h3 id="重定向的实现"><a href="#重定向的实现" class="headerlink" title="重定向的实现"></a>重定向的实现</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> *argv[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">argv[<span class="number">0</span>] = <span class="string">&quot;cat&quot;</span>;</span><br><span class="line">argc[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">if</span>(fork() == <span class="number">0</span>)&#123;</span><br><span class="line">    close(<span class="number">0</span>);</span><br><span class="line">    open(<span class="string">&quot;input.txt&quot;</span>,O_RDONLY);</span><br><span class="line">    exec(<span class="string">&quot;cat&quot;</span>,argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>xv6的重定向实现跟这个原理差不多：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> REDIR:</span><br><span class="line">  rcmd = (<span class="keyword">struct</span> redircmd*)cmd;</span><br><span class="line">  close(rcmd-&gt;fd);</span><br><span class="line">  <span class="keyword">if</span>(open(rcmd-&gt;file, rcmd-&gt;mode) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>, <span class="string">&quot;open %s failed\n&quot;</span>, rcmd-&gt;file);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  runcmd(rcmd-&gt;cmd);</span><br><span class="line">  <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="共享偏移量"><a href="#共享偏移量" class="headerlink" title="共享偏移量"></a>共享偏移量</h3><p>fork出来的父子进程同一个句柄对同一个文件的偏移量是相同的，这个原理应该是因为，父子进程共享的是文件句柄这个结构体对象本身，也就是拷贝的时候是浅拷贝而不是深拷贝。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(fork() == <span class="number">0</span>) &#123;</span><br><span class="line">	write(<span class="number">1</span>, <span class="string">&quot;hello &quot;</span>, <span class="number">6</span>);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	wait(<span class="number">0</span>);</span><br><span class="line">	write(<span class="number">1</span>, <span class="string">&quot;world\n&quot;</span>, <span class="number">6</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="dup"><a href="#dup" class="headerlink" title="dup"></a>dup</h3><p><code>dup</code>系统调用复制一个现有的文件描述符，返回一个引用自同一个底层I/O对象的新文件描述符。</p>
+<p>dup和open一样，都是会占用一个新的句柄的，而且都是优先分配数值小的。比如说fd = dup(3)，得到fd=4，那么结果就是句柄3和句柄4指向同一个文件，并且偏移量一样。</p>
+<p>dup可以让这样的指令变得可以实现：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ls existing-file non-existing-file &gt; tmp1 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这个指令的意思是，先把stderr的结果重定向到stdout，再把stdout的结果重定向到tmp1中。</p>
+<p>关于2&gt;&amp;1的解释，可以看这个 <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_38500662/article/details/84973518">shell中的”2&gt;&amp;1”是什么意思？</a></p>
+</blockquote>
+<p>这个的实现就要用到dup了。我们会fork一个子进程，在子进程里面close(2)，然后再dup(1)。这样一来，我们就成功实现了句柄1和2指向同一个文件</p>
+<h2 id="Pipe"><a href="#Pipe" class="headerlink" title="Pipe"></a>Pipe</h2><h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>int pipe(int p[]) 创建一个管道，把read/write文件描述符放在p[0]和p[1]中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> p[<span class="number">2</span>];</span><br><span class="line"><span class="type">char</span>* argv[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">argv[<span class="number">0</span>] = <span class="string">&quot;wc&quot;</span>;</span><br><span class="line">argv[<span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">pipe(p);</span><br><span class="line"><span class="keyword">if</span>(fork() == <span class="number">0</span>)&#123;</span><br><span class="line">    close(<span class="number">0</span>);</span><br><span class="line">    dup(p[<span class="number">0</span>]);</span><br><span class="line">    close(p[<span class="number">0</span>]);</span><br><span class="line">    close(p[<span class="number">1</span>]);</span><br><span class="line">&#125; <span class="keyword">else</span>&#123;</span><br><span class="line">    close(p[<span class="number">0</span>]);</span><br><span class="line">    write(p[<span class="number">1</span>],<span class="string">&quot;hello world\n&quot;</span>,<span class="number">12</span>);</span><br><span class="line">    close(p[<span class="number">1</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成了父进程-pipe-子进程的一个重定向。</p>
+<p>pipe是阻塞的生产者消费者模式。对管道的read，在没有数据输入时会阻塞，直到读到数据，或者所有的write方向都被关闭。示例代码中，如果不使用pipe就需要显示close(p[0]) close(p[1])，正是为了防止没有数据输入时write方向不为0导致死锁的情况出现。</p>
+<h3 id="实现管道命令"><a href="#实现管道命令" class="headerlink" title="实现管道命令"></a>实现管道命令</h3><p>管道命令的实现正是通过pipe。</p>
+<p>执行原理就是，创建两个子进程分别执行左右两侧的句子，然后左侧子进程的out重定向到pip的write，右侧子进程的in重定向到pip的read。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">case</span> PIPE:</span><br><span class="line">   pcmd = (<span class="keyword">struct</span> pipecmd*)cmd;</span><br><span class="line">   <span class="keyword">if</span>(pipe(p) &lt; <span class="number">0</span>)</span><br><span class="line">     panic(<span class="string">&quot;pipe&quot;</span>);</span><br><span class="line"><span class="comment">//左</span></span><br><span class="line">   <span class="keyword">if</span>(fork1() == <span class="number">0</span>)&#123;</span><br><span class="line">     close(<span class="number">1</span>);</span><br><span class="line">     dup(p[<span class="number">1</span>]);</span><br><span class="line">     close(p[<span class="number">0</span>]);</span><br><span class="line">     close(p[<span class="number">1</span>]);</span><br><span class="line">     runcmd(pcmd-&gt;left);</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">//右</span></span><br><span class="line">   <span class="keyword">if</span>(fork1() == <span class="number">0</span>)&#123;</span><br><span class="line">     close(<span class="number">0</span>);</span><br><span class="line">     dup(p[<span class="number">0</span>]);</span><br><span class="line">     close(p[<span class="number">0</span>]);</span><br><span class="line">     close(p[<span class="number">1</span>]);</span><br><span class="line">     runcmd(pcmd-&gt;right);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//中</span></span><br><span class="line">close(p[<span class="number">0</span>]);</span><br><span class="line">   close(p[<span class="number">1</span>]);</span><br><span class="line">   <span class="comment">//wait</span></span><br><span class="line">wait(<span class="number">0</span>);</span><br><span class="line">   wait(<span class="number">0</span>);</span><br><span class="line">   <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这实际上是二叉树的左右中递归过程。</p>
+<blockquote>
+<p>附：对于管道命令的解读</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat a.txt | echo</span><br></pre></td></tr></table></figure>
+
+<p>我的本意是觉得，这意思就是把cat a.txt的输出连到echo的输入，这个命令结果跟cat a.txt是没什么差的。但具体执行出来发现最后的结果却是跟：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo</span><br></pre></td></tr></table></figure>
+
+<p>这个指令的效果是一样的，也就是cat a.txt的output，即echo的input完全被丢弃了。</p>
+<p>我想这是因为，echo这个命令的执行过程并没有用到stdin，仅仅用到了参数，也就是说管道read端的接入对它并没有什么影响。</p>
+<p>这也是为啥</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sleep 10 | echo hi</span><br></pre></td></tr></table></figure>
+
+<p>这个命令最后的结果是，秒速出hi，然后等待10s后结束，了。由于echo的输出与stdin没有关系，所以，echo不会阻塞读入stdin，等待管道关闭，而是会即刻输出hi。</p>
+</blockquote>
+<p>管道实际上就相当于：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo hello world | wc</span><br><span class="line">echo hello world &gt; /tmp/xyz; wc &lt; /tmp/xyz</span><br></pre></td></tr></table></figure>
+
+<p>在这种情况下，管道相比临时文件至少有四个优势</p>
+<ul>
+<li>首先，不用删文件</li>
+<li>其次，管道可以任意传递长的数据流</li>
+<li>第三，管道允许一定程度上的并行</li>
+<li>第四，如果实现进程间通讯，管道的块读写比文件的非块语义更有效率。</li>
+</ul>
+<h2 id="File-system"><a href="#File-system" class="headerlink" title="File system"></a>File system</h2><p>inode：代表文件本体，包括文件类型、文件长度、文件内容在磁盘位置、文件的链接数</p>
+<p>link：指向文件的链接，一个文件可以有多个link，link内包含文件名和对inode的引用</p>
+<p>当链接数=0，且句柄数=0，文件的磁盘空间和inode索引就会被释放</p>
+<h2 id="Lab-Xv6-and-Unix-utilities"><a href="#Lab-Xv6-and-Unix-utilities" class="headerlink" title="Lab Xv6 and Unix utilities"></a>Lab Xv6 and Unix utilities</h2><h3 id="虚拟机准备"><a href="#虚拟机准备" class="headerlink" title="虚拟机准备"></a>虚拟机准备</h3><h4 id="vmware"><a href="#vmware" class="headerlink" title="vmware"></a>vmware</h4><p>使用的是rcore给的盘：</p>
+<p>D:\aWorkStorage\etc\ubuntu\oslab.vmdk</p>
+<p>过程还是几经波折的。在这里记录下我踩的坑和解决办法吧。</p>
+<h5 id="账号密码"><a href="#账号密码" class="headerlink" title="账号密码"></a>账号密码</h5><blockquote>
+<p>账号：oslab</p>
+<p>密码：oslab</p>
+</blockquote>
+<h5 id="怎么使用vmdk文件"><a href="#怎么使用vmdk文件" class="headerlink" title="怎么使用vmdk文件"></a>怎么使用vmdk文件</h5><p><a target="_blank" rel="noopener" href="http://t.zoukankan.com/lxml-p-13879978.html">新建虚拟机（.vmdk）导入Vmware</a></p>
+<p>看这个就够了。</p>
+<h4 id="阿里云服务器-XShell"><a href="#阿里云服务器-XShell" class="headerlink" title="阿里云服务器+XShell"></a>阿里云服务器+XShell</h4><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45851575/article/details/122987929">手把手系列–Xshell连接阿里云服务器</a></p>
+<h4 id="ubuntu系统忘记密码了怎么办"><a href="#ubuntu系统忘记密码了怎么办" class="headerlink" title="ubuntu系统忘记密码了怎么办"></a>ubuntu系统忘记密码了怎么办</h4><p>需要进入grub模式修改密码。</p>
+<h5 id="如何进入grub模式"><a href="#如何进入grub模式" class="headerlink" title="如何进入grub模式"></a>如何进入grub模式</h5><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44488927/article/details/125793756">VMware虚拟机忘记Linux用户登陆密码，重置密码解决办法</a></p>
+<p>尤其注意需要在重新启动的那次才能按E，而且按的是shift+E大写E。</p>
+<h5 id="进入grub模式后按什么"><a href="#进入grub模式后按什么" class="headerlink" title="进入grub模式后按什么"></a>进入grub模式后按什么</h5><p>先按个advance-recovery mod，接下来按这个操作：</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/liranke/article/details/25203927">操作系统实践-在Ubuntu recovery模式下找回密码</a></p>
+<p>就ok了。</p>
+<h4 id="连不了网"><a href="#连不了网" class="headerlink" title="连不了网"></a>连不了网</h4><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/jiesunliu3215/article/details/125021892">Ubuntu连接不了网络的解决方法（第二种亲测可行)</a></p>
+<h3 id="配置实验环境"><a href="#配置实验环境" class="headerlink" title="配置实验环境"></a>配置实验环境</h3><blockquote>
+<p>参考文章：</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_25356929/article/details/113747023">xv6环境搭建</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bbsmax.com/A/nAJvZNWoJr/">【MIT6.S081/6.828】手把手教你搭建开发环境</a></p>
+</blockquote>
+<h4 id="下载工具链"><a href="#下载工具链" class="headerlink" title="下载工具链"></a>下载工具链</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt-get install git build-essential gdb-multiarch qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu</span> </span><br></pre></td></tr></table></figure>
+
+<p>测试安装ok：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-riscv64 --version</span></span><br><span class="line">QEMU emulator version 5.1.0</span><br><span class="line">//下面其中之一正常就行</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">riscv64-linux-gnu-gcc --version</span></span><br><span class="line">riscv64-linux-gnu-gcc (Debian 10.3.0-8) 10.3.0</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">riscv64-unknown-elf-gcc --version</span></span><br><span class="line">riscv64-unknown-elf-gcc (GCC) 10.1.0</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">riscv64-unknown-linux-gnu-gcc --version</span></span><br><span class="line">riscv64-unknown-linux-gnu-gcc (GCC) 10.1.0</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注，这里出现了一个问题，<code>qemu-system-riscv64 --version</code>打出来发现qemu-system-riscv64 command not found。似乎是我的ubuntu16.04版本太低了【悲】去看了下网上，可以按照这个来做：</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_49270962/article/details/118052926">rCore qemu risc-v 实验环境配置</a></p>
+</blockquote>
+<h4 id="下载编译xv6源码"><a href="#下载编译xv6源码" class="headerlink" title="下载编译xv6源码"></a>下载编译xv6源码</h4><p>随后，进入一个你喜欢的文件夹clone xv6的实验源码，输入</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git <span class="built_in">clone</span> git://g.csail.mit.edu/xv6-labs-2020</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> xv6-labs-2020</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git checkout util</span></span><br></pre></td></tr></table></figure>
+
+<p>然后进行编译</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make qemu</span></span><br></pre></td></tr></table></figure>
+
+<p>如果此处发生错误：<code>unrecognized command line option -mno-relax</code>，则按照此说法 <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_25356929/article/details/113747023">xv6环境搭建</a>更新gcc版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt install gcc-8-riscv64-linux-gnu</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc /usr/bin/riscv64-linux-gnu-gcc-8 8</span></span><br></pre></td></tr></table></figure>
+
+<p>再执行一次</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make qemu</span></span><br></pre></td></tr></table></figure>
+
+<p>就ok了。</p>
+<h4 id="关闭qemu"><a href="#关闭qemu" class="headerlink" title="关闭qemu"></a>关闭qemu</h4><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_67090393/article/details/126975993">qemu退出操作</a></p>
+<p>在这里记个强制方法：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -elf | grep qemu</span><br></pre></td></tr></table></figure>
+
+
+
+<p>记住第二个的pid</p>
+<p>然后</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kill 3303</span><br></pre></td></tr></table></figure>
+
+<h4 id="测试gdb是否ok"><a href="#测试gdb是否ok" class="headerlink" title="测试gdb是否ok"></a>测试gdb是否ok</h4><p>见该文章最后一部分</p>
+<p><a target="_blank" rel="noopener" href="https://www.bbsmax.com/A/nAJvZNWoJr/">【MIT6.S081/6.828】手把手教你搭建开发环境</a></p>
+<h4 id="自测方法"><a href="#自测方法" class="headerlink" title="自测方法"></a>自测方法</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make grade</span><br></pre></td></tr></table></figure>
+
+<p>或者如果只想测其中一个，可以：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./grade-lab-util sleep</span><br></pre></td></tr></table></figure>
+
+<h3 id="实验内容"><a href="#实验内容" class="headerlink" title="实验内容"></a>实验内容</h3><h4 id="编写sleep-c"><a href="#编写sleep-c" class="headerlink" title="编写sleep.c"></a>编写sleep.c</h4><blockquote>
+<p>Implement the UNIX program <code>sleep</code> for xv6; your <code>sleep</code> should pause for a user-specified number of ticks. A tick is a notion of time defined by the xv6 kernel, namely the time between two interrupts from the timer chip. Your solution should be in the file <code>user/sleep.c</code>.</p>
+
+</blockquote>
+<h5 id="体会"><a href="#体会" class="headerlink" title="体会"></a>体会</h5><h6 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h6><p>注意，他要求我们实现的sleep的参数是<strong>ticks的数量</strong>，不是秒数。我花了半天找时钟周期大小这个参数在哪，找了许久没找到，估计是没考虑到这一点。</p>
+<p>比如说，我翻了一下linux0.11的源码，在include/linux/time.h下有这句：</p>
+
+
+<p>说明了时钟频率大小。在xv6好像没有看到对这个的显式说明。</p>
+<h6 id="系统调用过程"><a href="#系统调用过程" class="headerlink" title="系统调用过程"></a>系统调用过程</h6><p>感受了一下xv6的系统调用过程，跟linux0.11还是很相像的。</p>
+<p>这个好像是lab2的内容，我暂且先在此放下我体会到的感受。</p>
+<ol>
+<li><p>xv6</p>
+<p>首先是从用户态到内核态的切换。</p>
+<p>在user/user.h中有各个系统调用外化的函数签名。在用户程序中调用里面的函数签名，就会执行【说实话，我没看懂为什么这里会知道要从user.h跳到usys.S中执行，也许是Makefile里有写？】user/usys.S中对应的汇编代码，比如说这种：</p>
+
+
+<p>然后这个SYS_close这种，其实是系统调用号宏，被定义在kernel/syscall.h中：</p>
+
+
+<p><code>li a7,SYS_call</code>就是把SYS_call的值放入a7寄存器，大概就是传参的意思。<code>ecall</code>是从用户态转到内核态的指令。这样一来，就完成了从用户态到内核态的切换。</p>
+<p>然后是在内核态的执行。</p>
+<p>切换到内核态之后的执行步骤跟linux0.11可以说是完全一样。</p>
+<p>首先应该是会去执行kernel/syscall.c中的syscall函数，具体应该是通过ecall引发0x80中断，然后查表得知这个syscall是中断处理函数</p>
+
+
+<p>可以看到，syscall获取了a7里的参数，然后查了系统调用表</p>
+
+
+<p>然后去sysproc.c文件下执行相应的sys_xxx函数。这个函数指针用得真是牛逼。</p>
+<p>再然后，sys_xxx函数中会从栈中取出调用参数，再跳转到xxx(args)函数中去（这些xxx函数一般在kernel中以单独文件形式出现）。</p>
+<p>这样一来，就完成了一次系统调用。</p>
+</li>
+<li><p>linux0.11</p>
+<p>首先是用户态到内核态的切换。</p>
+<p>在用户态中比方说调用system call close()，则会调用lib/close.c下的：</p>
+
+
+<p>展开这个宏之后，是这样的：</p>
+
+
+<p>具体意思就是把close的系统调用号存入参数寄存器，然后引发0x80中断，进入内核态。</p>
+<p>然后是在内核态的执行。</p>
+<p>查表会得知sys_call函数是0x80中断的中断处理函数，然后就会根据参数里的系统调用名字去找系统调用表执行</p>
+
+
+<p>这部分跟xv6差不多，不再赘述</p>
+</li>
+</ol>
+<p>可见，这两个系统在内核态的实现是差不多的，只是在用户态有点稍稍不一样。感觉linux0.11会更加精妙一些。</p>
+<h5 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h5><p>附上代码实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;user/user.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/stat.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//argc应该指的是arg count，包含了arg[0]（命令名称）</span></span><br><span class="line">  <span class="comment">//如果命令为“sleep”，那么就输出“sleep: missing operand”</span></span><br><span class="line">  <span class="keyword">if</span>(argc &lt;= <span class="number">1</span>)&#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>, <span class="string">&quot;sleep:missing operand\n&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>(i = <span class="number">1</span>; i &lt; argc; i++)&#123;</span><br><span class="line">    <span class="keyword">if</span>(sleep(atoi(argv[i]))&lt;<span class="number">0</span>)&#123;</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="number">2</span>,<span class="string">&quot;sleep:there has something wromng.Stop running.\n&quot;</span>);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="编写pingpong程序"><a href="#编写pingpong程序" class="headerlink" title="编写pingpong程序"></a>编写pingpong程序</h4><blockquote>
+<p>Write a program that uses UNIX system calls to ‘’ping-pong’’ a byte between two processes over a <strong>pair of pipes</strong>, one for each direction. The parent should send a byte to the child; the child should print “<pid>: received ping”, where <pid> is its process ID, write the byte on the pipe to the parent, and exit; the parent should read the byte from the child, print “<pid>: received pong”, and exit. Your solution should be in the file <code>user/pingpong.c</code>.</pid></pid></pid></p>
+</blockquote>
+<h5 id="体会-1"><a href="#体会-1" class="headerlink" title="体会"></a>体会</h5><p>思路很简单，我之所以写了那么久是因为走了好大的弯路……</p>
+<p>题目要求输出格式为”<pid>: received ping”，我的思路固化为：先把pid化成数字，再用字符串拼接串成整个。为了实现我的思路，我就需要额外再写两个工具函数，一个是itoa，一个是strcat。而又由于malloc函数暂待实现，itoa和strcat的实现就仍然不够优雅。折腾了半天终于OK了，结果看到别人是怎么做到这个输出格式的呢？↓</pid></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">fprintf</span>(<span class="number">1</span>,<span class="string">&quot;%d: received ping\n&quot;</span>,getpid());</span><br></pre></td></tr></table></figure>
+
+<p>这下是真的尴尬了23333</p>
+<p>但总而言之，自己写了那俩不够优雅的函数还算是有点用【大概】。以下是我的代码</p>
+<h5 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h5><h6 id="工具函数"><a href="#工具函数" class="headerlink" title="工具函数"></a>工具函数</h6><p>这三个函数都在<code>user/ulib.c</code>下。记得要在<code>user/user.h</code>中登记它们的签名。</p>
+<p>由于使用不了malloc，所以实现会稍显复杂。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">ensure_itoa_capacity</span><span class="params">(<span class="type">int</span> num)</span>&#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span>(num&lt;<span class="number">0</span>)&#123;</span><br><span class="line">        num = -num;</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span>(num)&#123;</span><br><span class="line">        num/=<span class="number">10</span>;</span><br><span class="line">        i++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> i+<span class="number">1</span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">itoa</span><span class="params">(<span class="type">int</span> num,<span class="type">char</span>* res)</span>&#123;</span><br><span class="line">    <span class="type">char</span> res_tmp[<span class="built_in">strlen</span>(res)+<span class="number">1</span>];</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> tmp = num;</span><br><span class="line">    <span class="keyword">if</span>(tmp&lt;<span class="number">0</span>)&#123;</span><br><span class="line">        tmp = -tmp;</span><br><span class="line">        res[i++] = <span class="string">&#x27;-&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> j = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span>(tmp)&#123;</span><br><span class="line">        res_tmp[j++] = tmp%<span class="number">10</span> + <span class="string">&#x27;0&#x27;</span>;</span><br><span class="line">        tmp /= <span class="number">10</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(j=j<span class="number">-1</span>;j&gt;=<span class="number">0</span>;j--)&#123;</span><br><span class="line">        res[i++] = res_tmp[j];</span><br><span class="line">    &#125;</span><br><span class="line">    res[i]=<span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> </span><br><span class="line"><span class="title function_">strcat</span><span class="params">(<span class="type">char</span>* buf,<span class="type">const</span> <span class="type">char</span>* s1,<span class="type">const</span> <span class="type">char</span>* s2)</span></span><br><span class="line">&#123;    </span><br><span class="line">    <span class="built_in">memcpy</span>(buf,s1,<span class="built_in">strlen</span>(s1));</span><br><span class="line">    <span class="built_in">memcpy</span>(buf+<span class="built_in">strlen</span>(s1),s2,<span class="built_in">strlen</span>(s2)+<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="pingpong"><a href="#pingpong" class="headerlink" title="pingpong"></a>pingpong</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;user.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> byte[<span class="number">1</span>];</span><br><span class="line">    byte[<span class="number">0</span>] = <span class="string">&#x27;c&#x27;</span>;</span><br><span class="line">    <span class="type">int</span> p1[<span class="number">2</span>];</span><br><span class="line">    <span class="type">int</span> p2[<span class="number">2</span>];</span><br><span class="line">    pipe(p1);</span><br><span class="line">    pipe(p2);</span><br><span class="line">    <span class="keyword">if</span>(fork()==<span class="number">0</span>)&#123;</span><br><span class="line">	<span class="comment">//接收ping的一个byte</span></span><br><span class="line">	close(p1[<span class="number">1</span>]);</span><br><span class="line">	read(p1[<span class="number">0</span>],byte,<span class="number">1</span>);</span><br><span class="line">	close(p1[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//构造输出字符串并输出</span></span><br><span class="line">	<span class="type">int</span> pid = getpid();</span><br><span class="line">        <span class="type">char</span> pid_str[ensure_itoa_capacity(pid)];</span><br><span class="line">	itoa(pid,pid_str);	</span><br><span class="line">	<span class="type">char</span> meg_str[] = <span class="string">&quot;: received ping\n&quot;</span>;</span><br><span class="line">	<span class="type">char</span> buf[<span class="built_in">strlen</span>(pid_str)+<span class="built_in">strlen</span>(meg_str)+<span class="number">1</span>];</span><br><span class="line">	<span class="built_in">strcat</span>(buf,pid_str,meg_str);		</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="number">1</span>,buf);</span><br><span class="line">	<span class="comment">//fprintf(1,&quot;%d: received ping\n&quot;,getpid());</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">//子进程发送pong</span></span><br><span class="line">	close(p2[<span class="number">0</span>]);</span><br><span class="line">	write(p2[<span class="number">1</span>],byte,<span class="number">1</span>);</span><br><span class="line">	close(p2[<span class="number">1</span>]);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">	close(p1[<span class="number">0</span>]);</span><br><span class="line">	<span class="comment">//p1的write端由父进程拿着</span></span><br><span class="line">	write(p1[<span class="number">1</span>],byte,<span class="number">1</span>);</span><br><span class="line">	close(p1[<span class="number">1</span>]);</span><br><span class="line">	<span class="comment">//读取pong</span></span><br><span class="line">	close(p2[<span class="number">1</span>]);</span><br><span class="line">	read(p2[<span class="number">0</span>],byte,<span class="number">1</span>);</span><br><span class="line">	close(p2[<span class="number">0</span>]);</span><br><span class="line">	<span class="comment">//构造</span></span><br><span class="line">	<span class="type">int</span> pid = getpid();</span><br><span class="line">        <span class="type">char</span> pid_str[ensure_itoa_capacity(pid)];</span><br><span class="line">	itoa(pid,pid_str);	</span><br><span class="line">	<span class="type">char</span> meg_str[] = <span class="string">&quot;: received pong\n&quot;</span>;</span><br><span class="line">	<span class="type">char</span> buf[<span class="built_in">strlen</span>(pid_str)+<span class="built_in">strlen</span>(meg_str)+<span class="number">1</span>];</span><br><span class="line">	<span class="built_in">strcat</span>(buf,pid_str,meg_str);		</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="number">1</span>,buf);</span><br><span class="line">	<span class="comment">//fprintf(1,&quot;%d: received pong\n&quot;,getpid());</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="编写primes"><a href="#编写primes" class="headerlink" title="编写primes"></a>编写primes</h4><blockquote>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://www.ewbang.com/community/article/details/960672708.html">MIT操作系统实验lab1（案例：primes（质数筛选）附代码、详解）</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/frost5/article/details/114933307">XV6实验-Lab0 Utilities</a></p>
+</blockquote>
+<blockquote>
+<p>Write a concurrent version of prime sieve using pipes. This idea is due to Doug McIlroy, inventor of Unix pipes. The picture halfway down <a target="_blank" rel="noopener" href="http://swtch.com/~rsc/thread/">this page</a> and the surrounding text explain how to do it. Your solution should be in the file <code>user/primes.c</code>.</p>
+</blockquote>
+<p>其实就是用生产者消费者模式来写素数计算的并发版本，这个我熟</p>
+<p>……以上是第一印象。然后我看着超链接文章里的素数筛的图片，以及指导书给的提示：</p>
+<blockquote>
+<p>Your goal is to use <code>pipe</code> and <code>fork</code> to set up the pipeline. The first process feeds the numbers 2 through 35 into the pipeline. For each prime number, you will arrange to create one process that reads from its left neighbor over a pipe and writes to its right neighbor over another pipe. Since xv6 has limited number of file descriptors and processes, the first process can stop at 35.</p>
+<ul>
+<li>Be careful to close file descriptors that a process doesn’t need, because otherwise your program will run xv6 out of resources before the first process reaches 35.</li>
+</ul>
+</blockquote>
+<p>义无反顾地……使用了35个管道hhhhh</p>
+<p>然后不知道为什么不行，也焦头烂额地感觉我思路太离谱了，去看了下发现大家都是只用一个管道……</p>
+<p>我也搞了个单管道的出来，但是思路受第一篇的影响非常地串行，也即先筛完再创建子进程。看到</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/frost5/article/details/114933307">XV6实验-Lab0 Utilities</a></p>
+<p>这篇文章，才发现还可以那样双管道并行……我虽然也考虑过双管道，但是觉得实现不了【因为我是用循环的思路，如果要双管道的话切换会很麻烦】就没写了，没想到还可以向他那样【他选择的是一个在外部定义的p，和一个作用域更小在每次循环内定义的p1，再加上递归传递参数这个技巧，就可以接连不断递归下去了】，深感佩服。写得是真好，可以去参考学习一下，我懒得改了（</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&quot;user/user.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="type">int</span> p[<span class="number">2</span>];</span><br><span class="line">	pipe(p);</span><br><span class="line">    </span><br><span class="line">	<span class="keyword">if</span>(fork() == <span class="number">0</span>)&#123;</span><br><span class="line">		<span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">			<span class="type">char</span> buf[<span class="number">3</span>];</span><br><span class="line">			<span class="comment">//读入第一个数字 </span></span><br><span class="line">			read(p[<span class="number">0</span>],buf,<span class="number">3</span>);</span><br><span class="line">			<span class="type">int</span> prime = atoi(buf);</span><br><span class="line">			<span class="keyword">if</span>(prime == <span class="number">36</span>)&#123;</span><br><span class="line">				close(p[<span class="number">0</span>]);</span><br><span class="line">				close(p[<span class="number">1</span>]);</span><br><span class="line">				<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="built_in">fprintf</span>(<span class="number">1</span>,<span class="string">&quot;prime %d\n&quot;</span>,prime);</span><br><span class="line">			<span class="comment">//读入其他数字 </span></span><br><span class="line">			<span class="type">int</span> tmp = atoi(buf);</span><br><span class="line">			<span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">				read(p[<span class="number">0</span>],buf,<span class="number">3</span>);</span><br><span class="line">				tmp = atoi(buf);</span><br><span class="line">                <span class="comment">//输入结束</span></span><br><span class="line">				<span class="keyword">if</span>(tmp == <span class="number">36</span>)&#123;</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span>(tmp%prime!=<span class="number">0</span>)&#123;</span><br><span class="line">					write(p[<span class="number">1</span>],buf,<span class="number">3</span>);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">            <span class="comment">//作为标记，标志着输入序列结束</span></span><br><span class="line">			itoa(<span class="number">36</span>,buf);</span><br><span class="line">			write(p[<span class="number">1</span>],buf,<span class="number">3</span>);</span><br><span class="line">			<span class="keyword">if</span>(fork())&#123;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span>&#123;</span><br><span class="line">				close(p[<span class="number">0</span>]);</span><br><span class="line">				close(p[<span class="number">1</span>]);</span><br><span class="line">				wait(<span class="number">0</span>);</span><br><span class="line">				<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span>&#123;</span><br><span class="line">		close(p[<span class="number">0</span>]);</span><br><span class="line">		<span class="type">char</span> buf[<span class="number">3</span>];</span><br><span class="line">		<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">2</span>;i&lt;=<span class="number">35</span>;i++)&#123;</span><br><span class="line">			itoa(i,buf);</span><br><span class="line">			write(p[<span class="number">1</span>],buf,<span class="number">3</span>);</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">//作为标记，标志着输入序列结束</span></span><br><span class="line">		itoa(<span class="number">36</span>,buf);</span><br><span class="line">		write(p[<span class="number">1</span>],buf,<span class="number">3</span>);</span><br><span class="line">		close(p[<span class="number">1</span>]);</span><br><span class="line">		wait(<span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="编写find"><a href="#编写find" class="headerlink" title="编写find"></a>编写find</h4><blockquote>
+<p>Write a simple version of the UNIX find program: find all the files in a directory tree with a specific name. Your solution should be in the file <code>user/find.c</code>.</p>
+</blockquote>
+<h5 id="初始版"><a href="#初始版" class="headerlink" title="初始版"></a>初始版</h5><p>直接照着ls的模板改，改成递归就ok了。值得注意的是，目录也是一种文件，也可以通过read读取。目录文件的内容就是目录里的所有文件的名字。因而，我们在递归时可以忽略文件，只对目录处理，因为目录中就包含着所有文件名的信息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/stat.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;user/user.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/fs.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//取出类似/root/home/a.txt中的a.txt</span></span><br><span class="line"><span class="type">char</span>*</span><br><span class="line"><span class="title function_">fmtname</span><span class="params">(<span class="type">char</span> *path)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">static</span> <span class="type">char</span> buf[DIRSIZ+<span class="number">1</span>];</span><br><span class="line">  <span class="type">char</span> *p;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Find first character after last slash.</span></span><br><span class="line">  <span class="keyword">for</span>(p=path+<span class="built_in">strlen</span>(path); p &gt;= path &amp;&amp; *p != <span class="string">&#x27;/&#x27;</span>; p--)</span><br><span class="line">    ;</span><br><span class="line">  p++;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return blank-padded name.</span></span><br><span class="line">  <span class="keyword">if</span>(<span class="built_in">strlen</span>(p) &gt;= DIRSIZ)</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">  memmove(buf, p, <span class="built_in">strlen</span>(p));</span><br><span class="line">  <span class="built_in">memset</span>(buf+<span class="built_in">strlen</span>(p), <span class="string">&#x27;\0&#x27;</span>, DIRSIZ-<span class="built_in">strlen</span>(p));</span><br><span class="line">  <span class="keyword">return</span> buf;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">find</span><span class="params">(<span class="type">char</span> *path,<span class="type">char</span>* key)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> buf[<span class="number">512</span>], *p;</span><br><span class="line">  <span class="type">int</span> fd;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">dirent</span> <span class="title">de</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">stat</span> <span class="title">st</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>((fd = open(path, <span class="number">0</span>)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>, <span class="string">&quot;find: cannot open %s\n&quot;</span>, path);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(fstat(fd, &amp;st) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>, <span class="string">&quot;find: cannot stat %s\n&quot;</span>, path);</span><br><span class="line">    close(fd);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(st.type == T_DIR)&#123;</span><br><span class="line">   <span class="keyword">if</span>(<span class="built_in">strlen</span>(path) + <span class="number">1</span> + DIRSIZ + <span class="number">1</span> &gt; <span class="keyword">sizeof</span> buf)&#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;find: path too long\n&quot;</span>);</span><br><span class="line">	  close(fd);</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">strcpy</span>(buf, path);</span><br><span class="line">    p = buf+<span class="built_in">strlen</span>(buf);</span><br><span class="line">    *p++ = <span class="string">&#x27;/&#x27;</span>;</span><br><span class="line">    <span class="keyword">while</span>(read(fd, &amp;de, <span class="keyword">sizeof</span>(de)) == <span class="keyword">sizeof</span>(de))&#123;</span><br><span class="line">      <span class="keyword">if</span>(de.inum == <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      memmove(p, de.name, DIRSIZ);</span><br><span class="line">      p[DIRSIZ] = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">if</span>(stat(buf, &amp;st) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;find: cannot stat %s\n&quot;</span>, buf);</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">strcmp</span>(fmtname(buf),<span class="string">&quot;.&quot;</span>)!=<span class="number">0</span> &amp;&amp; <span class="built_in">strcmp</span>(fmtname(buf),<span class="string">&quot;..&quot;</span>)!=<span class="number">0</span>)</span><br><span class="line">    	find(buf,key);</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">strcmp</span>(fmtname(buf),key) == <span class="number">0</span>)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,buf);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  close(fd);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(argc &lt; <span class="number">3</span>)&#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>,<span class="string">&quot;find: have no arg.&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  find(argv[<span class="number">1</span>],argv[<span class="number">2</span>]);</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="附加题：支持正则表达式"><a href="#附加题：支持正则表达式" class="headerlink" title="附加题：支持正则表达式"></a>附加题：支持正则表达式</h5><p>把user/grep.c里面的匹配函数拿来就行。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/types.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/stat.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;user/user.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/fs.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">matchstar</span><span class="params">(<span class="type">int</span> c, <span class="type">char</span> *re, <span class="type">char</span> *text)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">matchhere</span><span class="params">(<span class="type">char</span> *re, <span class="type">char</span> *text)</span>;</span><br><span class="line"><span class="comment">//正則匹配函數</span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">match</span><span class="params">(<span class="type">char</span> *re, <span class="type">char</span> *text)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(re[<span class="number">0</span>] == <span class="string">&#x27;^&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> matchhere(re+<span class="number">1</span>, text);</span><br><span class="line">  <span class="keyword">do</span>&#123;  <span class="comment">// must look at empty string</span></span><br><span class="line">    <span class="keyword">if</span>(matchhere(re, text))</span><br><span class="line">      <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  &#125;<span class="keyword">while</span>(*text++ != <span class="string">&#x27;\0&#x27;</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// matchhere: search for re at beginning of text</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">matchhere</span><span class="params">(<span class="type">char</span> *re, <span class="type">char</span> *text)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(re[<span class="number">0</span>] == <span class="string">&#x27;\0&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">if</span>(re[<span class="number">1</span>] == <span class="string">&#x27;*&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> matchstar(re[<span class="number">0</span>], re+<span class="number">2</span>, text);</span><br><span class="line">  <span class="keyword">if</span>(re[<span class="number">0</span>] == <span class="string">&#x27;$&#x27;</span> &amp;&amp; re[<span class="number">1</span>] == <span class="string">&#x27;\0&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> *text == <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">  <span class="keyword">if</span>(*text!=<span class="string">&#x27;\0&#x27;</span> &amp;&amp; (re[<span class="number">0</span>]==<span class="string">&#x27;.&#x27;</span> || re[<span class="number">0</span>]==*text))</span><br><span class="line">    <span class="keyword">return</span> matchhere(re+<span class="number">1</span>, text+<span class="number">1</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// matchstar: search for c*re at beginning of text</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">matchstar</span><span class="params">(<span class="type">int</span> c, <span class="type">char</span> *re, <span class="type">char</span> *text)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">do</span>&#123;  <span class="comment">// a * matches zero or more instances</span></span><br><span class="line">    <span class="keyword">if</span>(matchhere(re, text))</span><br><span class="line">      <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">  &#125;<span class="keyword">while</span>(*text!=<span class="string">&#x27;\0&#x27;</span> &amp;&amp; (*text++==c || c==<span class="string">&#x27;.&#x27;</span>));</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//取出类似/root/home/a.txt中的a.txt</span></span><br><span class="line"><span class="type">char</span>*</span><br><span class="line"><span class="title function_">fmtname</span><span class="params">(<span class="type">char</span> *path)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">static</span> <span class="type">char</span> buf[DIRSIZ+<span class="number">1</span>];</span><br><span class="line">  <span class="type">char</span> *p;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Find first character after last slash.</span></span><br><span class="line">  <span class="keyword">for</span>(p=path+<span class="built_in">strlen</span>(path); p &gt;= path &amp;&amp; *p != <span class="string">&#x27;/&#x27;</span>; p--)</span><br><span class="line">    ;</span><br><span class="line">  p++;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Return blank-padded name.</span></span><br><span class="line">  <span class="keyword">if</span>(<span class="built_in">strlen</span>(p) &gt;= DIRSIZ)</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">  memmove(buf, p, <span class="built_in">strlen</span>(p));</span><br><span class="line">  <span class="built_in">memset</span>(buf+<span class="built_in">strlen</span>(p), <span class="string">&#x27;\0&#x27;</span>, DIRSIZ-<span class="built_in">strlen</span>(p));</span><br><span class="line">  <span class="keyword">return</span> buf;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">find</span><span class="params">(<span class="type">char</span> *path,<span class="type">char</span>* key)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> buf[<span class="number">512</span>], *p;</span><br><span class="line">  <span class="type">int</span> fd;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">dirent</span> <span class="title">de</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">stat</span> <span class="title">st</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>((fd = open(path, <span class="number">0</span>)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>, <span class="string">&quot;find: cannot open %s\n&quot;</span>, path);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(fstat(fd, &amp;st) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>, <span class="string">&quot;find: cannot stat %s\n&quot;</span>, path);</span><br><span class="line">    close(fd);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(st.type == T_DIR)&#123;</span><br><span class="line">   <span class="keyword">if</span>(<span class="built_in">strlen</span>(path) + <span class="number">1</span> + DIRSIZ + <span class="number">1</span> &gt; <span class="keyword">sizeof</span> buf)&#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;find: path too long\n&quot;</span>);</span><br><span class="line">	close(fd);</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">strcpy</span>(buf, path);</span><br><span class="line">    p = buf+<span class="built_in">strlen</span>(buf);</span><br><span class="line">    *p++ = <span class="string">&#x27;/&#x27;</span>;</span><br><span class="line">    <span class="keyword">while</span>(read(fd, &amp;de, <span class="keyword">sizeof</span>(de)) == <span class="keyword">sizeof</span>(de))&#123;</span><br><span class="line">      <span class="keyword">if</span>(de.inum == <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      memmove(p, de.name, DIRSIZ);</span><br><span class="line">      p[DIRSIZ] = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">if</span>(stat(buf, &amp;st) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;find: cannot stat %s\n&quot;</span>, buf);</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">strcmp</span>(fmtname(buf),<span class="string">&quot;.&quot;</span>)!=<span class="number">0</span> &amp;&amp; <span class="built_in">strcmp</span>(fmtname(buf),<span class="string">&quot;..&quot;</span>)!=<span class="number">0</span>)&#123;</span><br><span class="line">		<span class="keyword">if</span>(match(fmtname(buf),key))&#123;</span><br><span class="line">	    	<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,buf);</span><br><span class="line">      	&#125;</span><br><span class="line"></span><br><span class="line">    	find(buf,key);</span><br><span class="line">       &#125;</span><br><span class="line">      <span class="comment">//if(strcmp(fmtname(buf),key) == 0)&#123;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  close(fd);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(argc &lt; <span class="number">3</span>)&#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="number">2</span>,<span class="string">&quot;find: have no arg.&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  find(argv[<span class="number">1</span>],argv[<span class="number">2</span>]);</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="编写xargs"><a href="#编写xargs" class="headerlink" title="编写xargs"></a>编写xargs</h4><blockquote>
+<p>Write a simple version of the UNIX xargs program: read lines from the standard input and run a command for each line, supplying the line as arguments to the command. Your solution should be in the file <code>user/xargs.c</code>.</p>
+</blockquote>
+<h5 id="体会-2"><a href="#体会-2" class="headerlink" title="体会"></a>体会</h5><p>思路还是很直观的，就是从stdin一行一行读入数据，然后把这数据处理成参数，最后调用exec就行。就是中间有很多小细节值得注意。</p>
+<p>有一点比较坑的是，main方法的那个argc的计算方法是这样的，不是直接用数组的长度：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(argc = <span class="number">0</span>; argv[argc]; argc++) </span><br></pre></td></tr></table></figure>
+
+<p>可以看到，合格的argv的形式应该是：参1 参2 参3 “\0”，最后一个元素要以”\0”标志结束。</p>
+<p>这个应该是编写者约定俗成的。在user/sh.c的parseexec，大概445行左右：</p>
+
+
+<p>shell处理命令时是会默认把最后一个清零的。</p>
+<blockquote>
+<p>确实，后面在学内存的时候，用户空间的构成如图所示：</p>
+
+
+<p>可以看到栈那边，参数列完了之后是会有一个用以terminate的空指针的</p>
+</blockquote>
+<h5 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;user/user.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;kernel/param.h&quot;</span></span></span><br><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="comment">// for(int i=0;i&lt;argc;i++)	fprintf(1,&quot;argv[%d] = %s\n&quot;,i,argv[i]);</span></span><br><span class="line">    <span class="comment">//之所以写得这么曲折，是因为数组是const指针不能变值</span></span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">512</span>];</span><br><span class="line">    <span class="type">char</span>* buf = buffer; </span><br><span class="line">    <span class="type">char</span>* start = buf;</span><br><span class="line">    <span class="comment">//如果xargs没有参数，就开启复读模式</span></span><br><span class="line">    <span class="keyword">if</span>(argc &lt;= <span class="number">1</span>)&#123;</span><br><span class="line">		<span class="type">int</span> n;</span><br><span class="line">		<span class="keyword">while</span>((n = read(<span class="number">0</span>,buf,<span class="number">512</span>)))&#123;</span><br><span class="line">	    	write(<span class="number">1</span>,buf,n);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//这个必须写在外面，不能定义在下面的if体里，不然出了作用域就会被回收，不能作为参数的一员参与进exec，会变成很可怕的乱码。</span></span><br><span class="line">    <span class="type">char</span> tmp[<span class="number">512</span>];</span><br><span class="line">    <span class="comment">//MAXARG为定义在kernel/param.h下的参数，代表参数最多值</span></span><br><span class="line">    <span class="type">char</span>* new_argv[MAXARG] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line">    argc--;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;argc; i++)&#123;</span><br><span class="line">		new_argv[i] = argv[i+<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span>(read(<span class="number">0</span>,buf,<span class="number">1</span>))&#123;</span><br><span class="line">        <span class="comment">//fprintf(1,&quot;buf[0] is : %c\n&quot;,buf[0]);</span></span><br><span class="line">        <span class="keyword">if</span>(buf[<span class="number">0</span>] == <span class="string">&#x27;\n&#x27;</span>)&#123;</span><br><span class="line">            <span class="built_in">memcpy</span>(tmp,start,buf-start);</span><br><span class="line">            tmp[buf-start] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">            new_argv[i++] = tmp;</span><br><span class="line">            argc++;</span><br><span class="line">            buf = start;</span><br><span class="line">           <span class="comment">// fprintf(1,&quot;tmp is :%s\n&quot;,tmp);</span></span><br><span class="line">            <span class="comment">//fprintf(1,&quot;new_argv[i-1] is :%s\n&quot;,new_argv[i-1]);</span></span><br><span class="line">        &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">            buf ++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">   <span class="comment">// fprintf(1,&quot;argc = %d\n&quot;,argc);</span></span><br><span class="line">    <span class="keyword">if</span>(fork() == <span class="number">0</span>)&#123;</span><br><span class="line">    	exec(new_argv[<span class="number">0</span>],new_argv);</span><br><span class="line">    &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">		wait(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="附加题：改善shell"><a href="#附加题：改善shell" class="headerlink" title="附加题：改善shell"></a>附加题：改善shell</h4><p>看起来又难又多所以我先摸了【润】等之后有时间再回来弄吧</p>
+<h3 id="提交代码"><a href="#提交代码" class="headerlink" title="提交代码"></a>提交代码</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m &quot;utils&quot;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/21/JavaWeb/" rel="prev" title="JavaWeb">
+      <i class="fa fa-chevron-left"></i> JavaWeb
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6/" rel="next" title="xv6">
+      xv6 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Operating-system-interface"><span class="nav-number">1.</span> <span class="nav-text">Operating system interface</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Process-and-memory"><span class="nav-number">1.1.</span> <span class="nav-text">Process and memory</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fork"><span class="nav-number">1.1.1.</span> <span class="nav-text">fork</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exec"><span class="nav-number">1.1.2.</span> <span class="nav-text">exec</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exec%E4%B8%8Efork"><span class="nav-number">1.1.3.</span> <span class="nav-text">exec与fork</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#I-O-and-File-descriptors"><span class="nav-number">1.2.</span> <span class="nav-text">I&#x2F;O and File descriptors</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.2.1.</span> <span class="nav-text">文件描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#read%E3%80%81write"><span class="nav-number">1.2.2.</span> <span class="nav-text">read、write</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#close"><span class="nav-number">1.2.3.</span> <span class="nav-text">close</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#open"><span class="nav-number">1.2.4.</span> <span class="nav-text">open</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%AE%9A%E5%90%91%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.2.5.</span> <span class="nav-text">重定向的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%81%8F%E7%A7%BB%E9%87%8F"><span class="nav-number">1.2.6.</span> <span class="nav-text">共享偏移量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dup"><span class="nav-number">1.2.7.</span> <span class="nav-text">dup</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pipe"><span class="nav-number">1.3.</span> <span class="nav-text">Pipe</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">1.3.1.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%AE%A1%E9%81%93%E5%91%BD%E4%BB%A4"><span class="nav-number">1.3.2.</span> <span class="nav-text">实现管道命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#File-system"><span class="nav-number">1.4.</span> <span class="nav-text">File system</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-Xv6-and-Unix-utilities"><span class="nav-number">1.5.</span> <span class="nav-text">Lab Xv6 and Unix utilities</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%87%86%E5%A4%87"><span class="nav-number">1.5.1.</span> <span class="nav-text">虚拟机准备</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#vmware"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">vmware</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B4%A6%E5%8F%B7%E5%AF%86%E7%A0%81"><span class="nav-number">1.5.1.1.1.</span> <span class="nav-text">账号密码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E4%BD%BF%E7%94%A8vmdk%E6%96%87%E4%BB%B6"><span class="nav-number">1.5.1.1.2.</span> <span class="nav-text">怎么使用vmdk文件</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%BF%E9%87%8C%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8-XShell"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">阿里云服务器+XShell</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ubuntu%E7%B3%BB%E7%BB%9F%E5%BF%98%E8%AE%B0%E5%AF%86%E7%A0%81%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E"><span class="nav-number">1.5.1.3.</span> <span class="nav-text">ubuntu系统忘记密码了怎么办</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%BF%9B%E5%85%A5grub%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.5.1.3.1.</span> <span class="nav-text">如何进入grub模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5grub%E6%A8%A1%E5%BC%8F%E5%90%8E%E6%8C%89%E4%BB%80%E4%B9%88"><span class="nav-number">1.5.1.3.2.</span> <span class="nav-text">进入grub模式后按什么</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E4%B8%8D%E4%BA%86%E7%BD%91"><span class="nav-number">1.5.1.4.</span> <span class="nav-text">连不了网</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E5%AE%9E%E9%AA%8C%E7%8E%AF%E5%A2%83"><span class="nav-number">1.5.2.</span> <span class="nav-text">配置实验环境</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7%E9%93%BE"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">下载工具链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E7%BC%96%E8%AF%91xv6%E6%BA%90%E7%A0%81"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">下载编译xv6源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%97%ADqemu"><span class="nav-number">1.5.2.3.</span> <span class="nav-text">关闭qemu</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95gdb%E6%98%AF%E5%90%A6ok"><span class="nav-number">1.5.2.4.</span> <span class="nav-text">测试gdb是否ok</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E6%B5%8B%E6%96%B9%E6%B3%95"><span class="nav-number">1.5.2.5.</span> <span class="nav-text">自测方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E5%86%85%E5%AE%B9"><span class="nav-number">1.5.3.</span> <span class="nav-text">实验内容</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99sleep-c"><span class="nav-number">1.5.3.1.</span> <span class="nav-text">编写sleep.c</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%93%E4%BC%9A"><span class="nav-number">1.5.3.1.1.</span> <span class="nav-text">体会</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%82%E6%95%B0"><span class="nav-number">1.5.3.1.1.1.</span> <span class="nav-text">参数</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B"><span class="nav-number">1.5.3.1.1.2.</span> <span class="nav-text">系统调用过程</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.5.3.1.2.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99pingpong%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.5.3.2.</span> <span class="nav-text">编写pingpong程序</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%93%E4%BC%9A-1"><span class="nav-number">1.5.3.2.1.</span> <span class="nav-text">体会</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="nav-number">1.5.3.2.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E5%87%BD%E6%95%B0"><span class="nav-number">1.5.3.2.2.1.</span> <span class="nav-text">工具函数</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#pingpong"><span class="nav-number">1.5.3.2.2.2.</span> <span class="nav-text">pingpong</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99primes"><span class="nav-number">1.5.3.3.</span> <span class="nav-text">编写primes</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99find"><span class="nav-number">1.5.3.4.</span> <span class="nav-text">编写find</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E7%89%88"><span class="nav-number">1.5.3.4.1.</span> <span class="nav-text">初始版</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%99%84%E5%8A%A0%E9%A2%98%EF%BC%9A%E6%94%AF%E6%8C%81%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.5.3.4.2.</span> <span class="nav-text">附加题：支持正则表达式</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E5%86%99xargs"><span class="nav-number">1.5.3.5.</span> <span class="nav-text">编写xargs</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%93%E4%BC%9A-2"><span class="nav-number">1.5.3.5.1.</span> <span class="nav-text">体会</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-2"><span class="nav-number">1.5.3.5.2.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%84%E5%8A%A0%E9%A2%98%EF%BC%9A%E6%94%B9%E5%96%84shell"><span class="nav-number">1.5.3.6.</span> <span class="nav-text">附加题：改善shell</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E4%BA%A4%E4%BB%A3%E7%A0%81"><span class="nav-number">1.5.4.</span> <span class="nav-text">提交代码</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
