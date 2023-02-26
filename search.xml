@@ -5,9 +5,6 @@
     <url>/2022/11/06/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98/</url>
     <content><![CDATA[<blockquote>
 <p>idea 替换注释正则表达式<code>/\*&#123;1,2&#125;[\s\S]*?\*/</code></p>
-<p>typora 替换图片asset</p>
-<p><code>\!\[.*\]\(D:\\aWorkStorage\\hexo\\blog\\source\\_posts\\.*\\(.*)\.(.*)\)</code>，</p>
-<p>替换结果<code>&#123;% asset_img $1.$2 %&#125;</code></p>
 </blockquote>
 <h1 id="第一章-简介"><a href="#第一章-简介" class="headerlink" title="第一章 简介"></a>第一章 简介</h1><h2 id="线程的作用"><a href="#线程的作用" class="headerlink" title="线程的作用"></a>线程的作用</h2><img src="/2022/11/06/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98/image-20221102195038586.png" class>
 
