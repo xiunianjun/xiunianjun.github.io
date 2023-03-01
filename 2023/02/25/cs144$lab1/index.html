@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
+  <link rel="mask-icon" href="/images/cat.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Lab1   StreamReassembler TCP managed to produce a pair of reliable in-order byte streams (one from you to the server, and one in the opposite direction), even though the underlying network only delive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lab1  StreamReassembler">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/02/25/cs144$lab1/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="Lab1   StreamReassembler TCP managed to produce a pair of reliable in-order byte streams (one from you to the server, and one in the opposite direction), even though the underlying network only delive">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230225192145829.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230225232723083-1677339210527-2.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230225200605175.png">
+<meta property="article:published_time" content="2023-02-25T14:19:00.000Z">
+<meta property="article:modified_time" content="2023-02-28T15:58:11.448Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230225192145829.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/02/25/cs144$lab1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Lab1  StreamReassembler | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+	
+		<script type="text/javascript" 
+		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
+		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+	
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/02/25/cs144$lab1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Lab1  StreamReassembler
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-25 22:19:00" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-02-28 23:58:11" itemprop="dateModified" datetime="2023-02-28T23:58:11+08:00">2023-02-28</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Lab1-StreamReassembler"><a href="#Lab1-StreamReassembler" class="headerlink" title="Lab1   StreamReassembler"></a>Lab1   StreamReassembler</h1><blockquote>
+<p>TCP managed to produce a pair of <em>reliable in-order byte streams</em> (one from you to the server, and one in the opposite direction), even though the underlying network only delivers “best-effort” datagrams. </p>
+<p>You also implemented the byte-stream abstraction yourself, in memory within one computer. </p>
+<p>Over the next four weeks, you’ll implement TCP, to <strong>provide the byte-stream abstraction between a pair of computers</strong> separated by an unreliable datagram network.</p>
+</blockquote>
+<p>我们的任务是实现一个<code>StreamReassembler</code>。它的具体功能相信看下数据传输路径就很明了了：</p>
+<blockquote>
+<p>receiver的数据传输路径：network → StreamReassembler整流 →（write）ByteStream（read）→ app</p>
+</blockquote>
+<h2 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h2><p>先放个通关截图在这。</p>
+<p><img src="/2023/02/25/cs144/image-20230225192145829.png" alt="image-20230225192145829"></p>
+<p>这个实验我前前后后总共做了大概有9h+……写我下面放上来的屎山代码可能大概用了5h+。我总共使用了140+行代码实现我的核心函数<code>push_substring</code>。</p>
+<p>整个过程，包括思路和代码都十分复杂，但最后的表现相比于别人好像也没好到哪去，让我不禁怀疑自己是不是想错了……以及，这样的复杂性也给我带来很多担忧，担心会不会在以后的实验因为这个的bug而寄，毕竟我在写笔记的同时都已经找到了不止一个bug了（）希望人没事。</p>
+<p>总而言之，先把我的思路和一步步的代码拆解放上来吧。</p>
+<blockquote>
+<p>后记：</p>
+<p>不得不说，这个东西太健壮了，给后面的<code>TCPReceiver</code>省去了好多功夫……</p>
+<p>比如说，<code>TCPReceiver</code>无需考虑ack怎么算，因为这里就帮你算好了；<code>TCPReceiver</code>无需考虑数据包重叠或者重复，因为这里已经考虑到这个情况了；<code>TCPReceiver</code>无需担忧FIN是否会因为容量满丢弃一部分数据而未达到真正的FIN，只需调用其相关接口判断就行。</p>
+<p>它虽然帮助了<code>TCPReceiver</code>那么多，但很神奇的是，它们的耦合性并不高。你把<code>StreamReassembler</code>单独拆出来看，左看右看，它都<u>确实仅仅只是一个健壮的区间合并算法</u>。</p>
+<p>这得益于实验设计的精良，得益于设计<code>TCPReceiver</code>时的野心。这些边界情况都这么麻烦，而且都只与区间合并有关，那么我们为什么不直接把它抽象进区间合并进行处理呢？这种想法极富胆识，事实证明最后也确实能实现。这种设计理念让我受益很深。</p>
+</blockquote>
+<h2 id="为什么我的思路那么复杂"><a href="#为什么我的思路那么复杂" class="headerlink" title="为什么我的思路那么复杂"></a>为什么我的思路那么复杂</h2><p>看了<a target="_blank" rel="noopener" href="https://github.com/shootfirst/CS144/">感恩</a>的代码，我发现我俩的大题思路其实差不多是一模一样的，都是先进行两轮的区间合并，然后再处理但为啥我看起来就那么复杂呢？</p>
+<p>一是题意理解问题。</p>
+<p>我发现他对<code>_capacity</code>的理解跟我的理解不一样emmm……</p>
+<p>额好像怪我没认真看指导书的图。</p>
+<p><img src="/2023/02/25/cs144/image-20230225232723083-1677339210527-2.png" alt="image-20230225232723083-1677339210527-2"></p>
+<p>我理解的capacity：绿色部分和红色部分的净含量</p>
+<p>似乎是真正的capacity：绿色部分+红色部分+空部分？？也就是说capacity只是一个跟index差不多的索引下标？？…………</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// out of bound</span></span><br><span class="line"><span class="keyword">if</span> (start &gt;= hope_to_rec + _capacity - _output.<span class="built_in">buffer_size</span>()) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说我能过测试是因为偶然吗？？</p>
+<p>我其实感觉正确理解的capacity意义好怪啊，这怎么就能节省内存了呢？我觉得我理解的反而比较有道理（倔强）</p>
+<p>笑一笑算了家人们。总之先这么写吧，以后的实验寄掉了再回来改。</p>
+<p>二是代码规范问题。</p>
+<p>首先他代码规范性强，看起来非常舒服。其次他会用类似<code>upper_bound()</code>这样的函数（反观我压根没想起来），这样就显得比我的循环简洁了很多很多。</p>
+<p>首先他的代码规范确实做得很好</p>
+<p>第二他还会用upper_bound这样的函数（反观我压根没想起来），这样就显得比我的清除很多。</p>
+<p>三是设计问题。</p>
+<p>他用的是<code>map</code>我用的是<code>set</code>。确实是map比较合理，它既有find功能也兼具了有序的特性。</p>
+<h2 id="我的思路"><a href="#我的思路" class="headerlink" title="我的思路"></a>我的思路</h2><p>我们要做的，是将零散的数据包拼接成完整的字节流，并且将整流过的数据送入<code>ByteStream</code>中，这通过核心函数<code>push_substring</code>实现。我们可以先来看看<code>push_substring</code>的定义：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">StreamReassembler::push_substring</span><span class="params">(<span class="type">const</span> string &amp;data, <span class="type">const</span> <span class="type">size_t</span> index, <span class="type">const</span> <span class="type">bool</span> eof)</span> </span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>data</code>为数据包，<code>index</code>为<code>data</code>中第一个字符在整个字节流的下标，<code>eof</code>用来标识这是字节流的最后一个数据包。</p>
+<blockquote>
+<p>详细说明：</p>
+<p>比方说有字节流“abcdefg”，则合法的参数对有如：{“abc”,0,0},{“cdef”,2,0},{“g”,6,1}</p>
+</blockquote>
+<p>通俗来说，我们这个函数的功能就是，把一堆起始下标为<code>index</code>的<code>data</code>（无序、可能重叠）拼接为一个完整的字节流。</p>
+<p>听起来有没有觉得很耳熟？是的，我认为这正是“区间合并”问题。我接下来便通过区间合并的思想，对问题进行如下数据结构以及算法的设计。</p>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><h4 id="区间"><a href="#区间" class="headerlink" title="区间"></a>区间</h4><p>由于是区间合并问题，所以就先需要定义区间。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">node</span> &#123;</span><br><span class="line">    <span class="type">size_t</span> left;   <span class="comment">// 当前data位于总体的左index（闭）</span></span><br><span class="line">    <span class="type">size_t</span> right;  <span class="comment">// 右index（开）</span></span><br><span class="line">    string data;</span><br><span class="line">    <span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> node &amp;b) <span class="type">const</span> &#123; <span class="keyword">return</span> left &lt; b.left; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="集合"><a href="#集合" class="headerlink" title="集合"></a>集合</h4><p>我们需要维护一个左端点升序的区间集合，故使用内部红黑树实现的有序集合set。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set&lt;node&gt; buffer;   <span class="comment">// 存储结构</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><p>我们要做的，是对数据包进行整流，并且把整流过的部分输送到<code>ByteStream</code>中。由于存储结构存在<code>_capacity</code>的上限，因而，我们需要尽可能早地把存储结构中已经整流好的数据送入<code>ByteStream</code>中。</p>
+<p>那么，如何定义“已经整流好的数据”呢？它需要满足跟“之前已经整流好了的数据”的有序性，也即，比方说[0,1000]已经整流完毕送入app，那么下一个送入app的数据一定满足<code>index=1001</code>。</p>
+<p>因而，我们可以维护一个变量<code>left_bound</code>，表示下一个将被app接受的数据的index（如上例的1001）。为了达到“尽早”目的，我们需要在每次<code>push_substring</code>执行完区间合并之后，检查<code>buffer</code>的第一个区间的左端点是否与<code>left_bound</code>相等，是的话则将第一个区间写入<code>ByteStream</code>，不是的话就什么也不做。</p>
+<p>因而，在<code>push_substring</code>中，对于一个新来的数据包，我们大致需要进行以下几步：</p>
+<ol>
+<li>将参数所给的区间( <code>[index, index+data.length())</code> )并入区间集合<code>buffer</code>中</li>
+<li>查看是否需要<code>ByteStream</code></li>
+</ol>
+<h4 id="区间合并"><a href="#区间合并" class="headerlink" title="区间合并"></a>区间合并</h4><h5 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h5><p>问题可抽象为：</p>
+<blockquote>
+<p>给定一个有序区间集合<code>buffer</code>，以及一个小区间<code>node</code>，你需要把<code>node</code>塞进<code>buffer</code>里。</p>
+<p>Example： buffer = {[1,3),[5,7)} , node = [6,8) 输出：buffer = {[1,3), [5,8)}</p>
+</blockquote>
+<h5 id="算法思路"><a href="#算法思路" class="headerlink" title="算法思路"></a>算法思路</h5><p>判断区间重叠统一只检查左端点。注意，两次重叠的判断条件不一样，是因为相对性发生了改变。第一次相当于node的左端点在buffer[i]中，第二次相当于buffer[i]的左端点在node中。</p>
+<ol>
+<li><p>对<code>buffer</code>进行第一轮扫描</p>
+<p>如果node与buffer[i]产生重叠（<code>(left &gt;= it-&gt;left &amp;&amp; left &lt;= it-&gt;right)</code>），那么更新node为node∪buffer[i]，并且将buffer[i]从buffer中删去。</p>
+<p>在第一次找到重叠的区间，就应该break退出第一轮循环。</p>
+</li>
+<li><p>对<code>buffer</code>进行第二轮扫描</p>
+<p>如果node与buffer[i]产生重叠（<code> (it-&gt;left &gt;= left &amp;&amp; it-&gt;left &lt;= right)</code>），那么更新node为node∪buffer[i]，并且将buffer[i]从buffer中删去。</p>
+</li>
+</ol>
+<p>我们在合并区间时，不仅需要对<code>struct node</code>的左端点<code>left</code>和右端点<code>right</code>进行更新，还需要对其数据域<code>data</code>也进行合并拼接。我们维护变量<code>res</code>作为维护的目标区间的数据域。对于res，我们应该进行如下操作：</p>
+<ol>
+<li><p>初始化为data</p>
+</li>
+<li><p>除去[left, left_bound)这一区间内的数据</p>
+<p>这部分数据我们已经整流过并且写入<code>ByteStream</code></p>
+</li>
+<li><p>在两轮合并中对其进行正确拼接</p>
+</li>
+</ol>
+<h5 id="图解"><a href="#图解" class="headerlink" title="图解"></a>图解</h5><p><img src="/2023/02/25/cs144/image-20230225200605175.png" alt="image-20230225200605175"></p>
+<h5 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">size_t</span> left = index, right = index + data.<span class="built_in">length</span>();  <span class="comment">// 初始化左右区间</span></span><br><span class="line"><span class="type">size_t</span> o_left = left, o_right = right;               <span class="comment">// keep the original value</span></span><br><span class="line">node tmp = &#123;<span class="number">0</span>, <span class="number">0</span>, <span class="string">&quot;&quot;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (right &lt; left_bound)	<span class="keyword">return</span>;                <span class="comment">// must be duplicated</span></span><br><span class="line">left = left &lt; left_bound ? left_bound : left;  <span class="comment">// 左边已经接受过的数据就不要了</span></span><br><span class="line">string res = data.<span class="built_in">substr</span>(left - o_left, right - left);<span class="comment">// 掐头</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 开始区间合并。需要扫描两次 */</span></span><br><span class="line"><span class="comment">// 第一次</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (left &gt;= it-&gt;left &amp;&amp; left &lt;= it-&gt;right) &#123; <span class="comment">// 区间重叠</span></span><br><span class="line">        <span class="type">size_t</span> r = right,l = left;</span><br><span class="line">        <span class="comment">// 更新左右端点</span></span><br><span class="line">        right = <span class="built_in">max</span>(right, it-&gt;right);</span><br><span class="line">        left = <span class="built_in">min</span>(left, it-&gt;left);</span><br><span class="line">        <span class="keyword">if</span> (r &lt;= it-&gt;right) <span class="comment">// 如果目标区间被包裹在it内</span></span><br><span class="line">            <span class="comment">// res需要更新为it头+data掐头后的全长+it尾，也即将it中间重叠部分用data替换</span></span><br><span class="line">            res = it-&gt;data.<span class="built_in">substr</span>(<span class="number">0</span>, l - it-&gt;left) + data.<span class="built_in">substr</span>(l - o_left) +</span><br><span class="line">            it-&gt;data.<span class="built_in">substr</span>(r - it-&gt;left, it-&gt;right - r);</span><br><span class="line">        <span class="keyword">else</span> </span><br><span class="line">            res = it-&gt;data.<span class="built_in">substr</span>(<span class="number">0</span>, l - it-&gt;left) + data.<span class="built_in">substr</span>(l - o_left);</span><br><span class="line">        <span class="comment">// 删除原来的结点</span></span><br><span class="line">        buffer.<span class="built_in">erase</span>(it);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第二次</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (it-&gt;left &gt;= left &amp;&amp; it-&gt;left &lt;= right) &#123;</span><br><span class="line">        <span class="keyword">if</span> (it-&gt;right &lt;= right);<span class="comment">// it这个区间被包含在目标区间内，则什么也不做</span></span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 需要加上it的尾</span></span><br><span class="line">            res += it-&gt;data.<span class="built_in">substr</span>(right - it-&gt;left, it-&gt;right - right);</span><br><span class="line">            <span class="comment">// 更新右端点</span></span><br><span class="line">            right = it-&gt;right;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 删除</span></span><br><span class="line">        buffer.<span class="built_in">erase</span>(it);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 将维护区间插入区间集合</span></span><br><span class="line">tmp = &#123;left, right, res&#125;;</span><br><span class="line">buffer.<span class="built_in">insert</span>(tmp);</span><br></pre></td></tr></table></figure>
+
+<h4 id="写入ByteStream"><a href="#写入ByteStream" class="headerlink" title="写入ByteStream"></a>写入<code>ByteStream</code></h4><h5 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h5><p>我们需要检查buffer内的第一个区间，如果其左端点与left_bound相等，则把第一个区间填入<code>ByteStream</code>，然后更新left_bound，从buffer中删去该区间；如果不相等（只可能是left &gt; left_bound）则什么也不做。</p>
+<p>在把区间数据填入<code>ByteStream</code>的过程中，可能造成<code>ByteStream</code>满。因而我们就只能填入第一个区间内的一部分数据，更新left_bound，将第一个区间的剩余数据继续存在buffer中。</p>
+<h5 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> iterator = buffer.<span class="built_in">begin</span>();  </span><br><span class="line">iterator = buffer.<span class="built_in">begin</span>();</span><br><span class="line"><span class="comment">// write into the ByteStream</span></span><br><span class="line"><span class="keyword">if</span> (iterator != buffer.<span class="built_in">end</span>() &amp;&amp; iterator-&gt;left == left_bound) &#123;</span><br><span class="line">    <span class="comment">// 防止_output的容量超过</span></span><br><span class="line">    <span class="type">size_t</span> out_rem = _output.<span class="built_in">remaining_capacity</span>();</span><br><span class="line">    <span class="keyword">if</span> (out_rem &lt; iterator-&gt;data.<span class="built_in">length</span>()) &#123; <span class="comment">// ByteStream剩余容量小于第一个区间长度</span></span><br><span class="line">        _output.<span class="built_in">write</span>(iterator-&gt;data.<span class="built_in">substr</span>(<span class="number">0</span>, out_rem));<span class="comment">// 写入尽量多数据</span></span><br><span class="line">        left_bound = iterator-&gt;left + out_rem;<span class="comment">// 更新左边界</span></span><br><span class="line">        <span class="comment">// 由于iterator只读，因而我们不能直接修改其左端点和data域</span></span><br><span class="line">        tmp = &#123;left_bound, iterator-&gt;right, iterator-&gt;data.<span class="built_in">substr</span>(out_rem)&#125;;</span><br><span class="line">        buffer.<span class="built_in">erase</span>(iterator);</span><br><span class="line">        buffer.<span class="built_in">insert</span>(tmp);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        _output.<span class="built_in">write</span>(iterator-&gt;data);</span><br><span class="line">        left_bound = iterator-&gt;right;</span><br><span class="line">        buffer.<span class="built_in">erase</span>(iterator);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="buffer的最大容量-capacity"><a href="#buffer的最大容量-capacity" class="headerlink" title="buffer的最大容量_capacity"></a>buffer的最大容量_capacity</h4><h5 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h5><p>维护“存储结构的容量不超过capacity”这个不变性条件可以说是这个实验最恶心最难的地方……也正是它，让我的代码写成了一坨shit山（）</p>
+<p>为什么说它最难最恶心呢？其实它本来也许不算难，但在这个思路下想要保持这个不变性条件，就显得非常地困难。</p>
+<p>一开始没过脑子的时候，我觉得这样就行：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">StreamReassembler::push_substring</span><span class="params">(<span class="type">const</span> string &amp;data, <span class="type">const</span> <span class="type">size_t</span> index, <span class="type">const</span> <span class="type">bool</span> eof)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(data.<span class="built_in">length</span>() + <span class="built_in">unassemble_bytes</span>() &gt; capacity)	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是这样很明显有两个问题。</p>
+<p>一是就算你超过了，你也不能直接丢弃掉data，得把没超过的部分填满。</p>
+<p>二是，<code>data.length() + unassemble_bytes()</code>有时，甚至是很多时候，都不会是将data并入buffer之后buffer的容量。因为data和buffer很大概率会存在重叠区间。</p>
+<p>那么，你能不能在区间合并完之后，再进行该不变性条件的判断，并且将没超过的部分填满，超过的部分丢弃呢？</p>
+<p>答案是，也不能。因为经过两轮合并，你的data和buffer里原有的数据早已你中有我我中有你了，你无法在最后将它们分开，找出data超过capacity的数据并且丢弃它。</p>
+<p>因而，头尾都不行的话，唯一的答案就是，<strong>我们只能在两轮区间合并中途，去时刻追踪当前容量是否超过capacity</strong>。</p>
+<p>这听起来就令人十分地头大。但事实证明，并不是无法实现的，坚持下去，就算是shit山也能跑起来（）下面便是我的实现思路。</p>
+<h5 id="思路-1"><a href="#思路-1" class="headerlink" title="思路"></a>思路</h5><p>维护一个变量<code>remaining</code>，表示当前还有多少容量。维护<code>start</code>，表示未判断是否可以写入buffer的数据起点。我们要做的事：</p>
+<ol>
+<li>初始化remaining为capacity - 当前容量，start为掐头后的left</li>
+<li>在第一轮循环中更新start</li>
+<li>在第二轮循环中通过start和remaining来判断是否能够写入buffer。尽可能多地写入，把写入不了的部分丢弃。</li>
+</ol>
+<h5 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h5><p>下面举个例子来说明整个流程。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">initial:  </span><br><span class="line">buffer = &#123; [<span class="number">1</span>,<span class="number">3</span>], [<span class="number">5</span>,<span class="number">8</span>],[<span class="number">10</span>,<span class="number">12</span>],[<span class="number">13</span>,<span class="number">14</span>] &#125; , capacity = <span class="number">12</span>, remaining = <span class="number">12</span><span class="number">-9</span>=<span class="number">3</span>, data = [<span class="number">2</span>,<span class="number">11</span>], start = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p>start为2，是因为data的从2开始的这段数据还不知道能不能被成功存入buffer中。</p>
+<p>第一次合并后，buffer = { [5,8],[10,12],[13,14] } ，data=[1,11]，start = 3.</p>
+<p>start为3，是因为[2,11]与[1,3]合并，由于[2,3]这段本来就在buffer中，因而可以不用占用remaining，但从3开始这段数据还不知道能不能成功存入buffer中。</p>
+<p>在第二轮合并中，首先扫描到[5,8]。由于[start,it-&gt;left]也即[3,5]这段数据长度为2&lt;remaining=3，故而这段数据可以存入buffer，remaining更新为3-2=1，start更新为it-&gt;right=8.</p>
+<p>/*</p>
+<p>注意，此处无需再对[9,10]进行同样的操作。对于这种情况：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">buffer = &#123; [<span class="number">1</span>,<span class="number">3</span>], [<span class="number">5</span>,<span class="number">8</span>] &#125; , capacity = <span class="number">12</span>, remaining = <span class="number">12</span><span class="number">-9</span>=<span class="number">3</span>, data = [<span class="number">2</span>,<span class="number">11</span>], start = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p>在循环结束的这里已经处理：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (remaining &lt; right - start) &#123;</span><br><span class="line">    right = remaining + start;</span><br><span class="line">    <span class="keyword">if</span> (eof == <span class="number">1</span>)</span><br><span class="line">        is_eof = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>*/</p>
+<p>然后扫描到[10,12]。由于[start,it-&gt;left]也即[8,10]这段数据长度为2&gt;remaining=1，故而这段数据只能把[8,9]这部分存入buffer。因而，我们把到此为止的[1,9]结点存入buffer，剩下的[10,11]部分直接丢弃，也即直接跳入到最后的写入<code>ByteStream</code>部分。</p>
+<h5 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">StreamReassembler::push_substring</span><span class="params">(<span class="type">const</span> string &amp;data, <span class="type">const</span> <span class="type">size_t</span> index, <span class="type">const</span> <span class="type">bool</span> eof)</span> </span>&#123;</span><br><span class="line">    <span class="type">size_t</span> remaining = _capacity - <span class="built_in">unassembled_bytes</span>();  <span class="comment">// how much room left?</span></span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> left = index, right = index + data.<span class="built_in">length</span>();  <span class="comment">// 初始化左右区间</span></span><br><span class="line">    <span class="type">size_t</span> o_left = left, o_right = right;               <span class="comment">// keep the original value</span></span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> start = left;  <span class="comment">// the begin of the unused data-zone of variable data</span></span><br><span class="line">    <span class="comment">// if(remaining == 0)	goto end; // buffer满</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 开始区间合并。需要扫描两次</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (left &gt;= it-&gt;left &amp;&amp; left &lt;= it-&gt;right) &#123;</span><br><span class="line">            right = <span class="built_in">max</span>(right, it-&gt;right);</span><br><span class="line">            left = <span class="built_in">min</span>(left, it-&gt;left);</span><br><span class="line">            <span class="comment">// 说明目标区间完全被包裹，也即目标区间一定可以塞进buffer中</span></span><br><span class="line">            <span class="keyword">if</span> (right == it-&gt;right) 	start = o_right;</span><br><span class="line">            <span class="comment">// 说明仅仅部分重叠，去重部分从it-&gt;right开始</span></span><br><span class="line">            <span class="keyword">else</span>	start = it-&gt;right;</span><br><span class="line">			<span class="comment">// ...</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 第二次</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (it-&gt;left &gt;= left &amp;&amp; it-&gt;left &lt;= right) &#123;</span><br><span class="line">            <span class="comment">// 比remaining满</span></span><br><span class="line">            <span class="comment">// 第一个条件是为了防止unsigned溢出</span></span><br><span class="line">            <span class="keyword">if</span> (it-&gt;left &gt; start &amp;&amp; remaining &lt; it-&gt;left - start) &#123;</span><br><span class="line">                <span class="comment">// 截取能塞得下的部分</span></span><br><span class="line">                tmp = &#123;left, start + remaining, res.<span class="built_in">substr</span>(<span class="number">0</span>, start - left + remaining)&#125;;</span><br><span class="line">                remaining = <span class="number">0</span>;</span><br><span class="line">                <span class="comment">// 此时塞进去是肯定不重叠的，因为tmp.right &lt; it-&gt;left</span></span><br><span class="line">                buffer.<span class="built_in">insert</span>(tmp);</span><br><span class="line">                <span class="comment">// 剩下的直接丢弃</span></span><br><span class="line">                <span class="keyword">goto</span> end;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 塞得下</span></span><br><span class="line">            remaining -= it-&gt;left - start;</span><br><span class="line">            start = it-&gt;right;</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 边界处理</span></span><br><span class="line">    <span class="keyword">if</span> (remaining &lt; right - start) &#123;</span><br><span class="line">        <span class="comment">// 扔掉塞不下的部分</span></span><br><span class="line">        right = remaining + start;</span><br><span class="line">    &#125;</span><br><span class="line">    tmp = &#123;left, right, res&#125;;</span><br><span class="line">    buffer.<span class="built_in">insert</span>(tmp);</span><br><span class="line"></span><br><span class="line">end:</span><br><span class="line">    iterator = buffer.<span class="built_in">begin</span>();</span><br><span class="line">    <span class="comment">// write into the ByteStream</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="capacity还没结束"><a href="#capacity还没结束" class="headerlink" title="capacity还没结束"></a>capacity还没结束</h4><h5 id="背景-1"><a href="#背景-1" class="headerlink" title="背景"></a>背景</h5><p>你以为做到上面那个小标题那样就万无一失了吗？答案是，并不！</p>
+<p>我们还有哪里想得不周全呢？考虑这样一个案例，<code>ByteStream</code>未满，但是在更新remaining时发现buffer已满塞不下了。这时候，我们上面的做法是直接扔掉塞不下的部分。但其实，我们还可以查看buffer的一部分数据是否能够再塞进<code>ByteStream</code>，如果能的话，就又能省下一笔空间了！</p>
+<p>所以，我们在发现remaining不够时，应该首先检查能不能塞一部分buffer的数据进入<code>ByteStream</code>中用来腾出空间。</p>
+<h5 id="代码-3"><a href="#代码-3" class="headerlink" title="代码"></a>代码</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第二次</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (it-&gt;left &gt;= left &amp;&amp; it-&gt;left &lt;= right) &#123;</span><br><span class="line">        <span class="comment">// 比remaining满</span></span><br><span class="line">        <span class="comment">// 第一个条件是为了防止unsigned溢出</span></span><br><span class="line">        <span class="keyword">if</span> (it-&gt;left &gt; start &amp;&amp; remaining &lt; it-&gt;left - start) &#123;</span><br><span class="line">            <span class="comment">// 先看看能不能塞进ByteStream腾空间。需要满足两个条件</span></span><br><span class="line">            <span class="comment">// buffer的第一个区间正好是left_bound</span></span><br><span class="line">            <span class="keyword">if</span> (left == left_bound) &#123;</span><br><span class="line">                <span class="type">size_t</span> out_mem = _output.<span class="built_in">remaining_capacity</span>();</span><br><span class="line">                <span class="comment">// ByteStream有位置</span></span><br><span class="line">                <span class="keyword">if</span> (out_mem &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="comment">// 腾出的空间很充足，完全可以不改变remaining</span></span><br><span class="line">                    <span class="keyword">if</span> (out_mem &gt;= it-&gt;left - start) &#123;</span><br><span class="line">                        <span class="comment">// 写入ByteStream</span></span><br><span class="line">                        _output.<span class="built_in">write</span>(res.<span class="built_in">substr</span>(<span class="number">0</span>, it-&gt;left - start));</span><br><span class="line">                        <span class="comment">// 更新</span></span><br><span class="line">                        res = res.<span class="built_in">substr</span>(it-&gt;left - start);</span><br><span class="line">                        left_bound = it-&gt;left - start + left;</span><br><span class="line">                        left = left_bound;</span><br><span class="line">                        <span class="comment">// 加上腾出的空间【在ok标签处减掉】</span></span><br><span class="line">                        remaining += it-&gt;left-start;</span><br><span class="line">                        <span class="keyword">goto</span> ok;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="comment">// 空间不足以完全不改变remaining</span></span><br><span class="line">                        _output.<span class="built_in">write</span>(res.<span class="built_in">substr</span>(<span class="number">0</span>, out_mem));</span><br><span class="line">                        res = res.<span class="built_in">substr</span>(out_mem);</span><br><span class="line">                        left_bound = out_mem + left;</span><br><span class="line">                        left = left_bound;</span><br><span class="line">                        <span class="comment">// 加上腾出的空间</span></span><br><span class="line">                        remaining += out_mem;</span><br><span class="line">                        <span class="comment">// 如果两个加起来就行，则ok</span></span><br><span class="line">                        <span class="keyword">if</span>(it-&gt;left&gt;start &amp;&amp; remaining&gt;=it-&gt;left - start)&#123;</span><br><span class="line">                                <span class="keyword">goto</span> ok;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="comment">// 否则remaining依然不充足</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 截取能塞得下的部分</span></span><br><span class="line">            tmp = &#123;left, start + remaining, res.<span class="built_in">substr</span>(<span class="number">0</span>, start - left + remaining)&#125;;</span><br><span class="line">            remaining = <span class="number">0</span>;</span><br><span class="line">            <span class="comment">// 此时塞进去是肯定不重叠的，因为tmp.right &lt; it-&gt;left</span></span><br><span class="line">            buffer.<span class="built_in">insert</span>(tmp);</span><br><span class="line">            <span class="comment">// 剩下的直接丢弃</span></span><br><span class="line">            <span class="keyword">goto</span> end;</span><br><span class="line">        &#125;</span><br><span class="line">    ok:</span><br><span class="line">        <span class="comment">// 塞得下</span></span><br><span class="line">        remaining -= it-&gt;left - start;</span><br><span class="line">        start = it-&gt;right;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="小细节"><a href="#小细节" class="headerlink" title="小细节"></a>小细节</h5><p>因而，在一开始发现remaining满的时候，不能直接goto end。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// if(remaining == 0)	goto end; // buffer满</span></span><br></pre></td></tr></table></figure>
+
+<p>因为还得看看<code>ByteStream</code>能不能腾空间。</p>
+<h4 id="eof"><a href="#eof" class="headerlink" title="eof"></a>eof</h4><p>对于eof的处理也是需要注意的一个小细节。</p>
+<p>我们不能这么写：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (eof)</span><br><span class="line">    _output.<span class="built_in">end_input</span>();</span><br></pre></td></tr></table></figure>
+
+<p>原因有二，一是最后一个数据包有可能是部分丢失，二是整流可能还未结束。</p>
+<p>所以我们应该在成员变量中维护<code>is_eof</code>，记录是否收到过最后一个数据包，并且在最后一个数据包部分丢失的时候置它为false。当且仅当<code>is_eof == true</code>且buffer非空时，才能说明输入结束。</p>
+<p>相关代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">StreamReassembler::push_substring</span><span class="params">(<span class="type">const</span> string &amp;data, <span class="type">const</span> <span class="type">size_t</span> index, <span class="type">const</span> <span class="type">bool</span> eof)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (eof == <span class="number">1</span>)</span><br><span class="line">        is_eof = <span class="literal">true</span>;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">    <span class="comment">// 第二次</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (it-&gt;left &gt;= left &amp;&amp; it-&gt;left &lt;= right) &#123;</span><br><span class="line">            <span class="comment">// 此时空间不够，先尝试下能不能写入一部分到_output中</span></span><br><span class="line">            <span class="keyword">if</span> (it-&gt;left &gt; start &amp;&amp; remaining &lt; it-&gt;left - start) &#123;</span><br><span class="line">                <span class="comment">// ...</span></span><br><span class="line">                tmp = &#123;left, start + remaining, res.<span class="built_in">substr</span>(<span class="number">0</span>, start - left + remaining)&#125;;</span><br><span class="line">                remaining = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">if</span> (eof == <span class="number">1</span>)</span><br><span class="line">                    is_eof = <span class="literal">false</span>;</span><br><span class="line">                buffer.<span class="built_in">insert</span>(tmp);</span><br><span class="line">                <span class="keyword">goto</span> end;</span><br><span class="line">            &#125;</span><br><span class="line">        ok:</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (remaining &lt; right - start) &#123;</span><br><span class="line">        right = remaining + start;</span><br><span class="line">        <span class="keyword">if</span> (eof == <span class="number">1</span>)</span><br><span class="line">            is_eof = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">end:</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line">    <span class="comment">// 满足两个条件才是真的eof</span></span><br><span class="line">    <span class="keyword">if</span> (is_eof &amp;&amp; buffer.<span class="built_in">empty</span>())&#123;</span><br><span class="line">        is_eof = <span class="literal">false</span>;</span><br><span class="line">        _output.<span class="built_in">end_input</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代码-4"><a href="#代码-4" class="headerlink" title="代码"></a>代码</h2><h3 id="头文件声明"><a href="#头文件声明" class="headerlink" title="头文件声明"></a>头文件声明</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">StreamReassembler</span> &#123;</span><br><span class="line">  <span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// Your code here -- add private members as necessary.</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">node</span> &#123;</span><br><span class="line">        <span class="type">size_t</span> left;   <span class="comment">// 当前data位于总体的左index（闭）</span></span><br><span class="line">        <span class="type">size_t</span> right;  <span class="comment">// 右index（开）</span></span><br><span class="line">        string data;</span><br><span class="line">        <span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> node &amp;b) <span class="type">const</span> &#123; <span class="keyword">return</span> left &lt; b.left; &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="type">bool</span> is_eof;        <span class="comment">// 文件的末尾是否接收成功</span></span><br><span class="line">    <span class="type">size_t</span> left_bound;  <span class="comment">// 当前已经成功接收到left_bound之前的数据</span></span><br><span class="line">    set&lt;node&gt; buffer;   <span class="comment">// 存储结构</span></span><br><span class="line"></span><br><span class="line">    ByteStream _output;  <span class="comment">//!&lt; The reassembled in-order byte stream</span></span><br><span class="line">    <span class="type">size_t</span> _capacity;    <span class="comment">//!&lt; The maximum number of bytes</span></span><br><span class="line">   </span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// used by the TCPReceiver</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">set_is_eof</span><span class="params">()</span> </span>&#123; is_eof = <span class="literal">false</span>; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;stream_reassembler.hh&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;map&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span>... Targs&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">DUMMY_CODE</span><span class="params">(Targs &amp;&amp;... <span class="comment">/* unused */</span>)</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line">StreamReassembler::<span class="built_in">StreamReassembler</span>(<span class="type">const</span> <span class="type">size_t</span> capacity)</span><br><span class="line">    : <span class="built_in">is_eof</span>(<span class="literal">false</span>), <span class="built_in">left_bound</span>(<span class="number">0</span>), <span class="built_in">buffer</span>(), _output(capacity), _capacity(capacity) &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">StreamReassembler::push_substring</span><span class="params">(<span class="type">const</span> string &amp;data, <span class="type">const</span> <span class="type">size_t</span> index, <span class="type">const</span> <span class="type">bool</span> eof)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (eof == <span class="number">1</span>)</span><br><span class="line">        is_eof = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> remaining = _capacity - <span class="built_in">unassembled_bytes</span>();  <span class="comment">// how much room left?</span></span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> left = index, right = index + data.<span class="built_in">length</span>();  <span class="comment">// 初始化左右区间</span></span><br><span class="line">    <span class="type">size_t</span> o_left = left, o_right = right;               <span class="comment">// keep the original value</span></span><br><span class="line">    <span class="keyword">auto</span> iterator = buffer.<span class="built_in">begin</span>();                 <span class="comment">// 这些变量在这里声明是为了防止后面goto报错</span></span><br><span class="line">    node tmp = &#123;<span class="number">0</span>, <span class="number">0</span>, <span class="string">&quot;&quot;</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (right &lt; left_bound)	<span class="keyword">return</span>;                <span class="comment">// must be duplicated</span></span><br><span class="line">    left = left &lt; left_bound ? left_bound : left;  <span class="comment">// 左边已经接受过的数据就不要了</span></span><br><span class="line">    string res = data.<span class="built_in">substr</span>(left - o_left, right - left);</span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> start = left;  <span class="comment">// the begin of the unused data-zone of variable data</span></span><br><span class="line">    <span class="keyword">if</span> (data.<span class="built_in">compare</span>(<span class="string">&quot;&quot;</span>) == <span class="number">0</span>)	<span class="keyword">goto</span> end;  <span class="comment">// 如果data是空串也直接不要</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 开始区间合并。需要扫描两次</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (left &gt;= it-&gt;left &amp;&amp; left &lt;= it-&gt;right) &#123;</span><br><span class="line">            <span class="type">size_t</span> r = right,l = left;</span><br><span class="line">            right = <span class="built_in">max</span>(right, it-&gt;right);</span><br><span class="line">            left = <span class="built_in">min</span>(left, it-&gt;left);</span><br><span class="line">            <span class="comment">// 更新start</span></span><br><span class="line">            <span class="keyword">if</span> (right == it-&gt;right) &#123;</span><br><span class="line">                start = o_right;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                start = it-&gt;right;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (r &lt;= it-&gt;right) &#123;</span><br><span class="line">                res = it-&gt;data.<span class="built_in">substr</span>(<span class="number">0</span>, l - it-&gt;left) + data.<span class="built_in">substr</span>(l - o_left) +</span><br><span class="line">                      it-&gt;data.<span class="built_in">substr</span>(r - it-&gt;left, it-&gt;right - r);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                res = it-&gt;data.<span class="built_in">substr</span>(<span class="number">0</span>, l - it-&gt;left) + data.<span class="built_in">substr</span>(l - o_left);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 删除这一步很关键。</span></span><br><span class="line">            buffer.<span class="built_in">erase</span>(it);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 第二次</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (it-&gt;left &gt;= left &amp;&amp; it-&gt;left &lt;= right) &#123;</span><br><span class="line">            <span class="comment">// 此时空间不够，先尝试下能不能写入一部分到_output中</span></span><br><span class="line">            <span class="keyword">if</span> (it-&gt;left &gt; start &amp;&amp; remaining &lt; it-&gt;left - start) &#123;</span><br><span class="line">                <span class="keyword">if</span> (left == left_bound) &#123;</span><br><span class="line">                    <span class="type">size_t</span> out_mem = _output.<span class="built_in">remaining_capacity</span>();</span><br><span class="line">                    <span class="keyword">if</span> (out_mem &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="comment">// out的区域本身就很充足</span></span><br><span class="line">                        <span class="keyword">if</span> (out_mem &gt;= it-&gt;left - start) &#123;</span><br><span class="line">                            <span class="comment">// 写入ByteStream</span></span><br><span class="line">                            _output.<span class="built_in">write</span>(res.<span class="built_in">substr</span>(<span class="number">0</span>, it-&gt;left - start));</span><br><span class="line">                            <span class="comment">// 更新</span></span><br><span class="line">                            res = res.<span class="built_in">substr</span>(it-&gt;left - start);</span><br><span class="line">                            left_bound = it-&gt;left - start + left;</span><br><span class="line">                            left = left_bound;</span><br><span class="line">                            remaining += it-&gt;left - start;</span><br><span class="line">                            <span class="comment">// out剩下的空位会在最后写入</span></span><br><span class="line">                            <span class="keyword">goto</span> ok;</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            <span class="comment">// 光是out不够的话，那就先能腾多少空间腾多少</span></span><br><span class="line">                            _output.<span class="built_in">write</span>(res.<span class="built_in">substr</span>(<span class="number">0</span>, out_mem));</span><br><span class="line">                            res = res.<span class="built_in">substr</span>(out_mem);</span><br><span class="line">                            left_bound = out_mem + left;</span><br><span class="line">                            left = left_bound;</span><br><span class="line">                            remaining += out_mem;</span><br><span class="line">                            <span class="comment">// 如果腾出空间加上原来空间足够，那就非常ok</span></span><br><span class="line">                            <span class="keyword">if</span> (it-&gt;left &gt; start &amp;&amp; remaining &gt;= it-&gt;left - start) &#123;</span><br><span class="line">                                <span class="keyword">goto</span> ok;</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="comment">// 否则进入错误处理代码</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                tmp = &#123;left, start + remaining, res.<span class="built_in">substr</span>(<span class="number">0</span>, start - left + remaining)&#125;;</span><br><span class="line">                remaining = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">if</span> (eof == <span class="number">1</span>)</span><br><span class="line">                    is_eof = <span class="literal">false</span>;</span><br><span class="line">                buffer.<span class="built_in">insert</span>(tmp);</span><br><span class="line">                <span class="keyword">goto</span> end;</span><br><span class="line">            &#125;</span><br><span class="line">        ok:</span><br><span class="line">            remaining -= it-&gt;left - start;</span><br><span class="line">            start = it-&gt;right;</span><br><span class="line">            <span class="keyword">if</span> (it-&gt;right &gt; right)&#123;</span><br><span class="line">                res += it-&gt;data.<span class="built_in">substr</span>(right - it-&gt;left, it-&gt;right - right);</span><br><span class="line">                right = it-&gt;right;</span><br><span class="line">            &#125;</span><br><span class="line">            buffer.<span class="built_in">erase</span>(it);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (remaining &lt; right - start) &#123;</span><br><span class="line">        right = remaining + start;</span><br><span class="line">        <span class="keyword">if</span> (eof == <span class="number">1</span>)</span><br><span class="line">            is_eof = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    tmp = &#123;left, right, res&#125;;</span><br><span class="line">    buffer.<span class="built_in">insert</span>(tmp);</span><br><span class="line"></span><br><span class="line">end:</span><br><span class="line">    iterator = buffer.<span class="built_in">begin</span>();</span><br><span class="line">    <span class="comment">// write into the ByteStream</span></span><br><span class="line">    <span class="keyword">if</span> (iterator != buffer.<span class="built_in">end</span>() &amp;&amp; iterator-&gt;left == left_bound) &#123;</span><br><span class="line">        <span class="type">size_t</span> out_rem = _output.<span class="built_in">remaining_capacity</span>();</span><br><span class="line">        <span class="keyword">if</span> (out_rem &lt; iterator-&gt;data.<span class="built_in">length</span>()) &#123;</span><br><span class="line">            _output.<span class="built_in">write</span>(iterator-&gt;data.<span class="built_in">substr</span>(<span class="number">0</span>, out_rem));</span><br><span class="line">            left_bound = iterator-&gt;left + out_rem;</span><br><span class="line">            tmp = &#123;left_bound, iterator-&gt;right, iterator-&gt;data.<span class="built_in">substr</span>(out_rem)&#125;;</span><br><span class="line">            buffer.<span class="built_in">erase</span>(iterator);</span><br><span class="line">            buffer.<span class="built_in">insert</span>(tmp);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            _output.<span class="built_in">write</span>(iterator-&gt;data);</span><br><span class="line">            left_bound = iterator-&gt;right;</span><br><span class="line">            buffer.<span class="built_in">erase</span>(iterator);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 满足两个条件才是真的eof</span></span><br><span class="line">    <span class="keyword">if</span> (is_eof &amp;&amp; buffer.<span class="built_in">empty</span>())&#123;</span><br><span class="line">        is_eof = <span class="literal">false</span>;</span><br><span class="line">        _output.<span class="built_in">end_input</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">size_t</span> <span class="title">StreamReassembler::unassembled_bytes</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 可以跟上面的write合起来的，但在此处我采取了最保守的做法。</span></span><br><span class="line">    <span class="type">size_t</span> res = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">        res += it-&gt;right - it-&gt;left;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">StreamReassembler::empty</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> buffer.<span class="built_in">empty</span>()&amp;&amp;is_eof; &#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6/" rel="prev" title="xv6">
+      <i class="fa fa-chevron-left"></i> xv6
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/25/cs144$lab2/" rel="next" title="Lab2   TCPReceiver">
+      Lab2   TCPReceiver <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab1-StreamReassembler"><span class="nav-number">1.</span> <span class="nav-text">Lab1   StreamReassembler</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%84%9F%E6%83%B3"><span class="nav-number">1.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E7%9A%84%E6%80%9D%E8%B7%AF%E9%82%A3%E4%B9%88%E5%A4%8D%E6%9D%82"><span class="nav-number">1.2.</span> <span class="nav-text">为什么我的思路那么复杂</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E6%80%9D%E8%B7%AF"><span class="nav-number">1.3.</span> <span class="nav-text">我的思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.1.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BA%E9%97%B4"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">区间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%86%E5%90%88"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">集合</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95"><span class="nav-number">1.3.2.</span> <span class="nav-text">算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8C%BA%E9%97%B4%E5%90%88%E5%B9%B6"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">区间合并</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89"><span class="nav-number">1.3.2.1.1.</span> <span class="nav-text">问题定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%80%9D%E8%B7%AF"><span class="nav-number">1.3.2.1.2.</span> <span class="nav-text">算法思路</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9B%BE%E8%A7%A3"><span class="nav-number">1.3.2.1.3.</span> <span class="nav-text">图解</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.2.1.4.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%99%E5%85%A5ByteStream"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">写入ByteStream</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF"><span class="nav-number">1.3.2.2.1.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="nav-number">1.3.2.2.2.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#buffer%E7%9A%84%E6%9C%80%E5%A4%A7%E5%AE%B9%E9%87%8F-capacity"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">buffer的最大容量_capacity</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.3.2.3.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF-1"><span class="nav-number">1.3.2.3.2.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90"><span class="nav-number">1.3.2.3.3.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-2"><span class="nav-number">1.3.2.3.4.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#capacity%E8%BF%98%E6%B2%A1%E7%BB%93%E6%9D%9F"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">capacity还没结束</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%83%8C%E6%99%AF-1"><span class="nav-number">1.3.2.4.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-3"><span class="nav-number">1.3.2.4.2.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B0%8F%E7%BB%86%E8%8A%82"><span class="nav-number">1.3.2.4.3.</span> <span class="nav-text">小细节</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#eof"><span class="nav-number">1.3.2.5.</span> <span class="nav-text">eof</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-4"><span class="nav-number">1.4.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6%E5%A3%B0%E6%98%8E"><span class="nav-number">1.4.1.</span> <span class="nav-text">头文件声明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.4.2.</span> <span class="nav-text">具体实现</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
