@@ -1,0 +1,1 @@
+{"Version":3,"FileReferences":{"Moc":"Tiger.moc3","Textures":["Tiger.1024/texture_00.png"],"Physics":"Tiger.physics3.json","DisplayInfo":"Tiger.cdi3.json"},"Groups":[{"Target":"Parameter","Name":"LipSync","Ids":[]},{"Target":"Parameter","Name":"EyeBlink","Ids":["ParamEyeROpen","ParamEyeLOpen"]}]}
