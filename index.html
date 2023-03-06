@@ -93,6 +93,7 @@
 <body itemscope itemtype="http://schema.org/WebPage">
 
     <!-- Canvas -->
+	<!--
     <div class="Canvas"  id="L2dCanvas"></div>
     <script>
         var config = {
@@ -109,6 +110,29 @@
         }
         var v = new Viewer(config); 
     </script>
+	-->
+<div class="Canvas" id="L2dCanvas"></div>
+<div>
+<script>
+        var config = {
+            width: 800,
+            height: 600,
+            right: '-300px',
+            bottom: '-100px',
+            basePath: 'https://cdn.jsdelivr.net/gh/alg-wiki/AzurLaneL2DViewer@gh-pages/assets',
+            role: 'xuefeng_3',
+            background: '',
+            opacity: 1,
+            mobile: false
+        }
+        var v = new Viewer(config); 
+        window.onload = function(){
+            let dom = document.querySelector('.Canvas')
+            console.log(dom)
+            dom.style["pointer-events"]= 'none'
+        }
+    </script>
+</div>
 	
 		<script type="text/javascript" 
 		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
