@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
+  <link rel="mask-icon" href="/images/cat.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Lab5   NetworkInterfaceOverview在前面的lab0-4中，我们实现了TCP协议。而在本次实验，以及接下来的实验6中，我们会将目光从顶层转移到底层——我们将着眼于运输层以下的协议。在本次实验中，我们将实现ETH协议，实现对IP数据报的封装以及对物理地址的查询转发；在下一次实验中，我们将实现网络层的路由转发算法。 承上启下协议栈架构我们在前面的实验已经实现了TCP协议，那么">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lab5   NetworkInterface">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/02/25/cs144$lab5/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="Lab5   NetworkInterfaceOverview在前面的lab0-4中，我们实现了TCP协议。而在本次实验，以及接下来的实验6中，我们会将目光从顶层转移到底层——我们将着眼于运输层以下的协议。在本次实验中，我们将实现ETH协议，实现对IP数据报的封装以及对物理地址的查询转发；在下一次实验中，我们将实现网络层的路由转发算法。 承上启下协议栈架构我们在前面的实验已经实现了TCP协议，那么">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230307193836409.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230307194650945.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230307193102495.png">
+<meta property="article:published_time" content="2023-02-25T14:19:00.000Z">
+<meta property="article:modified_time" content="2023-03-08T05:42:33.809Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230307193836409.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/02/25/cs144$lab5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Lab5   NetworkInterface | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+	
+		<script type="text/javascript" 
+		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
+		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+	
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/02/25/cs144$lab5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Lab5   NetworkInterface
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-25 22:19:00" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-03-08 13:42:33" itemprop="dateModified" datetime="2023-03-08T13:42:33+08:00">2023-03-08</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Lab5-NetworkInterface"><a href="#Lab5-NetworkInterface" class="headerlink" title="Lab5   NetworkInterface"></a>Lab5   NetworkInterface</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>在前面的lab0-4中，我们实现了TCP协议。而在本次实验，以及接下来的实验6中，我们会将目光从顶层转移到底层——我们将着眼于运输层以下的协议。在本次实验中，我们将实现<strong>ETH协议</strong>，实现<u>对IP数据报的封装以及对物理地址的查询转发</u>；在下一次实验中，我们将实现网络层的路由转发算法。</p>
+<h3 id="承上启下"><a href="#承上启下" class="headerlink" title="承上启下"></a>承上启下</h3><h4 id="协议栈架构"><a href="#协议栈架构" class="headerlink" title="协议栈架构"></a>协议栈架构</h4><p>我们在前面的实验已经实现了TCP协议，那么，TCP报文究竟是如何进行封装，最终到达peer那边的？我们的协议栈架构究竟是怎么样的？对于这个过程的实现协议栈，我们可以有如下三种选择。</p>
+<h5 id="TCP-UDP-IP"><a href="#TCP-UDP-IP" class="headerlink" title="TCP-UDP-IP"></a>TCP-UDP-IP</h5><p>在此架构中，TCP不由操作系统的内核实现，而是运行在<strong>用户态</strong>。【事实上这三种选择TCP都是运行在用户态的，正如我们实现的这样】</p>
+<p>用户态会将上层app传来的数据封装在TCP报文段中，用户态只需向操作系统提供的一个接口传入TCP报文段以及目的地址进入该接口就行。在此接口中，操作系统会给用户传进来的数据报文增加UDP、IP、ETH等等协议头，添加端口号等等等。</p>
+<blockquote>
+<p>所以说，其实操作系统<strong>默认只支持</strong>UDP-IP-ETH呀！新加的一层TCP反倒是靠用户实现的！</p>
+<p>如果只需UDP协议，用户只需传入上层app的数据就行；如果还想要TCP，那就得由用户自己实现TCP协议，把上层app的数据封装成TCP报文，然后再发送给系统调用做进一步的封装。</p>
+</blockquote>
+<blockquote>
+<p>其实不仅是TCP，HTTP应该也是用户自己实现的。对于web开发来说，大概应该是这样：top app data→ HTTP request/response → TCP segment → 操作系统接口 → UDP → IP → ETH frame</p>
+</blockquote>
+<blockquote>
+<p>这个“TCP是用户态实现的”的观点让我非常震撼，在计网理论学的东西现在我们居然已经亲手实现出来了，有种网友面基的震撼。</p>
+<p><a target="_blank" rel="noopener" href="https://www.51cto.com/article/679964.html">TCP/IP协议栈到底是内核态好还是用户态好？</a>这篇文章好像写得很好，但是我没怎么看懂就先放在这【经典】不过里面对于NAK和ACK机制的对比学习写得挺有意思的，看了感觉很有收获。</p>
+</blockquote>
+<h5 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP-IP"></a>TCP-IP</h5><p>TCP当然也可以越过UDP协议，直接与IP层相连。但这由于不用了操作系统提供的那一层UDP，我们要做的事情就会变多变<strong>复杂</strong>。这也是我们经常听到的所谓“TCP/IP协议”的意义。</p>
+<blockquote>
+<p>Linux provides an interface, called a <code>TUN</code> device, that lets application supply <strong>an entire Internet datagram</strong>, and the kernel takes care of the rest (writing the Ethernet header, and actually sending via the physical Ethernet card, etc.). But now the application has to <u>construct the full IP header itself, not just the payload.</u>【要做的事变多了】</p>
+<p>不过这里的这个填IP header的事情，在学校已经做过了，只是这个点的话确实没什么好说的</p>
+</blockquote>
+<p>听起来有没有很耳熟？是的，这个TCP-IP架构，我们在lab0-4已经实现了！其TCP部分是由我们自己写的，而IP部分则是由官方给的代码写的。</p>
+<blockquote>
+<p><strong>You’ve done this already.</strong></p>
+<p>In Lab 4, we gave: </p>
+<ol>
+<li>an object that represents an Internet datagram and knows how to parse and serialize itself (<code>tcp_helpers/ipv4_datagram.&#123;hh,cc&#125;</code>) 表示了Internet datagram的数据结构，它可以自己序列化。</li>
+<li>the logic to encapsulate(封装) TCP segments in IP (now found in <code>tcp_helpers/tcp_over_ip.cc</code>).</li>
+</ol>
+<p> The <code>CS144TCPSocket</code> uses these tools to connect your <code>TCPConnection</code> to a TUN device.</p>
+<p>【我关于这些代码的研究放在了<code>其他的对实验未涉及的思考</code>模块中了】</p>
+<p>所以说，</p>
+<p>发送数据时，数据流向：上层app→（通过<code>CS144TCPSocket</code>）<code>TCPConnection</code>→（通过<code>write</code>方法）<code>ByteStream</code>→<code>TCPSender</code>→（通过从<code>_sender.segments_out</code>读）<code>TCPConnection</code>→（通过<code>CS144TCPSocket</code>绑定的事件从<code>segments_out</code>传输）<code>TUN</code></p>
+<p>接收数据时，数据流向：<code>TUN</code>→（通过<code>CS144TCPSocket</code>绑定的事件调用<code>segment_received</code>）<code>TCPConnection</code>→<code>TCPReceiver</code>→（中间经过<code>StreamAssembler</code>）<code>BYteStream</code>→（通过<code>CS144TCPSocket</code>读）上层app</p>
+<p>TUN以内隐藏的复杂逻辑，都由操作系统来帮我们实现。除去我们本次实验要做的ETH协议之外，剩下的其实好像就是我们在6.S081中做的networking driver了！再接下去就是数据链路层和物理层的工作了，这些就是硬件实现的范畴了。</p>
+<p>感觉写到这，心情非常地澎湃。我们居然真的真的，亲手将计算机网络全部实现了出来，心中真是无限感动啊！</p>
+</blockquote>
+<h5 id="TCP-IP-ETH"><a href="#TCP-IP-ETH" class="headerlink" title="TCP-IP-ETH"></a>TCP-IP-ETH</h5><p>而在整个sponge实现中，我们不拘泥于仅实现<code>TCP/IP</code>。我们还要实现属于我们自己的ETH协议。</p>
+<p>就跟<code>TCP/IP</code>的实现中，将IP数据包发送给操作系统需要通过<code>TUN</code>接口一样，我们需要把包装的ETH数据报发送给<code>TAN</code>接口。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>因而，通过以上表述，我们知道了本次实验的目的是实现数据链路层，以及为什么要实现数据链路层。下面将详细介绍数据链路层的具体功能以及实现。</p>
+<h3 id="数据链路层的实现"><a href="#数据链路层的实现" class="headerlink" title="数据链路层的实现"></a>数据链路层的实现</h3><p>要明白数据链路层怎么实现，首先要知道其功能。</p>
+<h4 id="数据链路层的功能"><a href="#数据链路层的功能" class="headerlink" title="数据链路层的功能"></a>数据链路层的功能</h4><p>可大概分为两点：</p>
+<ol>
+<li><p>通过ETH协议，封装/拆封数据包</p>
+<p>这个没什么好说的。</p>
+<blockquote>
+<p>“交付给上层协议栈”的这个“交付”动作是怎么用代码实现的呢？在成员变量里保留对上层协议栈的成员的引用？或者是像TCP那样，维护一个_out和一个received方法，其它具体连接由socket的事件驱动？</p>
+<p>答案应该是像TCP这样。</p>
+<p>但其实也不完全像TCP。TCP与其上层，也即app的交互是通过socket；但interface没有这个机制，它只能在frame_received的时候直接return它收到的数据报。啊不过，也许从eth得到数据报然后交给ip也是socket的任务？</p>
+<p>我记得在本校的计网实验中，似乎是归结到了一个函数内实现，其接收一个void*类型的指针，好像还有代表报文格式的枚举类。</p>
+</blockquote>
+</li>
+<li><p>通过ARP协议，将IP地址转化为物理地址</p>
+<p>我们学过，在数据链路层（还是说是物理层？）endpoint的交互是通过物理地址的，但在网络层以上，endpoint的交互是通过IP地址（域名也会被解析为IP地址）的。因而，在ETH层，我们首先需要将IP地址转化为其对应的物理地址。</p>
+<blockquote>
+<p>在这里可以梳理一下计算机网络中所谓“地址”的<strong>转化路径</strong>：</p>
+<p>我们通过约定俗成的<strong>域名</strong>访问某个主机，该域名会被DNS解析为<strong>IP地址</strong>，该IP地址会在网络层，也就是IP协议这边经过路由转发【<u>如果是用户host的话会发给自己的default路由器</u>】，然后在ETH层会根据这个要去的地方的IP地址通过ARP协议查表，得到下一站应该要去的<strong>物理地址</strong>。</p>
+<p>与此同时我们也可以归纳出lab6的内容。我们的lab6就是要做这个“转发”功能。根据所学可知，实质上只有路由器才算起着真实的路由转发功能【host的路由转发只是转发给自己的海关路由器】。而路由器不需要什么TCP协议，所以lab6只基于lab5，跟lab0-4没有半毛钱关系。</p>
+</blockquote>
+</li>
+</ol>
+<h4 id="ARP协议"><a href="#ARP协议" class="headerlink" title="ARP协议"></a>ARP协议</h4><p><img src="/2023/02/25/cs144/image-20230307193836409.png" alt="image-20230307193836409"></p>
+<p>H1知道R1的IP地址是因为设置了默认网关，而路由器之间知道彼此的IP地址是通过路由协议相互通信。</p>
+<p>为什么H1知道要发给H2就需要经过R1，以及为什么H1知道R1的IP地址，R1知道R2的IP地址，这都是网络层的路由协议在起作用。</p>
+<p>而H1怎么知道的R1的MAC地址，这就是ARP协议研究的内容了。是ARP将已知的IP地址翻译为MAC。</p>
+<p>ARP协议的具体内容看视频就好，在此不赘述。具体有ARP请求报文（广播）、ARP响应报文（单播）</p>
+<p>如果发现不知道MAC地址就发ARP request，收到ARP request的host如果发现是自己的，就需要做两件事，一个是记下来者，另一个是发送ARP响应报文。</p>
+<p><img src="/2023/02/25/cs144/image-20230307194650945.png" alt="image-20230307194650945"></p>
+<h3 id="network-interface"><a href="#network-interface" class="headerlink" title="network interface"></a>network interface</h3><p>介绍完上面的种种，终于来到了本次实验要实现的正题：<strong>network interface</strong>。</p>
+<p>正如同在网络层，各个主机通过IP协议，凭借自己的IP地址相互打交道一样，在数据链路层，各个network interface通过ARP协议和ETH协议，凭借MAC地址相互打交道。</p>
+<blockquote>
+<p>可以看出，数据链路层的“network interface”与网络层的“主机”是相近的。它们的区别是什么呢？</p>
+<p>答案是，一个主机可以有多个网卡，因而可以有多个network interface。</p>
+<p><img src="/2023/02/25/cs144/image-20230307193102495.png" alt="image-20230307193102495"></p>
+</blockquote>
+<blockquote>
+<p>不过这里的这个对应还是很有意思的，它反映出了计算机网络的抽象：一次网络传输可以看作是单层之间的相互交流，可以忽略其他层。不得不感慨，设计出网络层级模型的人真是天才。</p>
+</blockquote>
+<p>因而，在我们的数据链路层，也即我们的network interface中，我们需要实现ARP协议和ETH协议，完成数据包的收发。</p>
+<h2 id="心得"><a href="#心得" class="headerlink" title="心得"></a>心得</h2><h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><p>这次实验内容其实有一说一挺复杂的，既要管理各种超时，又要写收发管理。它其实跟<code>TCPSender</code>有点像，只不过本次实验的难点在数据结构的管理，<code>TCPSender</code>的难点在各种状态机的细枝末节。由于有<code>TCPSender</code>的基础，本次实验完成难度大大减小，我甚至写完代码后不出二十分钟就pass掉了测试用例（骄傲←）不过，它的编码过程及数据结构确实还是有点复杂的。</p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><h4 id="初见思路"><a href="#初见思路" class="headerlink" title="初见思路"></a>初见思路</h4><p>整理一下我们的interface可能收到/发送的报文，思路就很简单了</p>
+<p>收：</p>
+<ol>
+<li><p>来自外部的数据</p>
+<p>比较MAC地址跟自己一不一样</p>
+<p>需要去掉其ETH头，交付给上层</p>
+</li>
+<li><p>ARP请求</p>
+<p>比对请求的IP地址跟自己的一不一样。</p>
+<p>如果一样，就把该报文的src MAC记录进ARP，并且发送一个ARP响应进入frame_out</p>
+</li>
+<li><p>ARP响应</p>
+<p>记录MAC地址；将放入等待暂存队列的数据包取出重新发送</p>
+</li>
+</ol>
+<p>发：</p>
+<ol>
+<li><p>来自上层的数据报</p>
+<p>查询ARP表，如果MAC地址已知就发，未知的话放入等待队列，并且发送ARP请求</p>
+</li>
+<li><p>ARP请求</p>
+</li>
+<li><p>ARP响应</p>
+</li>
+</ol>
+<p>所以我们需要写以下几个函数：</p>
+<ol>
+<li><p>frame_received</p>
+</li>
+<li><p>send_arp_response</p>
+<p>创建一个新的frame，填上自己的MAC地址和srcMAC</p>
+</li>
+<li><p>send_arp_request</p>
+<p>创建一个新的frame，填上自己的MAC地址、IP地址和目的IP地址</p>
+</li>
+<li><p>frame_send</p>
+<p>发送从上层来的报文</p>
+</li>
+<li><p>ARP操作    ARP表是一个map映射</p>
+</li>
+</ol>
+<p>以及如下成员变量：</p>
+<ol>
+<li><p>ARP映射的数据结构</p>
+<p>map&lt;IP地址，{MAC地址，ticks}&gt;</p>
+</li>
+<li><p>等待队列</p>
+<p>map&lt;IP地址，{未填写dst的frame们，latest_ticks}&gt;</p>
+</li>
+<li><p>ticks  代表当前经过的时间</p>
+</li>
+</ol>
+<h4 id="正确思路"><a href="#正确思路" class="headerlink" title="正确思路"></a>正确思路</h4><p>可以看到，官方提供给我们的接口定义，以及在指导书中对函数实现的详细拆分，确实跟初见思路所想的差不多完全一样【但我更推荐看指导书的版本，它枚列得更加清晰】，可以说思路还是很直观的。所以就不多bb了直接看代码吧。</p>
+<h4 id="小细节"><a href="#小细节" class="headerlink" title="小细节"></a>小细节</h4><ol>
+<li><p>等待在同一个IP地址的帧可能不止一个，所以在数据结构中需要以vector集合形式管理</p>
+</li>
+<li><p>在接收以太帧时，应该首先检查最外层的ETH协议的MAC地址，作用是判断这个帧是不是发给自己的。</p>
+<p>如果帧内封装的是IP数据包，这样做就很OK了，因为能确保此时自己一定可以收这个包；</p>
+<p>但是如果帧内封装的是ARP数据包，这样做是不OK的。因为依照ARP协议，若是此为ARP REQUEST，则其ETH header是广播地址，而它真正想要届到的对象的信息是在ARP header中的target IP。因而，对于ARP协议，我们还得判断header中的target IP和本机IP是否相等。</p>
+</li>
+</ol>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><h3 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">NetworkInterface</span> &#123;</span><br><span class="line">  <span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// arp映射的元素定义</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">arp_node</span> &#123;</span><br><span class="line">        EthernetAddress mac;<span class="comment">// ip地址key对应的mac地址</span></span><br><span class="line">        <span class="type">size_t</span> ticks;<span class="comment">// 该条记录被记录时的时间</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">// ARP映射，&lt;IP地址，元素结点&gt;</span></span><br><span class="line">    std::map&lt;<span class="type">uint32_t</span>, arp_node&gt; arp_mappings&#123;&#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">waiting_node</span> &#123;</span><br><span class="line">        std::vector&lt;EthernetFrame&gt; frames&#123;&#125;;<span class="comment">// 等待在该IP地址的以太帧们</span></span><br><span class="line">        <span class="type">size_t</span> latest_ticks = <span class="number">0</span>;  <span class="comment">// 等候中的frame们最晚放入者的时间</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">// 等待队列，&lt;IP地址，元素结点&gt;</span></span><br><span class="line">    std::map&lt;<span class="type">uint32_t</span>, waiting_node&gt; waiting_frames&#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> ticks = <span class="number">0</span>;<span class="comment">// 出生到现在经过的时钟滴答</span></span><br><span class="line">    <span class="comment">// 自定义方法，用于发送一个arp报文【请求/响应】</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">send_arp</span><span class="params">(<span class="type">uint32_t</span> target_ip, EthernetAddress eth_add, <span class="type">uint16_t</span> opcode)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;network_interface.hh&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;arp_message.hh&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ethernet_frame.hh&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span>... Targs&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">DUMMY_CODE</span><span class="params">(Targs &amp;&amp;... <span class="comment">/* unused */</span>)</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">NetworkInterface::<span class="built_in">NetworkInterface</span>(<span class="type">const</span> EthernetAddress &amp;ethernet_address, <span class="type">const</span> Address &amp;ip_address)</span><br><span class="line">    : _ethernet_address(ethernet_address), _ip_address(ip_address) &#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// param: target ip address , target ethernet address , and the arp opcode</span></span><br><span class="line"><span class="comment">// if is the request, pass BROADCAST as the param;</span></span><br><span class="line"><span class="comment">// if is the response, pass arprequest.eth_add as the param.</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">NetworkInterface::send_arp</span><span class="params">(<span class="type">uint32_t</span> target_ip, EthernetAddress eth_add, <span class="type">uint16_t</span> opcode)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// create the eth frame</span></span><br><span class="line">    EthernetFrame frame;</span><br><span class="line">    <span class="comment">/* create the payload */</span></span><br><span class="line">    <span class="comment">// create the arp message</span></span><br><span class="line">    ARPMessage arp_mes;</span><br><span class="line">    arp_mes.sender_ethernet_address = _ethernet_address;</span><br><span class="line">    arp_mes.sender_ip_address = _ip_address.<span class="built_in">ipv4_numeric</span>();</span><br><span class="line">    arp_mes.opcode = opcode;</span><br><span class="line">    arp_mes.target_ip_address = target_ip;</span><br><span class="line">    <span class="keyword">if</span> (opcode == ARPMessage::OPCODE_REPLY)</span><br><span class="line">        arp_mes.target_ethernet_address = eth_add;</span><br><span class="line">    <span class="keyword">else</span> <span class="comment">// if is the REQUEST, arp target mac is unknown and should be set to zero</span></span><br><span class="line">        arp_mes.target_ethernet_address = &#123;<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>&#125;;</span><br><span class="line">    <span class="comment">// serialize and put it into the payload</span></span><br><span class="line">    frame.<span class="built_in">payload</span>() = <span class="built_in">BufferList</span>(arp_mes.<span class="built_in">serialize</span>());</span><br><span class="line">    <span class="comment">/* fill in the header */</span></span><br><span class="line">    EthernetHeader header;</span><br><span class="line">    header.src = _ethernet_address;</span><br><span class="line">    header.dst = eth_add;</span><br><span class="line">    header.type = EthernetHeader::TYPE_ARP;</span><br><span class="line">    frame.<span class="built_in">header</span>() = header;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// send it</span></span><br><span class="line">    _frames_out.<span class="built_in">push</span>(frame);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//! \param[in] dgram the IPv4 datagram to be sent</span></span><br><span class="line"><span class="comment">//! \param[in] next_hop the IP address of the interface to send it to (typically a router or default gateway, but may also be another host if directly connected to the same network as the destination)</span></span><br><span class="line"><span class="comment">//! (Note: the Address type can be converted to a uint32_t (raw 32-bit IP address) with the Address::ipv4_numeric() method.)</span></span><br><span class="line"><span class="comment">// 处理从上层协议接收到的信息</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">NetworkInterface::send_datagram</span><span class="params">(<span class="type">const</span> InternetDatagram &amp;dgram, <span class="type">const</span> Address &amp;next_hop)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// convert IP address of next hop to raw 32-bit representation (used in ARP header)</span></span><br><span class="line">    <span class="type">const</span> <span class="type">uint32_t</span> next_hop_ip = next_hop.<span class="built_in">ipv4_numeric</span>();</span><br><span class="line">    <span class="comment">// create the eth frame</span></span><br><span class="line">    EthernetFrame frame;</span><br><span class="line">    <span class="comment">// fill in the payload</span></span><br><span class="line">    frame.<span class="built_in">payload</span>() = dgram.<span class="built_in">serialize</span>();</span><br><span class="line">    <span class="comment">// fill in the header</span></span><br><span class="line">    EthernetHeader header;</span><br><span class="line">    <span class="comment">// dst is reserved</span></span><br><span class="line">    header.src = _ethernet_address;</span><br><span class="line">    header.type = EthernetHeader::TYPE_IPv4;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> tmp_arp = arp_mappings.<span class="built_in">find</span>(next_hop_ip);<span class="comment">// find the mac from the arp mappings</span></span><br><span class="line">    <span class="keyword">if</span> (tmp_arp == arp_mappings.<span class="built_in">end</span>()) &#123;  <span class="comment">// not exist</span></span><br><span class="line">        frame.<span class="built_in">header</span>() = header;          <span class="comment">// remember that the dst field is reserved</span></span><br><span class="line">        <span class="keyword">auto</span> tmp_wait = waiting_frames.<span class="built_in">find</span>(next_hop_ip);<span class="comment">// is there a waiting queue?</span></span><br><span class="line">        <span class="comment">// the arp request hasn&#x27;t been sent if there is not a waiting queue, </span></span><br><span class="line">        <span class="keyword">if</span> (tmp_wait == waiting_frames.<span class="built_in">end</span>()) &#123;</span><br><span class="line">            <span class="comment">// create the waiting queue</span></span><br><span class="line">            vector&lt;EthernetFrame&gt; frames;</span><br><span class="line">            frames.<span class="built_in">push_back</span>(frame);</span><br><span class="line">            waiting_node node;</span><br><span class="line">            node.frames = frames;</span><br><span class="line">            node.latest_ticks = ticks;</span><br><span class="line">            waiting_frames.<span class="built_in">insert</span>(<span class="built_in">make_pair</span>(next_hop_ip, node));</span><br><span class="line">            <span class="comment">// send arp request</span></span><br><span class="line">            <span class="built_in">send_arp</span>(next_hop_ip, ETHERNET_BROADCAST, ARPMessage::OPCODE_REQUEST);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123; <span class="comment">// the arp request has been sended</span></span><br><span class="line">            <span class="keyword">if</span> (ticks - tmp_wait-&gt;second.latest_ticks &gt; <span class="number">5</span>*<span class="number">1000</span>) &#123;<span class="comment">// send before 5 seconds</span></span><br><span class="line">                <span class="comment">// resend arp request</span></span><br><span class="line">                <span class="built_in">send_arp</span>(next_hop_ip, ETHERNET_BROADCAST, ARPMessage::OPCODE_REQUEST);</span><br><span class="line">                <span class="comment">// update the time only when the arp request was sent</span></span><br><span class="line">                tmp_wait-&gt;second.latest_ticks = ticks;  </span><br><span class="line">            &#125;</span><br><span class="line">            tmp_wait-&gt;second.frames.<span class="built_in">push_back</span>(frame);<span class="comment">// add the frame to the waiting list</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// recall that the dst field is reserved</span></span><br><span class="line">    header.dst = tmp_arp-&gt;second.mac;</span><br><span class="line">    frame.<span class="built_in">header</span>() = header;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// send it right away</span></span><br><span class="line">    _frames_out.<span class="built_in">push</span>(frame);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//! \param[in] frame the incoming Ethernet frame</span></span><br><span class="line"><span class="function">optional&lt;InternetDatagram&gt; <span class="title">NetworkInterface::recv_frame</span><span class="params">(<span class="type">const</span> EthernetFrame &amp;frame)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (frame.<span class="built_in">header</span>().dst != _ethernet_address &amp;&amp; frame.<span class="built_in">header</span>().dst != ETHERNET_BROADCAST)</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;;  <span class="comment">// should not accept</span></span><br><span class="line">    <span class="keyword">if</span> (frame.<span class="built_in">header</span>().type == EthernetHeader::TYPE_IPv4) &#123;</span><br><span class="line">        InternetDatagram ip_data;</span><br><span class="line">        ParseResult res = ip_data.<span class="built_in">parse</span>(frame.<span class="built_in">payload</span>());</span><br><span class="line">        <span class="keyword">if</span> (res == ParseResult::NoError) &#123;</span><br><span class="line">            <span class="keyword">return</span> ip_data; <span class="comment">// return to send it to the upper protocal</span></span><br><span class="line">        &#125; <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (frame.<span class="built_in">header</span>().type != EthernetHeader::TYPE_ARP)</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">    </span><br><span class="line">    ARPMessage arp_mes;</span><br><span class="line">    ParseResult res = arp_mes.<span class="built_in">parse</span>(frame.<span class="built_in">payload</span>());</span><br><span class="line">    <span class="keyword">if</span> (res != ParseResult::NoError)</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">    <span class="comment">// I&#x27;m not the arp target</span></span><br><span class="line">    <span class="keyword">if</span> (arp_mes.target_ip_address != _ip_address.<span class="built_in">ipv4_numeric</span>())</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">auto</span> tmp_arp = arp_mappings.<span class="built_in">find</span>(arp_mes.sender_ip_address);</span><br><span class="line">    <span class="keyword">if</span> (tmp_arp == arp_mappings.<span class="built_in">end</span>()) &#123;  <span class="comment">// arp mapping not exist, create one</span></span><br><span class="line">        arp_node node;</span><br><span class="line">        node.ticks = ticks;</span><br><span class="line">        node.mac = arp_mes.sender_ethernet_address;</span><br><span class="line">        arp_mappings.<span class="built_in">insert</span>(<span class="built_in">make_pair</span>(arp_mes.sender_ip_address, node));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        tmp_arp-&gt;second.ticks = ticks;  <span class="comment">// update the record ticks</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (arp_mes.opcode == ARPMessage::OPCODE_REQUEST) &#123;</span><br><span class="line">        <span class="built_in">send_arp</span>(arp_mes.sender_ip_address, arp_mes.sender_ethernet_address, ARPMessage::OPCODE_REPLY);</span><br><span class="line">        <span class="comment">// shouldn&#x27;t return now, maybe we are also waiting for the sender&#x27;s mac address</span></span><br><span class="line">        <span class="comment">// return &#123;&#125;;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// send all frames in the waiting queue</span></span><br><span class="line">    <span class="keyword">auto</span> tmp_wait = waiting_frames.<span class="built_in">find</span>(arp_mes.sender_ip_address);</span><br><span class="line">    <span class="comment">// have no frames waiting for the address</span></span><br><span class="line">    <span class="keyword">if</span> (tmp_wait == waiting_frames.<span class="built_in">end</span>())</span><br><span class="line">        <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">    <span class="keyword">while</span> (!tmp_wait-&gt;second.frames.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        EthernetFrame f = tmp_wait-&gt;second.frames.<span class="built_in">back</span>();</span><br><span class="line">        <span class="comment">// recall that the dst field is reserved</span></span><br><span class="line">        f.<span class="built_in">header</span>().dst = arp_mes.sender_ethernet_address;  </span><br><span class="line">        _frames_out.<span class="built_in">push</span>(f);</span><br><span class="line">        tmp_wait-&gt;second.frames.<span class="built_in">pop_back</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// erase all the waiting frames</span></span><br><span class="line">    waiting_frames.<span class="built_in">erase</span>(tmp_wait);</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">NetworkInterface::tick</span><span class="params">(<span class="type">const</span> <span class="type">size_t</span> ms_since_last_tick)</span> </span>&#123;</span><br><span class="line">    ticks += ms_since_last_tick;</span><br><span class="line">    <span class="comment">// walk the arp mappings to check whether a mapping is out-of-date</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = arp_mappings.<span class="built_in">begin</span>(); it != arp_mappings.<span class="built_in">end</span>();) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ticks - it-&gt;second.ticks &gt; <span class="number">30</span> * <span class="number">1000</span>) &#123;</span><br><span class="line">            it = arp_mappings.<span class="built_in">erase</span>(it);</span><br><span class="line">        &#125; <span class="keyword">else</span></span><br><span class="line">            it++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6/" rel="prev" title="xv6">
+      <i class="fa fa-chevron-left"></i> xv6
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/25/cs144$lab4/" rel="next" title="Lab4   TCPConnection">
+      Lab4   TCPConnection <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab5-NetworkInterface"><span class="nav-number">1.</span> <span class="nav-text">Lab5   NetworkInterface</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%BF%E4%B8%8A%E5%90%AF%E4%B8%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">承上启下</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%8F%E8%AE%AE%E6%A0%88%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">协议栈架构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#TCP-UDP-IP"><span class="nav-number">1.1.1.1.1.</span> <span class="nav-text">TCP-UDP-IP</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TCP-IP"><span class="nav-number">1.1.1.1.2.</span> <span class="nav-text">TCP-IP</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TCP-IP-ETH"><span class="nav-number">1.1.1.1.3.</span> <span class="nav-text">TCP-IP-ETH</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.1.2.</span> <span class="nav-text">数据链路层的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">数据链路层的功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ARP%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">ARP协议</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#network-interface"><span class="nav-number">1.1.3.</span> <span class="nav-text">network interface</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%83%E5%BE%97"><span class="nav-number">1.2.</span> <span class="nav-text">心得</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%9F%E6%83%B3"><span class="nav-number">1.2.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF"><span class="nav-number">1.2.2.</span> <span class="nav-text">思路</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E8%A7%81%E6%80%9D%E8%B7%AF"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">初见思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A3%E7%A1%AE%E6%80%9D%E8%B7%AF"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">正确思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%8F%E7%BB%86%E8%8A%82"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">小细节</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.1.</span> <span class="nav-text">头文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.2.</span> <span class="nav-text">具体实现</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+</body>
+</html>

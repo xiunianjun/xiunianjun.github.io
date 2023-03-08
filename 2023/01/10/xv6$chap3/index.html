@@ -28,6 +28,7 @@
 <meta property="og:description" content="Page tables 页表学完后，还有一个点就是，xv6有没有实现内存的换入换出呢？ 印象中，xv6从操作系统读入，一直到目前写程序，似乎一直都是获得虚拟地址，通过虚拟地址访问物理内存地址，好像从来没有考虑过物理内存和磁盘间的换入换出。 是xv6没有实现这个机制，还是还没讲到呢？此处有待发掘。  Paging hardware为什么需要页表将主存储器以及各种外设接口卡里面内置的存储器连接起来，就">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109153937459.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/pagetable.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109151346780.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/p3.png">
@@ -44,7 +45,7 @@
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111004500827.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230114011100370.png">
 <meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
-<meta property="article:modified_time" content="2023-02-26T06:30:52.818Z">
+<meta property="article:modified_time" content="2023-03-07T08:15:59.696Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109153937459.png">
@@ -208,7 +209,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-26 14:30:52" itemprop="dateModified" datetime="2023-02-26T14:30:52+08:00">2023-02-26</time>
+                <time title="修改时间：2023-03-07 16:15:59" itemprop="dateModified" datetime="2023-03-07T16:15:59+08:00">2023-03-07</time>
               </span>
 
           
@@ -244,7 +245,7 @@
 <p>虚拟地址有64bit，其中25bits未使用，39bits包含了27位的PTE索引号以及12位的offset。</p>
 <p>物理地址有56位，由PPN和offset拼接组成。</p>
 <h4 id="单页表和多级页表"><a href="#单页表和多级页表" class="headerlink" title="单页表和多级页表"></a>单页表和多级页表</h4><p>以单页表为例，物理地址形成过程如下图所示。</p>
-<p>![屏幕截图 2023-01-09 143707](./xv6/屏幕截图 2023-01-09 143707.png)</p>
+<p><img src="/2023/01/10/xv6/pagetable.png" alt="image"></p>
 <p><u>每个页表项PTE索引着一页</u>。因而，每一页的大小为2^12=4096B。单页表中PTE的索引号有2^27个，因而单页表中表项有134217728个，即可以代表134217728页。页表实际上也是以页的形式存储的。因而单页表需要的存储空间为(2^27x7)/2^12=2^15x7=229376页。</p>
 <p>RISC-V架构中真实情况是会有三级页表。三级页表结构相比于单级页表结构，会占据更多的<strong>物理存储空间</strong>。</p>
 <p><img src="/2023/01/10/xv6/image-20230109151346780.png" alt="image-20230109151346780"></p>
@@ -452,7 +453,7 @@
 <p>You will receive full credit for this part of the lab if the <code>pgaccess</code> test case passes when running <code>pgtbltest</code>.</p>
 </blockquote>
 <h4 id="感想-2"><a href="#感想-2" class="headerlink" title="感想"></a>感想</h4><p>实验内容：</p>
-<p>实现void pgaccess(uint64 sva,int pgnum,int* bitmask);，一个系统调用。在这里面，我们要做的是，访问从sva到sva+pgnum*PGSIZE这一范围内的虚拟地址对应的PTE，然后查看PTE的标记项是否有PTE_A。有的话则在bitmask对应位标记为1.</p>
+<p>实现<code>void pgaccess(uint64 sva,int pgnum,int* bitmask);</code>，一个系统调用。在这里面，我们要做的是，访问从<code>sva</code>到<code>sva+pgnum*PGSIZE</code>这一范围内的虚拟地址对应的PTE，然后查看PTE的标记项是否有<code>PTE_A</code>。有的话则在bitmask对应位标记为1.</p>
 <p>应该注意的点：</p>
 <p>1.需要进行内核态到用户态的参数传递  2.需要进行系统调用的必要步骤  3.PTE_A需要自己定义</p>
 <p>以上是初见。做完了发现，确实就是那么简单，我主要时间花费在下的实验版本不对，折腾来折腾去了可能有一个小时，最后还是选择了直接把测试函数搬过来手工调用。已经换到正确的年份版本了【泪目】</p>
@@ -461,7 +462,7 @@
 <p>Be sure to clear <code>PTE_A</code> after checking if it is set. Otherwise, it won’t be possible to determine if the page was accessed since the last time <code>pgaccess()</code> was called (i.e., the bit will be set forever).</p>
 </blockquote>
 <p>也就是说每次检查到一个，就需要手动清除掉PTE_A标记。</p>
-<p>还有一点以前一直没注意到的，<strong>头文件的引用需要注意次序</strong>。比如说要是把spinlock.h放在proc.h后面，就会寄得很彻底。</p>
+<p>还有一点以前一直没注意到的，<strong>头文件的引用需要注意次序</strong>。比如说要是把<code>spinlock.h</code>放在<code>proc.h</code>后面，就会寄得很彻底。</p>
 <h4 id="代码-2"><a href="#代码-2" class="headerlink" title="代码"></a>代码</h4><p>那些系统调用的登记步骤就先省略了。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// kernel/sysproc.c</span></span><br><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_pgaccess</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint64 sva;</span><br><span class="line">  <span class="type">int</span> pgnum;</span><br><span class="line">  uint64 bitmask;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(argaddr(<span class="number">0</span>,&amp;sva) &lt; <span class="number">0</span> || argint(<span class="number">1</span>, &amp;pgnum) &lt; <span class="number">0</span> || argaddr(<span class="number">2</span>, &amp;bitmask) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">return</span> pgaccess((<span class="type">void</span>*)sva,pgnum,(<span class="type">void</span>*)bitmask);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -710,7 +711,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-count">22</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
