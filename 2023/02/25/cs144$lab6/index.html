@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
+  <link rel="mask-icon" href="/images/cat.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Lab6   Router心得要做什么本次实验要实现的是IP层的路由工作，但是只用实现对路由表进行操作的部分，比如说增加表项以及查询路由表等，其他的什么RIP、OSPF都不用我们实现，所以这样一来其实就简单非常多了（） 有一点需要注意的是，它一直在强调一个“最长前缀匹配”。也就是：   还有一点需要注意的是路由的结构：  实际上就是路由表+一堆网络接口，这些端口都是network interfac">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lab6   Router">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/02/25/cs144$lab6/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="Lab6   Router心得要做什么本次实验要实现的是IP层的路由工作，但是只用实现对路由表进行操作的部分，比如说增加表项以及查询路由表等，其他的什么RIP、OSPF都不用我们实现，所以这样一来其实就简单非常多了（） 有一点需要注意的是，它一直在强调一个“最长前缀匹配”。也就是：   还有一点需要注意的是路由的结构：  实际上就是路由表+一堆网络接口，这些端口都是network interfac">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230309142032359.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230309141949757.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230308142934287.png">
+<meta property="article:published_time" content="2023-02-25T14:19:00.000Z">
+<meta property="article:modified_time" content="2023-03-09T13:56:26.811Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230309142032359.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/02/25/cs144$lab6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Lab6   Router | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+	
+		<script type="text/javascript" 
+		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
+		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+	
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/02/25/cs144$lab6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Lab6   Router
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-25 22:19:00" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-03-09 21:56:26" itemprop="dateModified" datetime="2023-03-09T21:56:26+08:00">2023-03-09</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>731</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Lab6-Router"><a href="#Lab6-Router" class="headerlink" title="Lab6   Router"></a>Lab6   Router</h1><h2 id="心得"><a href="#心得" class="headerlink" title="心得"></a>心得</h2><h3 id="要做什么"><a href="#要做什么" class="headerlink" title="要做什么"></a>要做什么</h3><p>本次实验要实现的是IP层的路由工作，但是只用实现对路由表进行操作的部分，比如说增加表项以及查询路由表等，其他的什么RIP、OSPF都不用我们实现，所以这样一来其实就简单非常多了（）</p>
+<p>有一点需要注意的是，它一直在强调一个“最长前缀匹配”。也就是：</p>
+<p><img src="/2023/02/25/cs144/image-20230309142032359.png" alt="image-20230309142032359"></p>
+<p><img src="/2023/02/25/cs144/image-20230309141949757.png" alt="image-20230309141949757"></p>
+<p>还有一点需要注意的是路由的结构：</p>
+<p><img src="/2023/02/25/cs144/image-20230308142934287.png" alt="image-20230308142934287"></p>
+<p>实际上就是路由表+一堆网络接口，这些端口都是network interface。</p>
+<blockquote>
+<p>路由器可分为两部分，一部分控制路由协议，包括完善路由表之类的；另一部分负责数据转发。</p>
+<p>负责接收数据的端口既可能收到数据，也可能收到路由信息报文。收到前者，则需要查询转发表然后进行路由转发；收到后者，就需要将其交付给路由选择处理机进行处理。</p>
+<p>它有一个地方说得很有意思：路由表需要对网络拓扑最优化，转发表需要使查找过程最优化</p>
+<p>也就是说，路由表只是key为目的IP地址，value为下一跳IP地址的一个普通map，可以是unordered_map，因为无需对它进行查找操作；转发表的内容可能跟路由表差不多，但是由于它要被进行频繁的查找工作，因而其数据结构需要对查找的消耗较低。</p>
+<p>不过在我们这边，一般不区分路由表和转发表的概念。</p>
+</blockquote>
+<h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><p>说实话思路很直观很简单，懒得说了，直接看代码吧【开摆】</p>
+<p>我唯一卡得比较久的有两个地方，一个是一开始数据结构选用的是set，图它的天然排序，针对<code>prefix_length</code>排序来优化查找，但是没有意识到，对于自定义比较运算符的结构体，set也是会自动去重的（）而不同路由项的<code>prefix_length</code>显然可以重复。因而这样是达咩的，最后不得已选用了一个普通的list。</p>
+<p>另一个是子网掩码计算问题，刚开始一个小地方想错了。这个没什么好说的，纯纯脑子一抽。</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><h3 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Router</span> &#123;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">route_node</span> &#123;</span><br><span class="line">        <span class="type">uint32_t</span> route_prefix = <span class="number">0</span>;</span><br><span class="line">        <span class="type">uint8_t</span> prefix_length = <span class="number">0</span>;</span><br><span class="line">        std::optional&lt;Address&gt; next_hop&#123;&#125;;</span><br><span class="line">        <span class="type">size_t</span> interface_num = <span class="number">0</span>;</span><br><span class="line">        <span class="comment">// 降序</span></span><br><span class="line">        <span class="type">bool</span> <span class="keyword">operator</span>&lt;(<span class="type">const</span> route_node &amp;b) <span class="type">const</span> &#123; <span class="keyword">return</span> prefix_length &gt; b.prefix_length; &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    std::list&lt;route_node&gt; route_table&#123;&#125;;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Router::add_route</span><span class="params">(<span class="type">const</span> <span class="type">uint32_t</span> route_prefix,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">const</span> <span class="type">uint8_t</span> prefix_length,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">const</span> optional&lt;Address&gt; next_hop,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">const</span> <span class="type">size_t</span> interface_num)</span> </span>&#123;</span><br><span class="line">    cerr &lt;&lt; <span class="string">&quot;DEBUG: adding route &quot;</span> &lt;&lt; Address::<span class="built_in">from_ipv4_numeric</span>(route_prefix).<span class="built_in">ip</span>() &lt;&lt; <span class="string">&quot;/&quot;</span> &lt;&lt; <span class="built_in">int</span>(prefix_length)</span><br><span class="line">         &lt;&lt; <span class="string">&quot; =&gt; &quot;</span> &lt;&lt; (next_hop.<span class="built_in">has_value</span>() ? next_hop-&gt;<span class="built_in">ip</span>() : <span class="string">&quot;(direct)&quot;</span>) &lt;&lt; <span class="string">&quot; on interface &quot;</span> &lt;&lt; interface_num &lt;&lt; <span class="string">&quot;\n&quot;</span>;</span><br><span class="line">    <span class="comment">// 添加</span></span><br><span class="line">    route_node node;</span><br><span class="line">    node.route_prefix = route_prefix;</span><br><span class="line">    node.prefix_length = prefix_length;</span><br><span class="line">    node.next_hop = next_hop;</span><br><span class="line">    node.interface_num = interface_num;</span><br><span class="line">    route_table.<span class="built_in">push_back</span>(node);</span><br><span class="line">    route_table.<span class="built_in">sort</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//! \param[in] dgram The datagram to be routed</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Router::route_one_datagram</span><span class="params">(InternetDatagram &amp;dgram)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 减少TTL</span></span><br><span class="line">    <span class="keyword">if</span> (dgram.<span class="built_in">header</span>().ttl &lt;= <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span>;  <span class="comment">// drop</span></span><br><span class="line">    dgram.<span class="built_in">header</span>().ttl -= <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">const</span> <span class="type">uint32_t</span> target_ip = dgram.<span class="built_in">header</span>().dst;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = route_table.<span class="built_in">begin</span>(); it != route_table.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">        <span class="type">uint32_t</span> mask = <span class="number">0</span>;</span><br><span class="line">        mask = (((~mask) &gt;&gt; (<span class="number">32</span>-it-&gt;prefix_length)) &lt;&lt; (<span class="number">32</span>-it-&gt;prefix_length));</span><br><span class="line">        <span class="keyword">if</span> (it-&gt;prefix_length == <span class="number">0</span> || ((it-&gt;route_prefix &amp; mask) == (target_ip &amp; mask)))&#123;</span><br><span class="line">            <span class="comment">// 发送报文</span></span><br><span class="line">            <span class="keyword">if</span> (it-&gt;next_hop.<span class="built_in">has_value</span>())</span><br><span class="line">                <span class="built_in">interface</span>(it-&gt;interface_num).<span class="built_in">send_datagram</span>(dgram, it-&gt;next_hop.<span class="built_in">value</span>());</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                <span class="built_in">interface</span>(it-&gt;interface_num).<span class="built_in">send_datagram</span>(dgram,</span><br><span class="line">Address::<span class="built_in">from_ipv4_numeric</span>(dgram.<span class="built_in">header</span>().dst));</span><br><span class="line">            <span class="keyword">return</span>;  <span class="comment">// 一定是最长前缀</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Router::route</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Go through all the interfaces, and route every incoming datagram to its proper outgoing interface.</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;interface : _interfaces) &#123;</span><br><span class="line">        <span class="keyword">auto</span> &amp;queue = interface.<span class="built_in">datagrams_out</span>();</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">not</span> queue.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">            <span class="built_in">route_one_datagram</span>(queue.<span class="built_in">front</span>());</span><br><span class="line">            queue.<span class="built_in">pop</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/10/xv6/" rel="prev" title="xv6">
+      <i class="fa fa-chevron-left"></i> xv6
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/25/cs144$else/" rel="next" title="其他的对实验未涉及的思考">
+      其他的对实验未涉及的思考 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab6-Router"><span class="nav-number">1.</span> <span class="nav-text">Lab6   Router</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%83%E5%BE%97"><span class="nav-number">1.1.</span> <span class="nav-text">心得</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%81%E5%81%9A%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.1.</span> <span class="nav-text">要做什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%9F%E6%83%B3"><span class="nav-number">1.1.2.</span> <span class="nav-text">感想</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.1.</span> <span class="nav-text">头文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.2.2.</span> <span class="nav-text">具体实现</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">NaNm</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+</body>
+</html>
