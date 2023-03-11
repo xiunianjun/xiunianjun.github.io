@@ -72,6 +72,22 @@
   </style>
 </noscript>
 
+    <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
@@ -195,14 +211,7 @@
                 <time title="修改时间：2023-03-11 15:09:21" itemprop="dateModified" datetime="2023-03-11T15:09:21+08:00">2023-03-11</time>
               </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>297</span>
-            </span>
+          
 
         </div>
       </header>
@@ -335,14 +344,7 @@
                 <time title="修改时间：2023-02-26 17:09:30" itemprop="dateModified" datetime="2023-02-26T17:09:30+08:00">2023-02-26</time>
               </span>
 
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span></span>
-            </span>
+          
 
         </div>
       </header>
@@ -491,12 +493,6 @@
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">修年</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-chart-area"></i>
-    </span>
-      <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">NaNm</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
   </div>
@@ -582,6 +578,23 @@ setInterval("createtime()",250);
 
 
 
+
+    <div class="Canvas"  id="L2dCanvas"></div>
+    <script>
+        var config = {
+            width: 800,
+            height: 600,
+            left: '750px',
+            bottom: '-100px',
+            basePath: 'https://cdn.jsdelivr.net/gh/xiunianjun/AzurLaneL2DViewer@aaa/assets/',
+            //role: 'Tiger',
+			role: 'aierdeliqi_4',
+            // background: 'https://cdn.jsdelivr.net/gh/xiunianjun/AzurLaneL2DViewer@gh-page/assets/bg/bg_church_jp.png',
+            opacity: 1,
+            mobile: false
+        }
+        var v = new Viewer(config); 
+    </script>
 
 
 
