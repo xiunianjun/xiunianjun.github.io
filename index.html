@@ -72,6 +72,7 @@
   </style>
 </noscript>
 
+
     <meta charset="UTF-8">
     <title>live2d-demo</title>
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -171,6 +172,13 @@
 	
 	
 		
+			
+		
+	
+	
+	
+	
+		
 	
 	
 		  
@@ -208,7 +216,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-11 15:09:21" itemprop="dateModified" datetime="2023-03-11T15:09:21+08:00">2023-03-11</time>
+                <time title="修改时间：2023-03-11 23:06:36" itemprop="dateModified" datetime="2023-03-11T23:06:36+08:00">2023-03-11</time>
               </span>
 
           
@@ -223,12 +231,39 @@
 
       
           <blockquote>
+<p>总耗时：65h  约17天</p>
 <p><a target="_blank" rel="noopener" href="https://cs144.github.io/">实验官网</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/shootfirst/CS144/">感恩</a></p>
 </blockquote>
-<h3 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h3><p><a target="_blank" rel="noopener" href="https://stanford.edu/class/cs144/vm_howto/vm-howto-byo.html">BYO Linux installation</a>根据这个安装完所需工具链就行，然后再跟这个 <a target="_blank" rel="noopener" href="http://doraemonzzz.com/2021/12/12/2021-12-12-CS144-%E5%AE%9E%E9%AA%8C%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/#%E5%AE%89%E8%A3%85">CS144 实验环境配置</a>就ok了。CMake还是第一次用，不知道又会被坑多少次2333</p>
-<p><a target="_blank" rel="noopener" href="https://stanford.edu/class/cs144/vm_howto/vm-howto-image.html">Setting up your CS144 VM using VirtualBox</a>或者使用virtualbox，里面还有教怎么用共享文件夹</p>
-<p>远程连接：<code>ssh -p 2222 cs144@localhost</code></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本实验总体思维和代码上的难度还是不难的（至少比xv6简单），我认为其难点主要集中在TCP协议本身就很复杂很多的细节问题，以及需要我们有一种面向测试用例编程、直面自己往日写过的屎山的勇气（。</p>
+<p>下面，我将对本实验的完成情况即心得进行一个总结，也算是本篇博客/本次实验的一个<strong>导读</strong>。</p>
+<blockquote>
+<p><strong>类似于这样的块引用中的部分是我自认为的精华部分哦</strong>。</p>
+</blockquote>
+<p>本实验对TCP-IP-ETH协议栈的实验是自顶向下的，其中对TCP协议的实现是由内而外的。</p>
+<p>后者很容易导致，当你写完了lab0-3，你<strong>还是不知道自己到底写了个啥</strong>，以及TCP又究竟怎么通过你写的那几个类run起来。直到lab4结束，你完成了对TCP状态机的组织，并且出于debug目的钻研过部分socket的代码、熟悉了（其实差不多已经背下来了）TCP的三握手四挥手的过程，至此你才会对TCP的实现<strong>有较为清晰的理解</strong>。这个过程很痛苦，但是也真的非常爽。</p>
+<blockquote>
+<p>关于TCP状态机的理解总结，请参见<code>Lab3 TCPConnection——心得——总结：状态机</code>部分。</p>
+</blockquote>
+<p>然而，实现了TCP协议之后，我们还是不知道，在<code>TCPConnection</code>中发送的数据包，又是如何到达网络上的另一个host处的。是时，官方贴心地为我们指了条明路：它告诉我们，我们在lab0-4实现的是TCP-IP协议栈，其中运输层和网络层由用户实现，其他更底层则由内核实现，二者通过操作系统提供的TUN接口进行交互。而我们接下来的学习目标，就是从内核中夺走一些权力：数据链路层也要由我们自己实现！</p>
+<blockquote>
+<p>关于此处的TCP-IP架构等，请参见<code>Lab5 NetworkInterface——Overview——承上启下</code></p>
+</blockquote>
+<p>故而，接下来，我们将实现TCP-IP-ETH协议栈。在lab5，我们将目光投向TCP层以下的数据链路层(没有网络层是因为官方已经帮我们实现了)，实现ETH协议和ARP协议；在lab6，我们则需要实现路由查找的功能。</p>
+<p>至此，所有实验已经结束。写完了上述实验，我们对协议栈已经具有了很深刻的了解，对TCP—IP—ETH—TAN—Internet—TAN—ETH—IP—TCP的这个数据传输过程也已经是懂王了。</p>
+<p>然而，我们在<code>TCPConnection</code>，只知道会有好心人，在上层app有数据传进来的时候调用<code>write</code>、在下层协议栈有segment传进来的时候调用<code>segment_received</code>、取出<code>_segment_out</code>的segment向底层协议栈发送、读走<code>outputstream</code>的内容。但是这个所谓的“好心人”具体是怎么做到的，怎么实现的，我们一概不知。</p>
+<p>答案是，这个所谓的“好心人”，其实就是我们的<code>TCPSpongeSocket</code>。它向上将协议栈与上层app连接，向下又将协议栈与TAN接口结合。</p>
+<blockquote>
+<p>发送数据时，数据流向：上层app→（通过<code>TCPSpongeSocket</code>）<code>TCPConnection</code>→（通过<code>write</code>方法）<code>ByteStream</code>→<code>TCPSender</code>→（通过从<code>_sender.segments_out</code>读）<code>TCPConnection</code>→（通过<code>TCPSpongeSocket</code>的adapter）<code>TAN</code></p>
+<p>接收数据时，数据流向：<code>TAN</code>→（通过<code>TCPSpongeSocket</code>的adapter）<code>TCPConnection</code>→<code>TCPReceiver</code>→（中间经过<code>StreamAssembler</code>）<code>BYteStream</code>→（通过<code>TCPSpongeSocket</code>读）上层app</p>
+<p>在<code>TCPSpongeSocket</code>的adapter中：TCPsegment←→IP数据报←→ETH帧</p>
+<p>至于ETH帧进入TAN之后的过程？在xv6的网卡驱动那一节我们事实上已经实现过了！</p>
+</blockquote>
+<p><code>CS144TCPSocket</code>和<code>FullStackTCPSokect</code>都继承自<code>TCPSpongeSocket</code>。<code>TCPSpongeSocket</code>通过一个包装了操作系统提供的socket的包装类<code>_thread_data</code>来与上层app进行交互，通过adapter<code>_datagram_adapter</code>来与协议栈进行交互。由于<code>_thread_data</code>和<code>_datagram_adapter</code>本质上都是文件描述符【牛逼吧】，因而，<code>TCPSpongeSocket</code>需要对上下层进行交互的需求，就可以通过操作系统提供的POLL机制来实现，也即，app←→TCP、TCP←→协议栈的这四种数据交互情况，都用<strong>事件监听</strong>来实现！这样就能做到“及时”“高效”了。</p>
+<blockquote>
+<p>关于此处<code>TCPSpongeSocket</code>的事件监听机制以及其它实现细节，详见<code>其它的对...——Socket实现——TCPSpongeSocket</code></p>
+</blockquote>
+<p>至此以来，我们的协议栈才算真正完整了。</p>
 <h3 id="Lab0"><a href="#Lab0" class="headerlink" title="Lab0"></a><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab0">Lab0</a></h3><h3 id="Lab1-StreamReassembler"><a href="#Lab1-StreamReassembler" class="headerlink" title="Lab1   StreamReassembler"></a><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab1">Lab1   StreamReassembler</a></h3><h3 id="Lab2-TCPReceiver"><a href="#Lab2-TCPReceiver" class="headerlink" title="Lab2   TCPReceiver"></a><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab2">Lab2   TCPReceiver</a></h3><h3 id="Lab3-TCPSender"><a href="#Lab3-TCPSender" class="headerlink" title="Lab3   TCPSender"></a><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab3">Lab3   TCPSender</a></h3><h3 id="Lab4-TCPConnection"><a href="#Lab4-TCPConnection" class="headerlink" title="Lab4   TCPConnection"></a><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab4">Lab4   TCPConnection</a></h3><h3 id="Lab5-NetworkInterface"><a href="#Lab5-NetworkInterface" class="headerlink" title="Lab5   NetworkInterface"></a><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab5">Lab5   NetworkInterface</a></h3><h3 id="Lab6-Router"><a href="#Lab6-Router" class="headerlink" title="Lab6   Router"></a><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab6">Lab6   Router</a></h3><h3 id="其他的对实验未涉及的思考"><a href="#其他的对实验未涉及的思考" class="headerlink" title="其他的对实验未涉及的思考"></a><a href="https://xiunianjun.github.io/2023/02/25/cs144$else">其他的对实验未涉及的思考</a></h3>
       
     </div>
@@ -301,83 +336,6 @@
 		
 	
 	
-	
-	
-		
-	
-	
-		  
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/01/10/xv6/" class="post-title-link" itemprop="url">xv6</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-26 17:09:30" itemprop="dateModified" datetime="2023-02-26T17:09:30+08:00">2023-02-26</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>部分地方的翻译和表格来源参考：<a target="_blank" rel="noopener" href="http://xv6.dgs.zone/">xv6指导书翻译</a></p>
-<p>实验官网：<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/tools.html">6.S081</a></p>
-<p>记得结合书本的笔记阅读，这里只记录了一点看心情觉得想记就记的东西以及实验感想。</p>
-<p>笔记的结构【以第一章Operating system interface为例】：</p>
-<p><img src="/2023/01/10/xv6/image-20230124235649128.png" alt="image-20230124235649128"></p>
-</blockquote>
-<h3 id="Operating-system-interface"><a href="#Operating-system-interface" class="headerlink" title="Operating system interface"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap1">Operating system interface</a></h3><h3 id="Operating-system-oganization"><a href="#Operating-system-oganization" class="headerlink" title="Operating system oganization"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap2">Operating system oganization</a></h3><h3 id="Page-tables"><a href="#Page-tables" class="headerlink" title="Page tables"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap3">Page tables</a></h3><h3 id="Traps-and-system-calls"><a href="#Traps-and-system-calls" class="headerlink" title="Traps and system calls"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap4">Traps and system calls</a></h3><h3 id="Interrupts-and-device-drivers"><a href="#Interrupts-and-device-drivers" class="headerlink" title="Interrupts and device drivers"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap5">Interrupts and device drivers</a></h3><h3 id="Locking"><a href="#Locking" class="headerlink" title="Locking"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap6">Locking</a></h3><h3 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap7">Scheduling</a></h3><h3 id="File-system"><a href="#File-system" class="headerlink" title="File system"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap8">File system</a></h3><h3 id="其他的对实验未涉及的思考"><a href="#其他的对实验未涉及的思考" class="headerlink" title="其他的对实验未涉及的思考"></a><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap9">其他的对实验未涉及的思考</a></h3>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-	
 
   
   <nav class="pagination">
@@ -449,7 +407,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-count">25</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -568,8 +526,6 @@ setInterval("createtime()",250);
 
 
   
-
-
 
 
 
