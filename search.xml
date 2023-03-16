@@ -7673,6 +7673,67 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <p>而<code>mkfs</code>的作用，正是把宿主机提供的<strong>虚拟地址空间作为虚拟磁盘</strong>，把虚拟地址空间划分为如上图所示的地址结构。<strong>它是运行在宿主机当中的</strong>。有了<code>mkfs</code>，才能有我们的虚拟机。</p>
 <h5 id="代码解读"><a href="#代码解读" class="headerlink" title="代码解读"></a>代码解读</h5><p><a href="https://blog.csdn.net/Mumu3w/article/details/54173069">xv6分析–mkfs源代码注释</a></p>
 <p>yysy这个就写得很好了。</p>
+<h2 id="user-mem-allocator"><a href="#user-mem-allocator" class="headerlink" title="user mem-allocator"></a>user mem-allocator</h2><p>在内核态中，我们使用<code>kalloc</code>和<code>kfree</code>来申请和释放内存页。在用户态中，我们使用<code>malloc</code>和<code>free</code>来对动态内存进行管理。</p>
+<p>内核中的最小单位只能是页，但user mem-allocator对外提供的申请内存服务的<strong>最小单位不是页</strong>，而是<code>sizeof(Header)</code>。因而，这就需要我们的user mem-allocator进行数据结构的管理，来统一这二者的实现。</p>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><h4 id="环形链表"><a href="#环形链表" class="headerlink" title="环形链表"></a>环形链表</h4><p>user mem-allocator的数据结构是<strong>环形链表</strong>，起始结点为一个空数据载体。</p>
+<p><img src="/2023/01/10/xv6/image-20230316140158908.png" alt="image-20230316140158908"></p>
+<p><img src="/2023/01/10/xv6/image-20230316140450988.png" alt="image-20230316140450988"></p>
+<h4 id="地址从低到高"><a href="#地址从低到高" class="headerlink" title="地址从低到高"></a>地址从低到高</h4><p>链表的头结点的存储地址/所代表的内存地址的地址数值最小，并且其余结点按遍历顺序地址递增。</p>
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><p>user mem-allocator由三个主要函数组成，分别是<code>morecore</code>、<code>malloc</code>和<code>free</code>。一个一个地来说未免有点不符合正常人的思路，所以我接下来会以用户初次调用<code>malloc</code>为例，来整理user mem-allocator的具体实现。</p>
+<h4 id="malloc"><a href="#malloc" class="headerlink" title="malloc"></a>malloc</h4><p>当用户初次调用<code>malloc</code>，此时freep仍为空指针，因而会进入如下分支：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>((prevp = freep) == <span class="number">0</span>)&#123;</span><br><span class="line">  <span class="comment">// 空闲mem为空的情况</span></span><br><span class="line">  base.s.ptr = freep = prevp = &amp;base;</span><br><span class="line">  base.s.size = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也即初始化为这种情况：</p>
+<p><img src="/2023/01/10/xv6/image-20230316143711888.png" alt="image-20230316143711888"></p>
+<p>随后，由于<code>prevp-&gt;ptr == freep</code>，故而会在循环中进入该分支：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(p = prevp-&gt;s.ptr; ; prevp = p, p = p-&gt;s.ptr)&#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">if</span>(p == freep) <span class="comment">// 一般情况下，此处表明已经完整遍历了一遍环形链表，因为prev的初值是freep，而我们是从prev-&gt;next开始遍历的</span></span><br><span class="line">    <span class="keyword">if</span>((p = morecore(nunits)) == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用<code>morecore</code>。</p>
+<h4 id="morecore"><a href="#morecore" class="headerlink" title="morecore"></a>morecore</h4><p>进入<code>morecore</code>后，首先会对堆内存进行扩容：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(nu &lt; <span class="number">4096</span>)</span><br><span class="line">  nu = <span class="number">4096</span>;</span><br><span class="line">p = sbrk(nu * <span class="keyword">sizeof</span>(Header));</span><br><span class="line"><span class="keyword">if</span>(p == (<span class="type">char</span>*)<span class="number">-1</span>)</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>其中，nu表示要申请的内存单元数，一个内存单元为<code>sizeof(Header)</code>，因而nu在<code>malloc</code>中计算如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">nunits = (nbytes + <span class="keyword">sizeof</span>(Header) - <span class="number">1</span>)/<span class="keyword">sizeof</span>(Header) + <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>为了满足内核以一页为最小内存单位的需求，以及避免过多陷入内核态，它每次会申请至少4096*内存单元的堆空间。</p>
+<p>对堆内存进行扩容完之后，<code>morecore</code>会手动调用一次<code>free</code>，将新申请到的内存加入数据结构中。【此处类似于在<code>knit</code>中调用<code>kfree</code>的原理】</p>
+<h4 id="free"><a href="#free" class="headerlink" title="free"></a>free</h4><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">free</span><span class="params">(<span class="type">void</span> *ap)</span>&#123;</span><br><span class="line">  Header *bp, *p;</span><br><span class="line"></span><br><span class="line">  bp = (Header*)ap - <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">for</span>(p = freep; !(bp &gt; p &amp;&amp; bp &lt; p-&gt;s.ptr); p = p-&gt;s.ptr)</span><br><span class="line">    <span class="keyword">if</span>(p &gt;= p-&gt;s.ptr &amp;&amp; (bp &gt; p || bp &lt; p-&gt;s.ptr))</span><br><span class="line">      <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>由于此时<code>freep == freep-&gt;str == base</code>，并且我们在<code>morecore</code>中新申请的内存空间<code>ap</code>满足<code>ap &gt; base</code>，故而会跳出循环。</p>
+<blockquote>
+<p>为什么<code>ap &gt; base</code>呢？</p>
+<p>别忘了我们扩容的原理。我们是以<code>proc-&gt;size</code>为起始地址扩容的。ap处在扩容内存中，因而ap&gt;旧size；base处在扩容前内存内，因而base&lt;=旧size。故而有ap&gt;base。</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(bp + bp-&gt;s.size == p-&gt;s.ptr)&#123;</span><br><span class="line">  bp-&gt;s.size += p-&gt;s.ptr-&gt;s.size;</span><br><span class="line">  bp-&gt;s.ptr = p-&gt;s.ptr-&gt;s.ptr;</span><br><span class="line">&#125; <span class="keyword">else</span></span><br><span class="line">  bp-&gt;s.ptr = p-&gt;s.ptr;</span><br><span class="line"><span class="keyword">if</span>(p + p-&gt;s.size == bp)&#123;</span><br><span class="line">  p-&gt;s.size += bp-&gt;s.size;</span><br><span class="line">  p-&gt;s.ptr = bp-&gt;s.ptr;</span><br><span class="line">&#125; <span class="keyword">else</span></span><br><span class="line">  p-&gt;s.ptr = bp;</span><br><span class="line">freep = p;</span><br></pre></td></tr></table></figure>
+
+<p>跳出循环后，我们会进入第一个if的第二个分支，以及第二个if的第二个分支。经过这些指针操作后，此时我们的数据结构如下图所示：</p>
+<p><img src="/2023/01/10/xv6/image-20230316145733160.png" alt="image-20230316145733160"></p>
+<p>也即形成了一个两节点的环形链表。</p>
+<h4 id="malloc-1"><a href="#malloc-1" class="headerlink" title="malloc"></a>malloc</h4><p>经历完上述调用后，我们回到<code>malloc</code>的循环中：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(p = prevp-&gt;s.ptr; ; prevp = p, p = p-&gt;s.ptr)&#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">if</span>(p == freep)</span><br><span class="line">    <span class="keyword">if</span>((p = morecore(nunits)) == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由<code>morecore</code>的返回值可知，此时我们的p应该指向freep。本轮循环结束后执行<code> p = p-&gt;s.ptr</code>，此时我们的p指向了我们刚在<code>morecore</code>中扩容出来的那一大段内存。</p>
+<p><img src="/2023/01/10/xv6/image-20230316150327569.png" alt="image-20230316150327569"></p>
+<p>在下一轮循环中，由于我们刚刚通过<code>morecore</code>申请了至少<code>nunits</code>的空间，因而我们将进入该分支：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(p-&gt;s.size &gt;= nunits)&#123;</span><br><span class="line">  <span class="keyword">if</span>(p-&gt;s.size == nunits)</span><br><span class="line">    <span class="comment">// 如果与所需的内存刚好相等，那就直接返回该小单元就行</span></span><br><span class="line">    prevp-&gt;s.ptr = p-&gt;s.ptr;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 不等的话就只划分出一小部分</span></span><br><span class="line">    <span class="comment">// 一次划出几个header单元</span></span><br><span class="line">    p-&gt;s.size -= nunits;</span><br><span class="line">    p += p-&gt;s.size;</span><br><span class="line">    p-&gt;s.size = nunits;</span><br><span class="line">  &#125;</span><br><span class="line">  freep = prevp;</span><br><span class="line">  <span class="keyword">return</span> (<span class="type">void</span>*)(p + <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当<code>nunits &gt;= 4096</code>，也即<code>p-&gt;s.size == nunits</code>，p所指向的地址恰好就是我们接下来会用的地址。因而，我们就将这部分内存空间从我们的freelist中剔除，在之后返回p的地址即可。</p>
+<p>当<code>nunits &lt; 4096</code>，也即<code>p-&gt;s.size != nunits</code>，说明p所指向的这块内存空间比我们需要的大，那么我们就仅将该段内存空间切割出需要的那一小部分，再把p指向那一小部分开头的地方，返回p地址即可，如图所示。</p>
+<p><img src="/2023/01/10/xv6/image-20230316150846709.png" alt="image-20230316150846709"></p>
+<p>这样一来，我们就成功给用户它所需要的内存空间了。</p>
+<h4 id="free-1"><a href="#free-1" class="headerlink" title="free"></a>free</h4><p>进行malloc之后，用户还需要调用free来手动释放内存，防止内存泄漏。</p>
+<p><img src="/2023/01/10/xv6/image-20230316151116462.png" alt="image-20230316151116462"></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(p = freep; !(bp &gt; p &amp;&amp; bp &lt; p-&gt;s.ptr); p = p-&gt;s.ptr)</span><br><span class="line">  <span class="keyword">if</span>(p &gt;= p-&gt;s.ptr &amp;&amp; (bp &gt; p || bp &lt; p-&gt;s.ptr))</span><br><span class="line">    <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>由于<code>ap &gt; base</code>且<code>ap &gt; 旧p-&gt;size = base-&gt;ptr</code>且<code>base &lt; base-&gt;ptr</code>，故而首先会进行一轮循环。再然后，由于<code>p = 旧p-&gt;size</code>，并且<code>p &gt; p-&gt;ptr = base</code>，并且<code>ap &gt; 旧size</code>，故而跳出循环。</p>
+<blockquote>
+<p>此处循环中，循环语句内部的这个循环实际上是对遍历到环形链表尾部，即将从头开始遍历，这个边界情况的处理。比较符合逻辑的还是循环语句内的那个条件。</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(bp + bp-&gt;s.size == p-&gt;s.ptr)&#123;</span><br><span class="line">  bp-&gt;s.size += p-&gt;s.ptr-&gt;s.size;</span><br><span class="line">  bp-&gt;s.ptr = p-&gt;s.ptr-&gt;s.ptr;</span><br><span class="line">&#125; <span class="keyword">else</span></span><br><span class="line">  bp-&gt;s.ptr = p-&gt;s.ptr;</span><br><span class="line"><span class="keyword">if</span>(p + p-&gt;s.size == bp)&#123;</span><br><span class="line">  p-&gt;s.size += bp-&gt;s.size;</span><br><span class="line">  p-&gt;s.ptr = bp-&gt;s.ptr;</span><br><span class="line">&#125; <span class="keyword">else</span></span><br><span class="line">  p-&gt;s.ptr = bp;</span><br><span class="line">freep = p;</span><br></pre></td></tr></table></figure>
+
+<p>此时会进入第二个if的第一个分支。具体情况看图就行，不多bb。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>主要就是这个数据结构用得很巧妙但也很复杂。它吸取了内核态中分配内存使用一个freelist的特点，同时又巧妙地利用了内存地址有序的特点，从而实现碎片内存管理。我的建议是多画图。</p>
+<p>还有其实有一点我不是很理解。我觉得<code>freep</code>这个变量的用意非常不明，它似乎并不是指代整个freelist的头，因为它在很多个地方都诡异地赋值了一次。我想，它也许始终指向上一次被alloc/被free的内存的前一个吧。。。我猜测这样设计是为了蕴含一些LRU的思想。不大明白。</p>
 ]]></content>
   </entry>
   <entry>
