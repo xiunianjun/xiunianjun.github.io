@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
+  <link rel="mask-icon" href="/images/cat.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="竞赛时对操作系统启动过程产生了些疑问，于是问题导向地浅浅探究了下GRUB和initramfs相关机制，相关笔记先放在这里了。 内核启动流程在传统的BIOS系统中，计算机具体的启动流程如下：  电源启动：当计算机的电源打开时，电源供电给计算机的硬件设备。 BIOS自检：计算机的BIOS固件会自检硬件设备，包括RAM、处理器、硬盘等，以确保它们正常工作。 引导设备选择：BIOS会根据预先定义的启动顺序">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对GRUB和initramfs的小探究">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="竞赛时对操作系统启动过程产生了些疑问，于是问题导向地浅浅探究了下GRUB和initramfs相关机制，相关笔记先放在这里了。 内核启动流程在传统的BIOS系统中，计算机具体的启动流程如下：  电源启动：当计算机的电源打开时，电源供电给计算机的硬件设备。 BIOS自检：计算机的BIOS固件会自检硬件设备，包括RAM、处理器、硬盘等，以确保它们正常工作。 引导设备选择：BIOS会根据预先定义的启动顺序">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616143835953.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151055620.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151122738.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151938951.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616153420011.png">
+<meta property="article:published_time" content="2023-06-17T08:36:11.000Z">
+<meta property="article:modified_time" content="2023-06-17T08:37:30.069Z">
+<meta property="article:author" content="修年">
+<meta property="article:tag" content="os竞赛">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616143835953.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>对GRUB和initramfs的小探究 | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+  
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+	
+		<script type="text/javascript" 
+		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
+		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+	
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          对GRUB和initramfs的小探究
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-06-17 16:36:11 / 修改时间：16:37:30" itemprop="dateCreated datePublished" datetime="2023-06-17T16:36:11+08:00">2023-06-17</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>竞赛时对操作系统启动过程产生了些疑问，于是问题导向地浅浅探究了下GRUB和initramfs相关机制，相关笔记先放在这里了。</p>
+<h1 id="内核启动流程"><a href="#内核启动流程" class="headerlink" title="内核启动流程"></a>内核启动流程</h1><p>在传统的BIOS系统中，计算机具体的启动流程如下：</p>
+<ol>
+<li>电源启动：当计算机的电源打开时，电源供电给计算机的硬件设备。</li>
+<li>BIOS自检：计算机的BIOS固件会自检硬件设备，包括RAM、处理器、硬盘等，以确保它们正常工作。</li>
+<li>引导设备选择：BIOS会根据预先定义的启动顺序（通常是硬盘、光驱、USB等）选择一个启动设备。</li>
+<li>MBR（Master Boot Record）加载：如果选择的启动设备是硬盘，BIOS会加载该硬盘的MBR，其中包含了引导加载程序。</li>
+<li>GRUB加载：MBR中的引导加载程序通常是GRUB（或其他引导加载程序）。GRUB会被加载到计算机的内存中，并开始执行。</li>
+<li>GRUB菜单：GRUB会显示一个菜单，列出可供选择的操作系统或内核。</li>
+<li>操作系统加载：用户选择操作系统后，GRUB会加载相应的操作系统或内核，并将控制权交给它。</li>
+</ol>
+<p>在本次内核编译配置过程中，<strong>最主要探究的是文件系统的装载过程</strong>，也即介于6-7之间的部分。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>文件系统在启动流程中的发展历程可以分为以下三个部分：</p>
+<ol>
+<li><p>GRUB文件系统</p>
+<p>由 GRUB 自身通过 BIOS 提供的服务加载</p>
+</li>
+<li><p>initramfs</p>
+<p>由GRUB加载，用于挂载真正的文件系统</p>
+</li>
+<li><p>真正的根文件系统</p>
+</li>
+</ol>
+<p>下面，将介绍1和2两个流程。</p>
+<h2 id="GRUB"><a href="#GRUB" class="headerlink" title="GRUB"></a>GRUB</h2><blockquote>
+<p>GRUB（GNU GRand Unified Bootloader）是一种常用的引导加载程序，用于在计算机启动时加载操作系统。</p>
+<p>GRUB的主要功能是在计算机启动时提供一个菜单，让用户选择要启动的操作系统或内核。它支持多个操作系统，包括各种版本的Linux、Windows、BSD等。通过GRUB，用户可以在多个操作系统之间轻松切换。</p>
+<p>除了操作系统选择，GRUB还提供了一些高级功能，例如引导参数的设置、内存检测、系统恢复等。它还支持在启动过程中加载内核模块和初始化RAM磁盘映像（initrd或initramfs）。</p>
+<p>GRUB具有高度可配置性，允许用户自定义引导菜单、设置默认启动项、编辑内核参数等。它还支持引导加载程序间的链式引导，可以引导其他引导加载程序，如Windows的NTLDR。</p>
+</blockquote>
+<p>GRUB的基本作用流程为：</p>
+<ol>
+<li>BIOS加载MBR，MBR加载GRUB，开始执行GRUB程序</li>
+<li>GRUB程序会读取<code>grub.cfg</code>配置文件</li>
+<li>GRUB程序依据配置文件，进行内核的加载、根文件系统的挂载等操作，最后将主导权转交给内核</li>
+</ol>
+<h3 id="grub-cfg"><a href="#grub-cfg" class="headerlink" title="grub.cfg"></a>grub.cfg</h3><p>内核启动时，GRUB程序会读取<code>/boot/grub/</code>目录下的GRUB配置文件<code>grub.cfg</code>，其中记录了所有GRUB菜单可供选择的内核选项（menuentry）及其对应的启动依赖参数。以6.4.0内核选项为例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">menuentry标识着GRUB菜单中的一个内核选项</span></span><br><span class="line">menuentry &#x27;Ubuntu&#x27; --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option &#x27;gnulinux-simple-XXX&#x27; &#123;</span><br><span class="line">        recordfail # 记录上次启动是否失败，用于处理启动失败的情况</span><br><span class="line">        load_video # 加载视频驱动模块，用于在启动过程中显示图形界面</span><br><span class="line">        gfxmode $linux_gfx_mode # 设置图形模式</span><br><span class="line">        insmod gzio # 加载gzio模块，提供对GZIP压缩和解压缩功能的支持</span><br><span class="line">        # 如果是在Xen虚拟化平台上，则加载xzio和lzopio模块</span><br><span class="line">        if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi </span><br><span class="line">        </span><br><span class="line">        insmod part_gpt # 加载part_gpt模块，支持GUID分区表（GPT）</span><br><span class="line">        insmod ext2 # 加载ext2模块，支持ext2文件系统</span><br><span class="line">        </span><br><span class="line">        # 设置文件系统的根分区</span><br><span class="line">        set root=&#x27;hd0,gpt3&#x27; </span><br><span class="line">        if [ x$feature_platform_search_hint = xy ]; then</span><br><span class="line">          search --no-floppy --fs-uuid --set=root --hint-bios=hd0,gpt3 --hint-efi=hd0,gpt3 --hint-baremetal=ahci0,gpt3  XXX</span><br><span class="line">        else</span><br><span class="line">          search --no-floppy --fs-uuid --set=root XXX</span><br><span class="line">        fi</span><br><span class="line">        </span><br><span class="line">        linux   /boot/vmlinuz-6.4.0-rc3+ root=UUID=XXX ro text # 指定内核映像的路径和启动参数</span><br><span class="line">        initrd  /boot/initrd.img-6.4.0-rc3+ # 指定initramfs映像的路径</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，<code>grub.cfg</code>主要记录了一些该<strong>内核启动需要的依赖module</strong>，以及<strong>内核映像和initramfs映像的路径</strong>。</p>
+<p>menuentry的代码中，有以下几个要点值得注意：</p>
+<ol>
+<li><p><code>insmod gzio </code></p>
+<p>由于加载gzio模块，提供对GZIP压缩和解压缩功能的支持。</p>
+<p>看到这里我第一反应是觉得有点割裂，为啥这看着比较无关紧要的解压缩功能要在内核启动之前就需要有呢？于是我想起来在配置内核时，有一个选项是这样的：</p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616143835953.png" alt="image-20230616143835953"></p>
+<p>在配置选项中，我们选择了对initramfs的支持，并且勾选了<code>Support initial ramdisk/ramfs compressed using gzip </code>，也即在编译时通过gzip压缩initramfs的大小以节省空间。</p>
+<p>所以说，我们在内核启动之前，持有的initramfs处于被压缩的状态。故而，我们自然需要在内核启动之前安装gzio模块，从而支持之后对initramfs的解压缩了。</p>
+</li>
+<li><p><code>insmod ext2</code></p>
+<p>这句代码说明，GRUB的临时文件系统为ext2类型，这句代码事实上是在安装GRUB建立临时文件的必要依赖包，从而GRUB程序之后才能建立其临时文件系统、从/boot/initrd.img获取initramfs映像。</p>
+</li>
+<li><p><code>linux   /boot/vmlinuz-6.4.0-rc3+ root=UUID=XXX ro text</code></p>
+<p>指定了启动参数，也即将根文件系统以只读（<code>ro</code>）的方式挂载在<code>root=UUID=XXX</code>对应的块设备上，并且默认以<code>text</code>方式（也即非图形化的Shell界面）启动内核。</p>
+<p><u>此处的启动参数可在下一个部分介绍的<code>grub</code>文件中个性化。</u></p>
+</li>
+</ol>
+<h3 id="grub-cfg的生成与修改"><a href="#grub-cfg的生成与修改" class="headerlink" title="grub.cfg的生成与修改"></a>grub.cfg的生成与修改</h3><p>实际运用中，很多时候需要对启动参数进行一些修改。下面介绍两种修改<code>grub.cfg</code>的方法。</p>
+<h4 id="etc-default-grub"><a href="#etc-default-grub" class="headerlink" title="/etc/default/grub"></a>/etc/default/grub</h4><p>可以看到，<code>grub.cfg</code>其实格式较为固定（也即由一系列内容也比较相似的menuentry构成）。因而，实际上我们是通过<code>grub.d</code>生成<code>grub.cfg</code>的（6.S081实验中事实上也涉及了这一点），而<code>/etc/default/grub</code>则是GRUB程序以及<code>grub.cfg</code>生成的配置文件。下面介绍下该文件主要有哪些配置选项。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">If you change this file, run <span class="string">&#x27;update-grub&#x27;</span> afterwards to update</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">/boot/grub/grub.cfg.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">For full documentation of the options <span class="keyword">in</span> this file, see:</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">  info -f grub -n <span class="string">&#x27;Simple configuration&#x27;</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开机时GRUB界面的持续时间，此处设置为30s</span></span><br><span class="line">GRUB_TIMEOUT=30</span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不使用图形化界面</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">GRUB_TERMINAL=console</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">图形化界面的大小</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">GRUB_GFXMODE=640x480</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不使用UUID</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">GRUB_DISABLE_LINUX_UUID=<span class="literal">true</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">隐藏recovery mode</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">GRUB_DISABLE_RECOVERY=<span class="string">&quot;true&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>重点看下这几个参数：</p>
+<ol>
+<li><p><code>GRUB_CMDLINE_LINUX</code></p>
+<p>表示最终生成的grub.cfg中的每一个menuentry中的linux那一行需要附加什么参数。</p>
+<p>例如说，如果设置为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">表示initramfs在挂载真正的根文件系统之前，需要等待120s，用于防止磁盘没准备好导致的挂载失败</span></span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;rootdelay=120&quot; </span><br></pre></td></tr></table></figure>
+
+<p>那么，最终在menuentry中的启动参数就为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">linux   /boot/vmlinuz-6.4.0-rc3+ root=UUID=XXX ro rootdelay=120 text</span><br></pre></td></tr></table></figure>
+
+<p>其他一些常见的选项：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接以路径来标识块设备而非使用UUID。此为old option，建议尽量使用UUID</span></span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;root=/dev/sda3&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">标明init进程（启动后第一个进程）的具体路径。此处指明为`/bin/sh`</span></span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;init=/bin/sh&quot;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>在修改完<code>grub</code>文件之后，我们需要执行<code>sudo update-grub</code>，来重新生成<code>grub.cfg</code>文件供下次启动使用。</p>
+<h4 id="在GRUB界面直接修改"><a href="#在GRUB界面直接修改" class="headerlink" title="在GRUB界面直接修改"></a>在GRUB界面直接修改</h4><p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151055620.png" alt="image-20230616151055620"></p>
+<p>我们可以在GRUB界面选中所需内核，按下e键：</p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151122738.png" alt="image-20230616151122738"></p>
+<p>然后就可以对启动参数进行修改。</p>
+<p>值得注意的是，此修改仅对本次启动有效。如果需要长期修改，建议还是通过第一种方法去修改。</p>
+<h2 id="initramfs"><a href="#initramfs" class="headerlink" title="initramfs"></a>initramfs</h2><p>GRUB程序会通过<code>initrd.img</code>启动initramfs，从而进行真正的根文件系统挂载。</p>
+<blockquote>
+<p>initrd.img是一个Linux系统中的初始化内存盘（initial RAM disk）的映像文件。它是一个压缩的文件系统映像，通常在引导过程中加载到内存中，并提供了一种临时的根文件系统，以便在正式的根文件系统（通常位于硬盘上）可用之前提供必要的功能和模块。</p>
+</blockquote>
+<p>我们可以通过<code>unmkinitramfs /boot/initrd.img-6.4.0-rc3+ /tmp/initrd/</code>命令解压initrd，探究里面到底有什么玩意。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">├── bin -&gt; usr/bin</span><br><span class="line">├── conf</span><br><span class="line">├── etc</span><br><span class="line">├── init</span><br><span class="line">├── lib -&gt; usr/lib</span><br><span class="line">├── lib32 -&gt; usr/lib32</span><br><span class="line">├── lib64 -&gt; usr/lib64</span><br><span class="line">├── libx32 -&gt; usr/libx32</span><br><span class="line">├── run</span><br><span class="line">├── sbin -&gt; usr/sbin</span><br><span class="line">├── scripts</span><br><span class="line">├── usr</span><br><span class="line">└── var</span><br><span class="line">init</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这实际上就是一个小型的文件系统，也即initramfs。它有自己的built-in Shell（BusyBox）：</p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151938951.png" alt="image-20230616151938951"></p>
+<p>有一些较少的Shell命令（bin和sbin目录下），以及用来挂载真正的根文件系统的代码逻辑（存储在scripts目录下）。【我猜】在正常情况下，系统会执行scripts下的脚本代码挂载真正的文件系统。当挂载出现异常时，系统就会将控制权交给initramfs内置的Shell BusyBox，由用户自己探究出了什么问题。</p>
+<p>我们接下来可以追踪下initramfs的script目录下的文件系统挂载流程。</p>
+<p>挂载真正文件系统的主要函数为<code>local_mount_root</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅展示主要流程代码</span></span><br><span class="line">local_mount_root()</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">预处理，获取参数等（也即上面grub.cfg配置的root=UUID）</span></span><br><span class="line">	local_top</span><br><span class="line">	if [ -z &quot;$&#123;ROOT&#125;&quot; ]; then</span><br><span class="line">		panic &quot;No root device specified. Boot arguments must include a root= parameter.&quot;</span><br><span class="line">	fi</span><br><span class="line"><span class="meta prompt_">	</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">根据UUID获取对应的块设备</span></span><br><span class="line">	local_device_setup &quot;$&#123;ROOT&#125;&quot; &quot;root file system&quot;</span><br><span class="line">	ROOT=&quot;$&#123;DEV&#125;&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">挂载前的预处理</span></span><br><span class="line">	local_premount</span><br><span class="line"><span class="meta prompt_">	</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">挂载</span></span><br><span class="line">	mount $&#123;roflag&#125; $&#123;FSTYPE:+-t &quot;$&#123;FSTYPE&#125;&quot;&#125; $&#123;ROOTFLAGS&#125; &quot;$&#123;ROOT&#125;&quot; &quot;$&#123;rootmnt?&#125;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于研究这个是错误驱动（乐），因而我只主要看了下<code>local_device_setup</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$1</span>=device ID to mount设备ID</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$2</span>=optionname (<span class="keyword">for</span> root and etc)要挂载的是什么玩意，此处应为root file system</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$3</span>=panic <span class="keyword">if</span> device is missing (<span class="literal">true</span> or <span class="literal">false</span>, default: <span class="literal">true</span>)</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Sets <span class="variable">$DEV</span> to the resolved device node <span class="variable">$DEV</span>是最终获取到的块设备</span></span><br><span class="line">local_device_setup()</span><br><span class="line">&#123;</span><br><span class="line">	local dev_id=&quot;$1&quot;</span><br><span class="line">	local name=&quot;$2&quot;</span><br><span class="line">	local may_panic=&quot;$&#123;3:-true&#125;&quot;</span><br><span class="line">	local real_dev</span><br><span class="line">	local time_elapsed</span><br><span class="line">	local count</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">获取grub.cfg的rootdelay参数的设备等待时间。如果没有该参数，默认是30秒</span></span><br><span class="line">	local slumber=30</span><br><span class="line">	if [ &quot;$&#123;ROOTDELAY:-0&#125;&quot; -gt $slumber ]; then</span><br><span class="line">		slumber=$ROOTDELAY</span><br><span class="line">	fi</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">等待设备</span></span><br><span class="line">	case &quot;$dev_id&quot; in</span><br><span class="line">	UUID=*|LABEL=*|PARTUUID=*|/dev/*)</span><br><span class="line">		FSTYPE=$( wait-for-root &quot;$dev_id&quot; &quot;$slumber&quot; )</span><br><span class="line">		;;</span><br><span class="line">	*)</span><br><span class="line">		wait_for_udev 10</span><br><span class="line">		;;</span><br><span class="line">	esac</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">等待结束了。如果条件为真，说明还是获取不到对应的设备，那就只能说明这个设备死了</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">所以我们就得把问题告诉用户，让用户自己解决，并且进入BusyBox Shell</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">We<span class="string">&#x27;ve given up, but we&#x27;</span>ll <span class="built_in">let</span> the user fix matters <span class="keyword">if</span> they can</span></span><br><span class="line">	while ! real_dev=$(resolve_device &quot;$&#123;dev_id&#125;&quot;) ||</span><br><span class="line">	      ! get_fstype &quot;$&#123;real_dev&#125;&quot; &gt;/dev/null; do</span><br><span class="line">		if ! $may_panic; then</span><br><span class="line">			echo &quot;Gave up waiting for $&#123;name&#125;&quot;</span><br><span class="line">			return 1</span><br><span class="line">		fi</span><br><span class="line">		echo &quot;Gave up waiting for $&#123;name&#125; device.  Common problems:&quot;</span><br><span class="line">		echo &quot; - Boot args (cat /proc/cmdline)&quot;</span><br><span class="line">		echo &quot;   - Check rootdelay= (did the system wait long enough?)&quot;</span><br><span class="line">		if [ &quot;$&#123;name&#125;&quot; = root ]; then</span><br><span class="line">			echo &quot;   - Check root= (did the system wait for the right device?)&quot;</span><br><span class="line">		fi</span><br><span class="line">		echo &quot; - Missing modules (cat /proc/modules; ls /dev)&quot;</span><br><span class="line">		panic &quot;ALERT!  $&#123;dev_id&#125; does not exist.  Dropping to a shell!&quot;</span><br><span class="line">	done</span><br><span class="line"></span><br><span class="line">	DEV=&quot;$&#123;real_dev&#125;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这里如果进入错误状态，最终就是这样的效果2333：</p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616153420011.png" alt="image-20230616153420011"></p>
+
+    </div>
+
+    
+    
+    
+
+		<div>
+		  
+			<div>
+    
+        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+		  
+		</div>
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/os%E7%AB%9E%E8%B5%9B/" rel="tag"><i class="fa fa-tag"></i> os竞赛</a>
+          </div>
+
+        
+
+
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">内核启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GRUB"><span class="nav-number">1.2.</span> <span class="nav-text">GRUB</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#grub-cfg"><span class="nav-number">1.2.1.</span> <span class="nav-text">grub.cfg</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#grub-cfg%E7%9A%84%E7%94%9F%E6%88%90%E4%B8%8E%E4%BF%AE%E6%94%B9"><span class="nav-number">1.2.2.</span> <span class="nav-text">grub.cfg的生成与修改</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#etc-default-grub"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">&#x2F;etc&#x2F;default&#x2F;grub</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8GRUB%E7%95%8C%E9%9D%A2%E7%9B%B4%E6%8E%A5%E4%BF%AE%E6%94%B9"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">在GRUB界面直接修改</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#initramfs"><span class="nav-number">1.3.</span> <span class="nav-text">initramfs</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+
+
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+</body>
+</html>

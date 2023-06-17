@@ -174,6 +174,169 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/" class="post-title-link" itemprop="url">对GRUB和initramfs的小探究</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-06-17 16:36:11 / 修改时间：16:37:30" itemprop="dateCreated datePublished" datetime="2023-06-17T16:36:11+08:00">2023-06-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>竞赛时对操作系统启动过程产生了些疑问，于是问题导向地浅浅探究了下GRUB和initramfs相关机制，相关笔记先放在这里了。</p>
+<h1 id="内核启动流程"><a href="#内核启动流程" class="headerlink" title="内核启动流程"></a>内核启动流程</h1><p>在传统的BIOS系统中，计算机具体的启动流程如下：</p>
+<ol>
+<li>电源启动：当计算机的电源打开时，电源供电给计算机的硬件设备。</li>
+<li>BIOS自检：计算机的BIOS固件会自检硬件设备，包括RAM、处理器、硬盘等，以确保它们正常工作。</li>
+<li>引导设备选择：BIOS会根据预先定义的启动顺序（通常是硬盘、光驱、USB等）选择一个启动设备。</li>
+<li>MBR（Master Boot Record）加载：如果选择的启动设备是硬盘，BIOS会加载该硬盘的MBR，其中包含了引导加载程序。</li>
+<li>GRUB加载：MBR中的引导加载程序通常是GRUB（或其他引导加载程序）。GRUB会被加载到计算机的内存中，并开始执行。</li>
+<li>GRUB菜单：GRUB会显示一个菜单，列出可供选择的操作系统或内核。</li>
+<li>操作系统加载：用户选择操作系统后，GRUB会加载相应的操作系统或内核，并将控制权交给它。</li>
+</ol>
+<p>在本次内核编译配置过程中，<strong>最主要探究的是文件系统的装载过程</strong>，也即介于6-7之间的部分。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>文件系统在启动流程中的发展历程可以分为以下三个部分：</p>
+<ol>
+<li><p>GRUB文件系统</p>
+<p>由 GRUB 自身通过 BIOS 提供的服务加载</p>
+</li>
+<li><p>initramfs</p>
+<p>由GRUB加载，用于挂载真正的文件系统</p>
+</li>
+<li><p>真正的根文件系统</p>
+</li>
+</ol>
+<p>下面，将介绍1和2两个流程。</p>
+<h2 id="GRUB"><a href="#GRUB" class="headerlink" title="GRUB"></a>GRUB</h2><blockquote>
+<p>GRUB（GNU GRand Unified Bootloader）是一种常用的引导加载程序，用于在计算机启动时加载操作系统。</p>
+<p>GRUB的主要功能是在计算机启动时提供一个菜单，让用户选择要启动的操作系统或内核。它支持多个操作系统，包括各种版本的Linux、Windows、BSD等。通过GRUB，用户可以在多个操作系统之间轻松切换。</p>
+<p>除了操作系统选择，GRUB还提供了一些高级功能，例如引导参数的设置、内存检测、系统恢复等。它还支持在启动过程中加载内核模块和初始化RAM磁盘映像（initrd或initramfs）。</p>
+<p>GRUB具有高度可配置性，允许用户自定义引导菜单、设置默认启动项、编辑内核参数等。它还支持引导加载程序间的链式引导，可以引导其他引导加载程序，如Windows的NTLDR。</p>
+</blockquote>
+<p>GRUB的基本作用流程为：</p>
+<ol>
+<li>BIOS加载MBR，MBR加载GRUB，开始执行GRUB程序</li>
+<li>GRUB程序会读取<code>grub.cfg</code>配置文件</li>
+<li>GRUB程序依据配置文件，进行内核的加载、根文件系统的挂载等操作，最后将主导权转交给内核</li>
+</ol>
+<h3 id="grub-cfg"><a href="#grub-cfg" class="headerlink" title="grub.cfg"></a>grub.cfg</h3><p>内核启动时，GRUB程序会读取<code>/boot/grub/</code>目录下的GRUB配置文件<code>grub.cfg</code>，其中记录了所有GRUB菜单可供选择的内核选项（menuentry）及其对应的启动依赖参数。以6.4.0内核选项为例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">menuentry标识着GRUB菜单中的一个内核选项</span></span><br><span class="line">menuentry &#x27;Ubuntu&#x27; --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option &#x27;gnulinux-simple-XXX&#x27; &#123;</span><br><span class="line">        recordfail # 记录上次启动是否失败，用于处理启动失败的情况</span><br><span class="line">        load_video # 加载视频驱动模块，用于在启动过程中显示图形界面</span><br><span class="line">        gfxmode $linux_gfx_mode # 设置图形模式</span><br><span class="line">        insmod gzio # 加载gzio模块，提供对GZIP压缩和解压缩功能的支持</span><br><span class="line">        # 如果是在Xen虚拟化平台上，则加载xzio和lzopio模块</span><br><span class="line">        if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi </span><br><span class="line">        </span><br><span class="line">        insmod part_gpt # 加载part_gpt模块，支持GUID分区表（GPT）</span><br><span class="line">        insmod ext2 # 加载ext2模块，支持ext2文件系统</span><br><span class="line">        </span><br><span class="line">        # 设置文件系统的根分区</span><br><span class="line">        set root=&#x27;hd0,gpt3&#x27; </span><br><span class="line">        if [ x$feature_platform_search_hint = xy ]; then</span><br><span class="line">          search --no-floppy --fs-uuid --set=root --hint-bios=hd0,gpt3 --hint-efi=hd0,gpt3 --hint-baremetal=ahci0,gpt3  XXX</span><br><span class="line">        else</span><br><span class="line">          search --no-floppy --fs-uuid --set=root XXX</span><br><span class="line">        fi</span><br><span class="line">        </span><br><span class="line">        linux   /boot/vmlinuz-6.4.0-rc3+ root=UUID=XXX ro text # 指定内核映像的路径和启动参数</span><br><span class="line">        initrd  /boot/initrd.img-6.4.0-rc3+ # 指定initramfs映像的路径</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，<code>grub.cfg</code>主要记录了一些该<strong>内核启动需要的依赖module</strong>，以及<strong>内核映像和initramfs映像的路径</strong>。</p>
+<p>menuentry的代码中，有以下几个要点值得注意：</p>
+<ol>
+<li><p><code>insmod gzio </code></p>
+<p>由于加载gzio模块，提供对GZIP压缩和解压缩功能的支持。</p>
+<p>看到这里我第一反应是觉得有点割裂，为啥这看着比较无关紧要的解压缩功能要在内核启动之前就需要有呢？于是我想起来在配置内核时，有一个选项是这样的：</p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616143835953.png" alt="image-20230616143835953"></p>
+<p>在配置选项中，我们选择了对initramfs的支持，并且勾选了<code>Support initial ramdisk/ramfs compressed using gzip </code>，也即在编译时通过gzip压缩initramfs的大小以节省空间。</p>
+<p>所以说，我们在内核启动之前，持有的initramfs处于被压缩的状态。故而，我们自然需要在内核启动之前安装gzio模块，从而支持之后对initramfs的解压缩了。</p>
+</li>
+<li><p><code>insmod ext2</code></p>
+<p>这句代码说明，GRUB的临时文件系统为ext2类型，这句代码事实上是在安装GRUB建立临时文件的必要依赖包，从而GRUB程序之后才能建立其临时文件系统、从/boot/initrd.img获取initramfs映像。</p>
+</li>
+<li><p><code>linux   /boot/vmlinuz-6.4.0-rc3+ root=UUID=XXX ro text</code></p>
+<p>指定了启动参数，也即将根文件系统以只读（<code>ro</code>）的方式挂载在<code>root=UUID=XXX</code>对应的块设备上，并且默认以<code>text</code>方式（也即非图形化的Shell界面）启动内核。</p>
+<p><u>此处的启动参数可在下一个部分介绍的<code>grub</code>文件中个性化。</u></p>
+</li>
+</ol>
+<h3 id="grub-cfg的生成与修改"><a href="#grub-cfg的生成与修改" class="headerlink" title="grub.cfg的生成与修改"></a>grub.cfg的生成与修改</h3><p>实际运用中，很多时候需要对启动参数进行一些修改。下面介绍两种修改<code>grub.cfg</code>的方法。</p>
+<h4 id="etc-default-grub"><a href="#etc-default-grub" class="headerlink" title="/etc/default/grub"></a>/etc/default/grub</h4><p>可以看到，<code>grub.cfg</code>其实格式较为固定（也即由一系列内容也比较相似的menuentry构成）。因而，实际上我们是通过<code>grub.d</code>生成<code>grub.cfg</code>的（6.S081实验中事实上也涉及了这一点），而<code>/etc/default/grub</code>则是GRUB程序以及<code>grub.cfg</code>生成的配置文件。下面介绍下该文件主要有哪些配置选项。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">If you change this file, run <span class="string">&#x27;update-grub&#x27;</span> afterwards to update</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">/boot/grub/grub.cfg.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">For full documentation of the options <span class="keyword">in</span> this file, see:</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">  info -f grub -n <span class="string">&#x27;Simple configuration&#x27;</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开机时GRUB界面的持续时间，此处设置为30s</span></span><br><span class="line">GRUB_TIMEOUT=30</span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不使用图形化界面</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">GRUB_TERMINAL=console</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">图形化界面的大小</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">GRUB_GFXMODE=640x480</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不使用UUID</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">GRUB_DISABLE_LINUX_UUID=<span class="literal">true</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">隐藏recovery mode</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">GRUB_DISABLE_RECOVERY=<span class="string">&quot;true&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>重点看下这几个参数：</p>
+<ol>
+<li><p><code>GRUB_CMDLINE_LINUX</code></p>
+<p>表示最终生成的grub.cfg中的每一个menuentry中的linux那一行需要附加什么参数。</p>
+<p>例如说，如果设置为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">表示initramfs在挂载真正的根文件系统之前，需要等待120s，用于防止磁盘没准备好导致的挂载失败</span></span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;rootdelay=120&quot; </span><br></pre></td></tr></table></figure>
+
+<p>那么，最终在menuentry中的启动参数就为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">linux   /boot/vmlinuz-6.4.0-rc3+ root=UUID=XXX ro rootdelay=120 text</span><br></pre></td></tr></table></figure>
+
+<p>其他一些常见的选项：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接以路径来标识块设备而非使用UUID。此为old option，建议尽量使用UUID</span></span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;root=/dev/sda3&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">标明init进程（启动后第一个进程）的具体路径。此处指明为`/bin/sh`</span></span><br><span class="line">GRUB_CMDLINE_LINUX=&quot;init=/bin/sh&quot;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>在修改完<code>grub</code>文件之后，我们需要执行<code>sudo update-grub</code>，来重新生成<code>grub.cfg</code>文件供下次启动使用。</p>
+<h4 id="在GRUB界面直接修改"><a href="#在GRUB界面直接修改" class="headerlink" title="在GRUB界面直接修改"></a>在GRUB界面直接修改</h4><p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151055620.png" alt="image-20230616151055620"></p>
+<p>我们可以在GRUB界面选中所需内核，按下e键：</p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151122738.png" alt="image-20230616151122738"></p>
+<p>然后就可以对启动参数进行修改。</p>
+<p>值得注意的是，此修改仅对本次启动有效。如果需要长期修改，建议还是通过第一种方法去修改。</p>
+<h2 id="initramfs"><a href="#initramfs" class="headerlink" title="initramfs"></a>initramfs</h2><p>GRUB程序会通过<code>initrd.img</code>启动initramfs，从而进行真正的根文件系统挂载。</p>
+<blockquote>
+<p>initrd.img是一个Linux系统中的初始化内存盘（initial RAM disk）的映像文件。它是一个压缩的文件系统映像，通常在引导过程中加载到内存中，并提供了一种临时的根文件系统，以便在正式的根文件系统（通常位于硬盘上）可用之前提供必要的功能和模块。</p>
+</blockquote>
+<p>我们可以通过<code>unmkinitramfs /boot/initrd.img-6.4.0-rc3+ /tmp/initrd/</code>命令解压initrd，探究里面到底有什么玩意。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">├── bin -&gt; usr/bin</span><br><span class="line">├── conf</span><br><span class="line">├── etc</span><br><span class="line">├── init</span><br><span class="line">├── lib -&gt; usr/lib</span><br><span class="line">├── lib32 -&gt; usr/lib32</span><br><span class="line">├── lib64 -&gt; usr/lib64</span><br><span class="line">├── libx32 -&gt; usr/libx32</span><br><span class="line">├── run</span><br><span class="line">├── sbin -&gt; usr/sbin</span><br><span class="line">├── scripts</span><br><span class="line">├── usr</span><br><span class="line">└── var</span><br><span class="line">init</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这实际上就是一个小型的文件系统，也即initramfs。它有自己的built-in Shell（BusyBox）：</p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151938951.png" alt="image-20230616151938951"></p>
+<p>有一些较少的Shell命令（bin和sbin目录下），以及用来挂载真正的根文件系统的代码逻辑（存储在scripts目录下）。【我猜】在正常情况下，系统会执行scripts下的脚本代码挂载真正的文件系统。当挂载出现异常时，系统就会将控制权交给initramfs内置的Shell BusyBox，由用户自己探究出了什么问题。</p>
+<p>我们接下来可以追踪下initramfs的script目录下的文件系统挂载流程。</p>
+<p>挂载真正文件系统的主要函数为<code>local_mount_root</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅展示主要流程代码</span></span><br><span class="line">local_mount_root()</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">预处理，获取参数等（也即上面grub.cfg配置的root=UUID）</span></span><br><span class="line">	local_top</span><br><span class="line">	if [ -z &quot;$&#123;ROOT&#125;&quot; ]; then</span><br><span class="line">		panic &quot;No root device specified. Boot arguments must include a root= parameter.&quot;</span><br><span class="line">	fi</span><br><span class="line"><span class="meta prompt_">	</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">根据UUID获取对应的块设备</span></span><br><span class="line">	local_device_setup &quot;$&#123;ROOT&#125;&quot; &quot;root file system&quot;</span><br><span class="line">	ROOT=&quot;$&#123;DEV&#125;&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">挂载前的预处理</span></span><br><span class="line">	local_premount</span><br><span class="line"><span class="meta prompt_">	</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">挂载</span></span><br><span class="line">	mount $&#123;roflag&#125; $&#123;FSTYPE:+-t &quot;$&#123;FSTYPE&#125;&quot;&#125; $&#123;ROOTFLAGS&#125; &quot;$&#123;ROOT&#125;&quot; &quot;$&#123;rootmnt?&#125;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于研究这个是错误驱动（乐），因而我只主要看了下<code>local_device_setup</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$1</span>=device ID to mount设备ID</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$2</span>=optionname (<span class="keyword">for</span> root and etc)要挂载的是什么玩意，此处应为root file system</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$3</span>=panic <span class="keyword">if</span> device is missing (<span class="literal">true</span> or <span class="literal">false</span>, default: <span class="literal">true</span>)</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Sets <span class="variable">$DEV</span> to the resolved device node <span class="variable">$DEV</span>是最终获取到的块设备</span></span><br><span class="line">local_device_setup()</span><br><span class="line">&#123;</span><br><span class="line">	local dev_id=&quot;$1&quot;</span><br><span class="line">	local name=&quot;$2&quot;</span><br><span class="line">	local may_panic=&quot;$&#123;3:-true&#125;&quot;</span><br><span class="line">	local real_dev</span><br><span class="line">	local time_elapsed</span><br><span class="line">	local count</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">获取grub.cfg的rootdelay参数的设备等待时间。如果没有该参数，默认是30秒</span></span><br><span class="line">	local slumber=30</span><br><span class="line">	if [ &quot;$&#123;ROOTDELAY:-0&#125;&quot; -gt $slumber ]; then</span><br><span class="line">		slumber=$ROOTDELAY</span><br><span class="line">	fi</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">等待设备</span></span><br><span class="line">	case &quot;$dev_id&quot; in</span><br><span class="line">	UUID=*|LABEL=*|PARTUUID=*|/dev/*)</span><br><span class="line">		FSTYPE=$( wait-for-root &quot;$dev_id&quot; &quot;$slumber&quot; )</span><br><span class="line">		;;</span><br><span class="line">	*)</span><br><span class="line">		wait_for_udev 10</span><br><span class="line">		;;</span><br><span class="line">	esac</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">等待结束了。如果条件为真，说明还是获取不到对应的设备，那就只能说明这个设备死了</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">所以我们就得把问题告诉用户，让用户自己解决，并且进入BusyBox Shell</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">We<span class="string">&#x27;ve given up, but we&#x27;</span>ll <span class="built_in">let</span> the user fix matters <span class="keyword">if</span> they can</span></span><br><span class="line">	while ! real_dev=$(resolve_device &quot;$&#123;dev_id&#125;&quot;) ||</span><br><span class="line">	      ! get_fstype &quot;$&#123;real_dev&#125;&quot; &gt;/dev/null; do</span><br><span class="line">		if ! $may_panic; then</span><br><span class="line">			echo &quot;Gave up waiting for $&#123;name&#125;&quot;</span><br><span class="line">			return 1</span><br><span class="line">		fi</span><br><span class="line">		echo &quot;Gave up waiting for $&#123;name&#125; device.  Common problems:&quot;</span><br><span class="line">		echo &quot; - Boot args (cat /proc/cmdline)&quot;</span><br><span class="line">		echo &quot;   - Check rootdelay= (did the system wait long enough?)&quot;</span><br><span class="line">		if [ &quot;$&#123;name&#125;&quot; = root ]; then</span><br><span class="line">			echo &quot;   - Check root= (did the system wait for the right device?)&quot;</span><br><span class="line">		fi</span><br><span class="line">		echo &quot; - Missing modules (cat /proc/modules; ls /dev)&quot;</span><br><span class="line">		panic &quot;ALERT!  $&#123;dev_id&#125; does not exist.  Dropping to a shell!&quot;</span><br><span class="line">	done</span><br><span class="line"></span><br><span class="line">	DEV=&quot;$&#123;real_dev&#125;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这里如果进入错误状态，最终就是这样的效果2333：</p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616153420011.png" alt="image-20230616153420011"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+	
+	
+	
+		
+	
+	
+		  
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/03/13/cmu15445/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -205,7 +368,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-01 14:19:22" itemprop="dateModified" datetime="2023-04-01T14:19:22+08:00">2023-04-01</time>
+                <time title="修改时间：2023-05-06 23:32:31" itemprop="dateModified" datetime="2023-05-06T23:32:31+08:00">2023-05-06</time>
               </span>
 
           
@@ -225,7 +388,240 @@
 <p><a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1618291703873589248">做spring2023的大佬的记录</a></p>
 <p>21年和22年的第二个实验不大一样，到时候看看情况两个都完成一下吧</p>
 </blockquote>
-<h3 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a><a href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab0">Project0   C++ Primer</a></h3><h3 id="Project1-Buffer-Pool"><a href="#Project1-Buffer-Pool" class="headerlink" title="Project1   Buffer Pool"></a><a href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab1">Project1   Buffer Pool</a></h3>
+<h3 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a><a href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab0">Project0   C++ Primer</a></h3><h3 id="Project1-Buffer-Pool"><a href="#Project1-Buffer-Pool" class="headerlink" title="Project1   Buffer Pool"></a><a href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab1">Project1   Buffer Pool</a></h3><h1 id="Project2-B-Tree"><a href="#Project2-B-Tree" class="headerlink" title="Project2   B+Tree"></a>Project2   B+Tree</h1><blockquote>
+<p>In this programming project you will implement a <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/B%2B_tree">B+Tree</a> index in your database system.</p>
+<p>Your implementation will support thread-safe <u>search, insertion, deletion</u> (including splitting and merging nodes包括分裂和合并结点), and an iterator to support in-order leaf scans.</p>
+</blockquote>
+<p>它这里的B+树（以及wiki里的）跟王道考研讲得不大一样。王道考研的B+每个结点一个关键字对应一个child，但是这里的是B树的形式。</p>
+<p><img src="/2023/03/13/cmu15445/B+-tree-remove-61.png" alt="undefined"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230417181239196.png" alt="image-20230417181239196"></p>
+<h2 id="Task1-B-Tree-Pages"><a href="#Task1-B-Tree-Pages" class="headerlink" title="Task1   B+Tree Pages"></a>Task1   B+Tree Pages</h2><blockquote>
+<p>You must implement three Page classes to store the data of your B+Tree:</p>
+<ol>
+<li><p>B+Tree Page  <code>BPlusTreePage</code></p>
+<p>下面那两个的基类</p>
+</li>
+<li><p>B+Tree Internal Page</p>
+<p>An Internal Page stores <strong>m</strong> ordered keys and <strong>m+1</strong> child pointers (as page_ids) to other B+Tree Pages.These keys and pointers are internally represented as an array of key/page_id pairs. </p>
+<p>Because the number of pointers does not equal the number of keys, <strong>the first key is set to be invalid, and lookups should always start with the second key.</strong></p>
+<p>At any time, each internal page should be at least half full.【min_size&lt;=  &lt;=max_size】</p>
+<p>During deletion, two half-full pages can be merged, or keys and pointers can be redistributed to avoid merging. During insertion, one full page can be split into two, or keys and pointers can be redistributed to avoid splitting. </p>
+</li>
+<li><p>B+Tree Leaf Page</p>
+<p>The Leaf Page stores <strong>m</strong> ordered keys and their <strong>m</strong> corresponding values.  In your implementation, the value should always be the 64-bit record_id for where the actual tuples are stored; see the <code>RID</code> class, in <code>src/include/common/rid.h</code>. </p>
+<p>*<strong>Note:*</strong> Even though Leaf Pages and Internal Pages contain the same type of key, they may have different value types. <strong>Thus, the <code>max_size</code> can be different.</strong></p>
+</li>
+</ol>
+</blockquote>
+<h2 id="Task2a-Insertion-and-Search"><a href="#Task2a-Insertion-and-Search" class="headerlink" title="Task2a   Insertion and Search"></a>Task2a   Insertion and Search</h2><blockquote>
+<p>The index should <strong>support only unique keys;</strong> if you try to reinsert an existing key into the index, it should not perform the insertion, and should return false. key必须unique</p>
+<p>B+Tree pages should be split (or keys should be redistributed) if an insertion would violate the B+Tree’s invariants. 插入时需要分裂</p>
+<p>If an insertion changes the page ID of the root, you must update the <code>root_page_id</code> in the B+Tree index’s header page. You can do this by accessing the <code>header_page_id_</code> page, which is given to you in the constructor.  Then, by using <code>reinterpret_cast</code>, you can interpret this page as a <code>BPlusTreeHeaderPage</code> (from <code>src/include/storage/page/b_plus_tree_header_page.h</code>) and update the root page ID from there. You also must implement <code>GetRootPageId</code>, which currently returns 0 by default.对<code>root_page_id</code>的一切访问，都需要通过<code>header_page_id_</code>。如果插入后改变了root的page ID，需要更新<code>root_page_id</code>。</p>
+<p>We recommend that you use the page guard classes from Project 1 to help prevent synchronization problems. For this checkpoint, we recommend that you use <code>FetchPageBasic</code> (defined in <code>src/include/storage/page/</code>) when you access a page. 在当前task中，我们推荐你使用pro1实现的page guard，比如说这里如果要访问一页，就需要用 <code>FetchPageBasic</code> 。</p>
+<p>You may optionally use the <code>Context</code> class (defined in <code>src/include/storage/index/b_plus_tree.h</code>) to track the pages that you’ve read or written (via the <code>read_set_</code> and <code>write_set_</code> fields) or to store other metadata that you need to pass into other functions recursively.你可以随意使用和修改 <code>Context</code> class，它大概就是一个存储共享信息的对象。</p>
+<p>If you are using the <code>Context</code> class, here are some tips:如果你要用，要注意以下几点：</p>
+<ul>
+<li><p>You might only need to use <code>write_set_</code> when inserting or deleting. 当你在为B+树插入/删除结点时，需要用到<code>write_set_</code>。【为什么？这个set存储的是修改路径上的结点吗？然后如果要分裂/合并结点，只需什么while(pop且需要分裂/合并){分裂/合并}？？所以说这里的deque是栈结构？】</p>
+<p>也就是说，其实我们就可以不用递归了，而是将上下文存储在context-&gt;write_set_这个栈里面就行了？大概是这个意思吧</p>
+<p>It is possible that you don’t need to use <code>read_set_</code>, depending on your implementation.</p>
+<p>read可以用递归（比较简单）也可以不用，所以说具体看实现。</p>
+</li>
+<li><p>You might want to store the root page id in the context and acquire write guard of header page when modifying the B+Tree.你需要将root page id存储在context，并且在修改b+树（插入、删除）时获取header page的WritePageGurad。</p>
+</li>
+<li><p>To find a parent to the current node, look at the back of <code>write_set_</code>. It should contain all nodes along the access path.如果想要寻找当前node的父亲，可以看看<code>write_set_.back</code>，它包含了访问路径上所有结点的引用【所以确实是当成栈来用了】</p>
+</li>
+<li><p>You should use <code>BUSTUB_ASSERT</code> to help you find inconsistent data in your implementation. 需要使用 <code>BUSTUB_ASSERT</code>。</p>
+<p>For example, if you want to split a node (except root), you might want to ensure there is still at least one node in the <code>write_set_</code>. If you need to split root, you might want to check if <code>header_page_</code> is <code>std::nullopt</code>.</p>
+<p>如果你想要分割一个根节点以外的node，那你必须保证<code>write_set_</code>中至少有一个结点；如果你想要分割根节点，那你必须保证<code>header_page_</code>非空。</p>
+</li>
+<li><p>To unlock the header page, simply set <code>header_page_</code> to <code>std::nullopt</code>. To unlock other pages, pop from the <code>write_set_</code> and drop.如果你想要不锁住header page，那就置其为空指针；如果想释放别的页，那就将它从 <code>write_set_</code> pop出来就行。【这是因为我们要用到的page类型都是page guard，可以析构时unpin吗？】</p>
+</li>
+</ul>
+</blockquote>
+<p>这是我的get方法，这里简要记录下思路。</p>
+<p>我并没有使用到它说的context对象。我是类似对二叉搜索树查找的思路进行查找的。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::GetValue</span><span class="params">(<span class="type">const</span> KeyType &amp;key, std::vector&lt;ValueType&gt; *result, Transaction *txn)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  BasicPageGuard guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(header_page_id_);</span><br><span class="line">  InternalPage* root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">  <span class="keyword">if</span>(root-&gt;<span class="built_in">GetSize</span>() == <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">    <span class="type">bool</span> flag=<span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;root-&gt;<span class="built_in">GetSize</span>();i++)&#123;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">comparator_</span>(key,root-&gt;<span class="built_in">KeyAt</span>(i)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="comment">// if(key&lt;root-&gt;KeyAt(i))&#123;</span></span><br><span class="line">        guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(root-&gt;<span class="built_in">ValueAt</span>(i<span class="number">-1</span>));</span><br><span class="line">        root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">        flag = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(!flag)&#123;</span><br><span class="line">      guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(root-&gt;<span class="built_in">ValueAt</span>(root-&gt;<span class="built_in">GetSize</span>()<span class="number">-1</span>));</span><br><span class="line">      root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(root-&gt;<span class="built_in">IsLeafPage</span>())&#123;</span><br><span class="line">      <span class="keyword">auto</span> leaf = guard.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">      <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;leaf-&gt;<span class="built_in">GetSize</span>();i++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">comparator_</span>(key,leaf-&gt;<span class="built_in">KeyAt</span>(i)) == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">// if(key == leaf-&gt;KeyAt(i))&#123;</span></span><br><span class="line">          result-&gt;<span class="built_in">push_back</span>(<span class="built_in">static_cast</span>&lt;ValueType&gt;(leaf-&gt;<span class="built_in">ValueAt</span>(i)));</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>进度：编译成功，测试寄</p>
+<p>下一步目标：</p>
+<ol>
+<li>添加asset语句</li>
+<li>看看测试到底哪里出错了</li>
+</ol>
+<p>记录下我的全代码和思路吧</p>
+<ol>
+<li><p>page</p>
+<p>都代表着一页物理页，并且其结构为header+value。如leaf page：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230418110917819.png" alt="image-20230418110917819"></p>
+<ol>
+<li><p>b_plus_tree_page        值得注意的就：IncreaseSize的amount可以是负数，代表减少size</p>
+</li>
+<li><p>b_plus_tree_internal_page</p>
+<ol>
+<li><p>增加了新的接口：SetValueAt</p>
+</li>
+<li><p>具体实现</p>
+<ol>
+<li><p>简述</p>
+<p>占据一个物理页大小，代表b+树非叶结点，其key表示结点关键字，value表示指向孩子的指针。由于其结构如下：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230418110258801.png" alt="image-20230418110258801"></p>
+<p>因而key的个数比value小1,，在具体实现中，key0被置为无效值。</p>
+</li>
+<li><p>空结点的size被置为1     因为我认为默认有key0和value0</p>
+</li>
+<li><p>key相关函数从1开始遍历，value相关函数从0开始遍历</p>
+</li>
+<li><p>进行了边界保护</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>b_plus_tree_leaf_page</p>
+<ol>
+<li><p>增加了新的接口：ValueAt、SetKeyAt、SetValueAt</p>
+</li>
+<li><p>具体实现</p>
+<ol>
+<li><p>简述</p>
+<p>占据一个物理页大小，代表b+树叶结点，其key表示结点关键字，value为真正存储数据的RID。其结构如下：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230418110753966.png" alt="image-20230418110753966"></p>
+<p>因而key与value数量一致。</p>
+</li>
+<li><p>相比于非叶结点，header新增了线性索引。<strong>这点我还没实现</strong>。</p>
+</li>
+<li><p>key和value都可以从0开始遍历</p>
+</li>
+<li><p>进行了边界保护</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>b+树</p>
+<p>b+树本身每个结点都是物理页，并且还额外用了另一个物理页header_page来记录其root page的id。这个header_page的id被记录在成员变量中，在构造函数中被初始化为root id = INVALID，并且在context中被获取写锁。</p>
+<ol>
+<li><p>判空</p>
+<ol>
+<li>获取header_page</li>
+<li>如果header page记录的root id INVALID，说明空</li>
+<li>否则，继续获取root page</li>
+<li>如果root_page为叶结点，当其size==0时为空；否则，size&lt;=1为空。</li>
+</ol>
+</li>
+<li><p>查找</p>
+<ol>
+<li>获取root page</li>
+<li>采用迭代方式进行查找。<ol>
+<li>对于叶结点，从0开始遍历其所有key，寻找是否有相同的key。注意应该使用<code>comparator_(a,b)</code>来判等。</li>
+<li>对于非叶结点，从1开始遍历其所有key。由于结点内部递增排序，因而当找到第一个比target大的key时，说明target应该插入到该key的左侧。</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>插入</p>
+<ol>
+<li><p>获取root page，登记context上下文，并且将root push进context的访问队列<code>write_set_</code>中</p>
+</li>
+<li><p>如果root page不存在</p>
+<ol>
+<li>新申请一页，更新header_page</li>
+<li>对新root page进行init，并且插入key和value。注意此时root应为叶结点</li>
+<li>return true</li>
+</ol>
+</li>
+<li><p>顺着b+树一级一级查找，直到找到目标leaf</p>
+<p>过程同查找，区别就是找到叶结点时应该break而非做别的事</p>
+</li>
+<li><p>如果key已存在，return false</p>
+</li>
+<li><p>插入new record到目标leaf中</p>
+<ol>
+<li><p>先分裂</p>
+<ol>
+<li><p>通过<code>write_set_</code>获取当前leaf的父节点root</p>
+<ol>
+<li><code>write_set_</code>为空，说明根节点就是leaf结点。此时新建一页，置root为该页</li>
+<li>否则，置为back()，并且pop_back()。</li>
+</ol>
+</li>
+<li><p>对leaf结点进行分裂</p>
+<ol>
+<li><p>创建新节点，并且copy旧结点的后半部分</p>
+</li>
+<li><p>缩小旧结点的size</p>
+</li>
+<li><p>改变leaf指针的值</p>
+<p>因为最后要将new record插入到新分裂出的结点</p>
+</li>
+</ol>
+</li>
+<li><p>将leaf中间的那个结点值copy插入到root中【注意，不同于b树，中间结点还是会存在于两个新leaf结点中之一的，所以这里用词为copy而非move】</p>
+<p>一个插入排序，从1开始遍历。最终，root的新key连接着新value（new node的page id）</p>
+</li>
+<li><p>向上生长</p>
+<ol>
+<li><p>当路径队列为空或者当前结点root无需分裂时退出</p>
+</li>
+<li><p>获取当前结点root的parent</p>
+</li>
+<li><p>分割root结点</p>
+<p>由于这是对internal page的分割，故而与上面对leaf page的分割稍有不同：idx从1开始复制。我们将新节点的最左孩子置为了空，保留了旧结点的最右孩子。</p>
+</li>
+<li><p>将root中间的那个结点值copy插入到parent中</p>
+</li>
+<li><p>移动root指针：root=parent</p>
+</li>
+</ol>
+</li>
+<li><p>退出4循环后，如果需要生长根节点</p>
+<ol>
+<li><p>创建并初始化根节点，登记</p>
+<p>注意，设置key0对于value指向旧结点。</p>
+</li>
+<li><p>分割当前结点</p>
+</li>
+<li><p>将中间部分的那个结点插入到新根节点中</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>再插入new record到分裂出的新leaf中</p>
+<p>插入排序，从0开始遍历。</p>
+</li>
+<li><p>释放ctx，return true。</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>以上就是我的全部实现。下次写代码的时候可以复习下这整个流程，我只能帮到这里了！</p>
+<p>遇到个小插曲：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/minglee/p/9016306.html">Check for working C compiler: /usr/bin/cc - broken</a></p>
+<p>感觉可能是内核切来切去的问题？总之我最后在5.11内核把build文件删了，重新执行<code>cmake -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) ..</code>就突然ok了。</p>
+<p><img src="/2023/03/13/cmu15445/image-20230505002652748.png" alt="image-20230505002652748"></p>
+<p>我发现在这里创建的root最后好像会被释放掉？</p>
+<p>比如我看到新root的page为6，连接也做得好好的，最后出了函数就寄了：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230505002731312.png" alt="image-20230505002731312"></p>
+<p>还有一个是发现新的leaf page好像不大对，其类型甚至是internal呃呃，我调下看看</p>
+<p>尼玛，绷不住了是这里：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230505011731797.png" alt="image-20230505011731797"></p>
+<p>原来写的</p>
+<p><img src="/2023/03/13/cmu15445/image-20230505011744924.png" alt="image-20230505011744924"></p>
+<p>改了之后test2马上ok，乐</p>
+<p>完成了index_iterator的编写。接下来需要修改b+tree.cpp，新增Begin的实现。</p>
+<p>不过index iterator报错了，之后再改</p>
+
       
     </div>
 
@@ -396,13 +792,6 @@
 		
 	
 	
-	
-	
-		
-			
-		
-	
-	
 
   
   <nav class="pagination">
@@ -474,12 +863,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-count">29</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
