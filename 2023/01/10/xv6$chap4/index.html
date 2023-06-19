@@ -22,13 +22,15 @@
     var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="Traps and system callstraps&#x3D;系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。 对trap的处理包含四个部分：硬件处理、中断向量、trap handler、对应的处理函数 RISC-V trap machinerycontrol registerrisc-v为trap提供了一组寄存器：  stvec trap handler的入口地址  sepc">
+  <meta name="description" content="Traps and system callstraps&#x3D;系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。 对trap的处理包含四个部分：硬件处理、中断向量、trap handler、对应的处理函数 RISC-V trap machinery     在RISC-V中，异常通常是由于程序执行过程中的错误或非预期事件而引起的，包括故障（faults）、陷阱（traps）和中止">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Traps and system calls">
 <meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap4/index.html">
 <meta property="og:site_name" content="修年">
-<meta property="og:description" content="Traps and system callstraps&#x3D;系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。 对trap的处理包含四个部分：硬件处理、中断向量、trap handler、对应的处理函数 RISC-V trap machinerycontrol registerrisc-v为trap提供了一组寄存器：  stvec trap handler的入口地址  sepc">
+<meta property="og:description" content="Traps and system callstraps&#x3D;系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。 对trap的处理包含四个部分：硬件处理、中断向量、trap handler、对应的处理函数 RISC-V trap machinery     在RISC-V中，异常通常是由于程序执行过程中的错误或非预期事件而引起的，包括故障（faults）、陷阱（traps）和中止">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230618162437636.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230618162500928-1687077103154-2.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/p3.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111203357767.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111224927837.png">
@@ -50,10 +52,10 @@
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230117235028133.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230118003118745.png">
 <meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
-<meta property="article:modified_time" content="2023-02-26T06:31:00.700Z">
+<meta property="article:modified_time" content="2023-06-19T14:25:39.215Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/p3.png">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230618162437636.png">
 
 <link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6$chap4/">
 
@@ -225,7 +227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-26 14:31:00" itemprop="dateModified" datetime="2023-02-26T14:31:00+08:00">2023-02-26</time>
+                <time title="修改时间：2023-06-19 22:25:39" itemprop="dateModified" datetime="2023-06-19T22:25:39+08:00">2023-06-19</time>
               </span>
 
           
@@ -248,7 +250,16 @@
       
         <h1 id="Traps-and-system-calls"><a href="#Traps-and-system-calls" class="headerlink" title="Traps and system calls"></a>Traps and system calls</h1><p>traps=系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。</p>
 <p>对trap的处理包含四个部分：硬件处理、中断向量、trap handler、对应的处理函数</p>
-<h2 id="RISC-V-trap-machinery"><a href="#RISC-V-trap-machinery" class="headerlink" title="RISC-V trap machinery"></a>RISC-V trap machinery</h2><h3 id="control-register"><a href="#control-register" class="headerlink" title="control register"></a>control register</h3><p>risc-v为trap提供了一组寄存器：</p>
+<h2 id="RISC-V-trap-machinery"><a href="#RISC-V-trap-machinery" class="headerlink" title="RISC-V trap machinery"></a>RISC-V trap machinery</h2><blockquote>
+<img src="/2023/01/10/xv6/image-20230618162437636.png" alt="image-20230618162437636" style="zoom:50%;">
+
+<img src="/2023/01/10/xv6/image-20230618162500928-1687077103154-2.png" alt="image-20230618162500928" style="zoom:50%;">
+
+<p>在RISC-V中，异常通常是由于程序执行过程中的错误或非预期事件而引起的，包括<strong>故障（faults）、陷阱（traps）和中止（aborts）</strong>。中断（interrupts）则是由外部事件触发的，例如定时器到期、外部设备请求等。中断是异步事件，与当前正在执行的指令无关，因此会在任何时候发生。</p>
+<p>xv6是基于RISC-V架构的。因此，发生异常的时候，就会跳转到统一的kernel trap，然后再在里面通过读取scause来进行相应处理。</p>
+<p>发生中断的处理方式就和x86差不多了，都是通过中断向量实现的。</p>
+</blockquote>
+<h3 id="control-register"><a href="#control-register" class="headerlink" title="control register"></a>control register</h3><p>risc-v为trap提供了一组寄存器：</p>
 <ol>
 <li><p>stvec</p>
 <p>trap handler的入口地址</p>
