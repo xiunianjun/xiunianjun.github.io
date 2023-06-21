@@ -9594,7 +9594,7 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <h3 id="计算机组成原理"><a href="#计算机组成原理" class="headerlink" title="计算机组成原理"></a><a href="./2023/06/21/comporgan">计算机组成原理</a></h3>]]></content>
   </entry>
   <entry>
-    <title>comporgan</title>
+    <title>计算机组成原理</title>
     <url>/2023/06/21/comporgan/</url>
     <content><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><h3 id="冯诺依曼"><a href="#冯诺依曼" class="headerlink" title="冯诺依曼"></a>冯诺依曼</h3><p>以运算器为中心，指令和数据同等地位（不满足摩尔定律）</p>
 <p><img src="/2023/06/21/comporgan/image-20230617133555268.png" alt="image-20230617133555268"></p>
