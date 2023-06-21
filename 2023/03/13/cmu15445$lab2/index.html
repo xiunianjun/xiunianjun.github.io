@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
+  <link rel="mask-icon" href="/images/cat.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Project2   B+Tree In this programming project you will implement a B+Tree index in your database system. Your implementation will support thread-safe search, insertion, deletion (including splitting a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Project2   B+Tree">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/03/13/cmu15445$lab2/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="Project2   B+Tree In this programming project you will implement a B+Tree index in your database system. Your implementation will support thread-safe search, insertion, deletion (including splitting a">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/B+-tree-remove-61.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230417181239196.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110917819.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110258801.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110753966.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505002652748.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505002731312.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505011731797.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505011744924.png">
+<meta property="article:published_time" content="2023-03-13T14:19:00.000Z">
+<meta property="article:modified_time" content="2023-06-21T14:26:28.802Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/B+-tree-remove-61.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Project2   B+Tree | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+  
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+	
+		<script type="text/javascript" 
+		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
+		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+	
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Project2   B+Tree
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-13 22:19:00" itemprop="dateCreated datePublished" datetime="2023-03-13T22:19:00+08:00">2023-03-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-06-21 22:26:28" itemprop="dateModified" datetime="2023-06-21T22:26:28+08:00">2023-06-21</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Project2-B-Tree"><a href="#Project2-B-Tree" class="headerlink" title="Project2   B+Tree"></a>Project2   B+Tree</h1><blockquote>
+<p>In this programming project you will implement a <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/B%2B_tree">B+Tree</a> index in your database system.</p>
+<p>Your implementation will support thread-safe <u>search, insertion, deletion</u> (including splitting and merging nodes包括分裂和合并结点), and an iterator to support in-order leaf scans.</p>
+</blockquote>
+<p>它这里的B+树（以及wiki里的）跟王道考研讲得不大一样。王道考研的B+每个结点一个关键字对应一个child，但是这里的是B树的形式。</p>
+<p><img src="/2023/03/13/cmu15445/B+-tree-remove-61.png" alt="undefined"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230417181239196.png" alt="image-20230417181239196"></p>
+<h2 id="Task1-B-Tree-Pages"><a href="#Task1-B-Tree-Pages" class="headerlink" title="Task1   B+Tree Pages"></a>Task1   B+Tree Pages</h2><blockquote>
+<p>You must implement three Page classes to store the data of your B+Tree:</p>
+<ol>
+<li><p>B+Tree Page  <code>BPlusTreePage</code></p>
+<p>下面那两个的基类</p>
+</li>
+<li><p>B+Tree Internal Page</p>
+<p>An Internal Page stores <strong>m</strong> ordered keys and <strong>m+1</strong> child pointers (as page_ids) to other B+Tree Pages.These keys and pointers are internally represented as an array of key/page_id pairs. </p>
+<p>Because the number of pointers does not equal the number of keys, <strong>the first key is set to be invalid, and lookups should always start with the second key.</strong></p>
+<p>At any time, each internal page should be at least half full.【min_size&lt;=  &lt;=max_size】</p>
+<p>During deletion, two half-full pages can be merged, or keys and pointers can be redistributed to avoid merging. During insertion, one full page can be split into two, or keys and pointers can be redistributed to avoid splitting. </p>
+</li>
+<li><p>B+Tree Leaf Page</p>
+<p>The Leaf Page stores <strong>m</strong> ordered keys and their <strong>m</strong> corresponding values.  In your implementation, the value should always be the 64-bit record_id for where the actual tuples are stored; see the <code>RID</code> class, in <code>src/include/common/rid.h</code>. </p>
+<p>*<strong>Note:*</strong> Even though Leaf Pages and Internal Pages contain the same type of key, they may have different value types. <strong>Thus, the <code>max_size</code> can be different.</strong></p>
+</li>
+</ol>
+</blockquote>
+<h2 id="Task2a-Insertion-and-Search"><a href="#Task2a-Insertion-and-Search" class="headerlink" title="Task2a   Insertion and Search"></a>Task2a   Insertion and Search</h2><blockquote>
+<p>The index should <strong>support only unique keys;</strong> if you try to reinsert an existing key into the index, it should not perform the insertion, and should return false. key必须unique</p>
+<p>B+Tree pages should be split (or keys should be redistributed) if an insertion would violate the B+Tree’s invariants. 插入时需要分裂</p>
+<p>If an insertion changes the page ID of the root, you must update the <code>root_page_id</code> in the B+Tree index’s header page. You can do this by accessing the <code>header_page_id_</code> page, which is given to you in the constructor.  Then, by using <code>reinterpret_cast</code>, you can interpret this page as a <code>BPlusTreeHeaderPage</code> (from <code>src/include/storage/page/b_plus_tree_header_page.h</code>) and update the root page ID from there. You also must implement <code>GetRootPageId</code>, which currently returns 0 by default.对<code>root_page_id</code>的一切访问，都需要通过<code>header_page_id_</code>。如果插入后改变了root的page ID，需要更新<code>root_page_id</code>。</p>
+<p>We recommend that you use the page guard classes from Project 1 to help prevent synchronization problems. For this checkpoint, we recommend that you use <code>FetchPageBasic</code> (defined in <code>src/include/storage/page/</code>) when you access a page. 在当前task中，我们推荐你使用pro1实现的page guard，比如说这里如果要访问一页，就需要用 <code>FetchPageBasic</code> 。</p>
+<p>You may optionally use the <code>Context</code> class (defined in <code>src/include/storage/index/b_plus_tree.h</code>) to track the pages that you’ve read or written (via the <code>read_set_</code> and <code>write_set_</code> fields) or to store other metadata that you need to pass into other functions recursively.你可以随意使用和修改 <code>Context</code> class，它大概就是一个存储共享信息的对象。</p>
+<p>If you are using the <code>Context</code> class, here are some tips:如果你要用，要注意以下几点：</p>
+<ul>
+<li><p>You might only need to use <code>write_set_</code> when inserting or deleting. 当你在为B+树插入/删除结点时，需要用到<code>write_set_</code>。【为什么？这个set存储的是修改路径上的结点吗？然后如果要分裂/合并结点，只需什么while(pop且需要分裂/合并){分裂/合并}？？所以说这里的deque是栈结构？】</p>
+<p>也就是说，其实我们就可以不用递归了，而是将上下文存储在context-&gt;write_set_这个栈里面就行了？大概是这个意思吧</p>
+<p>It is possible that you don’t need to use <code>read_set_</code>, depending on your implementation.</p>
+<p>read可以用递归（比较简单）也可以不用，所以说具体看实现。</p>
+</li>
+<li><p>You might want to store the root page id in the context and acquire write guard of header page when modifying the B+Tree.你需要将root page id存储在context，并且在修改b+树（插入、删除）时获取header page的WritePageGurad。</p>
+</li>
+<li><p>To find a parent to the current node, look at the back of <code>write_set_</code>. It should contain all nodes along the access path.如果想要寻找当前node的父亲，可以看看<code>write_set_.back</code>，它包含了访问路径上所有结点的引用【所以确实是当成栈来用了】</p>
+</li>
+<li><p>You should use <code>BUSTUB_ASSERT</code> to help you find inconsistent data in your implementation. 需要使用 <code>BUSTUB_ASSERT</code>。</p>
+<p>For example, if you want to split a node (except root), you might want to ensure there is still at least one node in the <code>write_set_</code>. If you need to split root, you might want to check if <code>header_page_</code> is <code>std::nullopt</code>.</p>
+<p>如果你想要分割一个根节点以外的node，那你必须保证<code>write_set_</code>中至少有一个结点；如果你想要分割根节点，那你必须保证<code>header_page_</code>非空。</p>
+</li>
+<li><p>To unlock the header page, simply set <code>header_page_</code> to <code>std::nullopt</code>. To unlock other pages, pop from the <code>write_set_</code> and drop.如果你想要不锁住header page，那就置其为空指针；如果想释放别的页，那就将它从 <code>write_set_</code> pop出来就行。【这是因为我们要用到的page类型都是page guard，可以析构时unpin吗？】</p>
+</li>
+</ul>
+</blockquote>
+<p>这是我的get方法，这里简要记录下思路。</p>
+<p>我并没有使用到它说的context对象。我是类似对二叉搜索树查找的思路进行查找的。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::GetValue</span><span class="params">(<span class="type">const</span> KeyType &amp;key, std::vector&lt;ValueType&gt; *result, Transaction *txn)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  BasicPageGuard guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(header_page_id_);</span><br><span class="line">  InternalPage* root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">  <span class="keyword">if</span>(root-&gt;<span class="built_in">GetSize</span>() == <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">    <span class="type">bool</span> flag=<span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;root-&gt;<span class="built_in">GetSize</span>();i++)&#123;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">comparator_</span>(key,root-&gt;<span class="built_in">KeyAt</span>(i)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="comment">// if(key&lt;root-&gt;KeyAt(i))&#123;</span></span><br><span class="line">        guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(root-&gt;<span class="built_in">ValueAt</span>(i<span class="number">-1</span>));</span><br><span class="line">        root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">        flag = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(!flag)&#123;</span><br><span class="line">      guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(root-&gt;<span class="built_in">ValueAt</span>(root-&gt;<span class="built_in">GetSize</span>()<span class="number">-1</span>));</span><br><span class="line">      root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(root-&gt;<span class="built_in">IsLeafPage</span>())&#123;</span><br><span class="line">      <span class="keyword">auto</span> leaf = guard.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">      <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;leaf-&gt;<span class="built_in">GetSize</span>();i++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">comparator_</span>(key,leaf-&gt;<span class="built_in">KeyAt</span>(i)) == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">// if(key == leaf-&gt;KeyAt(i))&#123;</span></span><br><span class="line">          result-&gt;<span class="built_in">push_back</span>(<span class="built_in">static_cast</span>&lt;ValueType&gt;(leaf-&gt;<span class="built_in">ValueAt</span>(i)));</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>进度：编译成功，测试寄</p>
+<p>下一步目标：</p>
+<ol>
+<li>添加asset语句</li>
+<li>看看测试到底哪里出错了</li>
+</ol>
+<p>记录下我的全代码和思路吧</p>
+<ol>
+<li><p>page</p>
+<p>都代表着一页物理页，并且其结构为header+value。如leaf page：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230418110917819.png" alt="image-20230418110917819"></p>
+<ol>
+<li><p>b_plus_tree_page        值得注意的就：IncreaseSize的amount可以是负数，代表减少size</p>
+</li>
+<li><p>b_plus_tree_internal_page</p>
+<ol>
+<li><p>增加了新的接口：SetValueAt</p>
+</li>
+<li><p>具体实现</p>
+<ol>
+<li><p>简述</p>
+<p>占据一个物理页大小，代表b+树非叶结点，其key表示结点关键字，value表示指向孩子的指针。由于其结构如下：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230418110258801.png" alt="image-20230418110258801"></p>
+<p>因而key的个数比value小1,，在具体实现中，key0被置为无效值。</p>
+</li>
+<li><p>空结点的size被置为1     因为我认为默认有key0和value0</p>
+</li>
+<li><p>key相关函数从1开始遍历，value相关函数从0开始遍历</p>
+</li>
+<li><p>进行了边界保护</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>b_plus_tree_leaf_page</p>
+<ol>
+<li><p>增加了新的接口：ValueAt、SetKeyAt、SetValueAt</p>
+</li>
+<li><p>具体实现</p>
+<ol>
+<li><p>简述</p>
+<p>占据一个物理页大小，代表b+树叶结点，其key表示结点关键字，value为真正存储数据的RID。其结构如下：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230418110753966.png" alt="image-20230418110753966"></p>
+<p>因而key与value数量一致。</p>
+</li>
+<li><p>相比于非叶结点，header新增了线性索引。<strong>这点我还没实现</strong>。</p>
+</li>
+<li><p>key和value都可以从0开始遍历</p>
+</li>
+<li><p>进行了边界保护</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>b+树</p>
+<p>b+树本身每个结点都是物理页，并且还额外用了另一个物理页header_page来记录其root page的id。这个header_page的id被记录在成员变量中，在构造函数中被初始化为root id = INVALID，并且在context中被获取写锁。</p>
+<ol>
+<li><p>判空</p>
+<ol>
+<li>获取header_page</li>
+<li>如果header page记录的root id INVALID，说明空</li>
+<li>否则，继续获取root page</li>
+<li>如果root_page为叶结点，当其size==0时为空；否则，size&lt;=1为空。</li>
+</ol>
+</li>
+<li><p>查找</p>
+<ol>
+<li>获取root page</li>
+<li>采用迭代方式进行查找。<ol>
+<li>对于叶结点，从0开始遍历其所有key，寻找是否有相同的key。注意应该使用<code>comparator_(a,b)</code>来判等。</li>
+<li>对于非叶结点，从1开始遍历其所有key。由于结点内部递增排序，因而当找到第一个比target大的key时，说明target应该插入到该key的左侧。</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>插入</p>
+<ol>
+<li><p>获取root page，登记context上下文，并且将root push进context的访问队列<code>write_set_</code>中</p>
+</li>
+<li><p>如果root page不存在</p>
+<ol>
+<li>新申请一页，更新header_page</li>
+<li>对新root page进行init，并且插入key和value。注意此时root应为叶结点</li>
+<li>return true</li>
+</ol>
+</li>
+<li><p>顺着b+树一级一级查找，直到找到目标leaf</p>
+<p>过程同查找，区别就是找到叶结点时应该break而非做别的事</p>
+</li>
+<li><p>如果key已存在，return false</p>
+</li>
+<li><p>插入new record到目标leaf中</p>
+<ol>
+<li><p>先分裂</p>
+<ol>
+<li><p>通过<code>write_set_</code>获取当前leaf的父节点root</p>
+<ol>
+<li><code>write_set_</code>为空，说明根节点就是leaf结点。此时新建一页，置root为该页</li>
+<li>否则，置为back()，并且pop_back()。</li>
+</ol>
+</li>
+<li><p>对leaf结点进行分裂</p>
+<ol>
+<li><p>创建新节点，并且copy旧结点的后半部分</p>
+</li>
+<li><p>缩小旧结点的size</p>
+</li>
+<li><p>改变leaf指针的值</p>
+<p>因为最后要将new record插入到新分裂出的结点</p>
+</li>
+</ol>
+</li>
+<li><p>将leaf中间的那个结点值copy插入到root中【注意，不同于b树，中间结点还是会存在于两个新leaf结点中之一的，所以这里用词为copy而非move】</p>
+<p>一个插入排序，从1开始遍历。最终，root的新key连接着新value（new node的page id）</p>
+</li>
+<li><p>向上生长</p>
+<ol>
+<li><p>当路径队列为空或者当前结点root无需分裂时退出</p>
+</li>
+<li><p>获取当前结点root的parent</p>
+</li>
+<li><p>分割root结点</p>
+<p>由于这是对internal page的分割，故而与上面对leaf page的分割稍有不同：idx从1开始复制。我们将新节点的最左孩子置为了空，保留了旧结点的最右孩子。</p>
+</li>
+<li><p>将root中间的那个结点值copy插入到parent中</p>
+</li>
+<li><p>移动root指针：root=parent</p>
+</li>
+</ol>
+</li>
+<li><p>退出4循环后，如果需要生长根节点</p>
+<ol>
+<li><p>创建并初始化根节点，登记</p>
+<p>注意，设置key0对于value指向旧结点。</p>
+</li>
+<li><p>分割当前结点</p>
+</li>
+<li><p>将中间部分的那个结点插入到新根节点中</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>再插入new record到分裂出的新leaf中</p>
+<p>插入排序，从0开始遍历。</p>
+</li>
+<li><p>释放ctx，return true。</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>以上就是我的全部实现。下次写代码的时候可以复习下这整个流程，我只能帮到这里了！</p>
+<p>遇到个小插曲：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/minglee/p/9016306.html">Check for working C compiler: /usr/bin/cc - broken</a></p>
+<p>感觉可能是内核切来切去的问题？总之我最后在5.11内核把build文件删了，重新执行<code>cmake -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) ..</code>就突然ok了。</p>
+<p><img src="/2023/03/13/cmu15445/image-20230505002652748.png" alt="image-20230505002652748"></p>
+<p>我发现在这里创建的root最后好像会被释放掉？</p>
+<p>比如我看到新root的page为6，连接也做得好好的，最后出了函数就寄了：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230505002731312.png" alt="image-20230505002731312"></p>
+<p>还有一个是发现新的leaf page好像不大对，其类型甚至是internal呃呃，我调下看看</p>
+<p>尼玛，绷不住了是这里：</p>
+<p><img src="/2023/03/13/cmu15445/image-20230505011731797.png" alt="image-20230505011731797"></p>
+<p>原来写的</p>
+<p><img src="/2023/03/13/cmu15445/image-20230505011744924.png" alt="image-20230505011744924"></p>
+<p>改了之后test2马上ok，乐</p>
+<p>完成了index_iterator的编写。接下来需要修改b+tree.cpp，新增Begin的实现。</p>
+<p>不过index iterator报错了，之后再改</p>
+
+    </div>
+
+    
+    
+    
+
+		<div>
+		  
+			<div>
+    
+        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+		  
+		</div>
+
+      <footer class="post-footer">
+
+        
+
+
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Project2-B-Tree"><span class="nav-number">1.</span> <span class="nav-text">Project2   B+Tree</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Task1-B-Tree-Pages"><span class="nav-number">1.1.</span> <span class="nav-text">Task1   B+Tree Pages</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Task2a-Insertion-and-Search"><span class="nav-number">1.2.</span> <span class="nav-text">Task2a   Insertion and Search</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+
+
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+</body>
+</html>

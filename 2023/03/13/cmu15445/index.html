@@ -22,28 +22,18 @@
     var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="实验官网 感恩 做spring2023的大佬的记录 21年和22年的第二个实验不大一样，到时候看看情况两个都完成一下吧  Project0   C++ PrimerProject1   Buffer PoolProject2   B+Tree In this programming project you will implement a B+Tree index in your databas">
+  <meta name="description" content="实验官网 感恩 做spring2023的大佬的记录 21年和22年的第二个实验不大一样，到时候看看情况两个都完成一下吧  Project0   C++ PrimerProject1   Buffer Pool">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CMU15445">
 <meta property="og:url" content="https://xiunianjun.github.io/2023/03/13/cmu15445/index.html">
 <meta property="og:site_name" content="修年">
-<meta property="og:description" content="实验官网 感恩 做spring2023的大佬的记录 21年和22年的第二个实验不大一样，到时候看看情况两个都完成一下吧  Project0   C++ PrimerProject1   Buffer PoolProject2   B+Tree In this programming project you will implement a B+Tree index in your databas">
+<meta property="og:description" content="实验官网 感恩 做spring2023的大佬的记录 21年和22年的第二个实验不大一样，到时候看看情况两个都完成一下吧  Project0   C++ PrimerProject1   Buffer Pool">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/B+-tree-remove-61.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230417181239196.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110917819.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110258801.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110753966.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505002652748.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505002731312.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505011731797.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505011744924.png">
 <meta property="article:published_time" content="2023-03-13T14:19:00.000Z">
-<meta property="article:modified_time" content="2023-06-21T13:00:59.615Z">
+<meta property="article:modified_time" content="2023-06-21T14:26:39.209Z">
 <meta property="article:author" content="修年">
 <meta property="article:tag" content="labs">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/B+-tree-remove-61.png">
 
 <link rel="canonical" href="https://xiunianjun.github.io/2023/03/13/cmu15445/">
 
@@ -215,7 +205,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-06-21 21:00:59" itemprop="dateModified" datetime="2023-06-21T21:00:59+08:00">2023-06-21</time>
+                <time title="修改时间：2023-06-21 22:26:39" itemprop="dateModified" datetime="2023-06-21T22:26:39+08:00">2023-06-21</time>
               </span>
 
           
@@ -242,240 +232,7 @@
 <p><a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1618291703873589248">做spring2023的大佬的记录</a></p>
 <p>21年和22年的第二个实验不大一样，到时候看看情况两个都完成一下吧</p>
 </blockquote>
-<h3 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a><a href="./2023/03/13/cmu15445$lab0">Project0   C++ Primer</a></h3><h3 id="Project1-Buffer-Pool"><a href="#Project1-Buffer-Pool" class="headerlink" title="Project1   Buffer Pool"></a><a href="./2023/03/13/cmu15445$lab1">Project1   Buffer Pool</a></h3><h1 id="Project2-B-Tree"><a href="#Project2-B-Tree" class="headerlink" title="Project2   B+Tree"></a>Project2   B+Tree</h1><blockquote>
-<p>In this programming project you will implement a <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/B%2B_tree">B+Tree</a> index in your database system.</p>
-<p>Your implementation will support thread-safe <u>search, insertion, deletion</u> (including splitting and merging nodes包括分裂和合并结点), and an iterator to support in-order leaf scans.</p>
-</blockquote>
-<p>它这里的B+树（以及wiki里的）跟王道考研讲得不大一样。王道考研的B+每个结点一个关键字对应一个child，但是这里的是B树的形式。</p>
-<p><img src="/2023/03/13/cmu15445/B+-tree-remove-61.png" alt="undefined"></p>
-<p><img src="/2023/03/13/cmu15445/image-20230417181239196.png" alt="image-20230417181239196"></p>
-<h2 id="Task1-B-Tree-Pages"><a href="#Task1-B-Tree-Pages" class="headerlink" title="Task1   B+Tree Pages"></a>Task1   B+Tree Pages</h2><blockquote>
-<p>You must implement three Page classes to store the data of your B+Tree:</p>
-<ol>
-<li><p>B+Tree Page  <code>BPlusTreePage</code></p>
-<p>下面那两个的基类</p>
-</li>
-<li><p>B+Tree Internal Page</p>
-<p>An Internal Page stores <strong>m</strong> ordered keys and <strong>m+1</strong> child pointers (as page_ids) to other B+Tree Pages.These keys and pointers are internally represented as an array of key/page_id pairs. </p>
-<p>Because the number of pointers does not equal the number of keys, <strong>the first key is set to be invalid, and lookups should always start with the second key.</strong></p>
-<p>At any time, each internal page should be at least half full.【min_size&lt;=  &lt;=max_size】</p>
-<p>During deletion, two half-full pages can be merged, or keys and pointers can be redistributed to avoid merging. During insertion, one full page can be split into two, or keys and pointers can be redistributed to avoid splitting. </p>
-</li>
-<li><p>B+Tree Leaf Page</p>
-<p>The Leaf Page stores <strong>m</strong> ordered keys and their <strong>m</strong> corresponding values.  In your implementation, the value should always be the 64-bit record_id for where the actual tuples are stored; see the <code>RID</code> class, in <code>src/include/common/rid.h</code>. </p>
-<p>*<strong>Note:*</strong> Even though Leaf Pages and Internal Pages contain the same type of key, they may have different value types. <strong>Thus, the <code>max_size</code> can be different.</strong></p>
-</li>
-</ol>
-</blockquote>
-<h2 id="Task2a-Insertion-and-Search"><a href="#Task2a-Insertion-and-Search" class="headerlink" title="Task2a   Insertion and Search"></a>Task2a   Insertion and Search</h2><blockquote>
-<p>The index should <strong>support only unique keys;</strong> if you try to reinsert an existing key into the index, it should not perform the insertion, and should return false. key必须unique</p>
-<p>B+Tree pages should be split (or keys should be redistributed) if an insertion would violate the B+Tree’s invariants. 插入时需要分裂</p>
-<p>If an insertion changes the page ID of the root, you must update the <code>root_page_id</code> in the B+Tree index’s header page. You can do this by accessing the <code>header_page_id_</code> page, which is given to you in the constructor.  Then, by using <code>reinterpret_cast</code>, you can interpret this page as a <code>BPlusTreeHeaderPage</code> (from <code>src/include/storage/page/b_plus_tree_header_page.h</code>) and update the root page ID from there. You also must implement <code>GetRootPageId</code>, which currently returns 0 by default.对<code>root_page_id</code>的一切访问，都需要通过<code>header_page_id_</code>。如果插入后改变了root的page ID，需要更新<code>root_page_id</code>。</p>
-<p>We recommend that you use the page guard classes from Project 1 to help prevent synchronization problems. For this checkpoint, we recommend that you use <code>FetchPageBasic</code> (defined in <code>src/include/storage/page/</code>) when you access a page. 在当前task中，我们推荐你使用pro1实现的page guard，比如说这里如果要访问一页，就需要用 <code>FetchPageBasic</code> 。</p>
-<p>You may optionally use the <code>Context</code> class (defined in <code>src/include/storage/index/b_plus_tree.h</code>) to track the pages that you’ve read or written (via the <code>read_set_</code> and <code>write_set_</code> fields) or to store other metadata that you need to pass into other functions recursively.你可以随意使用和修改 <code>Context</code> class，它大概就是一个存储共享信息的对象。</p>
-<p>If you are using the <code>Context</code> class, here are some tips:如果你要用，要注意以下几点：</p>
-<ul>
-<li><p>You might only need to use <code>write_set_</code> when inserting or deleting. 当你在为B+树插入/删除结点时，需要用到<code>write_set_</code>。【为什么？这个set存储的是修改路径上的结点吗？然后如果要分裂/合并结点，只需什么while(pop且需要分裂/合并){分裂/合并}？？所以说这里的deque是栈结构？】</p>
-<p>也就是说，其实我们就可以不用递归了，而是将上下文存储在context-&gt;write_set_这个栈里面就行了？大概是这个意思吧</p>
-<p>It is possible that you don’t need to use <code>read_set_</code>, depending on your implementation.</p>
-<p>read可以用递归（比较简单）也可以不用，所以说具体看实现。</p>
-</li>
-<li><p>You might want to store the root page id in the context and acquire write guard of header page when modifying the B+Tree.你需要将root page id存储在context，并且在修改b+树（插入、删除）时获取header page的WritePageGurad。</p>
-</li>
-<li><p>To find a parent to the current node, look at the back of <code>write_set_</code>. It should contain all nodes along the access path.如果想要寻找当前node的父亲，可以看看<code>write_set_.back</code>，它包含了访问路径上所有结点的引用【所以确实是当成栈来用了】</p>
-</li>
-<li><p>You should use <code>BUSTUB_ASSERT</code> to help you find inconsistent data in your implementation. 需要使用 <code>BUSTUB_ASSERT</code>。</p>
-<p>For example, if you want to split a node (except root), you might want to ensure there is still at least one node in the <code>write_set_</code>. If you need to split root, you might want to check if <code>header_page_</code> is <code>std::nullopt</code>.</p>
-<p>如果你想要分割一个根节点以外的node，那你必须保证<code>write_set_</code>中至少有一个结点；如果你想要分割根节点，那你必须保证<code>header_page_</code>非空。</p>
-</li>
-<li><p>To unlock the header page, simply set <code>header_page_</code> to <code>std::nullopt</code>. To unlock other pages, pop from the <code>write_set_</code> and drop.如果你想要不锁住header page，那就置其为空指针；如果想释放别的页，那就将它从 <code>write_set_</code> pop出来就行。【这是因为我们要用到的page类型都是page guard，可以析构时unpin吗？】</p>
-</li>
-</ul>
-</blockquote>
-<p>这是我的get方法，这里简要记录下思路。</p>
-<p>我并没有使用到它说的context对象。我是类似对二叉搜索树查找的思路进行查找的。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::GetValue</span><span class="params">(<span class="type">const</span> KeyType &amp;key, std::vector&lt;ValueType&gt; *result, Transaction *txn)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  BasicPageGuard guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(header_page_id_);</span><br><span class="line">  InternalPage* root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">  <span class="keyword">if</span>(root-&gt;<span class="built_in">GetSize</span>() == <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">    <span class="type">bool</span> flag=<span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;root-&gt;<span class="built_in">GetSize</span>();i++)&#123;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">comparator_</span>(key,root-&gt;<span class="built_in">KeyAt</span>(i)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="comment">// if(key&lt;root-&gt;KeyAt(i))&#123;</span></span><br><span class="line">        guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(root-&gt;<span class="built_in">ValueAt</span>(i<span class="number">-1</span>));</span><br><span class="line">        root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">        flag = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(!flag)&#123;</span><br><span class="line">      guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(root-&gt;<span class="built_in">ValueAt</span>(root-&gt;<span class="built_in">GetSize</span>()<span class="number">-1</span>));</span><br><span class="line">      root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(root-&gt;<span class="built_in">IsLeafPage</span>())&#123;</span><br><span class="line">      <span class="keyword">auto</span> leaf = guard.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">      <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;leaf-&gt;<span class="built_in">GetSize</span>();i++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">comparator_</span>(key,leaf-&gt;<span class="built_in">KeyAt</span>(i)) == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">// if(key == leaf-&gt;KeyAt(i))&#123;</span></span><br><span class="line">          result-&gt;<span class="built_in">push_back</span>(<span class="built_in">static_cast</span>&lt;ValueType&gt;(leaf-&gt;<span class="built_in">ValueAt</span>(i)));</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<p>进度：编译成功，测试寄</p>
-<p>下一步目标：</p>
-<ol>
-<li>添加asset语句</li>
-<li>看看测试到底哪里出错了</li>
-</ol>
-<p>记录下我的全代码和思路吧</p>
-<ol>
-<li><p>page</p>
-<p>都代表着一页物理页，并且其结构为header+value。如leaf page：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230418110917819.png" alt="image-20230418110917819"></p>
-<ol>
-<li><p>b_plus_tree_page        值得注意的就：IncreaseSize的amount可以是负数，代表减少size</p>
-</li>
-<li><p>b_plus_tree_internal_page</p>
-<ol>
-<li><p>增加了新的接口：SetValueAt</p>
-</li>
-<li><p>具体实现</p>
-<ol>
-<li><p>简述</p>
-<p>占据一个物理页大小，代表b+树非叶结点，其key表示结点关键字，value表示指向孩子的指针。由于其结构如下：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230418110258801.png" alt="image-20230418110258801"></p>
-<p>因而key的个数比value小1,，在具体实现中，key0被置为无效值。</p>
-</li>
-<li><p>空结点的size被置为1     因为我认为默认有key0和value0</p>
-</li>
-<li><p>key相关函数从1开始遍历，value相关函数从0开始遍历</p>
-</li>
-<li><p>进行了边界保护</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>b_plus_tree_leaf_page</p>
-<ol>
-<li><p>增加了新的接口：ValueAt、SetKeyAt、SetValueAt</p>
-</li>
-<li><p>具体实现</p>
-<ol>
-<li><p>简述</p>
-<p>占据一个物理页大小，代表b+树叶结点，其key表示结点关键字，value为真正存储数据的RID。其结构如下：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230418110753966.png" alt="image-20230418110753966"></p>
-<p>因而key与value数量一致。</p>
-</li>
-<li><p>相比于非叶结点，header新增了线性索引。<strong>这点我还没实现</strong>。</p>
-</li>
-<li><p>key和value都可以从0开始遍历</p>
-</li>
-<li><p>进行了边界保护</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>b+树</p>
-<p>b+树本身每个结点都是物理页，并且还额外用了另一个物理页header_page来记录其root page的id。这个header_page的id被记录在成员变量中，在构造函数中被初始化为root id = INVALID，并且在context中被获取写锁。</p>
-<ol>
-<li><p>判空</p>
-<ol>
-<li>获取header_page</li>
-<li>如果header page记录的root id INVALID，说明空</li>
-<li>否则，继续获取root page</li>
-<li>如果root_page为叶结点，当其size==0时为空；否则，size&lt;=1为空。</li>
-</ol>
-</li>
-<li><p>查找</p>
-<ol>
-<li>获取root page</li>
-<li>采用迭代方式进行查找。<ol>
-<li>对于叶结点，从0开始遍历其所有key，寻找是否有相同的key。注意应该使用<code>comparator_(a,b)</code>来判等。</li>
-<li>对于非叶结点，从1开始遍历其所有key。由于结点内部递增排序，因而当找到第一个比target大的key时，说明target应该插入到该key的左侧。</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>插入</p>
-<ol>
-<li><p>获取root page，登记context上下文，并且将root push进context的访问队列<code>write_set_</code>中</p>
-</li>
-<li><p>如果root page不存在</p>
-<ol>
-<li>新申请一页，更新header_page</li>
-<li>对新root page进行init，并且插入key和value。注意此时root应为叶结点</li>
-<li>return true</li>
-</ol>
-</li>
-<li><p>顺着b+树一级一级查找，直到找到目标leaf</p>
-<p>过程同查找，区别就是找到叶结点时应该break而非做别的事</p>
-</li>
-<li><p>如果key已存在，return false</p>
-</li>
-<li><p>插入new record到目标leaf中</p>
-<ol>
-<li><p>先分裂</p>
-<ol>
-<li><p>通过<code>write_set_</code>获取当前leaf的父节点root</p>
-<ol>
-<li><code>write_set_</code>为空，说明根节点就是leaf结点。此时新建一页，置root为该页</li>
-<li>否则，置为back()，并且pop_back()。</li>
-</ol>
-</li>
-<li><p>对leaf结点进行分裂</p>
-<ol>
-<li><p>创建新节点，并且copy旧结点的后半部分</p>
-</li>
-<li><p>缩小旧结点的size</p>
-</li>
-<li><p>改变leaf指针的值</p>
-<p>因为最后要将new record插入到新分裂出的结点</p>
-</li>
-</ol>
-</li>
-<li><p>将leaf中间的那个结点值copy插入到root中【注意，不同于b树，中间结点还是会存在于两个新leaf结点中之一的，所以这里用词为copy而非move】</p>
-<p>一个插入排序，从1开始遍历。最终，root的新key连接着新value（new node的page id）</p>
-</li>
-<li><p>向上生长</p>
-<ol>
-<li><p>当路径队列为空或者当前结点root无需分裂时退出</p>
-</li>
-<li><p>获取当前结点root的parent</p>
-</li>
-<li><p>分割root结点</p>
-<p>由于这是对internal page的分割，故而与上面对leaf page的分割稍有不同：idx从1开始复制。我们将新节点的最左孩子置为了空，保留了旧结点的最右孩子。</p>
-</li>
-<li><p>将root中间的那个结点值copy插入到parent中</p>
-</li>
-<li><p>移动root指针：root=parent</p>
-</li>
-</ol>
-</li>
-<li><p>退出4循环后，如果需要生长根节点</p>
-<ol>
-<li><p>创建并初始化根节点，登记</p>
-<p>注意，设置key0对于value指向旧结点。</p>
-</li>
-<li><p>分割当前结点</p>
-</li>
-<li><p>将中间部分的那个结点插入到新根节点中</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>再插入new record到分裂出的新leaf中</p>
-<p>插入排序，从0开始遍历。</p>
-</li>
-<li><p>释放ctx，return true。</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-<p>以上就是我的全部实现。下次写代码的时候可以复习下这整个流程，我只能帮到这里了！</p>
-<p>遇到个小插曲：</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/minglee/p/9016306.html">Check for working C compiler: /usr/bin/cc - broken</a></p>
-<p>感觉可能是内核切来切去的问题？总之我最后在5.11内核把build文件删了，重新执行<code>cmake -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) ..</code>就突然ok了。</p>
-<p><img src="/2023/03/13/cmu15445/image-20230505002652748.png" alt="image-20230505002652748"></p>
-<p>我发现在这里创建的root最后好像会被释放掉？</p>
-<p>比如我看到新root的page为6，连接也做得好好的，最后出了函数就寄了：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230505002731312.png" alt="image-20230505002731312"></p>
-<p>还有一个是发现新的leaf page好像不大对，其类型甚至是internal呃呃，我调下看看</p>
-<p>尼玛，绷不住了是这里：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230505011731797.png" alt="image-20230505011731797"></p>
-<p>原来写的</p>
-<p><img src="/2023/03/13/cmu15445/image-20230505011744924.png" alt="image-20230505011744924"></p>
-<p>改了之后test2马上ok，乐</p>
-<p>完成了index_iterator的编写。接下来需要修改b+tree.cpp，新增Begin的实现。</p>
-<p>不过index iterator报错了，之后再改</p>
-
+<h3 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a><a href="./2023/03/13/cmu15445$lab0">Project0   C++ Primer</a></h3><h3 id="Project1-Buffer-Pool"><a href="#Project1-Buffer-Pool" class="headerlink" title="Project1   Buffer Pool"></a><a href="./2023/03/13/cmu15445$lab1">Project1   Buffer Pool</a></h3>
     </div>
 
     
@@ -559,7 +316,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Project0-C-Primer"><span class="nav-number">1.</span> <span class="nav-text">Project0   C++ Primer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Project1-Buffer-Pool"><span class="nav-number">2.</span> <span class="nav-text">Project1   Buffer Pool</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Project2-B-Tree"><span class="nav-number"></span> <span class="nav-text">Project2   B+Tree</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Task1-B-Tree-Pages"><span class="nav-number"></span> <span class="nav-text">Task1   B+Tree Pages</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Task2a-Insertion-and-Search"><span class="nav-number"></span> <span class="nav-text">Task2a   Insertion and Search</span></a></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Project0-C-Primer"><span class="nav-number">1.</span> <span class="nav-text">Project0   C++ Primer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Project1-Buffer-Pool"><span class="nav-number">2.</span> <span class="nav-text">Project1   Buffer Pool</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -575,7 +332,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-count">32</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
