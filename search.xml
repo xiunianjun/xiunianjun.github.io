@@ -10425,4 +10425,73 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <p>泪目！</p>
 ]]></content>
   </entry>
+  <entry>
+    <title>2023OS大赛功能赛道总结</title>
+    <url>/2023/08/27/%E6%80%BB%E7%BB%93%E2%80%942023%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E8%83%BD%E5%8A%9B%E5%A4%A7%E8%B5%9B-OS%E5%8A%9F%E8%83%BD/</url>
+    <content><![CDATA[<h1 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h1><ul>
+<li><p>竞赛简介</p>
+<p>全国大学生计算机系统能力大赛可以说是计算机专业除了ACM以外专业性最高的比赛之一了。内分多个赛道，如CPU设计（“龙芯杯”）、编译器设计（“毕昇杯”）、数据库设计以及操作系统设计。其中操作系统设计赛又分为内核实现和功能挑战两个赛道，我这一次参加的是<strong>功能赛道</strong>。</p>
+<p>功能赛道的主要任务就是，从给定的265个赛题中选出一个赛题，并围绕此赛题做项目。项目周期为半年左右（其中3.28<del>6.07为初赛阶段，6.10</del>8.15为决赛阶段），并在最后有线下答辩以及代码现场检查验收。</p>
+</li>
+<li><p>团队</p>
+<p>这是我在<strong>大二</strong>时参加的比赛。我作为<strong>队员</strong>，与两位高年级成员一起参加比赛，并且在最后取得了<strong>全国一等奖</strong>的成绩。（详情可见<a href="https://os.educg.net/#/index">官网公示</a>）</p>
+<p><img src="/2023/08/27/%E6%80%BB%E7%BB%93%E2%80%942023%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E8%83%BD%E5%8A%9B%E5%A4%A7%E8%B5%9B-OS%E5%8A%9F%E8%83%BD/%E6%80%BB%E7%BB%93%E2%80%942023%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E8%83%BD%E5%8A%9B%E5%A4%A7%E8%B5%9B-OS%E5%8A%9F%E8%83%BD/image-20230827152845720.png" alt="image-20230827152845720"></p>
+</li>
+<li><p>项目简介</p>
+<p>详见我们的<a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093">项目首页</a>。我们的代码分别托管在多个仓库，<a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093#%E4%BB%A3%E7%A0%81%E4%BB%93%E5%BA%93:~:text=%E6%9C%AC%E9%A1%B9%E7%9B%AE%E7%94%B1%E5%A4%9A%E4%B8%AA%E4%BB%A3%E7%A0%81%E4%BB%93%E5%BA%93%E7%BB%84%E6%88%90%EF%BC%8C%E6%89%98%E7%AE%A1%E5%9C%A8%20GitHub%20%E6%88%96%20Gitlab%20%E4%B8%8A">仓库链接</a>放在了首页的最后一部分。</p>
+<p>简单来讲，我们的项目就是实现一个 “将<strong>线程调度</strong>的权限从内核暴露给用户态，从而使得用户态可以实现<strong>各种各样的调度算法</strong>并做出调度决策” 的用户态调度框架。</p>
+<p>EXT的用户态部分是我们初赛成果，COS的内核态+用户态是我们决赛成果。</p>
+</li>
+</ul>
+<h1 id="我的工作"><a href="#我的工作" class="headerlink" title="我的工作"></a>我的工作</h1><p>大致可以分为调研—代码—展示这三个方面的工作。</p>
+<h2 id="调研"><a href="#调研" class="headerlink" title="调研"></a>调研</h2><p>由于当时两位学长都在实习，我是三个人中时间最充足的一个，所以我负责的调研工作应该是三个人中最多的。</p>
+<p>我们项目主要调研了Google的ghOSt和Meta的EXT这两个开源的用户态调度框架。以下是我调研过程中的相关笔记：</p>
+<blockquote>
+<p><a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/tree/main/record/Dev-Docs/first-stage/hwx/4.5-5.6/note/ghOSt">ghOSt-userspace</a>   梳理调度流程、进程通信等</p>
+<p><a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/record/Dev-Docs/final-stage/note/ghost%E9%98%85%E8%AF%BB.md">ghOSt-kernel</a>   主要是探究了各类消息的发送时机，特别是抢占消息</p>
+<p><a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/record/Dev-Docs/first-stage/hwx/5.7-final/note/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ext.md">EXT-userland</a>   主要研究了下eBPF程序以及userland示例</p>
+<p><a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/record/Dev-Docs/final-stage/develop/EXT%E4%BC%98%E5%8C%96%E8%AE%B0%E5%BD%95.md">EXT-kernel</a>   记录了我对EXT内核的所有探究，如消息发送、任务调度、eBPF实现等，以及各种debug过程</p>
+</blockquote>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>EXT的用户态部分是我们初赛成果，COS的内核态+用户态是我们决赛成果。</p>
+<ul>
+<li><p>初赛</p>
+<blockquote>
+<p>EXT在内核中新增一个调度类，就类似常用的CFS调度类。该调度类定义了一系列最终由用户在用户态实现的eBPF钩子，并且将其挂载到Linux内核调度策略起作用的关键节点，从而达到用户态调度策略动态注入的效果。<strong>初赛阶段我们基于Meta的EXT内核开发了一个用户态调度框架</strong>。</p>
+</blockquote>
+<p>初赛的时候有点找不到比赛方向，差点万策尽了，最后队长通过userland得到了方向灵感，但无奈还是只能在应用层中游泳，所以是在堆代码量刷KPI的阶段（）</p>
+<p><img src="/2023/08/27/%E6%80%BB%E7%BB%93%E2%80%942023%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E8%83%BD%E5%8A%9B%E5%A4%A7%E8%B5%9B-OS%E5%8A%9F%E8%83%BD/%E6%80%BB%E7%BB%93%E2%80%942023%E5%85%A8%E5%9B%BD%E5%A4%A7%E5%AD%A6%E7%94%9F%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E8%83%BD%E5%8A%9B%E5%A4%A7%E8%B5%9B-OS%E5%8A%9F%E8%83%BD/image-20230827154559468.png" alt="image-20230827154559468"></p>
+<p>其中SJF、Shinjuku以及测试程序都由我负责，故而统<strong>共刷了约3000行KPI</strong>。</p>
+</li>
+<li><p>决赛</p>
+<p>决赛我们发展了两个方向，一个是继续初赛的成果优化EXT内核，另一个是自己从零开发一个新的用户态调度框架COS。我与队友负责第一个方向，队长负责第二个方向。</p>
+<p>决赛的前期我在痛苦地调优初赛的石山Shinjuku最后还没优化出什么，然后<strong>跟另一个队友一起完成了决赛的Shinjuku-eBPF</strong>（最后效果还是shit），所以到了中期我就转而去跟队长一起开发COS了。</p>
+<p>不过这时候COS开发也大概进入了成熟阶段，所以对于COS内核，我并没有做什么代码工作，主要做的就是<strong>跟队长一起完成了消息的开发（我更多负责调研）以及一起debug</strong>。COS的用户态也由我跟队长共同开发，COS<strong>用户态代码量各写了一半</strong>。</p>
+</li>
+<li><p>测试</p>
+<p>测试部分差不多初赛和决赛都算是我全权负责。</p>
+<p>我们最主要的负载还是参考ghOSt实现的I/O密集型场景RocksDB。我们的四个比较对象（CFS、COS、EXT、ghOSt）都使用了这个统一的负载进行测试。RocksDB负载大约有一千多行代码量，将它重写到COS和EXT也花了我不少时间。</p>
+</li>
+</ul>
+<h2 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h2><p>大概分为文档、PPT、演示视频、性能测试、开发记录这几个部分。<strong>我主要负责的是后三个部分</strong>。</p>
+<ul>
+<li><p>文档</p>
+<p><a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/doc/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">项目文档</a>的文字部分由队长负责，图片部分由我负责。</p>
+<p>环境配置教程和性能测试教程是我完成的。</p>
+</li>
+<li><p><a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/doc/2023COS%E5%86%B3%E8%B5%9B%E7%AD%94%E8%BE%A9.pptx">PPT</a>（链接非最终版）</p>
+<p>PPT文案大多由队长负责，我仅对背景介绍以及PPT模板做了调整。</p>
+</li>
+<li><p><a href="https://pan.baidu.com/s/1QJdYM_LAyrB1bswgEuO41g?pwd=hcos">演示视频</a>（链接非最终版）</p>
+<p>录制和剪辑都由我完成。</p>
+</li>
+<li><p>性能测试</p>
+<p>数据处理和图片都由我完成。</p>
+</li>
+<li><p><a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/tree/main/record">开发记录</a></p>
+<p>由我完成。</p>
+</li>
+</ul>
+<h1 id="学到了什么"><a href="#学到了什么" class="headerlink" title="学到了什么"></a>学到了什么</h1><p>感觉在这里也懒得说太多了，直接去看<a href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093">项目仓库</a>吧（）</p>
+]]></content>
+  </entry>
 </search>
