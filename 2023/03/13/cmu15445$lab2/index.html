@@ -39,7 +39,7 @@
 <meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505011731797.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505011744924.png">
 <meta property="article:published_time" content="2023-03-13T14:19:00.000Z">
-<meta property="article:modified_time" content="2023-06-21T14:26:28.802Z">
+<meta property="article:modified_time" content="2023-08-07T08:30:24.082Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/B+-tree-remove-61.png">
@@ -214,7 +214,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-06-21 22:26:28" itemprop="dateModified" datetime="2023-06-21T22:26:28+08:00">2023-06-21</time>
+                <time title="修改时间：2023-08-07 16:30:24" itemprop="dateModified" datetime="2023-08-07T16:30:24+08:00">2023-08-07</time>
               </span>
 
           
@@ -316,7 +316,8 @@
 <li><p>简述</p>
 <p>占据一个物理页大小，代表b+树非叶结点，其key表示结点关键字，value表示指向孩子的指针。由于其结构如下：</p>
 <p><img src="/2023/03/13/cmu15445/image-20230418110258801.png" alt="image-20230418110258801"></p>
-<p>因而key的个数比value小1,，在具体实现中，key0被置为无效值。</p>
+<p>因而key的个数比value小1，在具体实现中，key0被置为无效值。</p>
+<p>故而，比如说获取index的左区间页，则为[index - 1].second；右区间页则为[index].second。</p>
 </li>
 <li><p>空结点的size被置为1     因为我认为默认有key0和value0</p>
 </li>
@@ -468,6 +469,14 @@
 <p>改了之后test2马上ok，乐</p>
 <p>完成了index_iterator的编写。接下来需要修改b+tree.cpp，新增Begin的实现。</p>
 <p>不过index iterator报错了，之后再改</p>
+<p>乐，我过了iterator的编译之后，第一件事肯定是重构这沙比石山</p>
+<p>乐，重载++运算符的话，一定要特别注意：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">INDEX_TEMPLATE_ARGUMENTS</span><br><span class="line"><span class="keyword">auto</span> INDEXITERATOR_TYPE::<span class="keyword">operator</span>++() -&gt; INDEXITERATOR_TYPE &amp; &#123; </span><br><span class="line">    <span class="keyword">auto</span> page = guard_.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    cnt_ ++;</span><br><span class="line">    <span class="comment">// printf(&quot;cnt: %d, get size: %d, next id %d\n&quot;, cnt_, page-&gt;GetSize(), page-&gt;GetNextPageId());</span></span><br><span class="line">    <span class="keyword">if</span> (cnt_ &lt; page-&gt;<span class="built_in">GetSize</span>()) &#123;</span><br><span class="line">        <span class="comment">// printf(&quot;here\n&quot;);</span></span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> res = <span class="keyword">new</span> <span class="built_in">INDEXITERATOR_TYPE</span>(bpm_, page-&gt;<span class="built_in">GetNextPageId</span>());</span><br><span class="line">    <span class="comment">// printf(&quot;res: cnt %d, pgid %d\n&quot;, res-&gt;cnt_, res-&gt;pgid_);</span></span><br><span class="line">    <span class="keyword">return</span> *res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我原来是这么写的，但这么写实际上正确的只是返回值，目前的这个this对象是没有变的。所以我们其实应该这么写：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">INDEX_TEMPLATE_ARGUMENTS</span><br><span class="line"><span class="keyword">auto</span> INDEXITERATOR_TYPE::<span class="keyword">operator</span>++() -&gt; INDEXITERATOR_TYPE &amp; &#123; </span><br><span class="line">    <span class="keyword">auto</span> page = guard_.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    cnt_ ++;</span><br><span class="line">    <span class="keyword">if</span> (cnt_ &lt; page-&gt;<span class="built_in">GetSize</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    pgid_ = page-&gt;<span class="built_in">GetNextPageId</span>();</span><br><span class="line">    cnt_ = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>泪目！</p>
 
     </div>
 
@@ -581,19 +590,6 @@
   </div>
 
 
-  <div class="links-of-blogroll motion-element">
-    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
-      友链
-    </div>
-    <ul class="links-of-blogroll-list">
-        <li class="links-of-blogroll-item">
-          <a href="https://github.com/shootfirst" title="https:&#x2F;&#x2F;github.com&#x2F;shootfirst" rel="noopener" target="_blank">shootfirst</a>
-        </li>
-        <li class="links-of-blogroll-item">
-          <a href="https://github.com/violence-max" title="https:&#x2F;&#x2F;github.com&#x2F;violence-max" rel="noopener" target="_blank">violence-max</a>
-        </li>
-    </ul>
-  </div>
 
       </div>
 
