@@ -7293,12 +7293,16 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <p>\4. Save the current mode (user or supervisor) in the SPP bit in sstatus.保存mode</p>
 <p>\5. Set scause to reflflect the trap’s cause.保存中断号</p>
 <p>\6. Set the mode to supervisor.切换到内核态</p>
-<p>\7. Copy stvec to the pc.将trap handler写入pc，开始执行trap handler</p>
+<p>\7. Copy stvec to the pc.将trap handler写入pc，开始执行trap handler【uservec or kernelvec？】</p>
 </blockquote>
 <p>切换到内核页表、切换内核栈、保存寄存器现场这些工作交给操作系统完成。</p>
 <h2 id="Traps-from-user-space"><a href="#Traps-from-user-space" class="headerlink" title="Traps from user space"></a>Traps from user space</h2><p>从用户态来的trap会经历怎么样的过程？</p>
 <p>前面说到，下面需要进行页表的切换，页表的切换必然是接下来要做的指令的某个环节。那么为了让页表切换之后，CPU还知道要从哪里取指执行，<strong>就要让某段物理内存在内核空间和用户空间的虚拟地址一样</strong>。这样，不论页表是用户的还是内核的，都可以通过同样的虚拟地址访问到该段存放指令的物理内存从而继续执行。</p>
 <p>这段虚拟地址就是<strong>trampoline</strong>。它在内核页表和用户页表都位于MAXVA的位置。</p>
+<blockquote>
+<p>我感觉这段大概可以这么理解：</p>
+<p>通过查看代码，可知trampoline段实际上存储的是trampoline.S中的数据，也即uservec和userret的汇编代码，也即<strong>执行切换页表我们实际上就是在执行trampoline里的代码</strong>。trampoline的存在，就可以使得每个页表的这部分都是这两个的代码，这样一来切换页表也就不影响指令流的执行。</p>
+</blockquote>
 <p><img src="/2023/01/10/xv6/p3.png" alt="p3"></p>
 <p>stevc存储的正是trampoline段中的uservec。</p>
 <h3 id="uservec"><a href="#uservec" class="headerlink" title="uservec"></a>uservec</h3><p>sscratch里面存的是trapframe的值。</p>
