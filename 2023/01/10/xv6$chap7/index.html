@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120151820455.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120232149776.png">
 <meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
-<meta property="article:modified_time" content="2023-02-26T06:31:23.791Z">
+<meta property="article:modified_time" content="2023-08-29T11:47:29.887Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230118221757367.png">
@@ -213,7 +213,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-26 14:31:23" itemprop="dateModified" datetime="2023-02-26T14:31:23+08:00">2023-02-26</time>
+                <time title="修改时间：2023-08-29 19:47:29" itemprop="dateModified" datetime="2023-08-29T19:47:29+08:00">2023-08-29</time>
               </span>
 
           
@@ -236,6 +236,10 @@
       
         <h1 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a>Scheduling</h1><h2 id="Code-Context-switching"><a href="#Code-Context-switching" class="headerlink" title="Code: Context switching"></a>Code: Context switching</h2><p>xv6中，每个CPU中的scheduler都有一个专用的线程。这里线程的概念是，有自己的栈，有自己的寄存器状态。</p>
 <p>当发生时钟中断时，当前进程调用yield，yield再通过swtch切换到scheduler线程。scheduler线程会通过swtch跳转到另外一个进程去执行。当另外一个进程发生时钟中断，又会通过yield回到scheduler，scheduler再调度原进程继续执行，如此周而复始。</p>
+<blockquote>
+<p>Linux的调度原理也差不多类似这样。每个CPU都有一个调度类为SCHED_CLASS_IDLE的IDLE进程，IDLE进程体大概就是间歇不断地执行__schedule()函数，CPU空闲时就会不断执行IDLE线程。</p>
+<p>而当有新的任务产生时（或任务被唤醒。可以从此看出task new和task wakeup的共通点，可以联想到竞赛中对该消息的处理方法），它首先通过调度类对应的select_cpu选择一个合适的（可以被抢占&amp;&amp;在该task对应的cpumask中）的cpu，迁移到cpu对应的rq；目标cpu通过IDLE进程体或者中断返回时检查到了NEED_SCHEDULE标记位，从而调用schedule函数pick新任务，然后进行context_switch切换到目标线程。如此周而复始。</p>
+</blockquote>
 <p><img src="/2023/01/10/xv6/image-20230118221757367.png" alt="image-20230118221757367"></p>
 <p>下面就来讲讲这个所谓的“线程”以及xv6的上下文切换是怎么实现的。</p>
 <h3 id="context"><a href="#context" class="headerlink" title="context"></a>context</h3><p>上下文切换的操作对象是上下文，因而首先了解一下上下文的结构。各种寄存器的状态即是上下文context。xv6中的context定义如下:</p>
