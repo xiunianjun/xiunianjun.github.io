@@ -10787,4 +10787,23 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
         <tag>Java</tag>
       </tags>
   </entry>
+  <entry>
+    <title>关于我</title>
+    <url>/2003/03/21/about_me/</url>
+    <content><![CDATA[<h3 id="修年"><a href="#修年" class="headerlink" title="修年"></a>修年</h3><ul>
+<li>HITSZ大三在读，PLCT Lab实习ing</li>
+<li>喜欢&amp;&amp;目标是系统软件方向，偏爱操作系统</li>
+<li>qq 1776527992，速来与我交流</li>
+</ul>
+<h3 id="Pin"><a href="#Pin" class="headerlink" title="Pin"></a>Pin</h3><h4 id="竞赛"><a href="#竞赛" class="headerlink" title="竞赛"></a>竞赛</h4><p><a href="https://xiunianjun.github.io/2023/08/27/2023-os-comp/">总结—2023全国大学生计算机系统能力大赛-OS功能</a></p>
+<h4 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h4><p><a href="https://xiunianjun.github.io/2023/03/13/cmu15445/">CMU15445</a> 【未完成】</p>
+<p><a href="https://xiunianjun.github.io/2023/02/25/cs144/">cs144</a></p>
+<p><a href="https://xiunianjun.github.io/2023/01/10/xv6/">xv6</a></p>
+<p><a href="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/">哈工大操作系统实验</a></p>
+<p><a href="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/">链接、装载与运行库</a></p>
+]]></content>
+      <tags>
+        <tag>labs</tag>
+      </tags>
+  </entry>
 </search>

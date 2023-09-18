@@ -167,149 +167,31 @@
             
 	
 	
-		  
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/08/27/2023-os-comp/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          总结—2023全国大学生计算机系统能力大赛-OS功能
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2023-08-27 14:39:00 / 修改时间：17:02:06" itemprop="dateCreated datePublished" datetime="2023-08-27T14:39:00+08:00">2023-08-27</time>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <h1 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h1><ul>
-<li><p>竞赛简介</p>
-<p>全国大学生计算机系统能力大赛可以说是计算机专业除了ACM以外专业性最高的比赛之一了。内分多个赛道，如CPU设计（“龙芯杯”）、编译器设计（“毕昇杯”）、数据库设计以及操作系统设计。其中操作系统设计赛又分为内核实现和功能挑战两个赛道，我这一次参加的是<strong>功能赛道</strong>。</p>
-<p>功能赛道的主要任务就是，从给定的265个赛题中选出一个赛题，并围绕此赛题做项目。项目周期为半年左右（其中3.28~6.07为初赛阶段，6.10~8.15为决赛阶段），并在最后有线下答辩以及代码现场检查验收。</p>
-</li>
-<li><p>团队</p>
-<p>这是我在<strong>大二</strong>时参加的比赛。我作为<strong>队员</strong>，与两位高年级成员一起参加比赛，并且在最后取得了<strong>全国一等奖</strong>的成绩。（详情可见<a target="_blank" rel="noopener" href="https://os.educg.net/#/index">官网公示</a>）</p>
-<p><img src="/2023/08/27/2023-os-comp/image-20230827152845720.png" alt="image-20230827152845720"></p>
-</li>
-<li><p>项目简介</p>
-<p>详见我们的<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093">项目首页</a>。我们的代码分别托管在多个仓库，<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093#%E4%BB%A3%E7%A0%81%E4%BB%93%E5%BA%93:~:text=%E6%9C%AC%E9%A1%B9%E7%9B%AE%E7%94%B1%E5%A4%9A%E4%B8%AA%E4%BB%A3%E7%A0%81%E4%BB%93%E5%BA%93%E7%BB%84%E6%88%90%EF%BC%8C%E6%89%98%E7%AE%A1%E5%9C%A8%20GitHub%20%E6%88%96%20Gitlab%20%E4%B8%8A">仓库链接</a>放在了首页的最后一部分。</p>
-<p>简单来讲，我们的项目就是实现一个 “将<strong>线程调度</strong>的权限从内核暴露给用户态，从而使得用户态可以实现<strong>各种各样的调度算法</strong>并做出调度决策” 的用户态调度框架。</p>
-<p>EXT的用户态部分是我们初赛成果，COS的内核态+用户态是我们决赛成果。</p>
-</li>
-</ul>
-<h1 id="我的工作"><a href="#我的工作" class="headerlink" title="我的工作"></a>我的工作</h1><p>大致可以分为调研—代码—展示这三个方面的工作。</p>
-<h2 id="调研"><a href="#调研" class="headerlink" title="调研"></a>调研</h2><p>由于当时两位学长都在实习，我是三个人中时间最充足的一个，所以我负责的调研工作应该是三个人中最多的。</p>
-<p>我们项目主要调研了Google的ghOSt和Meta的EXT这两个开源的用户态调度框架。以下是我调研过程中的相关笔记：</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/tree/main/record/Dev-Docs/first-stage/hwx/4.5-5.6/note/ghOSt">ghOSt-userspace</a>   梳理调度流程、进程通信等</p>
-<p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/record/Dev-Docs/final-stage/note/ghost%E9%98%85%E8%AF%BB.md">ghOSt-kernel</a>   主要是探究了各类消息的发送时机，特别是抢占消息</p>
-<p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/record/Dev-Docs/first-stage/hwx/5.7-final/note/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/ext.md">EXT-userland</a>   主要研究了下eBPF程序以及userland示例</p>
-<p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/record/Dev-Docs/final-stage/develop/EXT%E4%BC%98%E5%8C%96%E8%AE%B0%E5%BD%95.md">EXT-kernel</a>   记录了我对EXT内核的所有探究，如消息发送、任务调度、eBPF实现等，以及各种debug过程</p>
-</blockquote>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>EXT的用户态部分是我们初赛成果，COS的内核态+用户态是我们决赛成果。</p>
-<ul>
-<li><p>初赛</p>
-<blockquote>
-<p>EXT在内核中新增一个调度类，就类似常用的CFS调度类。该调度类定义了一系列最终由用户在用户态实现的eBPF钩子，并且将其挂载到Linux内核调度策略起作用的关键节点，从而达到用户态调度策略动态注入的效果。<strong>初赛阶段我们基于Meta的EXT内核开发了一个用户态调度框架</strong>。</p>
-</blockquote>
-<p>初赛的时候有点找不到比赛方向，差点万策尽了，最后队长通过userland得到了方向灵感，但无奈还是只能在应用层中游泳，所以是在堆代码量刷KPI的阶段（）</p>
-<p><img src="/2023/08/27/2023-os-comp/image-20230827154559468.png" alt="image-20230827154559468"></p>
-<p>其中SJF、Shinjuku以及测试程序都由我负责，故而统<strong>共刷了约3000行KPI</strong>。</p>
-</li>
-<li><p>决赛</p>
-<p>决赛我们发展了两个方向，一个是继续初赛的成果优化EXT内核，另一个是自己从零开发一个新的用户态调度框架COS。我与队友负责第一个方向，队长负责第二个方向。</p>
-<p>决赛的前期我在痛苦地调优初赛的石山Shinjuku最后还没优化出什么，然后<strong>跟另一个队友一起完成了决赛的Shinjuku-eBPF</strong>（最后效果还是shit），所以到了中期我就转而去跟队长一起开发COS了。</p>
-<p>不过这时候COS开发也大概进入了成熟阶段，所以对于COS内核，我并没有做什么代码工作，主要做的就是<strong>跟队长一起完成了消息的开发（我更多负责调研）以及一起debug</strong>。COS的用户态也由我跟队长共同开发，COS<strong>用户态代码量各写了一半</strong>。</p>
-</li>
-<li><p>测试</p>
-<p>测试部分差不多初赛和决赛都算是我全权负责。</p>
-<p>我们最主要的负载还是参考ghOSt实现的I/O密集型场景RocksDB。我们的四个比较对象（CFS、COS、EXT、ghOSt）都使用了这个统一的负载进行测试。RocksDB负载大约有一千多行代码量，将它重写到COS和EXT也花了我不少时间。</p>
-</li>
-</ul>
-<h2 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h2><p>大概分为文档、PPT、演示视频、性能测试、开发记录这几个部分。<strong>我主要负责的是后三个部分</strong>。</p>
-<ul>
-<li><p>文档</p>
-<p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/doc/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">项目文档</a>的文字部分由队长负责，图片部分由我负责。</p>
-<p>环境配置教程和性能测试教程是我完成的。</p>
-</li>
-<li><p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/blob/main/doc/2023COS%E5%86%B3%E8%B5%9B%E7%AD%94%E8%BE%A9.pptx">PPT</a>（链接非最终版）</p>
-<p>PPT文案大多由队长负责，我仅对背景介绍以及PPT模板做了调整。</p>
-</li>
-<li><p><a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1QJdYM_LAyrB1bswgEuO41g?pwd=hcos">演示视频</a>（链接非最终版）</p>
-<p>录制和剪辑都由我完成。</p>
-</li>
-<li><p>性能测试</p>
-<p>数据处理和图片都由我完成。</p>
-</li>
-<li><p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093/-/tree/main/record">开发记录</a></p>
-<p>由我完成。</p>
-</li>
-</ul>
-<h1 id="学到了什么"><a href="#学到了什么" class="headerlink" title="学到了什么"></a>学到了什么</h1><p>感觉在这里也懒得说太多了，直接去看<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/202318123111334/project1466467-176093">项目仓库</a>吧（）</p>
-
-    </div>
-
-    
-    
-    
-
-		<div>
-		  
-			<div>
-    
-        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-		  
-		</div>
-
-      <footer class="post-footer">
-
-        
-
-
-        
-      </footer>
-    
-  </article>
-  
-  
-  
-
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -322,7 +204,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/03/13/cmu15445/">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2003/03/21/about_me/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/head.png">
@@ -335,7 +217,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          CMU15445
+          关于我
         </h1>
 
         <div class="post-meta">
@@ -345,14 +227,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2023-03-13 22:19:00" itemprop="dateCreated datePublished" datetime="2023-03-13T22:19:00+08:00">2023-03-13</time>
+              <time title="创建时间：2003-03-21 14:19:00" itemprop="dateCreated datePublished" datetime="2003-03-21T14:19:00+08:00">2003-03-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-07-11 22:58:36" itemprop="dateModified" datetime="2023-07-11T22:58:36+08:00">2023-07-11</time>
+                <time title="修改时间：2023-09-18 10:57:23" itemprop="dateModified" datetime="2023-09-18T10:57:23+08:00">2023-09-18</time>
               </span>
 
           
@@ -373,13 +255,18 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <blockquote>
-<p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/">实验官网</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/shootfirst/CMU15-445">感恩</a></p>
-<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1618291703873589248">做spring2023的大佬的记录</a></p>
-<p>21年和22年的第二个实验不大一样，到时候看看情况两个都完成一下吧</p>
-</blockquote>
-<h3 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a><a href="/2023/03/13/cmu15445$lab0">Project0   C++ Primer</a></h3><h3 id="Project1-Buffer-Pool"><a href="#Project1-Buffer-Pool" class="headerlink" title="Project1   Buffer Pool"></a><a href="/2023/03/13/cmu15445$lab1">Project1   Buffer Pool</a></h3>
+        <h3 id="修年"><a href="#修年" class="headerlink" title="修年"></a>修年</h3><ul>
+<li>HITSZ大三在读，PLCT Lab实习ing</li>
+<li>喜欢&amp;&amp;目标是系统软件方向，偏爱操作系统</li>
+<li>qq 1776527992，速来与我交流</li>
+</ul>
+<h3 id="Pin"><a href="#Pin" class="headerlink" title="Pin"></a>Pin</h3><h4 id="竞赛"><a href="#竞赛" class="headerlink" title="竞赛"></a>竞赛</h4><p><a href="https://xiunianjun.github.io/2023/08/27/2023-os-comp/">总结—2023全国大学生计算机系统能力大赛-OS功能</a></p>
+<h4 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h4><p><a href="https://xiunianjun.github.io/2023/03/13/cmu15445/">CMU15445</a> 【未完成】</p>
+<p><a href="https://xiunianjun.github.io/2023/02/25/cs144/">cs144</a></p>
+<p><a href="https://xiunianjun.github.io/2023/01/10/xv6/">xv6</a></p>
+<p><a href="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/">哈工大操作系统实验</a></p>
+<p><a href="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/">链接、装载与运行库</a></p>
+
     </div>
 
     
@@ -413,255 +300,6 @@
   
   
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-		  
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/02/25/cs144/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          cs144
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-02-25 22:19:00" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-07-11 22:59:08" itemprop="dateModified" datetime="2023-07-11T22:59:08+08:00">2023-07-11</time>
-              </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <blockquote>
-<p>总耗时：65h  约17天</p>
-<p><a target="_blank" rel="noopener" href="https://cs144.github.io/">实验官网</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/shootfirst/CS144/">感恩</a></p>
-</blockquote>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本实验总体思维和代码上的难度还是不难的（至少比xv6简单），我认为其难点主要集中在TCP协议本身就很复杂很多的细节问题，以及需要我们有一种面向测试用例编程、直面自己往日写过的屎山的勇气（。</p>
-<p>下面，我将对本实验的完成情况即心得进行一个总结，也算是本篇博客/本次实验的一个<strong>导读</strong>。</p>
-<blockquote>
-<p><strong>类似于这样的块引用中的部分是我自认为的精华部分哦</strong>。</p>
-</blockquote>
-<p>本实验对TCP-IP-ETH协议栈的实验是自顶向下的，其中对TCP协议的实现是由内而外的。</p>
-<p>后者很容易导致，在对TCP协议的实现中，当你写完了lab0-3，你还是不知道自己到底写了个啥，以及TCP又究竟怎么通过你写的那几个类run起来。直到lab4结束，你完成了对TCP状态机的组织，并且出于debug目的钻研过部分socket的代码、熟悉了（其实差不多已经背下来了）TCP的三握手四挥手的过程，至此你才会对TCP的实现有较为清晰的理解。这个过程很痛苦，但是也真的非常爽。</p>
-<blockquote>
-<p>关于TCP状态机的理解总结，请参见<a href="https://xiunianjun.github.io/2023/02/25/cs144$lab4/#:~:text=%E7%9A%84Timeout%E6%97%B6%E9%97%B4%EF%BC%9A-,%E6%80%BB%E7%BB%93%EF%BC%9A%E7%8A%B6%E6%80%81%E6%9C%BA,-%E6%88%91%E4%BB%AC%E5%B7%B2%E7%BB%8F%E5%AE%8C%E6%95%B4">Lab4 TCPConnection——心得——总结：状态机</a>部分。</p>
-</blockquote>
-<p>然而，实现了TCP协议之后，我们还是不知道，在<code>TCPConnection</code>中发送的数据包，又是如何到达网络上的另一个host处的，我们究竟又写了个啥。</p>
-<p>这时，官方贴心地为我们指了条明路：它告诉我们，我们在lab0-4实现的是TCP-IP协议栈，其中运输层和网络层由用户实现，其他更底层则由内核实现，二者通过操作系统提供的TUN接口进行交互。也即，我们之前实现的是<strong>用户态TCP协议</strong>！而我们接下来的学习目标，就是从内核中再夺走一些权力：数据链路层也要由我们自己实现！</p>
-<blockquote>
-<p>关于此处的TCP-IP架构等，请参见<a href="https://xiunianjun.github.io/2023/02/25/cs144$lab5/#:~:text=%E7%94%B1%E8%BD%AC%E5%8F%91%E7%AE%97%E6%B3%95%E3%80%82-,%E6%89%BF%E4%B8%8A%E5%90%AF%E4%B8%8B,-%E5%8D%8F%E8%AE%AE%E6%A0%88%E6%9E%B6%E6%9E%84">Lab5 NetworkInterface——Overview——承上启下</a></p>
-</blockquote>
-<p>故而，接下来，我们将实现用户态的TCP-IP-ETH协议栈。在lab5，我们将目光投向TCP层以下的数据链路层(网络层官方已经帮我们实现了)，实现ETH协议和ARP协议；在lab6，我们则需要实现路由查找的功能。</p>
-<p>至此，所有实验已经结束。写完了上述实验，我们对协议栈已经具有了很深刻的了解，对TCP—IP—ETH—TAN—Internet—TAN—ETH—IP—TCP的这个数据传输过程也已经是懂王了。</p>
-<p>然而，我们在<code>TCPConnection</code>，只知道会有<strong>好心人</strong>，在上层app有数据传进来的时候调用<code>write</code>、在下层协议栈有segment传进来的时候调用<code>segment_received</code>、取出<code>_segment_out</code>的segment向底层协议栈发送、读走<code>outputstream</code>的内容。但是这个所谓的“好心人”具体是怎么做到的，怎么实现的，我们一概不知。</p>
-<p>答案是，这个所谓的“好心人”，其实就是我们的<code>TCPSpongeSocket</code>。它向上将协议栈与上层app连接，向下又将协议栈与TAN接口结合。</p>
-<blockquote>
-<p>发送数据时，数据流向：上层app→（通过<code>TCPSpongeSocket</code>）<code>TCPConnection</code>→（通过<code>write</code>方法）<code>ByteStream</code>→<code>TCPSender</code>→（通过从<code>_sender.segments_out</code>读）<code>TCPConnection</code>→（通过<code>TCPSpongeSocket</code>的adapter）<code>TAN</code></p>
-<p>接收数据时，数据流向：<code>TAN</code>→（通过<code>TCPSpongeSocket</code>的adapter）<code>TCPConnection</code>→<code>TCPReceiver</code>→（中间经过<code>StreamAssembler</code>）<code>BYteStream</code>→（通过<code>TCPSpongeSocket</code>读）上层app</p>
-<p>在<code>TCPSpongeSocket</code>的adapter中：TCPsegment←→IP数据报←→ETH帧</p>
-<p>至于ETH帧进入TAN之后的过程？在xv6的网卡驱动那一节我们事实上已经实现过了！</p>
-</blockquote>
-<p><code>CS144TCPSocket</code>和<code>FullStackTCPSokect</code>都继承自<code>TCPSpongeSocket</code>。<code>TCPSpongeSocket</code>通过一个包装了操作系统提供的socket的包装类<code>_thread_data</code>来与上层app进行交互，通过adapter<code>_datagram_adapter</code>来与协议栈进行交互（adapter本质上也是调用了操作系统的TUN/TAN接口）。</p>
-<p>由于<code>_thread_data</code>和<code>_datagram_adapter</code>本质上都是文件描述符【牛逼吧】，因而，<code>TCPSpongeSocket</code>需要跟上下层进行交互的需求，就可以通过操作系统提供的POLL机制来实现，也即，app←→TCP、TCP←→协议栈的这四种数据交互情况，都用<strong>事件监听</strong>来实现！这样就能做到“及时”“高效”了。</p>
-<blockquote>
-<p>关于此处<code>TCPSpongeSocket</code>的事件监听机制以及其它实现细节，详见<a href="https://xiunianjun.github.io/2023/02/25/cs144$else/#:~:text=*-,TCPSpongeSocket,-%E4%B8%8A%E9%9D%A2%E9%82%A3%E4%BF%A9">其它的对…——Socket实现——TCPSpongeSocket</a></p>
-</blockquote>
-<p>至此以来，我们的协议栈才算真正完整了。</p>
-<h3 id="Lab0"><a href="#Lab0" class="headerlink" title="Lab0"></a><a href="/2023/02/25/cs144$lab0">Lab0</a></h3><h3 id="Lab1-StreamReassembler"><a href="#Lab1-StreamReassembler" class="headerlink" title="Lab1   StreamReassembler"></a><a href="/2023/02/25/cs144$lab1">Lab1   StreamReassembler</a></h3><h3 id="Lab2-TCPReceiver"><a href="#Lab2-TCPReceiver" class="headerlink" title="Lab2   TCPReceiver"></a><a href="/2023/02/25/cs144$lab2">Lab2   TCPReceiver</a></h3><h3 id="Lab3-TCPSender"><a href="#Lab3-TCPSender" class="headerlink" title="Lab3   TCPSender"></a><a href="/2023/02/25/cs144$lab3">Lab3   TCPSender</a></h3><h3 id="Lab4-TCPConnection"><a href="#Lab4-TCPConnection" class="headerlink" title="Lab4   TCPConnection"></a><a href="/2023/02/25/cs144$lab4">Lab4   TCPConnection</a></h3><h3 id="Lab5-NetworkInterface"><a href="#Lab5-NetworkInterface" class="headerlink" title="Lab5   NetworkInterface"></a><a href="/2023/02/25/cs144$lab5">Lab5   NetworkInterface</a></h3><h3 id="Lab6-Router"><a href="#Lab6-Router" class="headerlink" title="Lab6   Router"></a><a href="/2023/02/25/cs144$lab6">Lab6   Router</a></h3><h3 id="其他的对实验未涉及的思考"><a href="#其他的对实验未涉及的思考" class="headerlink" title="其他的对实验未涉及的思考"></a><a href="/2023/02/25/cs144$else">其他的对实验未涉及的思考</a></h3>
-    </div>
-
-    
-    
-    
-
-		<div>
-		  
-			<div>
-    
-        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-		  
-		</div>
-
-      <footer class="post-footer">
-          
-          <div class="post-tags">
-              <a href="/tags/labs/" rel="tag"><i class="fa fa-tag"></i> labs</a>
-          </div>
-
-        
-
-
-        
-      </footer>
-    
-  </article>
-  
-  
-  
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-		  
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          xv6
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-07-11 22:57:39" itemprop="dateModified" datetime="2023-07-11T22:57:39+08:00">2023-07-11</time>
-              </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <blockquote>
-<p>总耗时：120h  约27天</p>
-<p>部分地方的翻译和表格来源参考：<a target="_blank" rel="noopener" href="http://xv6.dgs.zone/">xv6指导书翻译</a></p>
-<p>实验官网：<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/tools.html">6.S081</a></p>
-<p>记得结合书本的笔记阅读，这里只记录了一点看心情觉得想记就记的东西以及实验感想。</p>
-<p>笔记的结构【以第一章Operating system interface为例】：</p>
-<p><img src="/2023/01/10/xv6/image-20230124235649128.png" alt="image-20230124235649128"></p>
-</blockquote>
-<h3 id="Operating-system-interface"><a href="#Operating-system-interface" class="headerlink" title="Operating system interface"></a><a href="/2023/01/10/xv6$chap1">Operating system interface</a></h3><h3 id="Operating-system-oganization"><a href="#Operating-system-oganization" class="headerlink" title="Operating system oganization"></a><a href="/2023/01/10/xv6$chap2">Operating system oganization</a></h3><h3 id="Page-tables"><a href="#Page-tables" class="headerlink" title="Page tables"></a><a href="/2023/01/10/xv6$chap3">Page tables</a></h3><h3 id="Traps-and-system-calls"><a href="#Traps-and-system-calls" class="headerlink" title="Traps and system calls"></a><a href="/2023/01/10/xv6$chap4">Traps and system calls</a></h3><h3 id="Interrupts-and-device-drivers"><a href="#Interrupts-and-device-drivers" class="headerlink" title="Interrupts and device drivers"></a><a href="/2023/01/10/xv6$chap5">Interrupts and device drivers</a></h3><h3 id="Locking"><a href="#Locking" class="headerlink" title="Locking"></a><a href="/2023/01/10/xv6$chap6">Locking</a></h3><h3 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a><a href="/2023/01/10/xv6$chap7">Scheduling</a></h3><h3 id="File-system"><a href="#File-system" class="headerlink" title="File system"></a><a href="/2023/01/10/xv6$chap8">File system</a></h3><h3 id="其他的对实验未涉及的思考"><a href="#其他的对实验未涉及的思考" class="headerlink" title="其他的对实验未涉及的思考"></a><a href="/2023/01/10/xv6$chap9">其他的对实验未涉及的思考</a></h3>
-    </div>
-
-    
-    
-    
-
-		<div>
-		  
-			<div>
-    
-        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-		  
-		</div>
-
-      <footer class="post-footer">
-          
-          <div class="post-tags">
-              <a href="/tags/labs/" rel="tag"><i class="fa fa-tag"></i> labs</a>
-          </div>
-
-        
-
-
-        
-      </footer>
-    
-  </article>
-  
-  
-  
-
-	
-	
-	
-	
-	
-	
 	
 
   
@@ -731,7 +369,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">35</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
