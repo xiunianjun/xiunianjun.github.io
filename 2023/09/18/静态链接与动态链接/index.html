@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
+  <link rel="mask-icon" href="/images/cat.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此为《程序员的自我修养：链接、装载与库》(俞甲子,石凡,潘爱民)的看书总结。  链接前与装载链接前的编译阶段可以生成.o文件，.o文件是ELF文件，里面含有段表、符号表、bss段、common段等链接辅助段。 执行可执行文件时，首先要通过fork创建一个新的子进程，然后要通过exec为子进程制定可执行文件装载逻辑。在exec系统调用中，会进行elf文件的读取解析。它会解析elf header，根">
+<meta property="og:type" content="article">
+<meta property="og:title" content="链接、装载与运行库">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="此为《程序员的自我修养：链接、装载与库》(俞甲子,石凡,潘爱民)的看书总结。  链接前与装载链接前的编译阶段可以生成.o文件，.o文件是ELF文件，里面含有段表、符号表、bss段、common段等链接辅助段。 执行可执行文件时，首先要通过fork创建一个新的子进程，然后要通过exec为子进程制定可执行文件装载逻辑。在exec系统调用中，会进行elf文件的读取解析。它会解析elf header，根">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913084511590.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230918100932220.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913090407013.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913090719480.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913231031432.png">
+<meta property="article:published_time" content="2023-09-18T02:24:11.000Z">
+<meta property="article:modified_time" content="2023-09-18T02:25:20.709Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913084511590.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>链接、装载与运行库 | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+  
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+	
+		<script type="text/javascript" 
+		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
+		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+	
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          链接、装载与运行库
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-09-18 10:24:11 / 修改时间：10:25:20" itemprop="dateCreated datePublished" datetime="2023-09-18T10:24:11+08:00">2023-09-18</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>此为《程序员的自我修养：链接、装载与库》(俞甲子,石凡,潘爱民)的看书总结。</p>
+</blockquote>
+<h1 id="链接前与装载"><a href="#链接前与装载" class="headerlink" title="链接前与装载"></a>链接前与装载</h1><p>链接前的编译阶段可以生成.o文件，.o文件是ELF文件，里面含有段表、符号表、bss段、common段等链接辅助段。</p>
+<p>执行可执行文件时，首先要通过fork创建一个新的子进程，然后要通过exec为子进程制定可执行文件装载逻辑。在exec系统调用中，会进行elf文件的读取解析。它会解析elf header，根据其各种信息将程序copy到内存（进程的虚拟地址空间）中，后者也就是我们所研究的装载。</p>
+<p>装载不同于“节（section），是以”<strong>段</strong>“（segment）为单位。进程虚拟地址空间被分为很多个VMA，每个VMA都有不同的属性（如权限，可读可写可执行）。ELF可执行文件除去在链接/编译过程中被视为一个个连续的节之外，它还会在链接的时候根据每个节的属性不同重排节，把属性相同的节连续放在一起成为一个个段。链接的时候还会形成程序头表。对应关系：节——段表，段——程序头表</p>
+<p>装载进内存时，是以段为单位，一个段就对应着一个VMA。</p>
+<p>内核通过<code>execve</code>系统调用装载完ELF可执行文件以后就返回到用户空间，将控制权交给程序的入口。</p>
+<p>对于不同链接形式的ELF可执行文件，这个程序的入口是有区别的。对于静态链接的可执行文件来说，程序的入口就是ELF文件头里面的<strong>e_entry指定的入口地址</strong>；对于动态链接的可执行文件来说，如果这时候把控制权交给e_entry指定的入口地址，那么肯定是不行的，因为可执行文件所依赖的共享库还没有被装载，也没有进行动态链接。所以对于动态链接的可执行文件，内核会分析它的动态链接器地址（在“.interp”段），将动态链接器映射至进程地址空间，然后把控制权交给<strong>动态链接器</strong>。</p>
+<h2 id="ELF"><a href="#ELF" class="headerlink" title="ELF"></a>ELF</h2><p>编译器编译源代码后⽣成的⽂件叫做⽬标⽂件（Object文件），⽬标⽂件从结构上讲，它是已经编译后的可执⾏⽂件格式，只是还没有经过链接的过程，其中可能有些符号或有些地址还没有被调整。其实它本⾝就是按照可执⾏⽂件格式存储的，只是跟真正的可执⾏⽂件在结构上稍有不同。</p>
+<p>Linux的可执行文件遵从ELF的结构模式。</p>
+<p>ELF可以分为这几类：</p>
+<p><img src="/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913084511590.png" alt="image-20230913084511590"></p>
+<p>也即.o（可重定位文件）、.exe(无后缀)（可执行文件）、.so（动态链接库）、.a（静态链接库）、core dump。</p>
+<h3 id="Object文件的结构"><a href="#Object文件的结构" class="headerlink" title="Object文件的结构"></a>Object文件的结构</h3><p>⽬标⽂件中的内容⾄少有编译后的机器指令代码、数据。没错，除了这些内容以外，⽬标⽂件中还包括了链接时所须要的⼀些信息，⽐如符号表、调试信息、字符串等。⼀般⽬标⽂件将这些信息按不同的属性，以“节”（Section）的形式存储，有时候也叫“<strong>段</strong>”（Segment）。</p>
+<p><img src="/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230918100932220.png" alt="image-20230918100932220"></p>
+<h3 id="符号修饰"><a href="#符号修饰" class="headerlink" title="符号修饰"></a>符号修饰</h3><p>众所周知，强⼤⽽⼜复杂的C++拥有类、继承、虚机制、重载、名称空间等这些特性，它们使得符号管理更为复杂。最简单的例⼦，两个相同名字的函数func(int)和func(double)，尽管函数名相同，但是参数列表不同，这是C++⾥⾯函数重载的最简单的⼀种情况，那么编译器和链接器在链接过程中如何区分这两个函数呢？为了⽀持C++这些复杂的特性，⼈们发明了符号修饰（Name Decoration）或符号改编（Name Mangling）的机制。</p>
+<p><img src="/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913090407013.png" alt="image-20230913090407013"></p>
+<p>C++为了与C兼容，在符号的管理上，C++有⼀个⽤来声明或定义⼀个C的符号的“extern “C””关键字⽤法：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> ”C” &#123;</span><br><span class="line">	<span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">(<span class="type">int</span>)</span></span>;</span><br><span class="line">    <span class="type">int</span> var;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>C++编译器会将在extern “C” 的⼤括号内部的代码当作C语⾔代码处理。所以很明显，上⾯的代码中，C++的名称修饰机制将不会起作⽤。</p>
+<h3 id="强符号和弱符号"><a href="#强符号和弱符号" class="headerlink" title="强符号和弱符号"></a>强符号和弱符号</h3><p>多个⽬标⽂件中含有相同名字全局符号的定义，那么这些⽬标⽂件链接的时候将会出现符号重复定义的错误。这种符号的定义可以被称为<strong>强符号</strong>（Strong Symbol）。有些符号的定义可以被称为<strong>弱符号</strong>（Weak Symbol）。对于C/C++语⾔来说，编译器默认<u>函数和初始化了的全局变量</u>为强符号，<u>未初始化的全局变量</u>为弱符号。我们也可以通过GCC的<code>__attribute__((weak))</code>来定义任何⼀个强符号为弱符号。</p>
+<p><img src="/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913090719480.png" alt="image-20230913090719480"></p>
+<p>⽬前我们所看到的对外部⽬标⽂件的符号引⽤在⽬标⽂件被最终链接成可执⾏⽂件时，它们须要被正确决议，如果没有找到该符号的定义，链接器就会报符号未定义错误，这种被称为<strong>强引⽤</strong>（Strong Reference）。与之相对应还有⼀种<strong>弱引⽤</strong>（Weak Reference），在处理弱引⽤时，如果该符号有定义，则链接器将该符号的引⽤决议；如果该符号未被定义，则链接器对于该引⽤不报错。</p>
+<p>链接器处理强引⽤和弱引⽤的过程⼏乎⼀样，只是对于未定义的弱引⽤，链接器不认为它是⼀个错误。⼀般对于未定义的弱引⽤，链接器默认其为0，或者是⼀个特殊的值，以便于程序代码能够识别。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">__attribute__ ((weakref)) <span class="function"><span class="type">void</span> <span class="title">foo</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(foo) <span class="built_in">foo</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种弱符号和弱引⽤对于库来说⼗分有⽤，⽐如库中定义的弱符号可以被⽤户定义的强符号所覆盖，从⽽使得程序可以使⽤⾃定义版本的库函数。</p>
+<blockquote>
+<p>这里很帅，有条件编译那味了</p>
+</blockquote>
+<p>在Linux程序的设计中，如果⼀个程序被设计成可以⽀持单线程或多线程的模式，就可以通过弱引⽤的⽅法来判断当前的程序是链接到了单线程的Glibc库还是多线程的Glibc库（是否在编译时有-lpthread选项），从⽽执⾏单线程版本的程序或多线程版本的程序。我们可以在程序中定义⼀个pthread_create函数的弱引⽤，然后程序在运⾏时动态判断是否链接到pthread库从⽽决定执⾏多线程版本还是单线程版本：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">pthread_create</span><span class="params">(<span class="type">pthread_t</span>*, <span class="type">const</span> <span class="type">pthread_attr_t</span>*, <span class="type">void</span>* (*)(<span class="type">void</span>*), </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">void</span>*)</span> __<span class="title">attribute__</span> <span class="params">((weak))</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(pthread_create) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;This is multi-thread</span></span><br><span class="line"><span class="string">        version!\n&quot;</span>);</span><br><span class="line">        <span class="comment">// run the multi-thread version</span></span><br><span class="line">        <span class="comment">// main_multi_thread()</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;This is single-thread</span></span><br><span class="line"><span class="string">        version!\n&quot;</span>); </span><br><span class="line">        <span class="comment">// run the single-thread version</span></span><br><span class="line">        <span class="comment">// main_single_thread()</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>弱符号大概是说该变量可以被定义多次，最终链接时再进行决议；弱引用大概是说该变量（函数）可以不被定义。</p>
+</blockquote>
+<h1 id="静态链接"><a href="#静态链接" class="headerlink" title="静态链接"></a>静态链接</h1><p>静态链接库（.a文件）本质上是一堆.o文件的集合。静态链接的基本过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">test.c ——(compile)——&gt;test.o——(link)——&gt;test(ELF exe)</span><br><span class="line">				  	   			↑</span><br><span class="line">                  			  lib.a</span><br></pre></td></tr></table></figure>
+
+<p>静态链接其实也就是分为两大步骤：</p>
+<ol>
+<li><p>空间与地址分配</p>
+<p>将input file的各个段都连在一起，并且为符号分配虚拟地址</p>
+</li>
+<li><p>符号解析与重定位</p>
+<ol>
+<li><p>扫描所有输入文件的符号表形成全局符号表；</p>
+</li>
+<li><p>重定向</p>
+<p>可执行文件基本可以确定自己在进程虚拟空间中的起始位置，因为可执行文件往往是第一个被加载的文件，它可以选择一个固定空闲的地址。因而，在link中，可执行文件的地址都以确定，就可以开始进行重定向。</p>
+<p>通过重定向表对所有UNDEF的符号进行地址修正，包括相对地址修正和绝对地址修正。</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>在link中，会读取<code>test.o</code>以及<code>lib.a</code>中的符号表，完成重定向（绝对地址和相对地址）以及节的重排组织，最终组合形成以段为单位的可执行文件<code>test</code>。</p>
+<p>可执行文件<code>test</code>会通过系统调用<code>exevec</code>被装载进物理内存（lazy allocation），分段映射到进程的虚拟地址空间。</p>
+<p>静态链接的缺陷是，由于重定向在link过程完成，故而同一份共享库在物理内存中会有多份copy，极大占用物理内存和磁盘空间。优点是速度快。</p>
+<h1 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h1><p>（下文注意区分两个概念：可执行文件和动态链接库）</p>
+<p>动态链接库（.so）不同于静态链接库。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">test.c ——(compile)——&gt;test.o——(link)——&gt;test(ELF exe)</span><br><span class="line">				  	   			↑</span><br><span class="line">                  			  lib.so</span><br></pre></td></tr></table></figure>
+
+<p>在link中，仅会读入动态链接库的符号表，对于动态链接库的符号仅会将其标记为动态符号，而不会对其进行重定向。</p>
+<p>可执行文件<code>test</code>会通过系统调用<code>exevec</code>被装载进物理内存（lazy allocation），分段映射到进程的虚拟地址空间。</p>
+<p>静态链接是per-process一份库，内存中有多份库；动态链接是per-process一份库，内存也只有一份库。并且虚拟地址动态分配，也即库映射到进程地址空间的哪块VMA是不确定的。</p>
+<p>由于动态链接库被装载时的虚拟地址不确定，所以对于动态链接库和可执行文件代码中与动态链接相关的绝对地址，不能简单采用装载时重定向的方法来对其重定向，否则会破坏其共享性和不变性。</p>
+<blockquote>
+<p>试想一下，每个进程加载的动态链接库的地址都不同，那岂不是每个进程的动态链接库的重定向结果都不一样，指令都不一样，不就寄了。</p>
+</blockquote>
+<p>所以我们此时进行了一个<strong>牛逼到家、惊天动地、无人能比</strong>的操作。</p>
+<p>我们可以分离.text和.data，前者作为“共享”语义保持不变性，后者则在每个进程地址空间中都留存一个copy。然后，我们将所有立即数绝对寻址的地方，换为间接寻址！也即，把那个立即数绝对地址改成一个变量，变量值在.data段中存储。这样一来，就<strong>成功把绝对寻址替换成了相对寻址</strong>。加载的时候也只需将虚拟地址填进可变的.data就行。不得不说真是十分地巧妙。</p>
+<p>这个从相对地址——绝对地址的转换过程，由ELF中的一个新段GOT表（.got）来实现。在link时加入了动态链接库符号表的可执行文件，以及动态链接库本身，都使用了.got段，以PIC形式出现。</p>
+<p>这个操作就是所谓的“<strong>地址无关代码</strong>”，通过<code>-fPIC</code>选项，就可以将代码编译为一个地址无关的程序。使用PIC模式编译的共享对象，对于模块内部的函数调用也是采用跟模块外部函数调用一样的方式，即使用GOT/PLT的方式。</p>
+<blockquote>
+<p>小trick：如何区分一个DSO是否为PIC</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">readelf -d foo.so | grep TEXTREL</span><br></pre></td></tr></table></figure>
+
+<p>如果上面的命令有任何输出，那么foo.so就不是PIC的，否则就是PIC的。PIC的DSO是不会包含任何代码段重定位表的，TEXTREL表⽰代码段重定位表地址。</p>
+<p>这也很好理解，因为PIC本质上就是<u>把代码段重定位转化为了数据段重定位</u>。</p>
+</blockquote>
+<p>除了动态链接库中的寻址（对变量和函数）需要使用PIC之外，对可执行文件的全局变量也需要使用特殊的机制。ELF共享库中的全局变量都<strong>类似</strong>以弱引用形式存在。当全局变量在主程序extern时，若该变量在共享库中初始化了，那么加载之后要把共享库的数据copy进主程序；否则，该变量值都以主模块为准。</p>
+<blockquote>
+<p>这段原因解释看书真没懂，详情340页开始。</p>
+<p>不过感觉它可能说的有点问题，我个人认为全局变量需要使用这种以方式存在，是为了保证进程资源独立。如果变量都以共享库中的数据值为准，那各个进程共享共享库不就乱了。。。你改一下我改一下</p>
+</blockquote>
+<p>因而，总的装载流程是：</p>
+<p><strong>未优化情况下</strong>，在可执行文件被装载之前，先将其依赖的所有动态链接库加载进内存。若其所需的动态链接库已经被映射到物理内存，则将其装载到进程虚拟地址空间；否则，则映射到物理内存，并且装载到进程虚拟地址空间。然后，在装载动态链接库后，扫描可执行文件.got段符号进行装载时重定向（依据已经装载了的动态链接库虚拟地址来计算符号地址）即可。</p>
+<p>但可以注意到这一步还是有优化空间。所以我们采取<strong>延迟绑定</strong>（PLT）的方法，第一次访问到动态链接库符号时，才对其进行重定向并填入.got中。</p>
+<p>动态链接的缺点就是太慢了，一是因为PIC导致模块内部函数和全局变量也需要以.got形式访问，加了层寻址；二是运行时重定向开销巨大。对于前者，模块内部函数可以使用static关键字修饰；对于后者，采用PLT。</p>
+<p><img src="/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913231031432.png" alt="image-20230913231031432"></p>
+<h1 id="显式运行时链接"><a href="#显式运行时链接" class="headerlink" title="显式运行时链接"></a>显式运行时链接</h1><p>支持动态链接的系统往往都支持一种更加灵活的模块加载方式，叫做显式运行时链接（Explicit Runtime Linking），有时候也叫做运行时加载。也就是让程序自己在运行时控制加载指定的模块，并且可以在不需要该模块时将其卸载。</p>
+<blockquote>
+<p>也就是说，前面介绍的动态链接库是由动态链接器自动完成的，程序啥也不知道；这里的动态装载库是程序自己控制的，所以会提供给程序各种API。</p>
+</blockquote>
+<p>而动态库的装载则是通过一系列由动态链接器提供的API，具体地讲共有4个函数：打开动态库（<code>dlopen</code>）、查找符号（<code>dlsym</code>）、错误处理（<code>dlerror</code>）以及关闭动态库（<code>dlclose</code>），程序可以通过这几个API对动态库进行操作。这几个API的实现是在<code>/lib/libdl.so.2</code>里面，它们的声明和相关常量被定义在系统标准头文件<code>&lt;dlfcn.h&gt;</code>。</p>
+<blockquote>
+<p>很有意思的是，如果我们将filename这个参数设置为0，那么dlopen返回的将是全局符号表的句柄，也就是说我们可以在运行时找到全局符号表里面的任何一个符号，并且可以执行它们，这有些类似高级语言<strong>反射</strong>（Reflection）的特性。全局符号表包括了程序的可执行文件本⾝、被动态链接器加载到进程中的所有共享模块以及在运行时通过dlopen打开并且使用了RTLD_GLOBAL方式的模块中的符号。</p>
+</blockquote>
+<p>它接下来举的例子很有意思，可惜不知道为啥在我这一直segment fault。。。好像是它用的内联汇编是32位什么的，我折腾了半天还是没办法，算了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">我们这个例子中将实现一个更为灵活的叫做runso的程序，这个程序可以通过命令行来执行共享对象里面的任意一个函数。</span></span><br><span class="line"><span class="comment">它在理论上很简单，基本的步骤就是：由命令行给出共享对象路径、函数名和相关参数，然后程序通过运行时加载将该模块加载</span></span><br><span class="line"><span class="comment">到进程中，查找相应的函数，并且执行它，然后将执行结果打印出来。</span></span><br><span class="line"><span class="comment">为了表示参数和返回值类型，我们假设字母d表示double、i表示int、s表示char*、v表示void</span></span><br><span class="line"><span class="comment">比如说，如果要调用/lib/libfoo.so里面一个void bar(char* str, int i)的函数，可以使用如下命令行：</span></span><br><span class="line"><span class="comment">$./RunSo /lib/libfoo.so bar sHello i10 </span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;dlfcn.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdint.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 大概就是根据参数类型把参数压入栈</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SETUP_STACK \</span></span><br><span class="line"><span class="meta">i = 2; \</span></span><br><span class="line"><span class="meta">while (++i &lt; argc - 1) &#123; \</span></span><br><span class="line"><span class="meta"> switch(argv[i][0]) &#123; \</span></span><br><span class="line"><span class="meta">    case <span class="string">&#x27;i&#x27;</span>: \</span></span><br><span class="line"><span class="meta">        int res = atoi(&amp;argv[i][1]); \</span></span><br><span class="line"><span class="meta">        asm volatile(<span class="string">&quot;.code32\n&quot;</span> \</span></span><br><span class="line"><span class="meta">            <span class="string">&quot;push %0&quot;</span> :: \</span></span><br><span class="line"><span class="meta">            <span class="string">&quot;r&quot;</span>(res )); \</span></span><br><span class="line"><span class="meta">        asm volatile(<span class="string">&quot;.code64\n&quot;</span>); \</span></span><br><span class="line"><span class="meta">        esp += 4; \</span></span><br><span class="line"><span class="meta">        break; \</span></span><br><span class="line"><span class="meta">    case <span class="string">&#x27;d&#x27;</span>: \</span></span><br><span class="line"><span class="meta">        atof(&amp;argv[i][1]); \</span></span><br><span class="line"><span class="meta">        asm volatile(<span class="string">&quot;subl $8,%esp\n&quot;</span> \</span></span><br><span class="line"><span class="meta">            <span class="string">&quot;fstpl (%esp)&quot;</span> ); \</span></span><br><span class="line"><span class="meta">        esp += 8; \</span></span><br><span class="line"><span class="meta">        break; \</span></span><br><span class="line"><span class="meta">    case <span class="string">&#x27;s&#x27;</span>: \</span></span><br><span class="line"><span class="meta">        asm volatile(<span class="string">&quot;push %0&quot;</span> :: \</span></span><br><span class="line"><span class="meta">            <span class="string">&quot;r&quot;</span>(&amp;argv[i][1]) ); \</span></span><br><span class="line"><span class="meta">        esp += 4; \</span></span><br><span class="line"><span class="meta">        break; \</span></span><br><span class="line"><span class="meta">    default: \</span></span><br><span class="line"><span class="meta">        printf(<span class="string">&quot;error argument type&quot;</span>); \</span></span><br><span class="line"><span class="meta">        goto exit_runso; \</span></span><br><span class="line"><span class="meta"> &#125; \</span></span><br><span class="line"><span class="meta">&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 大概就是相当于pop，给esp加上我们之前申请的栈空间esp</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RESTORE_STACK \</span></span><br><span class="line"><span class="meta">asm volatile(<span class="string">&quot;add %0,%%esp&quot;</span>::<span class="string">&quot;r&quot;</span>(esp))</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">void</span>* handle;</span><br><span class="line">    <span class="type">char</span>* error;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="type">int</span> esp = <span class="number">0</span>; </span><br><span class="line">    <span class="type">void</span>* func;</span><br><span class="line"></span><br><span class="line">    handle = dlopen(argv[<span class="number">1</span>], RTLD_NOW);</span><br><span class="line">    <span class="keyword">if</span>(handle == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Can&#x27;t find library: %s\n&quot;</span>, argv[<span class="number">1</span>]);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    func = dlsym(handle, argv[<span class="number">2</span>]);</span><br><span class="line">    <span class="keyword">if</span>( (error = dlerror()) != <span class="literal">NULL</span> ) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Find symbol %s error: %s\n&quot;</span>, argv[<span class="number">2</span>], error);</span><br><span class="line">        <span class="keyword">goto</span> exit_runso;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据返回值不同构造函数指针</span></span><br><span class="line">    <span class="keyword">switch</span>(argv[argc<span class="number">-1</span>][<span class="number">0</span>])&#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;i&#x27;</span>:</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> (*func_int)() = func;</span><br><span class="line">            SETUP_STACK;</span><br><span class="line">            <span class="type">int</span> ret = func_int();</span><br><span class="line">            RESTORE_STACK;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;ret = %d\n&quot;</span>, ret );</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;d&#x27;</span>:</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">double</span> (*func_double)() = func;</span><br><span class="line">            SETUP_STACK;</span><br><span class="line">            <span class="type">double</span> ret = func_double();</span><br><span class="line">            RESTORE_STACK;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;ret = %f\n&quot;</span>, ret );</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;s&#x27;</span>:</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">char</span>* (*func_str)() = func;</span><br><span class="line">            SETUP_STACK;</span><br><span class="line">            <span class="type">char</span>* ret = func_str();</span><br><span class="line">            RESTORE_STACK;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;ret = %s\n&quot;</span>, ret );</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;v&#x27;</span>:</span><br><span class="line">        &#123; </span><br><span class="line">            <span class="type">void</span> (*func_void)() = func;</span><br><span class="line">            SETUP_STACK;</span><br><span class="line">            func_void();</span><br><span class="line">            RESTORE_STACK;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;ret = void&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="comment">// end of switch</span></span><br><span class="line"></span><br><span class="line">exit_runso:</span><br><span class="line">    dlclose(handle);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="运行库"><a href="#运行库" class="headerlink" title="运行库"></a>运行库</h1><h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><p>操作系统装载程序之后，首先运行的代码并不是main的第一行，而是某些别的代码，这些代码负责准备好main函数执行所需要的环境，并且负责调用main函数，这时候你才可以在main函数里放心大胆地写各种代码：申请内存、使用系统调用、触发异常、访问I/O。在main返回之后，它会记录main函数的返回值，调用atexit注册的函数，然后结束进程。</p>
+<p>运行这些代码的函数称为<strong>入口函数或入口点</strong>（Entry Point），视平台的不同而有不同的名字。程序的入口点实际上是一个程序的初始化和结束部分，它往往是<strong>运行库的一部分</strong>。</p>
+<p>一个典型的程序运行步骤大致如下：</p>
+<ol>
+<li><p>操作系统在创建进程后，把控制权交到了程序的入口，这个入口往往是运行库中的某个入口函数。</p>
+</li>
+<li><p>入口函数对运行库和程序运行环境进行<strong>初始化</strong>，包括堆、I/O、线程、全局变量构造，等等。</p>
+</li>
+<li><p>入口函数在完成初始化之后，调用main函数，正式开始执行程序主体部分。</p>
+</li>
+<li><p>main函数执行完毕以后，返回到入口函数，入口函数进行清理⼯作，包括全局变量析构、堆销毁、关闭I/O等，然后进行系统调用结束进程。</p>
+</li>
+</ol>
+<p>Linux中的C语言运行库就是<strong>glibc</strong>。</p>
+<h2 id="运行库-1"><a href="#运行库-1" class="headerlink" title="运行库"></a>运行库</h2><p>运行时库（Runtime Library）为入口函数及其所依赖的函数所构成的函数、各种标准库函数的实现的集合。可以通过<code>sudo apt-get install glibc-source</code>安装glibc的源代码。</p>
+<p>一个C语言运行库大致包含了如下功能：</p>
+<ol>
+<li><p>启动与退出：包括入口函数及入口函数所依赖的其他函数等。</p>
+</li>
+<li><p>标准函数：由C语言标准规定的C语言标准库所拥有的函数实现。</p>
+</li>
+<li><p>I/O：I/O功能的封装和实现，参见上一节中I/O初始化部分。</p>
+<p>应该指的是比如说提供File*指针、IO stream之类的高级功能封装。</p>
+</li>
+<li><p>堆：堆的封装和实现，参见上一节中堆初始化部分。</p>
+<blockquote>
+<p>这点让我耳目一新！因为我以前一直以为堆栈都是操作系统实现的，现在想来才发现确实，操作系统只负责通过sbrk系统调用给内存，具体的堆分配算法由glibc的malloc实现。</p>
+</blockquote>
+</li>
+<li><p>语言实现：语言中一些特殊功能的实现。</p>
+</li>
+<li><p>调试：实现调试功能的代码。</p>
+</li>
+</ol>
+<h3 id="库函数介绍"><a href="#库函数介绍" class="headerlink" title="库函数介绍"></a>库函数介绍</h3><p>它这里主要讲了两个比较特殊的库，还挺有意思的：变长参数（stdarg.h）和非局部跳转（setjmp.h）。</p>
+<ol>
+<li><p>变长参数</p>
+<p>讲这玩意其实用作是printf的实现。看下下面这两个代码相信你就能明白printf的基本原理了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Code 1</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">sum</span><span class="params">(<span class="type">unsigned</span> num, ...)</span></span><br><span class="line">&#123;</span><br><span class="line"> <span class="type">int</span>* p = &amp;num + <span class="number">1</span>;</span><br><span class="line"> <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line"> <span class="keyword">while</span> (num--)</span><br><span class="line"> ret += *p++;</span><br><span class="line"> <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">call:</span><br><span class="line"><span class="type">int</span> n = sum(<span class="number">3</span>, <span class="number">16</span>, <span class="number">38</span>, <span class="number">53</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdarg.h&gt;</span></span></span><br><span class="line"><span class="comment">// Code 2</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">arg_match</span><span class="params">(<span class="type">const</span> <span class="type">char</span>* fmt, ...)</span> &#123;</span><br><span class="line">        va_list ap; <span class="comment">// 本质char * / void *</span></span><br><span class="line">        va_start(ap, fmt); <span class="comment">// 之后ap就会指向fmt后的第一个可变参数</span></span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> idx = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="built_in">strlen</span>(fmt); i ++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (fmt[i] != <span class="string">&#x27;%&#x27;</span>)      <span class="keyword">continue</span>;</span><br><span class="line">                idx ++;</span><br><span class="line">                <span class="keyword">switch</span> (fmt[i + <span class="number">1</span>]) &#123;</span><br><span class="line">                        <span class="keyword">case</span> <span class="string">&#x27;d&#x27;</span>:</span><br><span class="line">                                <span class="type">int</span> argv_i = va_arg(ap, <span class="type">int</span>);</span><br><span class="line">                                <span class="built_in">printf</span>(<span class="string">&quot;第%d个参数为：%d\n&quot;</span>, idx, argv_i);</span><br><span class="line">                                <span class="keyword">break</span>;</span><br><span class="line">                        <span class="keyword">case</span> <span class="string">&#x27;s&#x27;</span>:</span><br><span class="line">                                <span class="type">char</span>* argv_s = va_arg(ap, <span class="type">char</span>*);</span><br><span class="line">                                <span class="built_in">printf</span>(<span class="string">&quot;第%d个参数为：%s\n&quot;</span>, idx, argv_s);</span><br><span class="line">                                <span class="keyword">break</span>;</span><br><span class="line">                        <span class="keyword">default</span>:</span><br><span class="line">                                <span class="built_in">printf</span>(<span class="string">&quot;unknown.\n&quot;</span>);</span><br><span class="line">                                <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">call:</span><br><span class="line">arg_match(<span class="string">&quot;%d %d %s\n&quot;</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="string">&quot;333&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，我们也可以实现<strong>变长参数宏</strong>：</p>
+<p>在GCC编译器下，变长参数宏可以使用“##”宏字符串连接操作实现。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> printf(args…) fprintf(stdout, ##args)</span></span><br></pre></td></tr></table></figure></li>
+<li><p>非局部跳转</p>
+<p>这位更是重量级</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;setjmp.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">jmp_buf b;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">f</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	longjmp(b, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (setjmp(b))</span><br><span class="line">    	<span class="built_in">printf</span>(<span class="string">&quot;World!&quot;</span>);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Hello &quot;</span>);</span><br><span class="line">        f();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>事实上的输出是：</p>
+<p>Hello World!</p>
+<blockquote>
+<p>实际上，当setjmp正常返回的时候，会返回0，因此会打印出“Hello”的字样。而longjmp的作用，就是让程序的执行流回到当初setjmp返回的时刻，并且返回由longjmp指定的返回值（longjmp的参数2），也就是1，自然接着会打印出“World！”并退出。换句话说，longjmp可以让程序“时光倒流”回setjmp返回的时刻，并改变其行为，以至于改变了未来。</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="glibc"><a href="#glibc" class="headerlink" title="glibc"></a>glibc</h3><p>glibc是对标准C运行库的扩展（如增加了pthread），全称GNU C Library，是GNU旗下的C标准库。</p>
+<h2 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h2><p>于是，我们可以完整串联整个运行程序的生命周期：</p>
+<p>由链接器ld将所有.o文件的<code>_init</code>段和<code>_finit</code>段（包含glibc对堆空间的初始化和释放、编译器对C++全局对象构造析构的实现以及app自己实现的init和finit函数）分别串在一起，并且链接上glibc库的包含了<code>_start</code>（会调用<code>_init</code>）的crt.o文件，最后就形成了包含各种glibc标准库和真·用户代码的可执行文件。</p>
+<p>可执行文件被装载到进程地址空间后，首先会进行动态链接。然后，从程序入口<code>_start</code>开始进行各种初始化，调用可执行文件的这个<code>_init</code>段的内容。init完成之后，glibc就调用程序中的入口main。main执行过程中会用到glibc的各种标准库函数。main执行完后就会继续执行<code>_finit</code>段来结束一切。</p>
+<h3 id="C-的全局对象构造析构"><a href="#C-的全局对象构造析构" class="headerlink" title="C++的全局对象构造析构"></a>C++的全局对象构造析构</h3><ol>
+<li><p>构造（<code>_init</code>）</p>
+<p>编译器会将每个全局对象的构造函数以如下形式包装：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">GLOBAL__I_Hw</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    Hw::Hw(); <span class="comment">// 构造对象</span></span><br><span class="line">    atexit(__tcf_1); <span class="comment">// 一个神秘的函数叫做__tcf_1被注册到了exit</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后将这个<code>GLOBAL__I_Hw</code>放进.o文件的一个<code>.ctor</code>段中，最后由ld将各个.o文件的<code>.ctor</code>段链接起来，并计算出全局对象数量填入<code>crtbegin.o</code>即可。</p>
+<p>之后在<code>_init</code>段中遍历<code>.ctor</code>的各个函数指针进行构造函数调用就行了</p>
+</li>
+<li><p>析构（<code>_finit</code>）</p>
+<p>早期同理可得。现在变了，变成直接在<code>GLOBAL__I_Hw</code>中注册<code>atexit</code>了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> __tcf_1(<span class="type">void</span>) <span class="comment">//这个名字由编译器⽣成</span></span><br><span class="line">&#123;</span><br><span class="line">    Hw.~HelloWorld();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="实现小型运行库"><a href="#实现小型运行库" class="headerlink" title="实现小型运行库"></a>实现小型运行库</h2><blockquote>
+<p>看到标题就知道接下来有多帅了</p>
+</blockquote>
+<p>在这一章我们仅实现CRT几个关键的部分。虽然这个迷你CRT仅仅实现了为数不多的功能，但是它已经具备了CRT的关键功能：入口函数、初始化、堆管理、基本IO，甚至还将实现堆C++的new/delete、stream和string的支持。</p>
+<p>本章主要分为两个部分，首先实现一个仅仅支持C语言的运行库，即传统意义上的CRT。其次，将为这个CRT加入一部分以支持C++语言的运行时特性。</p>
+<p>相关代码放在<a target="_blank" rel="noopener" href="https://github.com/xiunianjun/minicrt">github</a>了，其实感觉差不多是按它写的抄了一遍。可以现在稍微整理下文件结构。</p>
+<ol>
+<li><p>just for C</p>
+<p>前面说到，CRT的作用是执行init和finit段、进行堆的管理、进行IO的封装管理以及提供各种标准C语言库。因而，我们可以分别用如下几个文件来实现这几个功能：</p>
+<ol>
+<li><p><code>entry.c</code></p>
+<p>用于实现入口函数<code>mini_crt_entry</code>。入口函数中主要要做：调用main之前的栈构造、堆初始化、IO初始化，最后调用main函数。main函数返回后，通过系统调用exit来杀死进程。</p>
+</li>
+<li><p><code>malloc.c</code></p>
+<p>用于实现堆的管理，主要实现了<code>malloc</code>和<code>free</code>。使用了空闲链表的小内存管理法，实现简单。</p>
+</li>
+<li><p><code>stdio.c</code></p>
+<p>用于实现IO封装，<code>fread</code>、<code>fwrite</code>、<code>fopen</code>、<code>fclose</code>、<code>fseek</code>。实现简单，因而只是系统调用的封装</p>
+</li>
+<li><p><code>string.c</code></p>
+<p>以字符串操作为例，提供的标准C语言库。</p>
+</li>
+</ol>
+<p>之后，我们将其以如下参数编译为静态库：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ gcc -c -fno-builtin -nostdlib -fno-stack-protector entry.c malloc.c stdio.c string.c printf.c</span><br><span class="line">$ ar -rs minicrt.a malloc.o printf.o stdio.o string.o</span><br><span class="line"><span class="comment"># 编译测试用例</span></span><br><span class="line">$ gcc -m32 -c -ggdb -fno-builtin -nostdlib -fno-stack-protector test.c</span><br></pre></td></tr></table></figure>
+
+<p>再指定<code>mini_crt_entry</code>为入口进行静态链接：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ld -m elf_i386 -static -e mini_crt_entry entry.o test.o minicrt.a -o <span class="built_in">test</span></span><br></pre></td></tr></table></figure></li>
+<li><p>C++</p>
+<p>如果要实现对C++的支持，除了在上述基础上，我们还需增加以下几个内容：全局对象（cout）构造/析构的实现、new/delete、类的实现（string和iostream）。具体来说，会支持下面这个简单的代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;iostream&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;string&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    string* msg = <span class="keyword">new</span> <span class="built_in">string</span>(<span class="string">&quot;Hello World&quot;</span>);</span><br><span class="line">    cout &lt;&lt; *msg &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">delete</span> msg;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以分步实现这些功能：</p>
+<ol>
+<li><p>new/delete实现</p>
+<p>简单地使用运算符重载功能即可：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> size)</span></span>;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* p)</span></span>;</span><br></pre></td></tr></table></figure></li>
+<li><p>类的实现</p>
+<p>不多说</p>
+</li>
+<li><p>全局对象的构造/析构</p>
+<ol>
+<li><p>构造</p>
+<p>全局对象的构造在entry中进行：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">mini_crt_entry</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	...</span><br><span class="line">    <span class="comment">// 构造所有全局对象</span></span><br><span class="line">	do_global_ctors();</span><br><span class="line">    ret = main(argc,argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>前文说过，在Linux中，每个.o文件的全局构造最后都会放在<code>.ctor</code>段。ld在链接阶段中将所有目标文件（包括用于标识<code>.ctor</code>段开始和结束的<code>crtbegin.o</code>和<code>crtend.o</code>）的<code>.ctor</code>段连在一起。所以，我们就需要实现三个文件：</p>
+<ol>
+<li><p><code>ctors.c</code></p>
+<p>主要是用于实现<code>do_global_ctors()</code>。既然都有<code>.ctor</code>段存在了，那么它的实现就很简单，就是遍历<code>.ctor</code>段的所有函数指针并且调用它们。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">run_hooks</span><span class="params">()</span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="type">void</span> <span class="title function_">do_global_ctors</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	run_hooks();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">run_hooks</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">const</span> ctor_func *<span class="built_in">list</span> = ctors_begin;</span><br><span class="line">	<span class="comment">// 逐个调用ctors段里的东西</span></span><br><span class="line">	<span class="keyword">while</span> ((<span class="type">int</span>)*++<span class="built_in">list</span> != <span class="number">-1</span>)	(**<span class="built_in">list</span>)();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p><code>crtbegin.c</code></p>
+<p>前文说到，按规定，ld将会以如下顺序连接.o文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ld crtbegin.o 其他文件 crtend.o -o <span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+
+<p>因而，<code>crtbegin.c</code>的<code>.ctor</code>段会被链接在第一个。其作用是标识<code>.ctor</code>函数指针的数量，将在链接时由ld计算并且填写。因而在这里，我们只需将其初始化为一个特殊值（-1）就行：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="title function_">void</span> <span class="params">(*ctor_func)</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"></span><br><span class="line">ctor_func ctors_begin[<span class="number">1</span>] __attribute__((section(<span class="string">&quot;.ctors&quot;</span>))) = &#123;</span><br><span class="line">	(ctor_func)<span class="number">-1</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></li>
+<li><p><code>crtend.c</code></p>
+<p>同样，<code>crtend.c</code>的<code>.ctor</code>段标识着<code>.ctor</code>段的结束。因而我们也将其初始化为一个特殊值（-1）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="title function_">void</span> <span class="params">(*ctor_func)</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 转化-1为函数指针，标识结束</span></span><br><span class="line">ctor_func crt_end[<span class="number">1</span>] __attribute__((section(<span class="string">&quot;.ctors&quot;</span>))) = &#123;</span><br><span class="line">	(ctor_func) - <span class="number">1</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+<li><p>析构</p>
+<p>全局对象的析构同样在entry中进行：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">mini_crt_entry</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	...</span><br><span class="line">    ret = main(argc,argv);</span><br><span class="line">    <span class="built_in">exit</span>(ret);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">exit</span><span class="params">(<span class="type">int</span> exitCode)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// 执行atexit，完成所有finit钩子</span></span><br><span class="line">	mini_crt_call_exit_routine();</span><br><span class="line">    <span class="comment">// 调用exit系统调用</span></span><br><span class="line">    <span class="keyword">asm</span>( <span class="string">&quot;movl %0,%%ebx \n\t&quot;</span></span><br><span class="line">    <span class="string">&quot;movl $1,%%eax \n\t&quot;</span></span><br><span class="line">    <span class="string">&quot;int $0x80 \n\t&quot;</span> </span><br><span class="line">    <span class="string">&quot;hlt \n\t&quot;</span>::<span class="string">&quot;m&quot;</span>(exitCode));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体也是以链表形式管理所有的函数指针，在<code>atexit</code>中注册（加入链表），在<code>mini_crt_call_exit_routine</code>中真正调用，不多分析。</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+		<div>
+		  
+			<div>
+    
+        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+		  
+		</div>
+
+      <footer class="post-footer">
+
+        
+
+
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E5%89%8D%E4%B8%8E%E8%A3%85%E8%BD%BD"><span class="nav-number">1.</span> <span class="nav-text">链接前与装载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ELF"><span class="nav-number">1.1.</span> <span class="nav-text">ELF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Object%E6%96%87%E4%BB%B6%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.1.</span> <span class="nav-text">Object文件的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E4%BF%AE%E9%A5%B0"><span class="nav-number">1.1.2.</span> <span class="nav-text">符号修饰</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%BA%E7%AC%A6%E5%8F%B7%E5%92%8C%E5%BC%B1%E7%AC%A6%E5%8F%B7"><span class="nav-number">1.1.3.</span> <span class="nav-text">强符号和弱符号</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5"><span class="nav-number">2.</span> <span class="nav-text">静态链接</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5"><span class="nav-number">3.</span> <span class="nav-text">动态链接</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%98%BE%E5%BC%8F%E8%BF%90%E8%A1%8C%E6%97%B6%E9%93%BE%E6%8E%A5"><span class="nav-number">4.</span> <span class="nav-text">显式运行时链接</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E5%BA%93"><span class="nav-number">5.</span> <span class="nav-text">运行库</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">5.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E5%BA%93-1"><span class="nav-number">5.2.</span> <span class="nav-text">运行库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%93%E5%87%BD%E6%95%B0%E4%BB%8B%E7%BB%8D"><span class="nav-number">5.2.1.</span> <span class="nav-text">库函数介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#glibc"><span class="nav-number">5.2.2.</span> <span class="nav-text">glibc</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">5.3.</span> <span class="nav-text">生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#C-%E7%9A%84%E5%85%A8%E5%B1%80%E5%AF%B9%E8%B1%A1%E6%9E%84%E9%80%A0%E6%9E%90%E6%9E%84"><span class="nav-number">5.3.1.</span> <span class="nav-text">C++的全局对象构造析构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%B0%8F%E5%9E%8B%E8%BF%90%E8%A1%8C%E5%BA%93"><span class="nav-number">5.4.</span> <span class="nav-text">实现小型运行库</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">35</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+
+
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+</body>
+</html>
