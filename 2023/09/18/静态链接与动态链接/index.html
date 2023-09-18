@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913090719480.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913231031432.png">
 <meta property="article:published_time" content="2023-09-18T02:24:11.000Z">
-<meta property="article:modified_time" content="2023-09-18T03:06:05.529Z">
+<meta property="article:modified_time" content="2023-09-18T03:19:39.288Z">
 <meta property="article:author" content="修年">
 <meta property="article:tag" content="books">
 <meta name="twitter:card" content="summary">
@@ -205,7 +205,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2023-09-18 10:24:11 / 修改时间：11:06:05" itemprop="dateCreated datePublished" datetime="2023-09-18T10:24:11+08:00">2023-09-18</time>
+              <time title="创建时间：2023-09-18 10:24:11 / 修改时间：11:19:39" itemprop="dateCreated datePublished" datetime="2023-09-18T10:24:11+08:00">2023-09-18</time>
             </span>
 
           
@@ -247,7 +247,7 @@
 <p>C++为了与C兼容，在符号的管理上，C++有一个用来声明或定义一个C的符号的“extern “C””关键字用法：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> ”C” &#123;</span><br><span class="line">	<span class="function"><span class="type">int</span> <span class="title">func</span><span class="params">(<span class="type">int</span>)</span></span>;</span><br><span class="line">    <span class="type">int</span> var;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>C++编译器会将在extern “C” 的大括号内部的代码当作C语言代码处理。所以很明显，上⾯的代码中，C++的名称修饰机制将不会起作用。</p>
+<p>C++编译器会将在extern “C” 的大括号内部的代码当作C语言代码处理。所以很明显，上面的代码中，C++的名称修饰机制将不会起作用。</p>
 <h3 id="强符号和弱符号"><a href="#强符号和弱符号" class="headerlink" title="强符号和弱符号"></a>强符号和弱符号</h3><p>多个目标文件中含有相同名字全局符号的定义，那么这些目标文件链接的时候将会出现符号重复定义的错误。这种符号的定义可以被称为<strong>强符号</strong>（Strong Symbol）。有些符号的定义可以被称为<strong>弱符号</strong>（Weak Symbol）。对于C/C++语言来说，编译器默认<u>函数和初始化了的全局变量</u>为强符号，<u>未初始化的全局变量</u>为弱符号。我们也可以通过GCC的<code>__attribute__((weak))</code>来定义任何一个强符号为弱符号。</p>
 <p><img src="/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/image-20230913090719480.png" alt="image-20230913090719480"></p>
 <p>目前我们所看到的对外部目标文件的符号引用在目标文件被最终链接成可执行文件时，它们须要被正确决议，如果没有找到该符号的定义，链接器就会报符号未定义错误，这种被称为<strong>强引用</strong>（Strong Reference）。与之相对应还有一种<strong>弱引用</strong>（Weak Reference），在处理弱引用时，如果该符号有定义，则链接器将该符号的引用决议；如果该符号未被定义，则链接器对于该引用不报错。</p>
