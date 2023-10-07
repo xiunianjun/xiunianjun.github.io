@@ -11093,9 +11093,9 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><ol>
 <li><p>merge与rebase的差异</p>
 <p>merge：</p>
-<p>![流水线数据通路 (3)](./git/流水线数据通路 (3).png)</p>
+<p><img src="/2023/10/07/git/merge.png" alt="merge"></p>
 <p>rebase：</p>
-<p>![流水线数据通路 (2)](./git/流水线数据通路 (2).png)</p>
+<p><img src="/2023/10/07/git/rebase.png" alt="rebase"></p>
 </li>
 <li></li>
 </ol>
