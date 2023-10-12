@@ -11090,6 +11090,7 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 </ol>
 </li>
 </ol>
+<h2 id="rebase"><a href="#rebase" class="headerlink" title="rebase"></a>rebase</h2><p><a href="https://zhuanlan.zhihu.com/p/659979063">修改 git 的历史 commit，你能想到几种方案？</a>  详细介绍了rebase基本用法</p>
 <h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><ol>
 <li><p>merge与rebase的差异</p>
 <p>merge：</p>
@@ -11099,6 +11100,99 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 </li>
 <li></li>
 </ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>rtt硬件环境搭建</title>
+    <url>/2023/10/12/rtt%E7%A1%AC%E4%BB%B6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/</url>
+    <content><![CDATA[<h1 id="SDK-内核编译"><a href="#SDK-内核编译" class="headerlink" title="SDK/内核编译"></a>SDK/内核编译</h1><p>编译内核和sdk时到没有太大问题，都能靠gpt or 修改menuconfig解决。比较棘手的果然还是只能靠自己摸索硬件hhh</p>
+<h1 id="烧录"><a href="#烧录" class="headerlink" title="烧录"></a>烧录</h1><p>这个也是狠狠折磨了我许久，gpt也一直满嘴跑火车，毕竟一开始串口连错了所以一直以为自己是烧录没对，整了半天。不过这其中也学到了挺多。这篇文章介绍得很详细：<a href="https://blog.csdn.net/hffwj/article/details/118584422">Linux 系统中关于磁盘分区工具的使用</a></p>
+<p><img src="/2023/10/12/rtt%E7%A1%AC%E4%BB%B6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/f2753b5e6a40f9fea328223b197ede3.png" alt="f2753b5e6a40f9fea328223b197ede3"></p>
+<p>具体要做的是：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo fdisk /dev/sdb</span><br></pre></td></tr></table></figure>
+
+<p>然后进入后，n命令创建新分区，d删除现有分区。我们需要用n创建两个分区（大小随意），第一个用于存放bin文件。创建完分区之后，使用a命令将分区1标记为Boot，并且使用t将分区1的类型修改为<code>W95 FAT32 (LBA)</code>，随后就可以保存退出了。具体流程及操作结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo fdisk /dev/sdb</span><br><span class="line"></span><br><span class="line">Welcome to fdisk (util-linux 2.37.2).</span><br><span class="line">Changes will remain <span class="keyword">in</span> memory only, until you decide to write them.</span><br><span class="line">Be careful before using the write <span class="built_in">command</span>.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): p</span><br><span class="line"></span><br><span class="line">Disk /dev/sdb: 29.72 GiB, 31914983424 bytes, 62333952 sectors</span><br><span class="line">Disk model: Storage Device  </span><br><span class="line">Units: sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disklabel <span class="built_in">type</span>: dos</span><br><span class="line">Disk identifier: 0xd4c6d64f</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition <span class="built_in">type</span></span><br><span class="line">   p   primary (0 primary, 0 extended, 4 free)</span><br><span class="line">   e   extended (container <span class="keyword">for</span> logical partitions)</span><br><span class="line">Select (default p): </span><br><span class="line"></span><br><span class="line">Using default response p.</span><br><span class="line">Partition number (1-4, default 1): </span><br><span class="line">First sector (2048-62333951, default 2048): </span><br><span class="line">Last sector, +/-sectors or +/-size&#123;K,M,G,T,P&#125; (2048-62333951, default 62333951): +128M</span><br><span class="line"></span><br><span class="line">Created a new partition 1 of <span class="built_in">type</span> <span class="string">&#x27;Linux&#x27;</span> and of size 128 MiB.</span><br><span class="line">Partition <span class="comment">#1 contains a vfat signature.</span></span><br><span class="line"></span><br><span class="line">Do you want to remove the signature? [Y]es/[N]o: <span class="built_in">yes</span></span><br><span class="line"></span><br><span class="line">The signature will be removed by a write <span class="built_in">command</span>.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Partition <span class="built_in">type</span></span><br><span class="line">   p   primary (1 primary, 0 extended, 3 free)</span><br><span class="line">   e   extended (container <span class="keyword">for</span> logical partitions)</span><br><span class="line">Select (default p): </span><br><span class="line"></span><br><span class="line">Using default response p.</span><br><span class="line">Partition number (2-4, default 2): </span><br><span class="line">First sector (264192-62333951, default 264192): </span><br><span class="line">Last sector, +/-sectors or +/-size&#123;K,M,G,T,P&#125; (264192-62333951, default 62333951): </span><br><span class="line"></span><br><span class="line">Created a new partition 2 of <span class="built_in">type</span> <span class="string">&#x27;Linux&#x27;</span> and of size 29.6 GiB.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): t</span><br><span class="line">Partition number (1,2, default 2): 0c</span><br><span class="line">Value out of range.</span><br><span class="line">Partition number (1,2, default 2): 1</span><br><span class="line">Hex code or <span class="built_in">alias</span> (<span class="built_in">type</span> L to list all): 0c</span><br><span class="line"></span><br><span class="line">Changed <span class="built_in">type</span> of partition <span class="string">&#x27;Linux&#x27;</span> to <span class="string">&#x27;W95 FAT32 (LBA)&#x27;</span>.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): a</span><br><span class="line">Partition number (1,2, default 2): 1</span><br><span class="line"></span><br><span class="line">The bootable flag on partition 1 is enabled now.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): p</span><br><span class="line">Disk /dev/sdb: 29.72 GiB, 31914983424 bytes, 62333952 sectors</span><br><span class="line">Disk model: Storage Device  </span><br><span class="line">Units: sectors of 1 * 512 = 512 bytes</span><br><span class="line">Sector size (logical/physical): 512 bytes / 512 bytes</span><br><span class="line">I/O size (minimum/optimal): 512 bytes / 512 bytes</span><br><span class="line">Disklabel <span class="built_in">type</span>: dos</span><br><span class="line">Disk identifier: 0xd4c6d64f</span><br><span class="line"></span><br><span class="line">Device     Boot  Start      End  Sectors  Size Id Type</span><br><span class="line">/dev/sdb1  *      2048   264191   262144  128M  c W95 FAT32 (LBA)</span><br><span class="line">/dev/sdb2       264192 62333951 62069760 29.6G 83 Linux</span><br><span class="line"></span><br><span class="line">Filesystem/RAID signature on partition 1 will be wiped.</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): w</span><br><span class="line">The partition table has been altered.</span><br><span class="line">Calling ioctl() to re-read partition table.</span><br><span class="line">Syncing disks.</span><br></pre></td></tr></table></figure>
+
+<p>然后更新分区表，格式化文件系统，复制bin和sd文件、弹出sd卡：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo partprobe </span><br><span class="line">sudo mkfs.vfat -F 32 /dev/sdb1</span><br><span class="line">sudo mkfs.vfat -F 32 /dev/sdb2</span><br><span class="line">sudo mount /dev/sdb1 /mnt/sdb1</span><br><span class="line">sudo <span class="built_in">cp</span> boot.sd fip.bin /mnt/sdb1</span><br><span class="line">sudo umount /mnt/sdb1 </span><br><span class="line">sudo eject /dev/sdb</span><br></pre></td></tr></table></figure>
+
+<p>就烧录ok了。</p>
+<p>与此同时也顺便学了下<a href="https://www.zhihu.com/question/472730443/answer/2453759267">Windows磁盘管理</a>，感觉也挺方便。</p>
+<h1 id="串口连接"><a href="#串口连接" class="headerlink" title="串口连接"></a>串口连接</h1><p>不得不说十分惨痛……</p>
+<p>也是因为我太狂妄自大不仔细了，一直以为RX就得连RX，TX就得连TX，然后下午焦灼之中才突然想起来这俩是不是以前教过得反着连……搜了一下果然是草。</p>
+<p>这个错误害我起码花了三个小时在纠结烧录问题，一直以为没输出是因为烧录不对，发现结果那一刻我真没蚌珠。哎，以后还是别对自己太自信，毕竟本质上这种东西不是专业的学得也不够扎实，做什么都得先查一下该怎么做。</p>
+<p>然后别的倒是没什么问题，虽然摸索也花了点时间，都是小事。对着这张图参照就行了：</p>
+<p><img src="/2023/10/12/rtt%E7%A1%AC%E4%BB%B6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/mmexport1697102534057.jpg" alt="mmexport1697102534057"></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>网络是怎样连接的</title>
+    <url>/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/</url>
+    <content><![CDATA[<blockquote>
+<p>此为<a href="https://xiunianjun.github.io/2023/10/06/%E5%AD%98%E5%82%A8%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8/%E4%BF%A1%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E7%AE%A1%E7%90%86%EF%BC%88%E7%AC%AC%E4%BA%8C%E7%89%88%EF%BC%89%EF%BC%9A%E6%95%B0%E5%AD%97%E4%BF%A1%E6%81%AF%E7%9A%84%E5%AD%98%E5%82%A8%E3%80%81%E7%AE%A1%E7%90%86%E5%92%8C%E4%BF%9D%E6%8A%A4%EF%BC%88%E5%BC%82%E6%AD%A5%E5%9B%BE%E4%B9%A6%EF%BC%89%20(G.Somasundara_.%20(Z-Library).pdf">《信息存储与管理（第二版）：数字信息的存储、管理和保护》</a>的看书总结，相当于是对存储技术的一个简单的名词入门。</p>
+</blockquote>
+<h1 id="浏览器生成消息"><a href="#浏览器生成消息" class="headerlink" title="浏览器生成消息"></a>浏览器生成消息</h1><p>本章节我印象最深的还是以前就不大了解的DNS，今天看到书的描写真有种豁然开朗的感觉。</p>
+<p>DNS服务器用于保存域名—IP地址的映射对，为了增加查找效率，DNS根据域名的分级采用树形组织，例如<code>hitsz.edu.cn/</code>可以相当于是<code>/cn/edu/hitsz</code>，包含了<code>/</code>、<code>cn</code>、<code>edu</code>这几个域。根DNS服务器存储着根域，记录了所有一级域名对应DNS服务器的IP地址。所有的DNS服务器都会保存根服务器的IP地址。</p>
+<blockquote>
+<p>世界上只有13个根DNS服务器IP地址，但是有很多台根DNS服务器。</p>
+</blockquote>
+<p>主机需要手动配置DNS服务器地址。</p>
+<p>当浏览器需要填写请求头时，它需要通过系统调用向操作系统发送DNS查询请求。操作系统将DNS请求发送给配置在主机上的DNS服务器（下称A），A再向根DNS服务器发送请求。根DNS服务器解析域名，返回下一级DNS服务器的IP地址。A再向下级DNS服务器再次发送请求，下级再返回下下级IP地址。以此类推，最终A就能得到目标IP地址的正确响应。整个过程如下图所示：</p>
+<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231010132718116.png" alt="image-20231010132718116"></p>
+<p>与此同时，各个DNS服务器都会有定时刷新的缓存，从而加速了查找效率。</p>
+<h1 id="用电信号传输TCP-IP数据"><a href="#用电信号传输TCP-IP数据" class="headerlink" title="用电信号传输TCP/IP数据"></a>用电信号传输TCP/IP数据</h1><h2 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP/IP"></a>TCP/IP</h2><p>本章前面大多讨论TCP/IP具体协议内容，以前已经了解过很多次了就不多赘述。所以TCP/IP部分就以分点的形式随意列举一下：</p>
+<ol>
+<li><p>IP 中还包括 ICMPA 协议和 ARPB 协议。ICMP 用于告知网络包传送过程中产生的错误以及各种控制消息，ARP 用于根据 IP 地址查询相应的以太网 MAC 地址。</p>
+</li>
+<li><p>套接字中记录了用于控制通信操作的各种控制信息，协议栈则需要根据这些信息判断下一步的行动，【包括应用程序信息和协议栈状态信息】这就是套接字的作用。所以需要针对不同协议栈实现不同的socket。</p>
+</li>
+<li><p>是的，回想当初CS144，也是socket来负责有特定消息时调用TCP相关函数来通知处理。</p>
+</li>
+<li><p>连接 connect</p>
+<p>连接实际上是通信双方交换控制信息，在套接字中记录这些必要信息并准备数据收发的一连串操作。</p>
+<ol>
+<li>应用程序向协议栈传ip地址</li>
+<li>本机向服务器发通信请求</li>
+<li>过程中分配通信缓冲区</li>
+</ol>
+</li>
+<li><p>动态调整等待时间</p>
+<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012113725655.png" alt="image-20231012113725655"></p>
+</li>
+</ol>
+<h2 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h2><ol>
+<li><p>以太网的定义</p>
+<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012113840636.png" alt="image-20231012113840636"></p>
+</li>
+<li><p>系统初始化时MAC地址的设置</p>
+<p>MAC地址是上电后由驱动程序从ROM中读取的，而非自动获取的</p>
+</li>
+<li><p><strong>电信号转换</strong>【这个帅得不行】</p>
+<p>为了区分连续的1或0，我们就需要同时发送数据信号和时钟信号，然而这样开销太大，因而我们引入了<strong>上升沿</strong>。</p>
+<p>上升沿本质上是数据信号和时钟信号叠加而成的结果，叠加方式是<strong>异或</strong>。</p>
+<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012114006378.png" alt="image-20231012114006378"></p>
+<p>提到异或是否感觉豁然开朗？是的，这东西恢复时也是使用了异或的性质：接收方从帧头获取时钟频率从而得到时钟信号，跟收到的叠加信号进行再次叠加（异或），就可以获得原来的数据信号了。</p>
+<p>我只能说牛逼，一直以来对异或的视角还停留在单纯的数字，这个波形的物理概念真的惊到我了。</p>
+<p>实例：</p>
+<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012114350599.png" alt="image-20231012114350599"></p>
+</li>
+<li><p>半双工模式【同一时刻只能进行发or收】使用集线器，全双工模式【发or收可以并行】使用交换机。半双工模式需要进行载波监听碰撞检测。</p>
+</li>
+<li><p>服务器的操作系统具备和路由器相同的包转发功能，当打开这一功能时，它就可以像路由器一样对包进行转发。在这种情况下，当收到不是发给自己的包的时候，就会像路由器一样执行包转发操作。</p>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>books</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>各种配环境中遇到的问题</title>
+    <url>/2023/10/12/%E5%90%84%E7%A7%8D%E9%85%8D%E7%8E%AF%E5%A2%83%E4%B8%AD%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p><a href="https://xiunianjun.github.io/2023/09/27/%E8%AE%B0%E5%BD%95%E4%B8%80%E6%AC%A1vm%E6%89%A9%E5%AE%B9/">记录一次vm扩容</a></p>
+<p><a href="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/#:~:text=%E7%94%A8%EF%BC%8C%E4%B8%8D%E5%A4%9A%E5%88%86%E6%9E%90%E3%80%82-,%E7%89%B9%E8%BE%91%EF%BC%9A%E5%BC%80%E5%8F%91%E4%B8%AD%E9%81%87%E5%88%B0%E7%9A%84%E9%93%BE%E6%8E%A5%E5%B0%8F%E9%97%AE%E9%A2%98,-%E5%B7%B2%E7%BB%8F%E5%9C%A8LD_LIBRARY_PATH">开发中遇到的链接小问题</a></p>
+<p><a href="https://xiunianjun.github.io/2023/10/12/rtt%E7%A1%AC%E4%BB%B6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">rtt硬件环境搭建</a></p>
 ]]></content>
   </entry>
 </search>
