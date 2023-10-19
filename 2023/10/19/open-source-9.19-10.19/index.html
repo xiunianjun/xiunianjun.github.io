@@ -22,26 +22,28 @@
     var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="此为《信息存储与管理（第二版）：数字信息的存储、管理和保护》的看书总结，相当于是对存储技术的一个简单的名词入门。  浏览器生成消息本章节我印象最深的还是以前就不大了解的DNS，今天看到书的描写真有种豁然开朗的感觉。 DNS服务器用于保存域名—IP地址的映射对，为了增加查找效率，DNS根据域名的分级采用树形组织，例如hitsz.edu.cn&#x2F;可以相当于是&#x2F;cn&#x2F;edu&#x2F;hitsz，包含了&#x2F;、cn、">
+  <meta name="description" content="其实是9.10就开始了，但9.19才办理入职所以少算了几天xxxx不然这不显得我菜hh  引言也许有许多programer与我一样，在初次接触到“开源”这个概念时，便对其产生了无限的向往。千万人通过共同的事业联结在一起，为了行业的进步不求回报地压缩自己的时间，贡献出自己的一份力，这是何等的浪漫。再加上听了无数遍的Linux发展历程故事，对“开源”我是愈发地憧憬。 然而，由于学习cs的时间尚不足，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="网络是怎样连接的">
-<meta property="og:url" content="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/index.html">
+<meta property="og:title" content="9.19-10.19，我参与开源的第一个月">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/index.html">
 <meta property="og:site_name" content="修年">
-<meta property="og:description" content="此为《信息存储与管理（第二版）：数字信息的存储、管理和保护》的看书总结，相当于是对存储技术的一个简单的名词入门。  浏览器生成消息本章节我印象最深的还是以前就不大了解的DNS，今天看到书的描写真有种豁然开朗的感觉。 DNS服务器用于保存域名—IP地址的映射对，为了增加查找效率，DNS根据域名的分级采用树形组织，例如hitsz.edu.cn&#x2F;可以相当于是&#x2F;cn&#x2F;edu&#x2F;hitsz，包含了&#x2F;、cn、">
+<meta property="og:description" content="其实是9.10就开始了，但9.19才办理入职所以少算了几天xxxx不然这不显得我菜hh  引言也许有许多programer与我一样，在初次接触到“开源”这个概念时，便对其产生了无限的向往。千万人通过共同的事业联结在一起，为了行业的进步不求回报地压缩自己的时间，贡献出自己的一份力，这是何等的浪漫。再加上听了无数遍的Linux发展历程故事，对“开源”我是愈发地憧憬。 然而，由于学习cs的时间尚不足，">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231010132718116.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012113725655.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012113840636.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012114006378.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012114350599.png">
-<meta property="article:published_time" content="2023-10-06T06:44:11.000Z">
-<meta property="article:modified_time" content="2023-10-12T09:00:54.724Z">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/image-20231019155950614.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/image-20231019165451893.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/image-20231019165206369.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/image-20231019165313914.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/image-20231019165706806.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/image-20231019165719966.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/image-20231019165738144.png">
+<meta property="article:published_time" content="2023-10-19T09:06:15.000Z">
+<meta property="article:modified_time" content="2023-10-19T09:06:56.268Z">
 <meta property="article:author" content="修年">
-<meta property="article:tag" content="books">
+<meta property="article:tag" content="mylife">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231010132718116.png">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/image-20231019155950614.png">
 
-<link rel="canonical" href="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/">
+<link rel="canonical" href="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/">
 
 
 <script id="page-configurations">
@@ -54,7 +56,7 @@
   };
 </script>
 
-  <title>网络是怎样连接的 | 修年</title>
+  <title>9.19-10.19，我参与开源的第一个月 | 修年</title>
   
 
 
@@ -181,7 +183,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/head.png">
@@ -194,7 +196,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          网络是怎样连接的
+          9.19-10.19，我参与开源的第一个月
         </h1>
 
         <div class="post-meta">
@@ -203,16 +205,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2023-10-06 14:44:11" itemprop="dateCreated datePublished" datetime="2023-10-06T14:44:11+08:00">2023-10-06</time>
+              <time title="创建时间：2023-10-19 17:06:15 / 修改时间：17:06:56" itemprop="dateCreated datePublished" datetime="2023-10-19T17:06:15+08:00">2023-10-19</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-10-12 17:00:54" itemprop="dateModified" datetime="2023-10-12T17:00:54+08:00">2023-10-12</time>
-              </span>
 
           
             <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -233,58 +229,55 @@
 
       
         <blockquote>
-<p>此为<a href="https://xiunianjun.github.io/2023/10/06/%E5%AD%98%E5%82%A8%E7%AE%80%E5%8D%95%E5%85%A5%E9%97%A8/%E4%BF%A1%E6%81%AF%E5%AD%98%E5%82%A8%E4%B8%8E%E7%AE%A1%E7%90%86%EF%BC%88%E7%AC%AC%E4%BA%8C%E7%89%88%EF%BC%89%EF%BC%9A%E6%95%B0%E5%AD%97%E4%BF%A1%E6%81%AF%E7%9A%84%E5%AD%98%E5%82%A8%E3%80%81%E7%AE%A1%E7%90%86%E5%92%8C%E4%BF%9D%E6%8A%A4%EF%BC%88%E5%BC%82%E6%AD%A5%E5%9B%BE%E4%B9%A6%EF%BC%89%20(G.Somasundara_.%20(Z-Library).pdf">《信息存储与管理（第二版）：数字信息的存储、管理和保护》</a>的看书总结，相当于是对存储技术的一个简单的名词入门。</p>
+<p>其实是9.10就开始了，但9.19才办理入职所以少算了几天xxxx不然这不显得我菜hh</p>
 </blockquote>
-<h1 id="浏览器生成消息"><a href="#浏览器生成消息" class="headerlink" title="浏览器生成消息"></a>浏览器生成消息</h1><p>本章节我印象最深的还是以前就不大了解的DNS，今天看到书的描写真有种豁然开朗的感觉。</p>
-<p>DNS服务器用于保存域名—IP地址的映射对，为了增加查找效率，DNS根据域名的分级采用树形组织，例如<code>hitsz.edu.cn/</code>可以相当于是<code>/cn/edu/hitsz</code>，包含了<code>/</code>、<code>cn</code>、<code>edu</code>这几个域。根DNS服务器存储着根域，记录了所有一级域名对应DNS服务器的IP地址。所有的DNS服务器都会保存根服务器的IP地址。</p>
-<blockquote>
-<p>世界上只有13个根DNS服务器IP地址，但是有很多台根DNS服务器。</p>
+<h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>也许有许多programer与我一样，在初次接触到“开源”这个概念时，便对其产生了无限的向往。千万人通过共同的事业联结在一起，为了行业的进步不求回报地压缩自己的时间，贡献出自己的一份力，这是何等的浪漫。再加上听了无数遍的Linux发展历程故事，对“开源”我是愈发地憧憬。</p>
+<p>然而，由于学习cs的时间尚不足，也不知道该从何入手去参与社区贡献，尽管心中怀有对参与这份事业的渴望，我还是会“望而却步”。转折点在今年参加竞赛时，在使用某个开源项目时因为遇到了一点问题而去提了个issue。虽然这个问题本质很傻，但在与开发者你来我往的交流中，我深切地感受到自己仿佛离憧憬更近了一步。因而，在今年竞赛结束后的九月，我毫不犹豫地向PLCT Lab提交了简历，试图追逐那个长存我心的幻影。</p>
+<p>而现在，距离第一次提issue已有半年，距离考核通过也已有一个半月之久，我想也是时候好好总结一下我这一个月以来的心路历程了。</p>
+<h1 id="我的第一个月"><a href="#我的第一个月" class="headerlink" title="我的第一个月"></a>我的第一个月</h1><blockquote>
+<p>从9.10过审核开始写了很久的日报，当然除了实习还包括别的内容：</p>
+<p><img src="/2023/10/19/open-source-9.19-10.19/image-20231019155950614.png" alt="image-20231019155950614"></p>
 </blockquote>
-<p>主机需要手动配置DNS服务器地址。</p>
-<p>当浏览器需要填写请求头时，它需要通过系统调用向操作系统发送DNS查询请求。操作系统将DNS请求发送给配置在主机上的DNS服务器（下称A），A再向根DNS服务器发送请求。根DNS服务器解析域名，返回下一级DNS服务器的IP地址。A再向下级DNS服务器再次发送请求，下级再返回下下级IP地址。以此类推，最终A就能得到目标IP地址的正确响应。整个过程如下图所示：</p>
-<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231010132718116.png" alt="image-20231010132718116"></p>
-<p>与此同时，各个DNS服务器都会有定时刷新的缓存，从而加速了查找效率。</p>
-<h1 id="用电信号传输TCP-IP数据"><a href="#用电信号传输TCP-IP数据" class="headerlink" title="用电信号传输TCP/IP数据"></a>用电信号传输TCP/IP数据</h1><h2 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP/IP"></a>TCP/IP</h2><p>本章前面大多讨论TCP/IP具体协议内容，以前已经了解过很多次了就不多赘述。所以TCP/IP部分就以分点的形式随意列举一下：</p>
+<p>这一个月以来，我学到了很多东西，学习周期大致可分为三个阶段：初步了解rtt和配置环境、设备树学习以及最后的gpio driver开发。</p>
+<h2 id="rtt"><a href="#rtt" class="headerlink" title="rtt"></a>rtt</h2><p>由于时间有限，所以仅对rtt的标准版本做了一个比较基本的了解（也就是说没有太涉及到源码部分，只能说是对文档中心的那些对外开发用接口有一定的了解）。rtt是一个微内核的RTOS，这与以前所接触的Linux和xv6都不同。由于RTOS的特性，它的许多设计都十分精简，相比于Linux可谓”麻雀虽小五脏俱全“。</p>
+<p>对rtt的基本介绍，详情可见其<a target="_blank" rel="noopener" href="https://www.rt-thread.org/document/site/#/">文档中心</a>。我印象最深（也是开发过程中接触得最多的）的几个点有：</p>
 <ol>
-<li><p>IP 中还包括 ICMPA 协议和 ARPB 协议。ICMP 用于告知网络包传送过程中产生的错误以及各种控制消息，ARP 用于根据 IP 地址查询相应的以太网 MAC 地址。</p>
+<li><p>接口设计</p>
+<p>与Linux一样，rtt也采用了精简的接口设计。</p>
 </li>
-<li><p>套接字中记录了用于控制通信操作的各种控制信息，协议栈则需要根据这些信息判断下一步的行动，【包括应用程序信息和协议栈状态信息】这就是套接字的作用。所以需要针对不同协议栈实现不同的socket。</p>
-</li>
-<li><p>是的，回想当初CS144，也是socket来负责有特定消息时调用TCP相关函数来通知处理。</p>
-</li>
-<li><p>连接 connect</p>
-<p>连接实际上是通信双方交换控制信息，在套接字中记录这些必要信息并准备数据收发的一连串操作。</p>
-<ol>
-<li>应用程序向协议栈传ip地址</li>
-<li>本机向服务器发通信请求</li>
-<li>过程中分配通信缓冲区</li>
-</ol>
-</li>
-<li><p>动态调整等待时间</p>
-<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012113725655.png" alt="image-20231012113725655"></p>
+<li><p>自动初始化机制</p>
+<p>帅的一匹，具体详见<a href="https://xiunianjun.github.io/2023/09/18/%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/#:~:text=%E5%B0%B1%E8%A1%8C%E4%BA%86-,%E5%90%8E%E6%97%A5%E8%B0%88,-%EF%BC%9A%E4%BB%8A%E5%A4%A9%E5%8F%88%E5%9C%A8rtt">此</a>。</p>
 </li>
 </ol>
-<h2 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h2><ol>
-<li><p>以太网的定义</p>
-<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012113840636.png" alt="image-20231012113840636"></p>
-</li>
-<li><p>系统初始化时MAC地址的设置</p>
-<p>MAC地址是上电后由驱动程序从ROM中读取的，而非自动获取的</p>
-</li>
-<li><p><strong>电信号转换</strong>【这个帅得不行】</p>
-<p>为了区分连续的1或0，我们就需要同时发送数据信号和时钟信号，然而这样开销太大，因而我们引入了<strong>上升沿</strong>。</p>
-<p>上升沿本质上是数据信号和时钟信号叠加而成的结果，叠加方式是<strong>异或</strong>。</p>
-<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012114006378.png" alt="image-20231012114006378"></p>
-<p>提到异或是否感觉豁然开朗？是的，这东西恢复时也是使用了异或的性质：接收方从帧头获取时钟频率从而得到时钟信号，跟收到的叠加信号进行再次叠加（异或），就可以获得原来的数据信号了。</p>
-<p>我只能说牛逼，一直以来对异或的视角还停留在单纯的数字，这个波形的物理概念真的惊到我了。</p>
-<p>实例：</p>
-<p><img src="/2023/10/06/%E7%BD%91%E7%BB%9C%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%9E%E6%8E%A5%E7%9A%84/image-20231012114350599.png" alt="image-20231012114350599"></p>
-</li>
-<li><p>半双工模式【同一时刻只能进行发or收】使用集线器，全双工模式【发or收可以并行】使用交换机。半双工模式需要进行载波监听碰撞检测。</p>
-</li>
-<li><p>服务器的操作系统具备和路由器相同的包转发功能，当打开这一功能时，它就可以像路由器一样对包进行转发。在这种情况下，当收到不是发给自己的包的时候，就会像路由器一样执行包转发操作。</p>
-</li>
-</ol>
+<p>其余的只能说不甚了解，还有待挖掘。</p>
+<h2 id="配置环境"><a href="#配置环境" class="headerlink" title="配置环境"></a>配置环境</h2><p>由于确实对这种东西毫无所知，所以配环境这个过程也是比较漫长，而且很折磨很痛苦（。</p>
+<p>硬件方面，一开始拿到IO-board连这是啥都不知道，还以为这就是开发板研究了半天怎么上电和把内核烧进去（（（。然后东西也是买得缺斤少两，比如拿到开发板不知道还要有TF卡，上网搜图研究了半天才意识到；再比如也没有USB-TTL，又是一通淘宝购物。这些各种各样的小白问题导致配环境的周期十分漫长。然后还有一些很傻的错误，再次也不好意思多说了，详情可见<a href="https://xiunianjun.github.io/2023/10/12/rtt%E7%A1%AC%E4%BB%B6%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">rtt硬件环境搭建</a>。</p>
+<p>软件方面倒是没什么问题，之前也早就跟编译内核用的menuconfig打过很多交道，磁盘分区之类的东西之前也简单使过几次，只不过经过这次后也算是使得更加熟练了。</p>
+<h2 id="设备树学习"><a href="#设备树学习" class="headerlink" title="设备树学习"></a>设备树学习</h2><blockquote>
+<p>TODO，这部分还是比较多好写的，虽然还是有点模糊（待我之后有时间整理下放个链接</p>
+</blockquote>
+<p>设备树还是比较复杂，而且因为本人的不审慎，导致对其理解出了偏差，还麻烦了社区看我的代码（悲）只能说个人出道的开源社区还是需要对自己的所有笔代码负责。</p>
+<h2 id="gpio-driver"><a href="#gpio-driver" class="headerlink" title="gpio driver"></a>gpio driver</h2><blockquote>
+<p>涉及到的各种硬件手册：</p>
+<p><img src="/2023/10/19/open-source-9.19-10.19/image-20231019165451893.png" alt="image-20231019165451893"></p>
+</blockquote>
+<p>这也是我最后这一周在做的工作，虽说只有短短一周，但是每天都研究这个花了我不少时间和精力（）目前算是写完了它的所有功能（大概），并且已经能把LED闪烁和中断绑定函数润起来了，<a target="_blank" rel="noopener" href="https://github.com/RT-Thread/rt-thread/pull/8158">提的pr在这里</a>。</p>
+<p>以前对驱动的理解，还停留在手把手教你做事的<a href="https://xiunianjun.github.io/2023/01/10/xv6$chap5/#Lab-networking">xv6的netlab</a>。也因而，这次可以算是以完全一无所知的状态接下了这个任务。</p>
+<p>不过，好在有以前那个短暂的lab经验，我还是稳扎稳打地定下了具体的学习步骤：调研（包括获取各种data book、schematic、rtt官方文档、Linux和rtt相关代码），然后就是学习。</p>
+<p>好在有设备树的研究积淀，我也算是比较快地掌握了milkv上gpio的分布、型号及其地址空间，从而顺藤摸瓜找到了对应gpio型号的Linux驱动代码参考和硬件手册，算是免去了不少麻烦。</p>
+<p><img src="/2023/10/19/open-source-9.19-10.19/image-20231019165206369.png" alt="image-20231019165206369"></p>
+<p>然后，我观察rtt的gpio驱动们，也找到了对应的pin.md文档，了解了下大致的代码框架思路：</p>
+<p><img src="/2023/10/19/open-source-9.19-10.19/image-20231019165313914.png" alt="image-20231019165313914"></p>
+<p>于是接下来的工作也可以比较独立地划分为两部分，一个是数据读写的实现（通过LED闪烁程序测试），另一个是rtt特有的中断回调函数的支持（通过中断程序测试），可以专注对这两个方面开发了。</p>
+<p>其中，数据读写的实现需要对寄存器和引脚号等有所了解。寄存器相对比较简单，只需阅读dwapb的data book即可；而引脚号到gpio的转换则花了我不少时间，做了许多猜想并且进行验证，最后误打误撞地“猜”中了正确思路，通过了LED测试。</p>
+<p><img src="/2023/10/19/open-source-9.19-10.19/image-20231019165706806.png" alt="image-20231019165706806"></p>
+<p><img src="/2023/10/19/open-source-9.19-10.19/image-20231019165719966.png" alt="image-20231019165719966"></p>
+<p><img src="/2023/10/19/open-source-9.19-10.19/image-20231019165738144.png" alt="image-20231019165738144"></p>
+<p>不过引脚号我现在还是不大懂，总之先参照别的bsp写法自己编了个，等着代码review看下吧。</p>
+<p>前期调研一直到LED亮起来花了我整整五六天（）相比于此的困难，中断倒显得简单了许多，毕竟它属于是偏软件相关的。调了一天，也从Linux和其他bsp那边抄了些代码，最终在凌晨两点半成功完成了功能测试（）今天又花了一个下午整理了下代码和写日记，最终总算是把这个作业交上去了。</p>
+<p>整个过程光是写看起来还是比较轻松，但是由于初次开发摸索，每个小跨越都得花费我不少时间去调研搜索，经常是在长达几个小时的不知所措后才短暂地获得了一些光明，我甚至多次想过要不要去辞职了（（（。总之，最后还是坚持了下来。看到蓝色的LED在夜晚的T5中闪烁，我还是十分激动的，眼泪都爆出来了（）</p>
+<p>哎，坚持难能可贵，很高兴我最终做到了，虽然尚有测试上的不完善，以及还在等待review。</p>
+<h1 id="稍作总结"><a href="#稍作总结" class="headerlink" title="稍作总结"></a>稍作总结</h1><p>总之，这一个月来我学到了许多，同时也对我以前未曾涉足的空白领域做了许多探索，包括对设备树、对嵌入式开发、对Linux设备驱动等的学习，总体来说还是十分甚至九分地开心。希望下个月能再接再厉。</p>
 
     </div>
 
@@ -305,7 +298,7 @@
       <footer class="post-footer">
           
           <div class="post-tags">
-              <a href="/tags/books/" rel="tag"><i class="fa fa-tag"></i> books</a>
+              <a href="/tags/mylife/" rel="tag"><i class="fa fa-tag"></i> mylife</a>
           </div>
 
         
@@ -369,7 +362,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E7%94%9F%E6%88%90%E6%B6%88%E6%81%AF"><span class="nav-number">1.</span> <span class="nav-text">浏览器生成消息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%A8%E7%94%B5%E4%BF%A1%E5%8F%B7%E4%BC%A0%E8%BE%93TCP-IP%E6%95%B0%E6%8D%AE"><span class="nav-number">2.</span> <span class="nav-text">用电信号传输TCP&#x2F;IP数据</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-IP"><span class="nav-number">2.1.</span> <span class="nav-text">TCP&#x2F;IP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91"><span class="nav-number">2.2.</span> <span class="nav-text">以太网</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%9C%88"><span class="nav-number">2.</span> <span class="nav-text">我的第一个月</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#rtt"><span class="nav-number">2.1.</span> <span class="nav-text">rtt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%8E%AF%E5%A2%83"><span class="nav-number">2.2.</span> <span class="nav-text">配置环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E6%A0%91%E5%AD%A6%E4%B9%A0"><span class="nav-number">2.3.</span> <span class="nav-text">设备树学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gpio-driver"><span class="nav-number">2.4.</span> <span class="nav-text">gpio driver</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A8%8D%E4%BD%9C%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">稍作总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
