@@ -11250,6 +11250,7 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 </blockquote>
 <p>设备树还是比较复杂，而且因为本人的不审慎，导致对其理解出了偏差，还麻烦了社区看我的代码（悲）只能说个人出道的开源社区还是需要对自己的所有笔代码负责。</p>
 <h2 id="gpio-driver"><a href="#gpio-driver" class="headerlink" title="gpio driver"></a>gpio driver</h2><blockquote>
+<p><img src="/2023/10/19/open-source-9.19-10.19/image-20231021105306299.png" alt="image-20231021105306299"></p>
 <p>涉及到的各种硬件手册：</p>
 <p><img src="/2023/10/19/open-source-9.19-10.19/image-20231019165451893.png" alt="image-20231019165451893"></p>
 </blockquote>
