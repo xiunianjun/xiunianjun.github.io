@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
+  <link rel="mask-icon" href="/images/cat.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此为PLCT Lab BJ71实习内容，我的工作是为RT-Thread完善Milk-v Duo开发板支持。 GPIO感受之前已经详细记录过了，在此便不再赘述。这里只写一些开发流程和最终代码框架展示。 开发流程10.13—概述是什么首先了解一下gpio是什么。 芯片上的引脚一般分为 4 类：电源、时钟、控制与 I&#x2F;O，I&#x2F;O 口在使用模式上又分为 General Purpose Input Outp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="驱动开发小记">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/10/27/driver_develop/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="此为PLCT Lab BJ71实习内容，我的工作是为RT-Thread完善Milk-v Duo开发板支持。 GPIO感受之前已经详细记录过了，在此便不再赘述。这里只写一些开发流程和最终代码框架展示。 开发流程10.13—概述是什么首先了解一下gpio是什么。 芯片上的引脚一般分为 4 类：电源、时钟、控制与 I&#x2F;O，I&#x2F;O 口在使用模式上又分为 General Purpose Input Outp">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/27/driver_develop/v2-9ece20d4c5fb58bd9c9736a14e952403_1440w.webp">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/27/driver_develop/image-20231027203332238.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/27/driver_develop/image-20231027203540506.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/10/27/driver_develop/image-20231027203706048.png">
+<meta property="article:published_time" content="2023-10-27T12:24:15.000Z">
+<meta property="article:modified_time" content="2023-10-27T13:07:34.365Z">
+<meta property="article:author" content="修年">
+<meta property="article:tag" content="intern">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/10/27/driver_develop/v2-9ece20d4c5fb58bd9c9736a14e952403_1440w.webp">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/10/27/driver_develop/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>驱动开发小记 | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+  
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+	
+		<script type="text/javascript" 
+		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
+		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+	
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/10/27/driver_develop/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          驱动开发小记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-10-27 20:24:15 / 修改时间：21:07:34" itemprop="dateCreated datePublished" datetime="2023-10-27T20:24:15+08:00">2023-10-27</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>此为<a target="_blank" rel="noopener" href="https://github.com/lazyparser/weloveinterns/blob/master/open-internships.md#bj71-rt-thread-%E7%A4%BE%E5%8C%BA%E5%AE%9E%E4%B9%A0%E7%94%9F-3%E4%B8%AA%E5%90%8D%E9%A2%9D">PLCT Lab BJ71</a>实习内容，我的工作是为RT-Thread完善Milk-v Duo开发板支持。</p>
+<h1 id="GPIO"><a href="#GPIO" class="headerlink" title="GPIO"></a>GPIO</h1><p><a href="https://xiunianjun.github.io/2023/10/19/open-source-9.19-10.19/#:~:text=%E7%AC%94%E4%BB%A3%E7%A0%81%E8%B4%9F%E8%B4%A3%E3%80%82-,gpio%20driver,-pr%EF%BC%9A">感受</a>之前已经详细记录过了，在此便不再赘述。这里只写一些开发流程和最终代码框架展示。</p>
+<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><h3 id="10-13—概述"><a href="#10-13—概述" class="headerlink" title="10.13—概述"></a>10.13—概述</h3><h4 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h4><p>首先了解一下gpio是什么。</p>
+<p>芯片上的引脚一般分为 4 类：电源、时钟、控制与 I/O，I/O 口在使用模式上又分为 General Purpose Input Output（通用输入 / 输出），简称 GPIO，与功能复用 I/O（如 SPI/I2C/UART 等）。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_56694518/article/details/131207367">https://blog.csdn.net/m0_56694518/article/details/131207367</a></p>
+<p>GPIO是英文<strong>General Purpose Input/Output</strong>的缩写，中文翻译为通用输入/输出。它是一种在数字电子系统中常见的接口类型，用于与外部设备进行通信和控制。</p>
+<p>GPIO接口可以作为输入或输出引脚使用。作为输入引脚时，GPIO可以接收来自外部设备的电信号，并将其转换为数字信号，供系统内部使用。作为输出引脚时，GPIO可以将数字信号发送到外部设备，从而实现对其的控制。</p>
+<ol>
+<li><p>引脚：GPIO接口通常由一组引脚组成，每个引脚都可以用作输入或输出。每个引脚都有一个唯一的标识符，如GPIO0、GPIO1等。</p>
+</li>
+<li><p>输入模式：当GPIO引脚配置为输入模式时，它可以接收外部设备发送的电信号。通常，输入引脚可以读取高电平（1）或低电平（0）状态，或者在某些系统中可以读取模拟信号。</p>
+</li>
+<li><p>输出模式：当GPIO引脚配置为输出模式时，它可以向外部设备发送数字信号。输出引脚可以设置为高电平（1）或低电平（0），以控制连接的设备的状态。</p>
+</li>
+<li><p>状态和电平：GPIO引脚的状态表示当前引脚的输入或输出电平。高电平通常表示逻辑1，低电平表示逻辑0。在某些系统中，还可以使用其他状态，如浮空、上拉和下拉等。</p>
+</li>
+<li><p>控制寄存器：<strong>为了配置和控制GPIO引脚的功能，通常需要通过写入特定的控制寄存器来设置引脚的模式、状态和电平。这些寄存器的具体配置取决于所使用的硬件平台和操作系统。</strong>【这个估计就是我们驱动要干的】</p>
+</li>
+</ol>
+</blockquote>
+<p>也就是意思就是，这个gpio相当于一个接口，能够把系统的信号传给硬件，也能把硬件信号传给系统。所以有时候我们可以通过读写其寄存器来与硬件交互。比如， GPIO每个引脚连接着一个led，那么我们通过读写gpio的控制寄存器，控制每个引脚输出1/0，就可以控制led灯亮or灭。</p>
+<blockquote>
+<p>GPIO的实际应用非常广泛，以下是一些常见的示例：</p>
+<ol>
+<li><p>控制LED：将GPIO引脚配置为输出模式，可以通过设置引脚的高低电平状态来<strong>控制</strong>LED的亮灭。</p>
+</li>
+<li><p>按钮输入：将GPIO引脚配置为输入模式，可以连接按钮或开关，并通过读取引脚的电平状态来<strong>检测</strong>按钮是否被按下或开关是否打开。</p>
+</li>
+<li><p>传感器接口：通过GPIO引脚，可以连接各种传感器，如温度传感器、湿度传感器、光照传感器等。传感器的<strong>输出</strong>信号可以通过读取GPIO引脚的状态来获取。</p>
+</li>
+<li><p>驱动电机：通过GPIO引脚，可以连接电机驱动器，并通过设置引脚的高低电平状态来<strong>控制</strong>电机的运行方向和速度。</p>
+</li>
+<li><p>与外部设备通信：通过GPIO引脚，可以与其他外部设备进行通信，如显示器、LCD屏幕、数码管等。通过设置引脚的状态和电平，可以<strong>发送数据或控制命令</strong>。</p>
+</li>
+<li><p>脉冲宽度调制（PWM）输出：一些GPIO引脚支持PWM功能，可以生成模拟信号，用于<strong>控制</strong>电机速度、调节LED亮度等需要模拟输出的应用。</p>
+</li>
+<li><p><strong>扩展IO功能：通过使用扩展芯片或GPIO扩展板，可以增加系统的GPIO引脚数量，从而实现更多外部设备的控制和通信。</strong></p>
+</li>
+</ol>
+</blockquote>
+<h4 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h4><blockquote>
+<p><strong>4 个 32 位 配 置 寄 存 器</strong></p>
+<ol>
+<li><p>GPIOx_MODER 模式寄存器</p>
+<p>用于配置GPIO引脚的模式（<strong>输入或输出</strong>）。<u>每个引脚通常使用两个位表示模式</u>，例如00表示输入模式，01表示输出模式。</p>
+</li>
+<li><p>GPIOx_OTYPER 输出模式寄存器</p>
+<p>用于配置GPIO引脚的输出类型。<u>每个引脚通常使用一个位表示输出类型</u>，例如0表示推挽输出，1表示开漏输出。</p>
+</li>
+<li><p>GPIOx_ OSPEEDR 输出速度寄存器</p>
+<p>用于配置GPIO引脚的输出速度。<u>每个引脚通常使用两个位表示输出速度</u>，例如00表示低速，11表示高速。</p>
+</li>
+<li><p>GPIOx_PUPDR 上拉下拉寄存器</p>
+<p>用于配置GPIO引脚的上拉或下拉电阻。<u>每个引脚通常使用两个位表示上拉/下拉配置</u>，例如00表示无上拉/下拉，01表示上拉，10表示下拉。</p>
+</li>
+</ol>
+<p><strong>2 个 32 位数据寄存器</strong><br>GPIOx_IDR 输入数据寄存器<br>GPIOx_ODR 输出数据寄存器</p>
+<p>每个位对应一个引脚，读取/写入该位。</p>
+<p><strong>1个 32 位置位 / 复位寄存器</strong><br>GPIOx_BSRR 置位 / 复位寄存器</p>
+<p>用于通过设置或复位位来控制GPIO引脚的输出电平。每个引脚通常使用两个位，一个位用于置位（设置为1），另一个位用于复位（设置为0）。</p>
+<p><strong>2 个 32 位复用功能寄存器</strong><br>GPIOx_AFRH<br>GPIOx_AFRL</p>
+<p>用于配置GPIO引脚的复用功能，例如将引脚用作特定的外设功能（如UART、SPI等）。这些寄存器通常将32位分为两个部分，每个部分对应一组引脚。</p>
+</blockquote>
+<h4 id="模式"><a href="#模式" class="headerlink" title="模式"></a>模式</h4><blockquote>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/612333717?utm_id=0">https://zhuanlan.zhihu.com/p/612333717?utm_id=0</a></p>
+</blockquote>
+<p><img src="/2023/10/27/driver_develop/v2-9ece20d4c5fb58bd9c9736a14e952403_1440w.webp" alt="v2-9ece20d4c5fb58bd9c9736a14e952403_1440w"></p>
+<p>原来上下拉是这个意思啊，就是缺省值呗。</p>
+<p>一般来说，开漏输出连接上拉输入或浮空输入的外部元件，推挽输出连接下拉输入的外部元件。</p>
+<p>当引脚具有复用功能时，它可以在不同的工作模式下切换为不同的功能，而无需切换整个 GPIO 模式。</p>
+<h4 id="找到测试程序"><a href="#找到测试程序" class="headerlink" title="找到测试程序"></a>找到测试程序</h4><p>感觉其实思路还是比较清晰。看这个：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://milkv.io/zh/docs/duo/application-development/wiringx">https://milkv.io/zh/docs/duo/application-development/wiringx</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/milkv-duo/duo-examples/blob/main/README-zh.md">https://github.com/milkv-duo/duo-examples/blob/main/README-zh.md</a></p>
+</blockquote>
+<p>也即我最后gpio的效果就是能够运行它给的这个blink example就行。等下回去试下用linux和rtt试试。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">gpio_test</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> DUO_LED = <span class="number">25</span>;</span><br><span class="line"></span><br><span class="line">    rt_pin_mode(DUO_LED, PIN_MODE_OUTPUT);</span><br><span class="line">    rt_pin_write(DUO_LED, PIN_LOW);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i ++) &#123; <span class="comment">// 闪烁十次</span></span><br><span class="line">        rt_kprintf(<span class="string">&quot;Duo LED GPIO (wiringX) %d: High\n&quot;</span>, DUO_LED);</span><br><span class="line">        rt_pin_write(DUO_LED, PIN_HIGH);</span><br><span class="line">        rt_thread_delay(RT_TICK_PER_SECOND);</span><br><span class="line">        rt_kprintf(<span class="string">&quot;Duo LED GPIO (wiringX) %d: Low\n&quot;</span>, DUO_LED);</span><br><span class="line">        rt_pin_write(DUO_LED, PIN_LOW);</span><br><span class="line">        rt_thread_delay(RT_TICK_PER_SECOND);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总之明天试着开始写吧，我也不知道怎么办了该。可以先问下老师确认led是哪个。我看文档写的GPIOC24但是压根没那东西。</p>
+<h3 id="10-14—找到型号"><a href="#10-14—找到型号" class="headerlink" title="10.14—找到型号"></a>10.14—找到型号</h3><p>感觉可以从相同型号的gpio入手。查了下compatible，这东西好像是什么海思研发的什么the synopsys DW gpio。</p>
+<blockquote>
+<p>/home/xiunian/rt-thread/milkv-duo-buildroot-sdk/linux_5.10/drivers/gpio/gpio-dwapb.c</p>
+<p><a target="_blank" rel="noopener" href="https://lkml.org/lkml/2020/8/22/19">https://lkml.org/lkml/2020/8/22/19</a> commit patch</p>
+<p><a target="_blank" rel="noopener" href="https://www.elecfans.com/d/2184124.html">Milk-V Duo开发板免费体验 GPIO分析</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_49457347/article/details/126146947">DesignWare_APB_GPIO模块DUT&amp;Testbench仿真</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42703045/article/details/127778250">RK3399之8250串口驱动</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41696915/article/details/132173191">linux驱动 内核层适配485驱动控制引脚</a></p>
+</blockquote>
+<p>我现在发现了milkv的gpio型号是dwapb，找到了它对应的驱动手册【<code>DW_apb_gpio_databook</code> 浅看了下，里面至少有介绍寄存器是在干什么】，还有linux【<code>drivers/gpio/gpio-dwapb.c</code>  <code>drivers/gpio/gpio-pl061.c</code>】和rtt【<code>bsp/ft2004/libraries/bsp/ft_gpio/ft_gpio.c</code>】同一型号的驱动代码，我准备对照着这几个参考弄下</p>
+<p>然后各个回调的介绍可以看<code>documentation/device/pin/pin.md</code>。</p>
+<p>总之，不就是看寄存器都是啥东西，然后对应实现read write嘛！概念上是不难的，好好研究，相信可以！</p>
+<p>接下来的思路就是，看下那几个寄存器具体的description，理解下两个参考的代码，就可以慢慢开始写了。测试可能需要再花点心思因为毕竟那个还跑步起来。。。总之方向算是比较明确了（至少比前几天明确）加油捏。</p>
+<h3 id="10-15—寄存器了解"><a href="#10-15—寄存器了解" class="headerlink" title="10.15—寄存器了解"></a>10.15—寄存器了解</h3><p>这东西甚至是一个bit一个bit控制的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORTA_DR		0x00 <span class="comment">//A 组端口输出寄存器</span></span></span><br><span class="line">写入该寄存器的值独立控制端口A中对应数据位的方向。<span class="number">0</span>是input，<span class="number">1</span>是output</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORTA_DDR	0x04 <span class="comment">//A 组端口方向控制寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORTB_DR		0x0c <span class="comment">//B 组端口输出寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORTB_DDR	0x10 <span class="comment">//B 组端口方向控制寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORTC_DR		0x18 <span class="comment">//C 组端口输出寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORTC_DDR	0x1c <span class="comment">//C 组端口方向控制寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORTD_DR		0x24 <span class="comment">//D 组端口输出寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORTD_DDR	0x28 <span class="comment">//D 组端口方向控制寄存器</span></span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 这个东西可以用来控制每个bit的开关中断</span><br><span class="line"><span class="number">2.</span> 默认关中断</span><br><span class="line"><span class="number">3.</span> Output时关中断</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTEN		    0x30 <span class="comment">//A 组端口中断使能寄存器</span></span></span><br><span class="line">mask为<span class="number">1</span>表示屏蔽</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTMASK		0x34 <span class="comment">//A 组端口中断屏蔽寄存器</span></span></span><br><span class="line">控制是电平敏感中断还是边缘敏感</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTTYPE_LEVEL	0x38 <span class="comment">//A 组端口中断等级寄存器</span></span></span><br><span class="line">极性</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INT_POLARITY	0x3c <span class="comment">//A 组端口中断极性寄存器</span></span></span><br><span class="line">只读</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTSTATUS		0x40 <span class="comment">//A 组端口中断状态寄存器</span></span></span><br><span class="line">是否需要消抖【是不是很熟悉hhh】</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_PORTA_DEBOUNCE	0x48 <span class="comment">//A 组端口防反跳配置寄存器</span></span></span><br><span class="line">清除A/所有中断</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_PORTA_EOI		0x4c <span class="comment">//A 组端口中断清除寄存器</span></span></span><br><span class="line"></span><br><span class="line">只读，表示A端口连接的数据信号（也即input信号）</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_EXT_PORTA		0x50 <span class="comment">//A 组端口输入寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_EXT_PORTB		0x54 <span class="comment">//B 组端口输入寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_EXT_PORTC		0x58 <span class="comment">//C 组端口输入寄存器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_EXT_PORTD		0x5c <span class="comment">//D 组端口输入寄存器</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DWAPB_DRIVER_NAME	<span class="string">&quot;gpio-dwapb&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DWAPB_MAX_PORTS		4</span></span><br><span class="line">    </span><br><span class="line"><span class="comment">// 步长。可以看到如它所言，确实GPIO_EXT_PORT每个差4，GPIO_SWPORTA_DR和GPIO_SWPORTA_DDR每个差12</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_EXT_PORT_STRIDE	0x04 <span class="comment">/* register stride 32 bits */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORT_DR_STRIDE	0x0c <span class="comment">/* register stride 3*32 bits */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_SWPORT_DDR_STRIDE	0x0c <span class="comment">/* register stride 3*32 bits */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_REG_OFFSET_V2	1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTMASK_V2		0x44</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTTYPE_LEVEL_V2	0x34</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INT_POLARITY_V2	0x38</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTSTATUS_V2	0x3c</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_PORTA_EOI_V2	0x40</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DWAPB_NR_CLOCKS		2</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DWAPB_GPIO_BASE     0x03020000</span></span><br></pre></td></tr></table></figure>
+
+<p>难道说，我有一个猜想，就是这个实际表示是说GPIO Port A/C的第16/17、9/10位吗。。。。</p>
+<p><img src="/2023/10/27/driver_develop/image-20231027203332238.png" alt="image-20231027203332238"></p>
+<p>所以现在很需要这个pin和port的转换。。。</p>
+<p>一个是内核传过来的pin是什么数，还有它上面那个是不是端口和位的意思，这两点需要弄清楚</p>
+<p>总之先向来是确认下我的想法：那个图的灰色块和引脚号是同一个东西，GPIOA17这样的字符表示GPIO的A端口寄存器的第16个bit。</p>
+<p>如果是这样的话，那么思路就很自然了。我们可以通过图中引脚和GPIO这种的分布，从而得知当前是要写入什么端口什么寄存器，这样就能编写代码了。Good。</p>
+<h3 id="10-17—整亮led"><a href="#10-17—整亮led" class="headerlink" title="10.17—整亮led"></a>10.17—整亮led</h3><p>也许可以搜一下schematic该怎么看，说不定就能知道哪位是引脚号了。</p>
+<p>现在先假设GPIO C 24表示GPIO C端口的第24个bit，也即 (1&lt;&lt;23)吧。所以我们在读取和写入的时候，都是先读出原来的值，然后再把对应位设为1or0。但是为啥qemu是一字节一字节写。。。算了相信自己，总之先试试</p>
+<blockquote>
+<p>然后就去研究了下linux中的gpio……发现了其内部映射。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~# cat /sys/class/gpio/gpiochip</span><br><span class="line">gpiochip352/  gpiochip384/  gpiochip416/  gpiochip448/  gpiochip480/</span><br></pre></td></tr></table></figure>
+
+<p>384是GPIOD，416是C，448是B，480是A，每个间距32。而LED对应的是GPIO C 24，所以号是416+24 = 440。</p>
+<p>416+24 = 440，也就是说，GPIOC24是port C的第24号，也即第25位。</p>
+<blockquote>
+<p>然后慢慢整理问题……</p>
+</blockquote>
+<p>整理一下目前的问题。</p>
+<p>首先，我是不是想错了？？？</p>
+<p>按照刚刚在Linux下看到的结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~$ <span class="built_in">cat</span> /sys/class/gpio/gpiochip</span><br><span class="line">gpiochip352/  gpiochip384/  gpiochip416/  gpiochip448/  gpiochip480/</span><br></pre></td></tr></table></figure>
+
+<p>五个gpio，bank name分别为porte、d、c、b、a。那么问题来了，这个port跟我们在dw_apb手册里看到的gpio的abcd四个port是一个概念吗？？</p>
+<p>已知，dwapb gpio有ABCD四个Port，因而有四组寄存器。有一点值得注意，到底是一个字节控制一个设备，还是一个bit？</p>
+<p>那么我感觉的是，板上有5个gpio，每个gpio都各自有4个port和4K地址空间，每个port都有这样一堆寄存器：</p>
+<p><img src="/2023/10/27/driver_develop/image-20231027203540506.png" alt="image-20231027203540506"></p>
+<p>而GPIOC24的意思就是，它是第四个gpio？port夺少？说实话我真的很迷惑。。。</p>
+<p>而且我那个写入为什么一点效果没有。。。好痛苦我的天</p>
+<p>好，刚刚终于成功把led整亮了。所以是这样的，它那个GPIOABCD并不是一个GPIO的Port ABCD的意思，应该就是纯纯有多个GPIO芯片。然后GPIOC24的意思就是第三块GPIO的A组寄存器第32位，为什么是A不是别的我也不大懂，反正我看了Linux的驱动代码，好像一般也是只用A组端口。</p>
+<h3 id="10-18-19—中断"><a href="#10-18-19—中断" class="headerlink" title="10.18/19—中断"></a>10.18/19—中断</h3><p>很好，目前已经基本完成了数据的读写这部分，接下来要做的就是中断了，中断还是先看看数据手册在做。中断的话，决定先研究下wiringX的那个example，然后来看看中断怎么进行有效性验证。</p>
+<p>很好，把测试程序搬了过来，还有学习了下qemu的架构也搬过来了，现在剩下的任务就是看寄存器了</p>
+<p>目前是这样，<code>dwapb_pin_attach_irq</code>和<code>dwapb_pin_detach_irq</code>负责注册回调函数，<code>dwapb_pin_irq_enable</code>负责开关中断。然后，我们通过<code>rt_hw_interrupt_install(DWAPB_GPIOE_IRQNUM, rt_hw_gpio_isr, &amp;gpio_idx, &quot;gpio&quot;);</code>注册中断函数，这样一来每次DWAPB_GPIOE_IRQNUM中断时就会触发该函数，从而执行<code>rt_hw_gpio_isr</code>中遍历所有hdr并执行一遍的流程了。</p>
+<p>整理一下它目前需要有哪些寄存器。首先是<code>rt_hw_gpio_isr</code>，需要有一个pending功能；然后是<code>dwapb_pin_attach_irq</code>，需要能设置是电平/边缘触发以及触发的极性；最后是<code>dwapb_pin_irq_enable</code>，需要有个能开关中断的寄存器。</p>
+<p>目前是这样，理论上，我通过rt_pin_irq_enable向INTEN写入数据，这b对应的GPIO引脚就会产生一个中断，然后将中断传递给CPU，CPU通过其中断号从而调用中断处理函数，然后就吊我们在it_install中安装的那个回调。然而不知怎的没调。我觉得原因可能两个，一个寄存器看错了，另一个安装没装好。明天对照Linux源码看下吧。</p>
+<p>应该不是，还是得靠外界输入才能触发中断。明天问问老师怎么做。</p>
+<p>新进展，发现C9C10互连，然后C10间隔输出就行23333这样就可以触发中断，perfect。</p>
+<p>不过我目前的问题似乎是，触发了中断之后，不知道为什么没有进入pending处理，导致中断一直未处理从而寄。</p>
+<p>牛逼，成了！！！明天改下码风，多写几个测试，应该就结了。好像目前是both有点问题。明天把这个修下。</p>
+<p><img src="/2023/10/27/driver_develop/image-20231027203706048.png" alt="image-20231027203706048"></p>
+<p>BOTH_EDGE有点问题，好像那啥玩意没效果，依然保持着上次设置的lowedge。现在去学习下linux的both edge怎么写的。</p>
+<p>很好，bug已除。</p>
+<h2 id="代码框架"><a href="#代码框架" class="headerlink" title="代码框架"></a>代码框架</h2><p>GPIO实际上就是一个单纯的在板子和外设之间搬运字节的东西，所以本质上只需做好寄存器配置，以及引脚映射即可。接下来将从几个方面拆解我的代码。</p>
+<h3 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h3><p>在rtt中，提供了一系列回调函数用于实现gpio：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rt_pin_ops</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">// 设置gpio的模式（读/写）</span></span><br><span class="line">    <span class="type">void</span> (*pin_mode)(<span class="keyword">struct</span> rt_device *device, <span class="type">rt_base_t</span> pin, <span class="type">rt_uint8_t</span> mode);</span><br><span class="line">    <span class="comment">// 读写gpio</span></span><br><span class="line">    <span class="type">void</span> (*pin_write)(<span class="keyword">struct</span> rt_device *device, <span class="type">rt_base_t</span> pin, <span class="type">rt_uint8_t</span> value);</span><br><span class="line">    <span class="type">rt_int8_t</span>  (*pin_read)(<span class="keyword">struct</span> rt_device *device, <span class="type">rt_base_t</span> pin);</span><br><span class="line">    <span class="comment">// rtt特有中断回调，mode可以设置为电平/边缘触发，以及触发极性</span></span><br><span class="line">    <span class="type">rt_err_t</span> (*pin_attach_irq)(<span class="keyword">struct</span> rt_device *device, <span class="type">rt_base_t</span> pin,</span><br><span class="line">            <span class="type">rt_uint8_t</span> mode, <span class="type">void</span> (*hdr)(<span class="type">void</span> *args), <span class="type">void</span> *args);</span><br><span class="line">    <span class="type">rt_err_t</span> (*pin_detach_irq)(<span class="keyword">struct</span> rt_device *device, <span class="type">rt_base_t</span> pin);</span><br><span class="line">    <span class="type">rt_err_t</span> (*pin_irq_enable)(<span class="keyword">struct</span> rt_device *device, <span class="type">rt_base_t</span> pin, <span class="type">rt_uint8_t</span> enabled);</span><br><span class="line">    <span class="comment">// 引脚映射</span></span><br><span class="line">    <span class="type">rt_base_t</span> (*pin_get)(<span class="type">const</span> <span class="type">char</span> *name);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>milkv上有ABCDE五个gpio组件：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">gpio@<span class="number">03020000</span> &#123;</span><br><span class="line">        bank-name = <span class="string">&quot;porta&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">gpio@<span class="number">03021000</span> &#123;</span><br><span class="line">        bank-name = <span class="string">&quot;portb&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">gpio@<span class="number">03022000</span> &#123;</span><br><span class="line">        bank-name = <span class="string">&quot;portc&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">gpio@<span class="number">03023000</span> &#123;</span><br><span class="line">        bank-name = <span class="string">&quot;portd&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">gpio@<span class="number">05021000</span> &#123;</span><br><span class="line">        bank-name = <span class="string">&quot;porte&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>但是，在实现中，这五个gpio组件会被注册为同一个设备，而不是像uart那样有多少个就注册多少个：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rt_device_pin_register(<span class="string">&quot;gpio&quot;</span>, &amp;_dwapb_ops, RT_NULL);</span><br></pre></td></tr></table></figure>
+
+<h3 id="外界交互"><a href="#外界交互" class="headerlink" title="外界交互"></a>外界交互</h3><p>应用程序会通过引脚名，使用<code>rt_pin_get</code>获取驱动内部自定义的引脚号，然后就可以通过引脚号对其进行模式设置和读写：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> DUO_LED = rt_pin_get(<span class="string">&quot;C24&quot;</span>);</span><br><span class="line">rt_pin_mode(DUO_LED, PIN_MODE_OUTPUT);</span><br><span class="line">rt_pin_write(DUO_LED, PIN_LOW);</span><br></pre></td></tr></table></figure>
+
+<h3 id="寄存器-1"><a href="#寄存器-1" class="headerlink" title="寄存器"></a>寄存器</h3><h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><p>这坨宏我是从linux里搬过来的。各个寄存器的含义可以详见data book，在此不多赘述。</p>
+<h4 id="访问"><a href="#访问" class="headerlink" title="访问"></a>访问</h4><p>在rtt中，外设地址也是统一编址到内存地址空间的。由其它gpio实现可知，当开启<code>RT_USING_LWP</code>（轻量级进程支持）时，外设地址不再是一一映射，需要我们手动在init中调用<code>ioremap</code>进行映射：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> RT_USING_LWP</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BSP_IOREMAP_GPIO_DEVICE(no)     \</span></span><br><span class="line"><span class="meta">    rt_ioremap((void *)(DWAPB_GPIOA_BASE + (no) * DWAPB_GPIO_SIZE), DWAPB_GPIO_SIZE);</span></span><br><span class="line"></span><br><span class="line">    dwapb_gpio_base = (<span class="type">rt_size_t</span>)BSP_IOREMAP_GPIO_DEVICE(<span class="number">0</span>);</span><br><span class="line">    BSP_IOREMAP_GPIO_DEVICE(<span class="number">1</span>);</span><br><span class="line">    BSP_IOREMAP_GPIO_DEVICE(<span class="number">2</span>);</span><br><span class="line">    BSP_IOREMAP_GPIO_DEVICE(<span class="number">3</span>);</span><br><span class="line">    dwapb_gpio_base_e = (<span class="type">rt_size_t</span>)rt_ioremap((<span class="type">void</span> *)DWAPB_GPIOE_BASE, DWAPB_GPIO_SIZE);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<p>然后，之后就可以在各个方法中借助这两个函数传入寄存器地址直接进行读写了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">rt_inline <span class="type">rt_uint32_t</span> <span class="title function_">dwapb_read32</span><span class="params">(<span class="type">rt_ubase_t</span> addr)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> HWREG32(addr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">rt_inline <span class="type">void</span> <span class="title function_">dwapb_write32</span><span class="params">(<span class="type">rt_ubase_t</span> addr, <span class="type">rt_uint32_t</span> value)</span></span><br><span class="line">&#123;</span><br><span class="line">    HWREG32(addr) = value;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HWREG32(x)          (*((volatile rt_uint32_t *)(x)))</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="引脚映射"><a href="#引脚映射" class="headerlink" title="引脚映射"></a>引脚映射</h3><p>摸索了半天，最终还是猜测这个引脚映射规定应该是自己决定的，于是我就从别的bsp那边把规则搬了过来：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// port &amp;&amp; no -&gt; pin</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PIN_NUM(port, no)   (((((port) &amp; 0xFu) &lt;&lt; 8) | ((no) &amp; 0xFFu)))</span></span><br><span class="line"><span class="comment">// pin -&gt; port</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PIN_PORT(pin)       ((uint8_t)(((pin) &gt;&gt; 8) &amp; 0xFu))</span></span><br><span class="line"><span class="comment">// pin -&gt; no</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PIN_NO(pin)         ((uint8_t)((pin) &amp; 0xFFu))</span></span><br></pre></td></tr></table></figure>
+
+<p>例如，“C24”就可转化为<code>(((((&#39;C&#39; - &#39;A&#39;) &amp; 0xFu) &lt;&lt; 8) | ((24) &amp; 0xFFu)))</code>。</p>
+<p>根据此规则实现<code>get_pin</code>回调即可。具体板子上哪个引脚是哪个port，详见milkv的schematic book。</p>
+<h3 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h3><h4 id="回调执行"><a href="#回调执行" class="headerlink" title="回调执行"></a>回调执行</h4><p>rtt提供了很好用的中断回调。参考别的bsp以及以前的经验，很容易知道<code>attach_irq</code>和<code>detach_irq</code>就是注册和注销回调函数。那么，回调是什么时候被调用的呢？查阅其他bsp，也可得知它这是采取了一个非常巧妙的委托：在rtt给的<code>rt_hw_interrupt_install(DWAPB_GPIOE_IRQNUM, rt_hw_gpio_isr, RT_NULL, &quot;gpio&quot;);</code>注册的<code>rt_hw_gpio_isr</code>中做即可。这个层层外包的思想让我不禁想起Linux的调度类机制和用户态调度框架的实现原理，实在是牛逼至极。</p>
+<p>为了记录所有回调签名，我们需要为每个gpio组件整一个数据结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">dwapb_event</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="type">void</span> (*(hdr[DWAPB_GPIO_NR]))(<span class="type">void</span> *args);</span><br><span class="line">    <span class="type">void</span> *args[DWAPB_GPIO_NR];</span><br><span class="line">    <span class="type">rt_uint8_t</span> is_both_edge[DWAPB_GPIO_NR];</span><br><span class="line">&#125; _dwapb_events[DWAPB_GPIO_PORT_NR];</span><br></pre></td></tr></table></figure>
+
+<p>在<code>rt_hw_gpio_isr</code>中：</p>
+<ol>
+<li>根据硬件寄存器判断是否发生中断</li>
+<li>调用相应回调</li>
+<li>清除中断位表明完成中断处理</li>
+</ol>
+<p>即可。</p>
+<h4 id="both-edge实现"><a href="#both-edge实现" class="headerlink" title="both-edge实现"></a>both-edge实现</h4><p>这个是抄自linux。本质逻辑就是先设个上升沿触发，然后在<code>rt_hw_gpio_isr</code>执行完回调后再改成反方向也即下降沿触发，以此类推。不得不说确实帅。</p>
+<h1 id="I2C"><a href="#I2C" class="headerlink" title="I2C"></a>I2C</h1><p>Wait todo…</p>
+
+    </div>
+
+    
+    
+    
+
+		<div>
+		  
+			<div>
+    
+        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+		  
+		</div>
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/intern/" rel="tag"><i class="fa fa-tag"></i> intern</a>
+          </div>
+
+        
+
+
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GPIO"><span class="nav-number">1.</span> <span class="nav-text">GPIO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">开发流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-13%E2%80%94%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.1.</span> <span class="nav-text">10.13—概述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%BE%E5%88%B0%E6%B5%8B%E8%AF%95%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">找到测试程序</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-14%E2%80%94%E6%89%BE%E5%88%B0%E5%9E%8B%E5%8F%B7"><span class="nav-number">1.1.2.</span> <span class="nav-text">10.14—找到型号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-15%E2%80%94%E5%AF%84%E5%AD%98%E5%99%A8%E4%BA%86%E8%A7%A3"><span class="nav-number">1.1.3.</span> <span class="nav-text">10.15—寄存器了解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-17%E2%80%94%E6%95%B4%E4%BA%AEled"><span class="nav-number">1.1.4.</span> <span class="nav-text">10.17—整亮led</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-18-19%E2%80%94%E4%B8%AD%E6%96%AD"><span class="nav-number">1.1.5.</span> <span class="nav-text">10.18&#x2F;19—中断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%86%E6%9E%B6"><span class="nav-number">1.2.</span> <span class="nav-text">代码框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">整体架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E7%95%8C%E4%BA%A4%E4%BA%92"><span class="nav-number">1.2.2.</span> <span class="nav-text">外界交互</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8-1"><span class="nav-number">1.2.3.</span> <span class="nav-text">寄存器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">访问</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E8%84%9A%E6%98%A0%E5%B0%84"><span class="nav-number">1.2.4.</span> <span class="nav-text">引脚映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD"><span class="nav-number">1.2.5.</span> <span class="nav-text">中断</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E8%B0%83%E6%89%A7%E8%A1%8C"><span class="nav-number">1.2.5.1.</span> <span class="nav-text">回调执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#both-edge%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.2.5.2.</span> <span class="nav-text">both-edge实现</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#I2C"><span class="nav-number">2.</span> <span class="nav-text">I2C</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+
+
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+</body>
+</html>
