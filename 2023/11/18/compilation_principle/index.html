@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
+  <link rel="mask-icon" href="/images/cat.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第一章  绪论概述 可重定位的代码通过linker和loader重定位这部分内容就是在之前那本书学过的。  从中，我们也可以看到有语法分析、中间代码的影子。  词法分析相当于通过DFA NFA捉出各类符号，形成简单的符号表和token list；语法分析相当于对token list组词成句，判断该句子是否符合语言规则；语义分析相当于对词句进行类型判断和中间代码的生成，获得基本语义。 编译程序总体结">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译原理">
+<meta property="og:url" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/index.html">
+<meta property="og:site_name" content="修年">
+<meta property="og:description" content="第一章  绪论概述 可重定位的代码通过linker和loader重定位这部分内容就是在之前那本书学过的。  从中，我们也可以看到有语法分析、中间代码的影子。  词法分析相当于通过DFA NFA捉出各类符号，形成简单的符号表和token list；语法分析相当于对token list组词成句，判断该句子是否符合语言规则；语义分析相当于对词句进行类型判断和中间代码的生成，获得基本语义。 编译程序总体结">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111140301743.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111140605193.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111140706414.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912150030956.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117195321134.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912150219789.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111141534566.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111141746384.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912150256855.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111142323311.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111142018960.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111142131418.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111142248100.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111142423484.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912150651183.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111142700484.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912150917534.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912150954990.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912151022455.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912151115068.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912151202843.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912151224791.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912151807557.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912151833383.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912151921220.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912152940349.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912153008796.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912153133302.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912153726618.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912154048256.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912154039266.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912154244842.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912154325688.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230912154336462.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111160656018.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143157256.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143221621.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143239147.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143314759.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143409565.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143432642.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143446877.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143548871.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143705962.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143731539.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143847519.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111143913889.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144029955.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144058226.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144118715.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144152251.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144248318.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144434533.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144542412.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144904130.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111144955639.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145104473.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145137813.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145223966.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145335622.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111150037107.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145357478.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145502020.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145641168.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145753395.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111145910824.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111154812943.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111154859986.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111154955368.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111155639435.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111155714243.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111163320026.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111163349819.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111163439700.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111163924572.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111163951955.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111164041730.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111164151621.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111164242666.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111204434473.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111204442819.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111204551416.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111204616742.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111204710524.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111204757584.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111204853606.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111205038930.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111205128195.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111205228158.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111212751036.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111212906336.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111213005572.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111213140343.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111213217067.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111213412934.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111213454870.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111213506162.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111222323130.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111222405544.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111222420530.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111222818446.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111223024140.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111223447888.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111224131714.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111224251494.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111224542931.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111224619133.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111224717169.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111224806610.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111224823978.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111225923993.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111225909752.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111230333527.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111230647504.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111231321301.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111231423131.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111231410702.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111231035186.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111232758160.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111232654126.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112152418378.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112144111437.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112144432098.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112144717729.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112145014440.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112145647129.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112145842176.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112152157112.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112152452712.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112152538620.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112152727160.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112153809849.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112154325377.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112154432092.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112155014094.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112155440980.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112155547984.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112155656933.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112160019688.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112160838128.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116210010466.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116210045015.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116210128893.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116210403348.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116210851975.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116211302726.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116211508599.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116212722404.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231116213212317.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112161051362.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112161128029.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112161201907.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112161228677.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112163815934.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112164459093.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112164735691.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112164916157.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112164957032.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112165330771.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112165351676.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112165427936.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112165527201.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113141858123.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113142206565.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113142258075.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113142434388.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113142546012.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113142842691.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113143131304.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113143406696.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113144055939.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113144119128.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113145133094.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113145254201.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113145845546.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113150010199.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113150304592.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113150701975.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113151101241.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113153354856.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113153518654.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113153800860.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113153819450.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113153848078.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113153900879.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113153954039.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113154034683.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113160838344.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113160923423.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113161709638.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113161819971.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113161834028.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113162150197.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113162307565.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113162408135.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113162650850.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113162827636.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113163832788.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113162854973.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113164116586.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113164413558.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113164521479.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113165433278.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113165523187.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113170553095.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113170653148.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113170735475.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113171201608.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113172215498.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113172322388.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113172359082.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113172513034.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113172711030.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117013106735.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117013424181.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113173152660.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113173253496.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113173544340.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113181234782.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113181656031.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117015036335.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117015114181.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117015317921.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117015508123.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113182558725.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113183910480.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113184357577.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113184413140.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113184535813.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231113184726388.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117132802682.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117132823037.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117132857376.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117132928425.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117133032501.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117232308034.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117232356037.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117133559846.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117133641799.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117133916946.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117134049564.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117134332304.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114134527011.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117141718821.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117141752196.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117141925619.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114135607007.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117142612678.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117143632516.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117144101729.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117144044829.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117144159367.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117144240347.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117144732419.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117144844789.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117144953615.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117145110693.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117145328642.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114143941194.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117145550405.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117145640707.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117145651346.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117151832498.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117151857333.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117152106296.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117152118611.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117152148577.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117153522776.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117154312081.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117154431688.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117154604715.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117154706152.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117154755243.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117154934759.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114151544042.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114151804396.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114151941652.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114152025154.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114152151627.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117153655955.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117153853340.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117153943533.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117154033264.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117154205465.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117155722232.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117155802643.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117155907176.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117160239307.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117160402055.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117160511486.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117160632529.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117160714133.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117160746437.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117161920391.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117161657187.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117161841553.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117161858720.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117162019665.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117162031648.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117162348542.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117162621503.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117162737368.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117162844535.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117162904611.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117163627882.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117163826360.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117163859976.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117163919294.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117164058117.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117164119210.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117164204857.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117164216783.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117164258301.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117164351180.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117164359025.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117163537291.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117171051536.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117171128213.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117171228838.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117171300515.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117175920514.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117180004684.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117180054430.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117171950775.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/IMG_20231117_172022.jpg">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117170505088.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117170532844.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117170732952.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117170800064.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117170823344.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117170937326.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117172112207.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117172148583.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114153012920.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114153140663.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117172408087.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117172511529.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114153656196.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114153757311.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114153915178.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114154150835.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20230112010749756.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117172559365.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114163448345.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114163547096.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114163616550.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117172906559.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117172923420.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117173436377.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117173612717.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117173658051.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117173808890.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114163655037.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114163755972.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117174306568.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114164346770.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114164422157.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114164603745.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117174747278.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117174832911.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117174847771.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114164851929.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114164943640.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114165052095.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117175313877.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117175426674.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117225959427.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117230032838.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117230042818.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117175535226.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117175607305.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117180329608.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117180235703.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117180438408.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117180730318.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117180838505.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117181023249.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117181052032.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117181110982.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117181442971.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117181553476.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114164528749.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114164541337.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117181646330.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117181818373.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114165902157.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114165945689.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114170305153.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231114170418929.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182248619.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182308855.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182349789.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182416592.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182448247.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182512496.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182528648.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182539934.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182558421.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182608013.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182623627.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182828515.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182927404.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117182951626.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183024194.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183140104.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183149744.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183159507.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183212350.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183238255.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183257632.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183311213.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183329528.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183354736.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183424301.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183509870.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183531327.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183553775.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183750248.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183815060.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183851562.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231117183958719.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/v2-610bf072e6ca46f194b45dc2ff39fdc4_1440w.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/v2-e295f3442cda25ff7e287920b293eaa1_1440w.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231112151642625.png">
+<meta property="article:published_time" content="2023-11-18T11:09:29.000Z">
+<meta property="article:modified_time" content="2023-11-18T12:45:21.658Z">
+<meta property="article:author" content="修年">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/11/18/compilation_principle/image-20231111140301743.png">
+
+<link rel="canonical" href="https://xiunianjun.github.io/2023/11/18/compilation_principle/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>编译原理 | 修年</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+  
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+	
+		<script type="text/javascript" 
+		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
+		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+	
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">修年</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/11/18/compilation_principle/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/head.png">
+      <meta itemprop="name" content="修年">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="修年">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编译原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-11-18 19:09:29 / 修改时间：20:45:21" itemprop="dateCreated datePublished" datetime="2023-11-18T19:09:29+08:00">2023-11-18</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第一章-绪论"><a href="#第一章-绪论" class="headerlink" title="第一章  绪论"></a>第一章  绪论</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p><img src="/2023/11/18/compilation_principle/image-20231111140301743.png" alt="picture"></p>
+<p>可重定位的代码通过linker和loader重定位这部分内容就是在之前那本书学过的。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111140605193.png" alt="picture"></p>
+<p>从中，我们也可以看到有语法分析、中间代码的影子。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111140706414.png" alt="picture"></p>
+<p>词法分析相当于通过DFA NFA捉出各类符号，形成简单的符号表和token list；语法分析相当于对token list组词成句，判断该句子是否符合语言规则；语义分析相当于对词句进行类型判断和中间代码的生成，获得基本语义。</p>
+<h2 id="编译程序总体结构"><a href="#编译程序总体结构" class="headerlink" title="编译程序总体结构"></a>编译程序总体结构</h2><p><img src="/2023/11/18/compilation_principle/image-20230912150030956.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117195321134.png" alt="picture"></p>
+<p><strong>语法制导翻译：语义分析和中间代码生成集成到语法分析中</strong></p>
+<h3 id="词法分析"><a href="#词法分析" class="headerlink" title="词法分析"></a>词法分析</h3><p>将结果转化为token的形式。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912150219789.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111141534566.png" alt="picture"></p>
+<h3 id="语法分析"><a href="#语法分析" class="headerlink" title="语法分析"></a>语法分析</h3><p>从token list中识别出各个短语，并且构造语法分析树。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111141746384.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912150256855.png" alt="picture"></p>
+<p>相当于是通过文法来进行归约（自底向上的语法分析），从而判断给定句子是否合法。</p>
+<h3 id="语义分析"><a href="#语义分析" class="headerlink" title="语义分析"></a>语义分析</h3><p><img src="/2023/11/18/compilation_principle/image-20231111142323311.png" alt="picture"></p>
+<ol>
+<li>收集标识符的属性信息，并将其存入符号表</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20231111142018960.png" alt="picture"></p>
+<p>种属就是比如是函数还是数组之类的。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111142131418.png" alt="picture"></p>
+<ol start="2">
+<li>语义检查</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20231111142248100.png" alt="picture"></p>
+<ol start="3">
+<li><p>静态绑定</p>
+<p>包括绑定代码相对地址（子程序）、数据相对地址（变量）</p>
+</li>
+</ol>
+<h3 id="中间代码生成"><a href="#中间代码生成" class="headerlink" title="中间代码生成"></a>中间代码生成</h3><p><img src="/2023/11/18/compilation_principle/image-20231111142423484.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912150651183.png" alt="picture"></p>
+<p>波兰也就是前序遍历二叉树（中左右），逆波兰也就是后序遍历二叉树（左右中）</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111142700484.png" alt="picture"></p>
+<h3 id="代码优化"><a href="#代码优化" class="headerlink" title="代码优化"></a>代码优化</h3><p><img src="/2023/11/18/compilation_principle/image-20230912150917534.png" alt="picture"></p>
+<ol>
+<li><p>无关机器</p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912150954990.png" alt="picture"></p>
+</li>
+<li><p>有关机器</p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912151022455.png" alt="picture"></p>
+</li>
+</ol>
+<h3 id="目标代码生成"><a href="#目标代码生成" class="headerlink" title="目标代码生成"></a>目标代码生成</h3><p><img src="/2023/11/18/compilation_principle/image-20230912151115068.png" alt="picture"></p>
+<h3 id="表格管理"><a href="#表格管理" class="headerlink" title="表格管理"></a>表格管理</h3><p>这也挺好理解，相当于管理符号表吧。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912151202843.png" alt="picture"></p>
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><p><img src="/2023/11/18/compilation_principle/image-20230912151224791.png" alt="picture"></p>
+<h2 id="编译程序的组织"><a href="#编译程序的组织" class="headerlink" title="编译程序的组织"></a>编译程序的组织</h2><p>了解了编译程序的基本结构，那么我们就可以想想该怎么实现这个编译器了。</p>
+<p>最直观的想法是，我们有几个步骤就对代码进行多少次扫描：</p>
+<ol>
+<li>首先扫一次，进行词法分析，将所有标识符写入到符号表中，同时进行语法分析，看看有没有错，如果出错了就转到错误处理，没有的话就进行语义分析；（三合一）</li>
+<li>然后再针对得出来的语义分析树进行中间代码生成；</li>
+<li>再对得出来的中间代码进行代码优化，最后对优化出来的代码进行翻译处理。（二合一）</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20230912151807557.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912151833383.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912151921220.png" alt="picture"></p>
+<h2 id="实现编译器"><a href="#实现编译器" class="headerlink" title="实现编译器"></a>实现编译器</h2><p><img src="/2023/11/18/compilation_principle/image-20230912152940349.png" alt="picture"></p>
+<h3 id="T形图"><a href="#T形图" class="headerlink" title="T形图"></a>T形图</h3><p><img src="/2023/11/18/compilation_principle/image-20230912153008796.png" alt="picture"></p>
+<h3 id="自展"><a href="#自展" class="headerlink" title="自展"></a>自展</h3><p><img src="/2023/11/18/compilation_principle/image-20230912153133302.png" alt="picture"></p>
+<p>也就是说：</p>
+<ol>
+<li>P0是汇编语言，可以用来编译C语言子集；（P0：汇编语言，C子集→汇编）</li>
+<li>P1是机器语言，可以用来把汇编语言翻译为机器语言；（P1：机器语言，汇编→机器）</li>
+<li>所以我们就得到了P2，也即一个可以用来编译C语言子集的机器语言程序；（P2：机器语言，C子集→汇编）</li>
+<li>然后我们就可以用C语言子集来写C语言编译程序P3，再用P2翻译P3，就可以得到工具P4。（P4：汇编语言，C→汇编）</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20230912153726618.png" alt="image-20230912153726618"></p>
+<p>帅的。</p>
+<h3 id="移植"><a href="#移植" class="headerlink" title="移植"></a>移植</h3><p><img src="/2023/11/18/compilation_principle/image-20230912154048256.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912154039266.png" alt="picture"></p>
+<h3 id="本机编译器的利用"><a href="#本机编译器的利用" class="headerlink" title="本机编译器的利用"></a>本机编译器的利用</h3><p><img src="/2023/11/18/compilation_principle/image-20230912154244842.png" alt="picture"></p>
+<h3 id="编译程序的自动生成"><a href="#编译程序的自动生成" class="headerlink" title="编译程序的自动生成"></a>编译程序的自动生成</h3><p>这大概是描述了我们到时候会怎么实现这两个阶段代码。</p>
+<p>不过确实，词法分析可以看作是正则匹配，语法分析可以看作是产生式。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912154325688.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20230912154336462.png" alt="picture"></p>
+<h1 id="第二章-文法等概念"><a href="#第二章-文法等概念" class="headerlink" title="第二章  文法等概念"></a>第二章  文法等概念</h1><p><img src="/2023/11/18/compilation_principle/image-20231111160656018.png" alt="image-20231111160656018"></p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><ol>
+<li><p>字母表</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143157256.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143221621.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143239147.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143314759.png" alt="picture"></p>
+</li>
+<li><p>串</p>
+<p>克林闭包中的每一个元素都称为是字母表Σ上的一个串</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143409565.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143432642.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143446877.png" alt="picture"></p>
+</li>
+</ol>
+<h2 id="文法"><a href="#文法" class="headerlink" title="文法"></a>文法</h2><p><img src="/2023/11/18/compilation_principle/image-20231111143548871.png" alt="picture"></p>
+<p>如果文法用于描述单词，基本符号就是字母；用于描述句子，基本符号就是单词</p>
+<ol>
+<li><p>文法的形式化定义</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143705962.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143731539.png" alt="picture"></p>
+<p>由于可以从它们推出其他语法成分，故而称之为非终结符</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143847519.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111143913889.png" alt="picture"></p>
+<p>还真是最大的语法成分</p>
+</li>
+<li><p>产生式</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111144029955.png" alt="picture"></p>
+</li>
+<li><p>符号约定</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111144058226.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111144118715.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111144152251.png" alt="picture"></p>
+<p><strong>文法符号串</strong>应该就是指<strong>既包含终结符也包含非终结符的，也可能是空</strong>串的串。</p>
+<p>注意终结符号串也包括空串。</p>
+</li>
+</ol>
+<h2 id="语言"><a href="#语言" class="headerlink" title="语言"></a>语言</h2><p><img src="/2023/11/18/compilation_principle/image-20231111144248318.png" alt="picture"></p>
+<p>这部分就是要讲怎么看一个串是否满足文法规则，那么我们就需要先从什么样的串是满足文法规则的串开始说起，也即引入“语言”的概念。</p>
+<ol>
+<li><p>推导与归约</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111144434533.png" alt="picture"></p>
+<p>然后也分为最左推导和最右推导，对应最右归约和最左归约。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111144542412.png" alt="picture"></p>
+<p>故而，如果<strong>从开始符号可以推导（派生）出该句子，或者从该句子可以归约到开始符号</strong>，那么该句子就是该语言的句子。</p>
+</li>
+<li><p>句子与句型</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111144904130.png" alt="picture"></p>
+<p>句型就是可以有非终结符，句子就是只能有终结符</p>
+</li>
+<li><p>语言</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111144955639.png" alt="picture"></p>
+<p><strong>文法解决了无穷语言的有穷表示问题。</strong></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111145104473.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111145137813.png" alt="picture"></p>
+<p>emm，就是好像没有∩运算</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111145223966.png" alt="picture"></p>
+<p>有正则那味了</p>
+</li>
+</ol>
+<h2 id="乔姆斯基文法体系"><a href="#乔姆斯基文法体系" class="headerlink" title="乔姆斯基文法体系"></a>乔姆斯基文法体系</h2><p><img src="/2023/11/18/compilation_principle/image-20231111145335622.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111150037107.png" alt="picture"></p>
+<ol>
+<li><p>0型</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111145357478.png" alt="picture"></p>
+</li>
+<li><p>1型</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111145502020.png" alt="picture"></p>
+<p>之所以是上下文有关，是因为只有A的上下文为a1和a2时才能替换为β【666666，第一次懂】</p>
+<p>CSG不包含空产生式。</p>
+</li>
+<li><p>2型</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111145641168.png" alt="picture"></p>
+<p>左部只能是<strong>一个</strong>非终结符。</p>
+</li>
+<li><p>3型</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111145753395.png" alt="picture"></p>
+<p>产生式右部最多只有一个非终结符，且要在同一侧</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111145910824.png" alt="picture"></p>
+<p>看起来还能转（是的，自动机教的已经全忘了（））</p>
+</li>
+</ol>
+<h2 id="CFG"><a href="#CFG" class="headerlink" title="CFG"></a>CFG</h2><p><strong>正则文法用于判定大多数标识，但是无法判断句子构造</strong>。</p>
+<ol>
+<li>分析树</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20231111154812943.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111154859986.png" alt="picture"></p>
+<p>也就是说，每个句型都有自己对应的分析树。那么接下来就介绍什么是句型的短语</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111154955368.png" alt="picture"></p>
+<p>意思就是直接短语是高度为2的子树的边缘，<strong>直接短语一定是某个产生式的右部</strong>，但是产生式右部不一定是给定句型的直接短语（因为有可能给定句型的推导用不到那个产生式）</p>
+<ol start="2">
+<li>二义性文法</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20231111155639435.png" alt="picture"></p>
+<p>通过自定义规则消除歧义</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111155714243.png" alt="picture"></p>
+<h1 id="第三章-词法分析"><a href="#第三章-词法分析" class="headerlink" title="第三章  词法分析"></a>第三章  词法分析</h1><h2 id="正则语言"><a href="#正则语言" class="headerlink" title="正则语言"></a>正则语言</h2><h3 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h3><p><img src="/2023/11/18/compilation_principle/image-20231111163320026.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111163349819.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111163439700.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111163924572.png" alt="picture"></p>
+<p>最后两条值得注意</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111163951955.png" alt="picture"></p>
+<h3 id="正则定义"><a href="#正则定义" class="headerlink" title="正则定义"></a>正则定义</h3><p><img src="/2023/11/18/compilation_principle/image-20231111164041730.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111164151621.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111164242666.png" alt="picture"></p>
+<h2 id="有穷自动机"><a href="#有穷自动机" class="headerlink" title="有穷自动机"></a>有穷自动机</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><p><img src="/2023/11/18/compilation_principle/image-20231111204434473.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111204442819.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111204551416.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111204616742.png" alt="picture"></p>
+<p>所以真正的终止是输入带到末尾并且指向终态</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><h4 id="DFA"><a href="#DFA" class="headerlink" title="DFA"></a>DFA</h4><p><img src="/2023/11/18/compilation_principle/image-20231111204710524.png" alt="picture"></p>
+<h4 id="NFA"><a href="#NFA" class="headerlink" title="NFA"></a>NFA</h4><p><img src="/2023/11/18/compilation_principle/image-20231111204757584.png" alt="picture"></p>
+<h4 id="NFA与DFA转化"><a href="#NFA与DFA转化" class="headerlink" title="NFA与DFA转化"></a>NFA与DFA转化</h4><p><img src="/2023/11/18/compilation_principle/image-20231111204853606.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111205038930.png" alt="picture"></p>
+<h4 id="e-NFA"><a href="#e-NFA" class="headerlink" title="e-NFA"></a>e-NFA</h4><p><img src="/2023/11/18/compilation_principle/image-20231111205128195.png" alt="picture"></p>
+<h4 id="e-NFA与NFA转化"><a href="#e-NFA与NFA转化" class="headerlink" title="e-NFA与NFA转化"></a>e-NFA与NFA转化</h4><p><img src="/2023/11/18/compilation_principle/image-20231111205228158.png" alt="picture"></p>
+<h2 id="词法分析相关"><a href="#词法分析相关" class="headerlink" title="词法分析相关"></a>词法分析相关</h2><h3 id="识别单词的DFA"><a href="#识别单词的DFA" class="headerlink" title="识别单词的DFA"></a>识别单词的DFA</h3><h4 id="数字"><a href="#数字" class="headerlink" title="数字"></a>数字</h4><p><img src="/2023/11/18/compilation_principle/image-20231111212751036.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111212906336.png" alt="picture"></p>
+<p>66666，还能这么捏起来</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111213005572.png" alt="picture"></p>
+<h4 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h4><p><img src="/2023/11/18/compilation_principle/image-20231111213140343.png" alt="picture"></p>
+<h4 id="识别token"><a href="#识别token" class="headerlink" title="识别token"></a>识别token</h4><p><img src="/2023/11/18/compilation_principle/image-20231111213217067.png" alt="picture"></p>
+<p>关键字是在识别完标识符之后进行查表识别的</p>
+<h3 id="scanner的错误处理"><a href="#scanner的错误处理" class="headerlink" title="scanner的错误处理"></a>scanner的错误处理</h3><p>说实话没太看懂</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111213412934.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111213454870.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111213506162.png" alt="picture"></p>
+<h1 id="第四章-语法分析"><a href="#第四章-语法分析" class="headerlink" title="第四章  语法分析"></a>第四章  语法分析</h1><p>根据给定文法，识别各类短语，构造分析树。所以关键就是怎么构建分析树</p>
+<h2 id="自顶向下LL-1"><a href="#自顶向下LL-1" class="headerlink" title="自顶向下LL(1)"></a>自顶向下LL(1)</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>可以看做是推导（派生）的过程。<br><strong>如果同一非终结符的各个产生式的可选集互不相交</strong>，就可以进行确定的自顶向下分析：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111222323130.png" alt="picture"></p>
+<p>这两个分析也是我们的分析方法需要解决的。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111222405544.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111222420530.png" alt="picture"></p>
+<p>也就是说，在<u>自顶向下</u>分析时，采用的是<strong>最左推导</strong>；在<u>自底向上</u>分析时，<strong>最左归约和最右推导</strong>才是正道！</p>
+<h3 id="通用算法"><a href="#通用算法" class="headerlink" title="通用算法"></a>通用算法</h3><h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p><img src="/2023/11/18/compilation_principle/image-20231111222818446.png" alt="picture"></p>
+<p>大概流程应该是，有产生式就展开，然后当产生式右部有多个候选式的时候再根据输入决定。</p>
+<h4 id="递归下降分析"><a href="#递归下降分析" class="headerlink" title="递归下降分析"></a>递归下降分析</h4><p><img src="/2023/11/18/compilation_principle/image-20231111223024140.png" alt="picture"></p>
+<p>如果有多个以输入终结符打头的右部候选，那就需要逐一尝试错了再回溯，因而效率较低。</p>
+<h4 id="预测分析"><a href="#预测分析" class="headerlink" title="预测分析"></a>预测分析</h4><p><img src="/2023/11/18/compilation_principle/image-20231111223447888.png" alt="picture"></p>
+<p>66666，这其实就可以类似于动态规划了吧</p>
+<p><strong>【感觉这里也能窥见一些算法设计的思想。</strong></p>
+<p><strong>仔细想想，我们在引入动态规划时，也是这个说辞：对于一些回溯问题，回溯效率太低，所以我们就可以提前通过动态规划的思想构造一个状态转移表，到时候只需从零开始按照表进行状态转移即可。</strong></p>
+<p><strong>仔细想想，这不就是这里这个预测分析提出的思想吗！真的牛逼，6666</strong></p>
+<p><strong>我记得KMP算法一开始也是这个思想，感觉十分神奇】</strong></p>
+<h3 id="文法转换"><a href="#文法转换" class="headerlink" title="文法转换"></a>文法转换</h3><h4 id="什么情况需要改造"><a href="#什么情况需要改造" class="headerlink" title="什么情况需要改造"></a>什么情况需要改造</h4><p><img src="/2023/11/18/compilation_principle/image-20231111224131714.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111224251494.png" alt="picture"></p>
+<h4 id="消除左递归"><a href="#消除左递归" class="headerlink" title="消除左递归"></a>消除左递归</h4><h5 id="直接左递归"><a href="#直接左递归" class="headerlink" title="直接左递归"></a>直接左递归</h5><p><img src="/2023/11/18/compilation_principle/image-20231111224542931.png" alt="picture"></p>
+<p>这个左递归及其消除方法解释得很形象</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111224619133.png" alt="picture"></p>
+<h5 id="间接左递归"><a href="#间接左递归" class="headerlink" title="间接左递归"></a>间接左递归</h5><p><img src="/2023/11/18/compilation_principle/image-20231111224717169.png" alt="picture"></p>
+<p>先转化为直接左递归</p>
+<h4 id="消除回溯"><a href="#消除回溯" class="headerlink" title="消除回溯"></a>消除回溯</h4><p><img src="/2023/11/18/compilation_principle/image-20231111224806610.png" alt="picture"></p>
+<p>666666这个解读可以，感觉这个就跟：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111224823978.png" alt="image-20231111224823978"></p>
+<p>这个“向前看”有异曲同工之妙了。</p>
+<h3 id="LL-1-文法"><a href="#LL-1-文法" class="headerlink" title="LL(1)文法"></a>LL(1)文法</h3><p><strong>LL(1)文法才能使用预测分析技术</strong>。判断是否是LL文法就得看<strong>具有相同左部的产生式的select集是否相交</strong>。</p>
+<h4 id="S-文法"><a href="#S-文法" class="headerlink" title="S_文法"></a>S_文法</h4><p><img src="/2023/11/18/compilation_principle/image-20231111225923993.png" alt="picture"></p>
+<p>S文法不包含空产生式</p>
+<h4 id="q-文法"><a href="#q-文法" class="headerlink" title="q_文法"></a>q_文法</h4><p><img src="/2023/11/18/compilation_principle/image-20231111225909752.png" alt="picture"></p>
+<p>也就是说，<strong>B的Follow集为{b,c}，只有当输入符号为b/c时才能使用空产生式</strong>。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111230333527.png" alt="picture"></p>
+<p>first集和follow集不交。</p>
+<p>这下总算知道这两个是什么玩意了。也就是这样：</p>
+<ol>
+<li><p>输入符号与B的First集元素匹配</p>
+<p>直接用那个产生式</p>
+</li>
+<li><p>否则，看输入符号是否与Follow集元素匹配</p>
+<ol>
+<li><p>是</p>
+<p>若B无空产生式，报错；否则，使用B的空产生式（相当于消了一个符号但不变输入带指针）</p>
+</li>
+<li><p>否</p>
+<p>报错</p>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20231111230647504.png" alt="picture"></p>
+<p>这个感觉跟first集有点像，相当于是右部只能以终结符开始的形式，所以下面的LL文法会增强定义。</p>
+<p><strong>当该非终结符对应的所有SELECT集不相交，就可以进行确定的自顶向下语法分析</strong>。这个思想也将贯穿下面的LL文法</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111231321301.png" alt="picture"></p>
+<h4 id="LL-1-文法-1"><a href="#LL-1-文法-1" class="headerlink" title="LL(1)文法"></a>LL(1)文法</h4><p><img src="/2023/11/18/compilation_principle/image-20231111231423131.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111231410702.png" alt="picture"></p>
+<p>最后，<strong>如果同一非终结符的各个产生式的可选集互不相交</strong>，就可以进行确定的自顶向下分析：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111231035186.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111232758160.png" alt="picture"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>这几个推理下来，真是让人感觉酣畅淋漓！</p>
+<p>确定的自顶向下分析的核心就是，给定一个当前所处的非终结符和一个输入字符[E, a]，我们可以唯一确定一个产生式P用于构建语法分析树。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231111232654126.png" alt="picture"></p>
+<p>也即，同一个非终结符的所有产生式的SELECT集必须是<strong>不交的</strong>【才能确保选择产生式的唯一性】。因而，<strong>问题就转化为了如何让SELECT集不交</strong>。</p>
+<p>我们需要对空产生式和正常产生式的SELECT集计算做一个分类讨论。</p>
+<ol>
+<li><p>空产生式</p>
+<p>由于可以推导出空，相当于把该符号啥了去读下一个符号，因此我们的问题就转化为输入字符a是否能够跟该符号后面紧跟着的字符相匹配。而紧跟着的字符集我们将其成为FOLLOW集，如果a在follow集中，那么就可以接受，否则不行。</p>
+<p>对于LL(1)文法，相当于是进一步处理了简介推出空的串：</p>
+<p>​        由于α串-&gt;*空，则α串必定仅由非终结符构成。那么它能推导出的<strong>所有可能</strong>即为SELECT集。故而为<code>First(α)∪Follow(α)</code></p>
+</li>
+<li><p>非空产生式</p>
+<p>很简单，就是其First集。</p>
+</li>
+</ol>
+<p>故而，只需要让这些计算出来的First集合不交，就能进行确定的自顶向下语法分析，构造确定的语法分析树。不得不说真的牛逼。</p>
+<p>感觉其“预测分析”的“预测”主要体现在对空产生式的处理上。</p>
+<p>总算懂了为什么LL(1)能够解决这个回溯效率太低的问题了，太牛逼。不过问题是怎么转化为LL(1)呢（）上面的消除回溯和左递归只是一部分而已吧。</p>
+<h3 id="预测分析法"><a href="#预测分析法" class="headerlink" title="预测分析法"></a>预测分析法</h3><p><img src="/2023/11/18/compilation_principle/image-20231112152418378.png" alt="picture"></p>
+<p>这个消除二义性是啥玩意？二轮的时候看看PPT怎么讲的</p>
+<h4 id="递归的预测分析"><a href="#递归的预测分析" class="headerlink" title="递归的预测分析"></a>递归的预测分析</h4><p><img src="/2023/11/18/compilation_principle/image-20231112144111437.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112144432098.png" alt="picture"></p>
+<p>66666，它这个计算follow集的方法就很直观</p>
+<p>declistn有个空产生式，那么我们看得看②，而②的declistn排在最后，也就是说declistn的follow集就是其左部declist的follow集【6666】，所以我们看①，可以发现declist后面为:。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112144717729.png" alt="picture"></p>
+<p>如果是终结符，就直接==比较；非终结符，就把token传入到其对应的过程。</p>
+<h4 id="非递归的预测分析"><a href="#非递归的预测分析" class="headerlink" title="非递归的预测分析"></a>非递归的预测分析</h4><p><img src="/2023/11/18/compilation_principle/image-20231112145014440.png" alt="picture"></p>
+<p>66666</p>
+<p>感觉从中又能窥见动态规划的同样思想了。下推自动机其实感觉就像是递归思想（或者说顺序模拟递归，因为它甚至有一个栈，出栈相当于达成条件递归return），动态规划的话可能有点像是把每个不同状态以及不同状态时的栈顶元素整成一个2x2的表，所以感觉思想类似。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112145647129.png" alt="picture"></p>
+<p>注意，是栈顶跟输入一样都是非终结符才会移动指针和出栈</p>
+<p>值得注意的是，输出的产生式序列就对应了一个最左推导。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112145842176.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112152157112.png" alt="picture"></p>
+<h3 id="错误处理-1"><a href="#错误处理-1" class="headerlink" title="错误处理"></a>错误处理</h3><p><img src="/2023/11/18/compilation_principle/image-20231112152452712.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112152538620.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112152727160.png" alt="picture"></p>
+<p>其实也挺有道理，栈顶是非终结符，但是输入是它的follow集，那我们自然而然可以想到把这b赶跑，看看下面有没有真的它的follow集在嗷嗷待哺。</p>
+<h2 id="自底向上语法分析"><a href="#自底向上语法分析" class="headerlink" title="自底向上语法分析"></a>自底向上语法分析</h2><h3 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h3><p><strong>正确识别句柄</strong>是一个关键问题。</p>
+<p>句柄：当前句型的<strong>最左直接短语</strong>。【最左、子树高度为2】</p>
+<h4 id="自底向上"><a href="#自底向上" class="headerlink" title="自底向上"></a>自底向上</h4><p><img src="/2023/11/18/compilation_principle/image-20231112153809849.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112154325377.png" alt="picture"></p>
+<p>每次句柄形成就将它归约，因而保证一直是最左归约（recall that，句柄一定是某个产生式的右部，并且每次最左句柄一旦形成就归约）</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112154432092.png" alt="picture"></p>
+<p>正如上面的LL分析，每次推导要选择哪个产生式是一个问题；这里的LR分析，每次归约要选择哪个产生式，也即<strong>正确识别句柄</strong>，也是一个关键问题。</p>
+<p>所以，我们应该把句柄定义为当前句型的最左直接短语。</p>
+<p>如下图所示，左下角是当前句型（画红线部分）的语法分析树，红字为在栈中的部分，蓝字为输入符号串剩余部分。当前句型的<strong>直接短语</strong>（相当于根节点的高度为二的子树，或者说子树前两层）有两个，一个是以<code>&lt;IDS&gt;</code>为根节点的<code>&lt;IDS&gt; , iB</code>，另一个是<code>&lt;T&gt;</code>为根节点的<code>real</code>。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112155014094.png" alt="picture"></p>
+<p><strong>而LR分析技术的核心就是正确地识别了句柄</strong>。</p>
+<h4 id="LR文法"><a href="#LR文法" class="headerlink" title="LR文法"></a>LR文法</h4><p><img src="/2023/11/18/compilation_principle/image-20231112155440980.png" alt="picture"></p>
+<p>也就是说LR技术就是用来识别句柄的，识别完了句柄就可以构建类似自顶向下的预测分析那样的自动机表来进行转移。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112155547984.png" alt="picture"></p>
+<ol>
+<li><p>移进状态</p>
+<p>·后为终结符</p>
+</li>
+<li><p>待约状态</p>
+<p>·后为非终结符</p>
+</li>
+<li><p>归约状态</p>
+<p>·后为空</p>
+</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20231112155656933.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112160019688.png" alt="picture"></p>
+<p>以前感觉一直很难理解GOTO表的作用，现在感觉稍微明白了点了，你想想，归约之后的那个结果是不是有可能是另一个产生式的右部成分之一，也即一个新的句柄？并且这个也是由你栈顶刚归约好的那个左部和下面的输入符号决定的。那么你自然而然需要切换一下当前状态，以便之后遇到那个产生式的时候能发现到了。</p>
+<p>那么，剩下的问题就是如何构造LR分析表了：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112160838128.png" alt="picture"></p>
+<h3 id="算符分析"><a href="#算符分析" class="headerlink" title="算符分析"></a>算符分析</h3><p><img src="/2023/11/18/compilation_principle/image-20231116210010466.png" alt="picture"></p>
+<p>也就是它会整一个终结符之间的优先级关系。。。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231116210045015.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231116210128893.png" alt="picture"></p>
+<p>也就是说：</p>
+<ol>
+<li><p>a=b</p>
+<p>相邻</p>
+</li>
+<li><p>a&lt;b</p>
+<p>也即在A-&gt;aB时，b在FIRSTOP(B)中（理解一下，这个First指在前面。。。）</p>
+</li>
+<li><p>a&gt;b</p>
+<p>也即在A-&gt;Bb时，a在LASTOP(B)中（理解一下，这个LAST指在后面。。。）</p>
+</li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20231116210403348.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231116210851975.png" alt="picture"></p>
+<p>我服了</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231116211302726.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231116211508599.png" alt="picture"></p>
+<p>好像#这个固定都是，横的为左，竖的为右</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231116212722404.png" alt="picture"></p>
+<p>根据优先关系来判断移入和归约</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231116213212317.png" alt="picture"></p>
+<h3 id="LR分析"><a href="#LR分析" class="headerlink" title="LR分析"></a>LR分析</h3><h4 id="LR-0"><a href="#LR-0" class="headerlink" title="LR(0)"></a>LR(0)</h4><p>每个分析方法其实都对应着一种构造LR分析表的方法。<br>LR(0)通过构造<strong>规范LR0项集族</strong>，从而构造LR分析表，从而构造LR0 DFA来最终进行语法分析。</p>
+<p>每一个项目都对应着句柄识别的一个状态。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112161051362.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112161128029.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112161201907.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112161228677.png" alt="picture"></p>
+<p>而肯定不可能整那么多个状态，所以我们需要进行状态合并。（这样也就很容易理解LR的状态族构建了。）</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112163815934.png" alt="picture"></p>
+<p>它这里也很直观解释了为什么点遇到非终结符就需要加入其对应的所有产生式，因为在等待该非终结符就相当于在等待它的对应产生式的第一个字母。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112164459093.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112164735691.png" alt="picture"></p>
+<p>上面这东西就是这个所谓的规范LR(0)项集族了。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112164916157.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112164957032.png" alt="picture"></p>
+<p>但是会产生移进归约冲突：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112165330771.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112165351676.png" alt="picture"></p>
+<p>还有归约归约冲突：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112165427936.png" alt="picture"></p>
+<p>所以我们就把没有冲突的叫LR(0)文法。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112165527201.png" alt="image-20231112165527201"></p>
+<p>感觉上述两个问题都是因为有公共前缀【包括空产生式勉强也能算是这个情况】，导致信息不足无法判断应该怎么做，多读入一个字符（也即LR(1)）应该可以有效解决该问题。</p>
+<h4 id="SLR分析"><a href="#SLR分析" class="headerlink" title="SLR分析"></a>SLR分析</h4><p>其实本质还是识别句柄问题，也即此时是归约还是移入，得看是不是句柄。故而LR0信息已经不能帮我们识别句柄了。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113141858123.png" alt="picture"></p>
+<p>Follow集可以帮助我们判断。由该状态I2可知，输入一个*应该跳转到I7。如果在I2把T归约为一个E，由Follow集可知E后面不可能有一个*，也就说明在这里进行归约是错误的，应该进行移入。</p>
+<p>这种依靠<strong>Follow集和下一个符号</strong>判断的思想，就会运用在SLR分析中。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113142206565.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113142258075.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113142434388.png" alt="picture"></p>
+<p>但值得注意的是SLR分析的条件还是相对更严苛，它要求移进项目和归约项目的Follow集不相交，所以它也会产生像下图这样的冲突：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113142546012.png" alt="picture"></p>
+<h4 id="LR-1"><a href="#LR-1" class="headerlink" title="LR(1)"></a>LR(1)</h4><p><img src="/2023/11/18/compilation_principle/image-20231113142842691.png" alt="picture"></p>
+<p>SLR将子集扩大到了全集，显然进行了概念扩大。</p>
+<p>含义为只有当下一个输入符号是XX时，才能运用这个产生式归约。这个XX是产生式左部非终结符的Follow子集。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113143131304.png" alt="picture"></p>
+<p>这玩意只有归约时会用到，这个很显然，毕竟前面提到的LR0的问题就是归约冲突。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113143406696.png" alt="picture"></p>
+<p>对了，值得注意的是这个<code>FIRST(βa)</code>，它表示的并不是<code>FIRST(a)∪FIRST(β)</code>，里面的βa应该取连接意，也即，当β为非空时这玩意等于<code>FIRST(β)</code>，当β空时这玩意等于<code>FIRST(a)</code>。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113144055939.png" alt="picture"></p>
+<p>刚刚老师对着这个状态转移图进行了一番强大的看图写话操作，我感觉还是十分地牛逼。她从这个图触发，讲述了状态I2为什么不能对R-&gt;L进行归约。</p>
+<p>假如我们进行了归约，那么我们就需要弹出状态I2回到I0，压入符号R，I0遇到符号R进入了I3，I3继续归约回到I0，I0遇到符号S到状态I1，但1是接收状态，下一个符号是=不是$，所以错了。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113144119128.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113145133094.png" alt="picture"></p>
+<p>比如说I8和I10就是同心的。左边的那个实际上是LR0项目集，所以这里的心指的是LR0。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113145254201.png" alt="picture"></p>
+<h4 id="LALR分析"><a href="#LALR分析" class="headerlink" title="LALR分析"></a>LALR分析</h4><p>然而，LR(1)会导致状态急剧膨胀，影响效率，所以又提出了个LALR分析。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113145845546.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113150010199.png" alt="picture"></p>
+<p>跟前面的SLR对比可以发现，相当于它就是多了个逗号后面的条件。但是这是可以瞎合的吗？不会出啥问题不。。。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113150304592.png" alt="picture"></p>
+<p>好吧问题这就来了，LALR可能会产生归约归约冲突。但值得注意的是，它不可能出现归约移入冲突，因为LR1没有这个东西，而LALR只是修改右边的符号，所以也不会有这个。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113150701975.png" alt="picture"></p>
+<p>因为LALR实际上是合并了展望符集合，这东西与移进没有关系，所以只会影响归约，不会影响移进。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113151101241.png" alt="picture"></p>
+<p>LALR可能<strong>会产生归约归约冲突</strong>。但值得注意的是，它<strong>不可能出现归约移入冲突</strong>，因为LR1没有这个东西，而LALR只是修改右边的符号，所以也不会有这个。</p>
+<p>它有可能做多余的归约动作，从而<strong>推迟错误的发现</strong>。</p>
+<p>形式上与LR1相同；大小上与LR0/SLR相当；分析能力介于SLR和LR1之间；展望集仍为Follow集的子集。</p>
+<h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><p>感觉一路看下来，思路还是很流畅的。LR0会产生归约移进冲突和归约归约冲突，所以我们在归约时根据下一个符号是在移进符号还是在Follow集中来判断是要归约还是要移进。但是SLR条件严苛，对于那些移进符号集和Follow集有交的不适用，并且这种情况其实很普遍。加之，出于这个motivation：其实不应该用整个Follow集判断，而是应该用其真子集，所以我们开发出来个LR1文法。然后LR1文法虽然效果好但是状态太多了，所以我们再次折中一下，造出来个效果没有那么好但是状态少的LALR文法。</p>
+<h4 id="二义性文法的LR"><a href="#二义性文法的LR" class="headerlink" title="二义性文法的LR"></a>二义性文法的LR</h4><p><img src="/2023/11/18/compilation_principle/image-20231113153354856.png" alt="picture"></p>
+<p>所以我们可以用LR对二义性文法进行分析</p>
+<p>我们可以通过自定义规则来消除二义性文法的归约移入冲突</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113153518654.png" alt="picture"></p>
+<p>对于状态7，此时输入+ or *会面临归约移入冲突。由于有E-&gt;E+E归约式子，可以知道此时栈中为E+E。当输入*，由于<strong>*运算优先级更高</strong>，所以我们在此时进行移入动作转移到I5；当输入+，由于<strong>同运算先执行左结合</strong>，所以我们此时可以安全归约。</p>
+<p>对于状态8，由于*运算比+优先级高，且左结合，所以始终进行归约。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113153800860.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113153819450.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113153848078.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113153900879.png" alt="picture"></p>
+<h4 id="错误检测"><a href="#错误检测" class="headerlink" title="错误检测"></a>错误检测</h4><p><img src="/2023/11/18/compilation_principle/image-20231113153954039.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113154034683.png" alt="picture"></p>
+<p>它这个意思大概就是，符号栈和状态栈都一直pop，直到pop到一个状态，GOTO[符号栈顶，状态栈顶]有值【注意，始终保持<code>符号栈元素+1 == 状态栈元素数+1</code>】。然后，一直不断丢弃输入符号，直到输入符号在A的Follow集中。此时，就将GOTO值压入栈中继续分析。</p>
+<p>【这其实也很有道理。如果输入符号在A的Follow集，说明A之后很有可能可以消耗这个输入符号。】</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113160838344.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113160923423.png" alt="picture"></p>
+<h1 id="第五章-语义分析"><a href="#第五章-语义分析" class="headerlink" title="第五章  语义分析"></a>第五章  语义分析</h1><p>注意：</p>
+<ol>
+<li>语义翻译包含语义分析和中间代码生成</li>
+<li>这笔包含了语法分析、语义分析、中间代码生成</li>
+</ol>
+<p>思想：</p>
+<ol>
+<li>通过为文法符号设置语义属性，来表达语义信息</li>
+<li>通过与产生式（语法规则）相关联的语义规则来计算符号的语义属性值</li>
+</ol>
+<p>也可能是先入为主吧，感觉用实验的方法来理解语义分析比较便利。语义分析相当于定义一连串事件，附加在每个产生式上。当该产生式进行归约的时候，就执行对应的语义事件。而由于执行语义分析时需要的符号在语法分析栈中，所以我们也同样需要维护一个语义分析栈，在移进时也需要进栈。</p>
+<h2 id="SDD-SDT概念"><a href="#SDD-SDT概念" class="headerlink" title="SDD/SDT概念"></a>SDD/SDT概念</h2><p>语义分析一般与语法分析一同实现，这一技术成为语法制导翻译。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113161709638.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113161819971.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113161834028.png" alt="picture"></p>
+<h3 id="SDD"><a href="#SDD" class="headerlink" title="SDD"></a>SDD</h3><p><img src="/2023/11/18/compilation_principle/image-20231113162150197.png" alt="picture"></p>
+<p>可以回忆一下实验，相当于对每个产生式进行一个switch-case，然后依照产生式的类别和代码规则进行出栈入栈来计算属性值。</p>
+<h3 id="SDT"><a href="#SDT" class="headerlink" title="SDT"></a>SDT</h3><p><img src="/2023/11/18/compilation_principle/image-20231113162307565.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113162408135.png" alt="picture"></p>
+<h2 id="SDD-1"><a href="#SDD-1" class="headerlink" title="SDD"></a>SDD</h2><p><img src="/2023/11/18/compilation_principle/image-20231113162650850.png" alt="picture"></p>
+<h3 id="概念-1"><a href="#概念-1" class="headerlink" title="概念"></a>概念</h3><p>一个很简单区分综合属性和继承属性的方法，就是如果定义的是产生式左部的属性，那就是综合属性；右部，那就是继承属性</p>
+<h4 id="综合属性"><a href="#综合属性" class="headerlink" title="综合属性"></a>综合属性</h4><p><img src="/2023/11/18/compilation_principle/image-20231113162827636.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113163832788.png" alt="picture"></p>
+<h4 id="继承属性"><a href="#继承属性" class="headerlink" title="继承属性"></a>继承属性</h4><p><img src="/2023/11/18/compilation_principle/image-20231113162854973.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113164116586.png" alt="picture"></p>
+<p>这个东西就是我们实验里写的，副作用也是更新符号表。</p>
+<h4 id="属性文法"><a href="#属性文法" class="headerlink" title="属性文法"></a>属性文法</h4><p>没有副作用的SDD称为属性文法。</p>
+<h3 id="求值顺序"><a href="#求值顺序" class="headerlink" title="求值顺序"></a>求值顺序</h3><p><img src="/2023/11/18/compilation_principle/image-20231113164413558.png" alt="picture"></p>
+<p>而感觉语法分析这个过程的产生式归约顺序就能一定程度上表示了这个求值顺序</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113164521479.png" alt="picture"></p>
+<ol>
+<li>继承属性放在结点左边，综合属性放在结点右边</li>
+<li>如果属性值A依赖于属性值B，那么就有一条从B到A的箭头【B决定A】</li>
+<li>对于副作用，我们将其看作一个<strong>虚综合属性</strong>【注意是综合的，虽然它看起来既由兄弟结点决定也由子节点决定】</li>
+<li>可行的求值序列就是<strong>拓扑排序</strong></li>
+</ol>
+<p><img src="/2023/11/18/compilation_principle/image-20231113165433278.png" alt="picture"></p>
+<p>蛤？这不是你自己规则设计有问题吗，关我屁事</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113165523187.png" alt="picture"></p>
+<p>其实我还是不大理解，因为这个规则不是user定义的吗？所以产生环不也是它的事，难道说自顶向下或者自底向上分析还能优化SDD定义？？</p>
+<p>感觉它意思应该是这样的，有一个方法能绝对不产生循环依赖环，也即将自底向上/自顶向下语法分析与语义分析结合的这个方法。这个方法就是它说的真子集。</p>
+<p>所以我们接下来要研究的就是什么样的语义分析可以用自顶向下or自底向上语法分析一起制导。</p>
+<h3 id="S-SDD"><a href="#S-SDD" class="headerlink" title="S-SDD"></a>S-SDD</h3><p><img src="/2023/11/18/compilation_principle/image-20231113170553095.png" alt="picture"></p>
+<p>那确实，你自底向上想要计算继承属性好像也不大可能</p>
+<h3 id="L-SDD"><a href="#L-SDD" class="headerlink" title="L-SDD"></a>L-SDD</h3><p><img src="/2023/11/18/compilation_principle/image-20231113170653148.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113170735475.png" alt="picture"></p>
+<p>对应了自顶向下的<strong>最左推导</strong>顺序</p>
+<p>S-SDD包含于L-SDD</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113171201608.png" alt="picture"></p>
+<h2 id="SDT-1"><a href="#SDT-1" class="headerlink" title="SDT"></a>SDT</h2><p><img src="/2023/11/18/compilation_principle/image-20231113172215498.png" alt="picture"></p>
+<h3 id="S-SDD-gt-SDT"><a href="#S-SDD-gt-SDT" class="headerlink" title="S-SDD -&gt; SDT"></a>S-SDD -&gt; SDT</h3><p><img src="/2023/11/18/compilation_principle/image-20231113172322388.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113172359082.png" alt="picture"></p>
+<p>当归约发生时执行对应的语义动作</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113172513034.png" alt="picture"></p>
+<p>还需要加个属性栈</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113172711030.png" alt="picture"></p>
+<p>所以S-SDD+自底向上其实很简单，因为只需在归约的时候进行语义分析，在移进的时候push进属性栈就行了。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117013106735.png" alt="picture"></p>
+<p>具体的S-SDD结合语法分析的分析过程可以看<a target="_blank" rel="noopener" href="https://www.icourse163.org/learn/HIT-1002123007?tid=1450215473#/learn/content?type=detail&id=1214538609&sm=1">视频</a>。</p>
+<p>这个例子还算简单的，毕竟只是综合属性的计算而已，只需要加个属性栈，保存值就行了。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117013424181.png" alt="picture"></p>
+<p>我们可以来关注一下这个SDT的设计，也很简单。可以产生式和语义规则分离看待，这也给我们以后设计提供一定的启发。</p>
+<h3 id="L-SDD-gt-SDT"><a href="#L-SDD-gt-SDT" class="headerlink" title="L-SDD -&gt; SDT"></a>L-SDD -&gt; SDT</h3><p><img src="/2023/11/18/compilation_principle/image-20231113173152660.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113173253496.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113173544340.png" alt="picture"></p>
+<h4 id="非递归的预测分析-1"><a href="#非递归的预测分析-1" class="headerlink" title="非递归的预测分析"></a>非递归的预测分析</h4><p><img src="/2023/11/18/compilation_principle/image-20231113181234782.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113181656031.png" alt="picture"></p>
+<p>这个是自顶向下的语法分析，本来只用一个栈就行了，现在需要进行扩展。T的综合属性存放在它的右边，继承属性存放在它的平行位置。</p>
+<p>当属性值还没计算完时，不能出栈；当综合记录出栈时，它要将属性值借由语义动作复制给特定属性。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117015036335.png" alt="picture"></p>
+<p>然后语义动作也得一起进栈。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117015114181.png" alt="image-20231117015114181"></p>
+<p>digit是终结符，只有词法分析器提供值</p>
+<p>此时，digit跟一个语义动作关联，所以我们需要把它的值复制给它关联的这个语义动作{a6}，然后才能出栈。</p>
+<img src="/2023/11/18/compilation_principle/image-20231117015317921.png" alt="image-20231117015317921" style="zoom:50%;">
+
+<blockquote>
+<p>关联的另一个实例：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117015508123.png" alt="image-20231117015508123"></p>
+<p>此时由于T’.inh还要被a3用到，所以我们就得在T’出栈前把它的这个inh值复制给a3。</p>
+</blockquote>
+<p>当遇到语义动作之后，就执行动作，并且出栈语义动作。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113182558725.png" alt="picture"></p>
+<p>它这意思应该是遇到每个产生式的每个符号要执行什么动作都是确定的，所以代码实现是可能的。</p>
+<p>可以看到：</p>
+<ol>
+<li>语义动作代码就是执行</li>
+<li>综合属性代码就是赋给关联语义动作</li>
+<li>非终结符就是选一个它作为左部的产生式，然后看看要不要用到它自身的属性对右部子属性进行复制（体现了继承属性）</li>
+</ol>
+<h4 id="递归的预测分析-1"><a href="#递归的预测分析-1" class="headerlink" title="递归的预测分析"></a>递归的预测分析</h4><p><img src="/2023/11/18/compilation_principle/image-20231113183910480.png" alt="picture"></p>
+<p>666666666</p>
+<p>感觉这个值得深思，但反正现在的我思不出啥了。。。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113184357577.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113184413140.png" alt="picture"></p>
+<h4 id="LR分析-1"><a href="#LR分析-1" class="headerlink" title="LR分析"></a>LR分析</h4><p><img src="/2023/11/18/compilation_principle/image-20231113184535813.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231113184726388.png" alt="picture"></p>
+<p>相当于把L-SDD转化为了个S-SDD。具体是这样，把原式子右边的变量替换为marker的继承属性，结果替换为marker的综合属性。那么新符号继承属性怎么算啊。。。不用担心，因为观察可知要使用的这两个非终结符一定已经在栈中了。</p>
+<p>具体分析也看视频就好了。</p>
+<h1 id="第六章-中间代码生成"><a href="#第六章-中间代码生成" class="headerlink" title="第六章  中间代码生成"></a>第六章  中间代码生成</h1><h2 id="中间代码的形式"><a href="#中间代码的形式" class="headerlink" title="中间代码的形式"></a>中间代码的形式</h2><p><img src="/2023/11/18/compilation_principle/image-20231117132802682.png" alt="picture"></p>
+<h3 id="逆波兰（后缀）"><a href="#逆波兰（后缀）" class="headerlink" title="逆波兰（后缀）"></a>逆波兰（后缀）</h3><p><img src="/2023/11/18/compilation_principle/image-20231117132823037.png" alt="picture"></p>
+<h3 id="三地址码"><a href="#三地址码" class="headerlink" title="三地址码"></a>三地址码</h3><p><img src="/2023/11/18/compilation_principle/image-20231117132857376.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117132928425.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117133032501.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117232308034.png" alt="picture"></p>
+<p>false list就是if失败后的那个goto序号，true list是成功的那个goto序号，s.nextline是整个if的下一条指令</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117232356037.png" alt="picture"></p>
+<h3 id="四元式"><a href="#四元式" class="headerlink" title="四元式"></a>四元式</h3><p><img src="/2023/11/18/compilation_principle/image-20231117133559846.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117133641799.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117133916946.png" alt="picture"></p>
+<p>增量生成</p>
+<h3 id="DAG图"><a href="#DAG图" class="headerlink" title="DAG图"></a>DAG图</h3><p><img src="/2023/11/18/compilation_principle/image-20231117134049564.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117134332304.png" alt="picture"></p>
+<h2 id="声明语句"><a href="#声明语句" class="headerlink" title="声明语句"></a>声明语句</h2><h3 id="类型表达式"><a href="#类型表达式" class="headerlink" title="类型表达式"></a>类型表达式</h3><p><img src="/2023/11/18/compilation_principle/image-20231114134527011.png" alt="picture"></p>
+<h3 id="一般声明"><a href="#一般声明" class="headerlink" title="一般声明"></a>一般声明</h3><h4 id="非嵌套"><a href="#非嵌套" class="headerlink" title="非嵌套"></a>非嵌套</h4><p><img src="/2023/11/18/compilation_principle/image-20231117141718821.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117141752196.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117141925619.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114135607007.png" alt="picture"></p>
+<h4 id="嵌套"><a href="#嵌套" class="headerlink" title="嵌套"></a>嵌套</h4><p><img src="/2023/11/18/compilation_principle/image-20231117142612678.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117143632516.png" alt="picture"></p>
+<p>它这个相当于是把符号表和offset都整成了一个栈，毕竟确实过程调用就是得用栈结构的</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117144101729.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117144044829.png" alt="picture"></p>
+<h3 id="记录"><a href="#记录" class="headerlink" title="记录"></a>记录</h3><p><img src="/2023/11/18/compilation_principle/image-20231117144159367.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117144240347.png" alt="picture"></p>
+<p>之后用到该记录类型，就指向记录符号表即可。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117144732419.png" alt="picture"></p>
+<h2 id="简单赋值语句"><a href="#简单赋值语句" class="headerlink" title="简单赋值语句"></a>简单赋值语句</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>这个就不用填符号表了，所以helper function都是用来产生中间代码的</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117144844789.png" alt="picture"></p>
+<p>addr属性需要从符号表中获取</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117144953615.png" alt="picture"></p>
+<h3 id="临时变量处理"><a href="#临时变量处理" class="headerlink" title="临时变量处理"></a>临时变量处理</h3><p><img src="/2023/11/18/compilation_principle/image-20231117145110693.png" alt="picture"></p>
+<h2 id="数组元素寻址"><a href="#数组元素寻址" class="headerlink" title="数组元素寻址"></a>数组元素寻址</h2><p><img src="/2023/11/18/compilation_principle/image-20231117145328642.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114143941194.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117145550405.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117145640707.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117145651346.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117151832498.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117151857333.png" alt="picture"></p>
+<h2 id="类型检查"><a href="#类型检查" class="headerlink" title="类型检查"></a>类型检查</h2><h3 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h3><p>看个乐吧</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117152106296.png" alt="picture"></p>
+<h3 id="类型转换"><a href="#类型转换" class="headerlink" title="类型转换"></a>类型转换</h3><p><img src="/2023/11/18/compilation_principle/image-20231117152118611.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117152148577.png" alt="picture"></p>
+<p>在语义动作中实现</p>
+<h2 id="控制流语句"><a href="#控制流语句" class="headerlink" title="控制流语句"></a>控制流语句</h2><h3 id="简单控制流"><a href="#简单控制流" class="headerlink" title="简单控制流"></a>简单控制流</h3><p><img src="/2023/11/18/compilation_principle/image-20231117153522776.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117154312081.png" alt="picture"></p>
+<p>反正意思就是用S.next这个继承属性来表示S.code执行完后的下一个三地址码地址。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117154431688.png" alt="picture"></p>
+<h4 id="if-then"><a href="#if-then" class="headerlink" title="if-then"></a>if-then</h4><p><img src="/2023/11/18/compilation_principle/image-20231117154604715.png" alt="picture"></p>
+<h4 id="if-then-else"><a href="#if-then-else" class="headerlink" title="if-then-else"></a>if-then-else</h4><p><img src="/2023/11/18/compilation_principle/image-20231117154706152.png" alt="picture"></p>
+<h4 id="while-do"><a href="#while-do" class="headerlink" title="while-do"></a>while-do</h4><p><img src="/2023/11/18/compilation_principle/image-20231117154755243.png" alt="picture"></p>
+<h4 id><a href="#" class="headerlink" title=";"></a>;</h4><p>其实不大懂这什么玩意</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117154934759.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114151544042.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114151804396.png" alt="picture"></p>
+<p>抽象</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114151941652.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114152025154.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114152151627.png" alt="picture"></p>
+<h3 id="布尔表达式"><a href="#布尔表达式" class="headerlink" title="布尔表达式"></a>布尔表达式</h3><h4 id="布尔表达式翻译"><a href="#布尔表达式翻译" class="headerlink" title="布尔表达式翻译"></a>布尔表达式翻译</h4><h5 id="基本"><a href="#基本" class="headerlink" title="基本"></a>基本</h5><p><img src="/2023/11/18/compilation_principle/image-20231117153655955.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117153853340.png" alt="picture"></p>
+<h5 id="数值表示"><a href="#数值表示" class="headerlink" title="数值表示"></a>数值表示</h5><p><img src="/2023/11/18/compilation_principle/image-20231117153943533.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117154033264.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117154205465.png" alt="picture"></p>
+<h5 id="控制流表示"><a href="#控制流表示" class="headerlink" title="控制流表示"></a>控制流表示</h5><p><img src="/2023/11/18/compilation_principle/image-20231117155722232.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117155802643.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117155907176.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117160239307.png" alt="picture"></p>
+<h4 id="混合模式布尔表达式"><a href="#混合模式布尔表达式" class="headerlink" title="混合模式布尔表达式"></a>混合模式布尔表达式</h4><p><img src="/2023/11/18/compilation_principle/image-20231117160402055.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117160511486.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117160632529.png" alt="picture"></p>
+<h4 id="回填"><a href="#回填" class="headerlink" title="回填"></a>回填</h4><h5 id="基本-1"><a href="#基本-1" class="headerlink" title="基本"></a>基本</h5><p><img src="/2023/11/18/compilation_principle/image-20231117160714133.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117160746437.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117161920391.png" alt="picture"></p>
+<p>这两个都是综合属性</p>
+<p>相当于是一个waiting list</p>
+<h5 id="布尔表达式的回填"><a href="#布尔表达式的回填" class="headerlink" title="布尔表达式的回填"></a>布尔表达式的回填</h5><p><img src="/2023/11/18/compilation_principle/image-20231117161657187.png" alt="picture"></p>
+<p>可以理解为，B这个表达式可以分为两种情况，两种情况有一个为真B就为真。那么，B的真回填list相当于也被分为了两种情况，所以要求B的就是把它们合起来。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117161841553.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117161858720.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117162019665.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117162031648.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117162348542.png" alt="picture"></p>
+<p>原来回填是这个意思</p>
+<h5 id="控制流结构的回填"><a href="#控制流结构的回填" class="headerlink" title="控制流结构的回填"></a>控制流结构的回填</h5><p>nextline是一个综合属性</p>
+<h6 id="if-then-1"><a href="#if-then-1" class="headerlink" title="if-then"></a>if-then</h6><p><img src="/2023/11/18/compilation_principle/image-20231117162621503.png" alt="picture"></p>
+<h6 id="if-then-else-1"><a href="#if-then-else-1" class="headerlink" title="if-then-else"></a>if-then-else</h6><p><img src="/2023/11/18/compilation_principle/image-20231117162737368.png" alt="picture"></p>
+<h6 id="while-do-1"><a href="#while-do-1" class="headerlink" title="while-do"></a>while-do</h6><p><img src="/2023/11/18/compilation_principle/image-20231117162844535.png" alt="picture"></p>
+<h6 id="sequence"><a href="#sequence" class="headerlink" title="sequence"></a>sequence</h6><p><img src="/2023/11/18/compilation_principle/image-20231117162904611.png" alt="picture"></p>
+<h6 id="for"><a href="#for" class="headerlink" title="for"></a>for</h6><p><img src="/2023/11/18/compilation_principle/image-20231117163627882.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117163826360.png" alt="picture"></p>
+<h6 id="repeat"><a href="#repeat" class="headerlink" title="repeat"></a>repeat</h6><p><img src="/2023/11/18/compilation_principle/image-20231117163859976.png" alt="picture"></p>
+<h6 id="switch-case"><a href="#switch-case" class="headerlink" title="switch-case"></a>switch-case</h6><p>TODO   这笔之后再看。。。。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117163919294.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117164058117.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117164119210.png" alt="picture"></p>
+<h2 id="过程调用"><a href="#过程调用" class="headerlink" title="过程调用"></a>过程调用</h2><p><img src="/2023/11/18/compilation_principle/image-20231117164204857.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117164216783.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117164258301.png" alt="picture"></p>
+<h2 id="输入输出语句"><a href="#输入输出语句" class="headerlink" title="输入输出语句"></a>输入输出语句</h2><p>TODO</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117164351180.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117164359025.png" alt="picture"></p>
+<h2 id="题型1-四元序列"><a href="#题型1-四元序列" class="headerlink" title="题型1  四元序列"></a>题型1  四元序列</h2><p><img src="/2023/11/18/compilation_principle/image-20231117163537291.png" alt="picture"></p>
+<h1 id="第七章-运行存储分配"><a href="#第七章-运行存储分配" class="headerlink" title="第七章  运行存储分配"></a>第七章  运行存储分配</h1><h2 id="概念-2"><a href="#概念-2" class="headerlink" title="概念"></a>概念</h2><h3 id="存储组织"><a href="#存储组织" class="headerlink" title="存储组织"></a>存储组织</h3><h4 id="活动记录"><a href="#活动记录" class="headerlink" title="活动记录"></a>活动记录</h4><p><img src="/2023/11/18/compilation_principle/image-20231117171051536.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117171128213.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117171228838.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117171300515.png" alt="picture"></p>
+<h4 id="静态-动态链"><a href="#静态-动态链" class="headerlink" title="静态/动态链"></a>静态/动态链</h4><p><img src="/2023/11/18/compilation_principle/image-20231117175920514.png" alt="picture"></p>
+<p>静态链也被称作访问链，用于访问存放于其他活动记录中的非局部数据。</p>
+<p>动态链也被称作控制链，用于指向调用者的活动记录。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117180004684.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117180054430.png" alt="picture"></p>
+<h4 id="内存对齐"><a href="#内存对齐" class="headerlink" title="内存对齐"></a>内存对齐</h4><p><img src="/2023/11/18/compilation_principle/image-20231117171950775.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/IMG_20231117_172022.jpg" alt="picture"></p>
+<h3 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h3><p><img src="/2023/11/18/compilation_principle/image-20231117170505088.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117170532844.png" alt="picture"></p>
+<h3 id="传参方式"><a href="#传参方式" class="headerlink" title="传参方式"></a>传参方式</h3><h4 id="传值"><a href="#传值" class="headerlink" title="传值"></a>传值</h4><p><img src="/2023/11/18/compilation_principle/image-20231117170732952.png" alt="picture"></p>
+<h4 id="传地址"><a href="#传地址" class="headerlink" title="传地址"></a>传地址</h4><p><img src="/2023/11/18/compilation_principle/image-20231117170800064.png" alt="picture"></p>
+<h4 id="传值结果"><a href="#传值结果" class="headerlink" title="传值结果"></a>传值结果</h4><p><img src="/2023/11/18/compilation_principle/image-20231117170823344.png" alt="picture"></p>
+<p>反正意思就是既要得到原来的A，又要修改A</p>
+<h4 id="传名"><a href="#传名" class="headerlink" title="传名"></a>传名</h4><p><img src="/2023/11/18/compilation_principle/image-20231117170937326.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117172112207.png" alt="picture"></p>
+<h2 id="静态存储分配"><a href="#静态存储分配" class="headerlink" title="静态存储分配"></a>静态存储分配</h2><p><img src="/2023/11/18/compilation_principle/image-20231117172148583.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114153012920.png" alt="picture"></p>
+<h3 id="顺序分配法"><a href="#顺序分配法" class="headerlink" title="顺序分配法"></a>顺序分配法</h3><p><img src="/2023/11/18/compilation_principle/image-20231114153140663.png" alt="picture"></p>
+<h3 id="层次分配法"><a href="#层次分配法" class="headerlink" title="层次分配法"></a>层次分配法</h3><p><img src="/2023/11/18/compilation_principle/image-20231117172408087.png" alt="picture"></p>
+<h2 id="栈式存储分配"><a href="#栈式存储分配" class="headerlink" title="栈式存储分配"></a>栈式存储分配</h2><h3 id="概念-3"><a href="#概念-3" class="headerlink" title="概念"></a>概念</h3><p><img src="/2023/11/18/compilation_principle/image-20231117172511529.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114153656196.png" alt="picture"></p>
+<p>也就是说左边及其所有子树全调完了，才能调下一个兄弟的。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114153757311.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114153915178.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114154150835.png" alt="image-20231114154150835"></p>
+<p>左边这几点设计规则都十分reasonable，很值得注意。</p>
+<p>不过我其实挺好奇，参数存在那么后面该咋访问。。。。看xv6，似乎是fp指向前面，sp才指向local，也即用了两个栈指针。</p>
+<p>这个控制链也是约定俗成的，具体可以想起来xv6也是类似结构：</p>
+<p><img src="/2023/11/18/compilation_principle/image-20230112010749756.png" alt="picture"></p>
+<p>当函数返回的时候，就会进行恢复现场，从而出栈一直到ra，很合理。</p>
+<h3 id="调用-返回序列"><a href="#调用-返回序列" class="headerlink" title="调用/返回序列"></a>调用/返回序列</h3><h4 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h4><p><img src="/2023/11/18/compilation_principle/image-20231117172559365.png" alt="picture"></p>
+<p>调用序列应该就是设置参数、填写栈帧一类，返回序列就是恢复现场</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114163448345.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114163547096.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114163616550.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117172906559.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117172923420.png" alt="picture"></p>
+<h4 id="生成代码"><a href="#生成代码" class="headerlink" title="生成代码"></a>生成代码</h4><p><img src="/2023/11/18/compilation_principle/image-20231117173436377.png" alt="picture"></p>
+<h5 id="调用序列"><a href="#调用序列" class="headerlink" title="调用序列"></a>调用序列</h5><p>传变量、改变meta data、改变top和sp指针</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117173612717.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117173658051.png" alt="picture"></p>
+<h5 id="返回序列"><a href="#返回序列" class="headerlink" title="返回序列"></a>返回序列</h5><p><img src="/2023/11/18/compilation_principle/image-20231117173808890.png" alt="picture"></p>
+<h3 id="变长数据"><a href="#变长数据" class="headerlink" title="变长数据"></a>变长数据</h3><p><img src="/2023/11/18/compilation_principle/image-20231114163655037.png" alt="picture"></p>
+<p>这段解释了下为什么不用堆，说得很好</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114163755972.png" alt="picture"></p>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><p><img src="/2023/11/18/compilation_principle/image-20231117174306568.png" alt="picture"></p>
+<p>第二点，比如malloc后不free</p>
+<h2 id="栈中非局部数据的访问"><a href="#栈中非局部数据的访问" class="headerlink" title="栈中非局部数据的访问"></a>栈中非局部数据的访问</h2><p><img src="/2023/11/18/compilation_principle/image-20231114164346770.png" alt="picture"></p>
+<h3 id="有过程嵌套"><a href="#有过程嵌套" class="headerlink" title="有过程嵌套"></a>有过程嵌套</h3><p><img src="/2023/11/18/compilation_principle/image-20231114164422157.png" alt="picture"></p>
+<h4 id="静态作用域"><a href="#静态作用域" class="headerlink" title="静态作用域"></a>静态作用域</h4><h5 id="访问链"><a href="#访问链" class="headerlink" title="访问链"></a>访问链</h5><p><img src="/2023/11/18/compilation_principle/image-20231114164603745.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117174747278.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117174832911.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117174847771.png" alt="picture"></p>
+<h5 id="建立访问链"><a href="#建立访问链" class="headerlink" title="建立访问链"></a>建立访问链</h5><p><img src="/2023/11/18/compilation_principle/image-20231114164851929.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114164943640.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114165052095.png" alt="picture"></p>
+<h5 id="过程参数的访问链"><a href="#过程参数的访问链" class="headerlink" title="过程参数的访问链"></a>过程参数的访问链</h5><p><img src="/2023/11/18/compilation_principle/image-20231117175313877.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117175426674.png" alt="picture"></p>
+<h4 id="Display表"><a href="#Display表" class="headerlink" title="Display表"></a>Display表</h4><h5 id="通俗解释"><a href="#通俗解释" class="headerlink" title="通俗解释"></a>通俗解释</h5><p>每一个嵌套深度的分配一个Display位</p>
+<p>S嵌套深度1，所以占据d[1]；Y和X嵌套深度2，所以占据d[2]；Z嵌套深度3，所以占据d[3]。</p>
+<p>然后，一开始遇到个S，d1指向S；然后调用Y，d2指向Y；然后Y中调用X，就修改d2指向X；然后调用Z，就修改d3指向Z。</p>
+<p>总之显示栈就是这个变换指针的过程。</p>
+<p>至于控制栈，要打印这里面的display表，就是看层数。如果d1那就打印当前层，d2就打印的12层，d3就123层【不是纯显示栈，是它自己内部的未变换指针的结果】</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117225959427.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117230032838.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117230042818.png" alt="picture"></p>
+<p>结果：SXZ</p>
+<h5 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h5><p><img src="/2023/11/18/compilation_principle/image-20231117175535226.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117175607305.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117180329608.png" alt="picture"></p>
+<h5 id="访问流程"><a href="#访问流程" class="headerlink" title="访问流程"></a>访问流程</h5><p><img src="/2023/11/18/compilation_principle/image-20231117180235703.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117180438408.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117180730318.png" alt="picture"></p>
+<h5 id="生成代码-1"><a href="#生成代码-1" class="headerlink" title="生成代码"></a>生成代码</h5><p><img src="/2023/11/18/compilation_principle/image-20231117180838505.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117181023249.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117181052032.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117181110982.png" alt="picture"></p>
+<h4 id="动态作用域"><a href="#动态作用域" class="headerlink" title="动态作用域"></a>动态作用域</h4><p>静态作用域是空间上就近原则，动态是时间上。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117181442971.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117181553476.png" alt="picture"></p>
+<h3 id="无过程嵌套"><a href="#无过程嵌套" class="headerlink" title="无过程嵌套"></a>无过程嵌套</h3><p><img src="/2023/11/18/compilation_principle/image-20231114164528749.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114164541337.png" alt="picture"></p>
+<p>也就是说这时候非局部的一定是全局变量或者静态的局部变量。</p>
+<h3 id="堆管理"><a href="#堆管理" class="headerlink" title="堆管理"></a>堆管理</h3><p><img src="/2023/11/18/compilation_principle/image-20231117181646330.png" alt="picture"></p>
+<h4 id="内存管理器"><a href="#内存管理器" class="headerlink" title="内存管理器"></a>内存管理器</h4><h4 id="局部性"><a href="#局部性" class="headerlink" title="局部性"></a>局部性</h4><p><img src="/2023/11/18/compilation_principle/image-20231117181818373.png" alt="picture"></p>
+<h4 id="堆分配算法"><a href="#堆分配算法" class="headerlink" title="堆分配算法"></a>堆分配算法</h4><h4 id="人工回收请求"><a href="#人工回收请求" class="headerlink" title="人工回收请求"></a>人工回收请求</h4><h2 id="符号表"><a href="#符号表" class="headerlink" title="符号表"></a>符号表</h2><h3 id="如题"><a href="#如题" class="headerlink" title="如题"></a>如题</h3><p><img src="/2023/11/18/compilation_principle/image-20231114165902157.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114165945689.png" alt="picture"></p>
+<p>如果是支持过程声明嵌套，顺着符号表就可以找到其父过程/子过程的数据。</p>
+<p>符号表也可以用于构造访问链，因为过程名也是一种符号。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231114170305153.png" alt="picture"></p>
+<h3 id="符号表的建立"><a href="#符号表的建立" class="headerlink" title="符号表的建立"></a>符号表的建立</h3><p><img src="/2023/11/18/compilation_principle/image-20231114170418929.png" alt="picture"></p>
+<h1 id="第九章-代码生成"><a href="#第九章-代码生成" class="headerlink" title="第九章  代码生成"></a>第九章  代码生成</h1><h2 id="概述-3"><a href="#概述-3" class="headerlink" title="概述"></a>概述</h2><p><img src="/2023/11/18/compilation_principle/image-20231117182248619.png" alt="picture"></p>
+<h3 id="目标代码形式"><a href="#目标代码形式" class="headerlink" title="目标代码形式"></a>目标代码形式</h3><p><img src="/2023/11/18/compilation_principle/image-20231117182308855.png" alt="picture"></p>
+<h3 id="指令选择"><a href="#指令选择" class="headerlink" title="指令选择"></a>指令选择</h3><p><img src="/2023/11/18/compilation_principle/image-20231117182349789.png" alt="picture"></p>
+<h3 id="寄存器分配"><a href="#寄存器分配" class="headerlink" title="寄存器分配"></a>寄存器分配</h3><p><img src="/2023/11/18/compilation_principle/image-20231117182416592.png" alt="picture"></p>
+<h3 id="计算顺序选择"><a href="#计算顺序选择" class="headerlink" title="计算顺序选择"></a>计算顺序选择</h3><p><img src="/2023/11/18/compilation_principle/image-20231117182448247.png" alt="picture"></p>
+<p>不讨论这个</p>
+<h2 id="目标语言"><a href="#目标语言" class="headerlink" title="目标语言"></a>目标语言</h2><h3 id="定义-2"><a href="#定义-2" class="headerlink" title="定义"></a>定义</h3><p><img src="/2023/11/18/compilation_principle/image-20231117182512496.png" alt="picture"></p>
+<h3 id="指令开销"><a href="#指令开销" class="headerlink" title="指令开销"></a>指令开销</h3><p><img src="/2023/11/18/compilation_principle/image-20231117182528648.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117182539934.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117182558421.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117182608013.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117182623627.png" alt="picture"></p>
+<h3 id="运行时刻地址"><a href="#运行时刻地址" class="headerlink" title="运行时刻地址"></a>运行时刻地址</h3><h2 id="简单的代码生成器"><a href="#简单的代码生成器" class="headerlink" title="简单的代码生成器"></a>简单的代码生成器</h2><h3 id="后续引用信息"><a href="#后续引用信息" class="headerlink" title="后续引用信息"></a>后续引用信息</h3><p><img src="/2023/11/18/compilation_principle/image-20231117182828515.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117182927404.png" alt="picture"></p>
+<h3 id="寄存器与地址描述符"><a href="#寄存器与地址描述符" class="headerlink" title="寄存器与地址描述符"></a>寄存器与地址描述符</h3><p><img src="/2023/11/18/compilation_principle/image-20231117182951626.png" alt="picture"></p>
+<h3 id="代码生成算法"><a href="#代码生成算法" class="headerlink" title="代码生成算法"></a>代码生成算法</h3><p><img src="/2023/11/18/compilation_principle/image-20231117183024194.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117183140104.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117183149744.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117183159507.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117183212350.png" alt="picture"></p>
+<h2 id="窥孔优化"><a href="#窥孔优化" class="headerlink" title="窥孔优化"></a>窥孔优化</h2><p><img src="/2023/11/18/compilation_principle/image-20231117183238255.png" alt="picture"></p>
+<h3 id="冗余指令消除"><a href="#冗余指令消除" class="headerlink" title="冗余指令消除"></a>冗余指令消除</h3><p><img src="/2023/11/18/compilation_principle/image-20231117183257632.png" alt="picture"></p>
+<h3 id="不可达代码消除"><a href="#不可达代码消除" class="headerlink" title="不可达代码消除"></a>不可达代码消除</h3><p><img src="/2023/11/18/compilation_principle/image-20231117183311213.png" alt="picture"></p>
+<h3 id="强度削弱"><a href="#强度削弱" class="headerlink" title="强度削弱"></a>强度削弱</h3><p><img src="/2023/11/18/compilation_principle/image-20231117183329528.png" alt="picture"></p>
+<h3 id="特殊机器指令使用"><a href="#特殊机器指令使用" class="headerlink" title="特殊机器指令使用"></a>特殊机器指令使用</h3><p><img src="/2023/11/18/compilation_principle/image-20231117183354736.png" alt="picture"></p>
+<h2 id="寄存器分配指派"><a href="#寄存器分配指派" class="headerlink" title="寄存器分配指派"></a>寄存器分配指派</h2><p><img src="/2023/11/18/compilation_principle/image-20231117183424301.png" alt="picture"></p>
+<h3 id="全局寄存器分配"><a href="#全局寄存器分配" class="headerlink" title="全局寄存器分配"></a>全局寄存器分配</h3><p><img src="/2023/11/18/compilation_principle/image-20231117183509870.png" alt="picture"></p>
+<h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><p><img src="/2023/11/18/compilation_principle/image-20231117183531327.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117183553775.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117183750248.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117183815060.png" alt="picture"></p>
+<p>所以这东西是用来决策寄存器分配的</p>
+<h3 id="外层循环的寄存器指派"><a href="#外层循环的寄存器指派" class="headerlink" title="外层循环的寄存器指派"></a>外层循环的寄存器指派</h3><p><img src="/2023/11/18/compilation_principle/image-20231117183851562.png" alt="picture"></p>
+<p><img src="/2023/11/18/compilation_principle/image-20231117183958719.png" alt="picture"></p>
+<p>反正类似保护现场恢复现场</p>
+<h1 id="拓展阅读"><a href="#拓展阅读" class="headerlink" title="拓展阅读"></a>拓展阅读</h1><h2 id="AC自动机"><a href="#AC自动机" class="headerlink" title="AC自动机"></a>AC自动机</h2><p>在思考自动机和动态规划的关系时，胡乱搜索看到了AC自动机，于是来了解了一下。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/569429689">算法学习笔记(89): AC自动机 - Pecco的文章 - 知乎</a></p>
+</blockquote>
+<blockquote>
+<p>考虑一个问题：给出若干个模式串，如何构建一个<strong>DFA</strong>，接受所有<strong>以任一模式串结尾</strong>（称为与该模式串<strong>匹配</strong>）的文本串？</p>
+<p>可以先思考一个更简单的问题：如何构建接受所有<strong>模式串</strong>的DFA？很明显，**<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/173981140">字典树</a>**就可以看做符合要求的自动机。例如，有模式串<code>&quot;abab&quot;</code>、<code>&quot;abc&quot;</code>、<code>&quot;bca&quot;</code>、<code>&quot;cc&quot;</code> ，我们把它们插入字典树，可以得到：</p>
+<p><img src="/2023/11/18/compilation_principle/v2-610bf072e6ca46f194b45dc2ff39fdc4_1440w.png" alt="picture"></p>
+<p>为了使它不仅接受模式串，还接受以模式串结尾的文本串，一个看起来挺正确的改动是，使每个状态接受所有原先不能接受的字符，转移到<strong>初始状态</strong>（即根节点）。</p>
+<p><img src="/2023/11/18/compilation_principle/v2-e295f3442cda25ff7e287920b293eaa1_1440w.png" alt="picture"></p>
+<p>但是如果我们尝试<code>&quot;abca&quot;</code>，我们会发现我们的自动机并不能接受它。稍加观察发现，我们在状态5接受<code>a</code>应该跳到状态8才对，而不是初始状态。某种意义上来说，状态7是状态5<strong>退而求其次</strong>的选择，因为状态7在trie上对应的字符串<code>&quot;bc&quot;</code>是状态5对应的字符串<code>&quot;abc&quot;</code>的<strong>后缀</strong>。既然状态5原本不能接受<code>&quot;a&quot;</code>，我们完全可以退而求其次看看状态7是否可以接受。这看起来很像<strong>KMP算法</strong>，确实，AC自动机常常被人称作trie上KMP。</p>
+<p>所以我们给每个状态分配一条<strong>fail边</strong>，它连向的是该状态对应字符串在trie上存在的<strong>最长真后缀</strong>所对应的状态。我们令所有状态p接受原来不能接受的字符c，转移到 next(fail(p),c) ，特别地，根节点转移到自己。为什么不需要像KMP算法一样，用一个循环不断进行退而求其次的选择呢？因为如果我们用<strong>BFS</strong>的方式进行上面的重构，我们可以保证 fail(p) 在p重构前已经重构完成了，类似于<strong>动态规划</strong>。</p>
+<p><img src="/2023/11/18/compilation_principle/image-20231112151642625.png" alt="picture"></p>
+<p>这样建fail边和重构完成后得到的自动机称为<strong>AC自动机</strong>（Aho-Corasick Automation）。</p>
+<p>我们发现fail边也形成一棵树，所以其实AC自动机包含两棵树：<strong>trie树</strong>和<strong>fail树</strong>。一个重要的性质是，如果当前状态 p 在某个终止状态 s 的fail树的<strong>子树</strong>上，那么当前文本串就与 s 所对应模式串<strong>匹配</strong>。</p>
+</blockquote>
+<p>也就是说它的解决方法是加fall边（蓝色）和加新边（红色），</p>
+
+    </div>
+
+    
+    
+    
+
+		<div>
+		  
+			<div>
+    
+        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+		  
+		</div>
+
+      <footer class="post-footer">
+
+        
+
+
+        
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%A0-%E7%BB%AA%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text">第一章  绪论</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E7%A8%8B%E5%BA%8F%E6%80%BB%E4%BD%93%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">编译程序总体结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.2.1.</span> <span class="nav-text">词法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.2.2.</span> <span class="nav-text">语法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E4%B9%89%E5%88%86%E6%9E%90"><span class="nav-number">1.2.3.</span> <span class="nav-text">语义分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-number">1.2.4.</span> <span class="nav-text">中间代码生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96"><span class="nav-number">1.2.5.</span> <span class="nav-text">代码优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-number">1.2.6.</span> <span class="nav-text">目标代码生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E6%A0%BC%E7%AE%A1%E7%90%86"><span class="nav-number">1.2.7.</span> <span class="nav-text">表格管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="nav-number">1.2.8.</span> <span class="nav-text">错误处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%BB%84%E7%BB%87"><span class="nav-number">1.3.</span> <span class="nav-text">编译程序的组织</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%BC%96%E8%AF%91%E5%99%A8"><span class="nav-number">1.4.</span> <span class="nav-text">实现编译器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#T%E5%BD%A2%E5%9B%BE"><span class="nav-number">1.4.1.</span> <span class="nav-text">T形图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%B1%95"><span class="nav-number">1.4.2.</span> <span class="nav-text">自展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%BB%E6%A4%8D"><span class="nav-number">1.4.3.</span> <span class="nav-text">移植</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E6%9C%BA%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84%E5%88%A9%E7%94%A8"><span class="nav-number">1.4.4.</span> <span class="nav-text">本机编译器的利用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E7%A8%8B%E5%BA%8F%E7%9A%84%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90"><span class="nav-number">1.4.5.</span> <span class="nav-text">编译程序的自动生成</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%96%87%E6%B3%95%E7%AD%89%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">第二章  文法等概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">2.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">文法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E8%A8%80"><span class="nav-number">2.3.</span> <span class="nav-text">语言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%94%E5%A7%86%E6%96%AF%E5%9F%BA%E6%96%87%E6%B3%95%E4%BD%93%E7%B3%BB"><span class="nav-number">2.4.</span> <span class="nav-text">乔姆斯基文法体系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CFG"><span class="nav-number">2.5.</span> <span class="nav-text">CFG</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">第三章  词法分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E8%AF%AD%E8%A8%80"><span class="nav-number">3.1.</span> <span class="nav-text">正则语言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">3.1.1.</span> <span class="nav-text">正则表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E5%AE%9A%E4%B9%89"><span class="nav-number">3.1.2.</span> <span class="nav-text">正则定义</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E7%A9%B7%E8%87%AA%E5%8A%A8%E6%9C%BA"><span class="nav-number">3.2.</span> <span class="nav-text">有穷自动机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB"><span class="nav-number">3.2.2.</span> <span class="nav-text">分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DFA"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">DFA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NFA"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">NFA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NFA%E4%B8%8EDFA%E8%BD%AC%E5%8C%96"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">NFA与DFA转化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#e-NFA"><span class="nav-number">3.2.2.4.</span> <span class="nav-text">e-NFA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#e-NFA%E4%B8%8ENFA%E8%BD%AC%E5%8C%96"><span class="nav-number">3.2.2.5.</span> <span class="nav-text">e-NFA与NFA转化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90%E7%9B%B8%E5%85%B3"><span class="nav-number">3.3.</span> <span class="nav-text">词法分析相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%86%E5%88%AB%E5%8D%95%E8%AF%8D%E7%9A%84DFA"><span class="nav-number">3.3.1.</span> <span class="nav-text">识别单词的DFA</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E5%AD%97"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">数字</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E9%87%8A"><span class="nav-number">3.3.1.2.</span> <span class="nav-text">注释</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%86%E5%88%ABtoken"><span class="nav-number">3.3.1.3.</span> <span class="nav-text">识别token</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scanner%E7%9A%84%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="nav-number">3.3.2.</span> <span class="nav-text">scanner的错误处理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">第四章  语法分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8BLL-1"><span class="nav-number">4.1.</span> <span class="nav-text">自顶向下LL(1)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">4.1.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E7%AE%97%E6%B3%95"><span class="nav-number">4.1.2.</span> <span class="nav-text">通用算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90"><span class="nav-number">4.1.2.1.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%92%E5%BD%92%E4%B8%8B%E9%99%8D%E5%88%86%E6%9E%90"><span class="nav-number">4.1.2.2.</span> <span class="nav-text">递归下降分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90"><span class="nav-number">4.1.2.3.</span> <span class="nav-text">预测分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%B3%95%E8%BD%AC%E6%8D%A2"><span class="nav-number">4.1.3.</span> <span class="nav-text">文法转换</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%83%85%E5%86%B5%E9%9C%80%E8%A6%81%E6%94%B9%E9%80%A0"><span class="nav-number">4.1.3.1.</span> <span class="nav-text">什么情况需要改造</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E9%99%A4%E5%B7%A6%E9%80%92%E5%BD%92"><span class="nav-number">4.1.3.2.</span> <span class="nav-text">消除左递归</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E5%B7%A6%E9%80%92%E5%BD%92"><span class="nav-number">4.1.3.2.1.</span> <span class="nav-text">直接左递归</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%97%B4%E6%8E%A5%E5%B7%A6%E9%80%92%E5%BD%92"><span class="nav-number">4.1.3.2.2.</span> <span class="nav-text">间接左递归</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E9%99%A4%E5%9B%9E%E6%BA%AF"><span class="nav-number">4.1.3.3.</span> <span class="nav-text">消除回溯</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LL-1-%E6%96%87%E6%B3%95"><span class="nav-number">4.1.4.</span> <span class="nav-text">LL(1)文法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#S-%E6%96%87%E6%B3%95"><span class="nav-number">4.1.4.1.</span> <span class="nav-text">S_文法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#q-%E6%96%87%E6%B3%95"><span class="nav-number">4.1.4.2.</span> <span class="nav-text">q_文法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LL-1-%E6%96%87%E6%B3%95-1"><span class="nav-number">4.1.4.3.</span> <span class="nav-text">LL(1)文法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.1.4.4.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90%E6%B3%95"><span class="nav-number">4.1.5.</span> <span class="nav-text">预测分析法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%92%E5%BD%92%E7%9A%84%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90"><span class="nav-number">4.1.5.1.</span> <span class="nav-text">递归的预测分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E9%80%92%E5%BD%92%E7%9A%84%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90"><span class="nav-number">4.1.5.2.</span> <span class="nav-text">非递归的预测分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86-1"><span class="nav-number">4.1.6.</span> <span class="nav-text">错误处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">4.2.</span> <span class="nav-text">自底向上语法分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0-2"><span class="nav-number">4.2.1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">自底向上</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LR%E6%96%87%E6%B3%95"><span class="nav-number">4.2.1.2.</span> <span class="nav-text">LR文法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E7%AC%A6%E5%88%86%E6%9E%90"><span class="nav-number">4.2.2.</span> <span class="nav-text">算符分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LR%E5%88%86%E6%9E%90"><span class="nav-number">4.2.3.</span> <span class="nav-text">LR分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LR-0"><span class="nav-number">4.2.3.1.</span> <span class="nav-text">LR(0)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SLR%E5%88%86%E6%9E%90"><span class="nav-number">4.2.3.2.</span> <span class="nav-text">SLR分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LR-1"><span class="nav-number">4.2.3.3.</span> <span class="nav-text">LR(1)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LALR%E5%88%86%E6%9E%90"><span class="nav-number">4.2.3.4.</span> <span class="nav-text">LALR分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">4.2.3.5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E4%B9%89%E6%80%A7%E6%96%87%E6%B3%95%E7%9A%84LR"><span class="nav-number">4.2.3.6.</span> <span class="nav-text">二义性文法的LR</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E6%A3%80%E6%B5%8B"><span class="nav-number">4.2.3.7.</span> <span class="nav-text">错误检测</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E7%AB%A0-%E8%AF%AD%E4%B9%89%E5%88%86%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">第五章  语义分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SDD-SDT%E6%A6%82%E5%BF%B5"><span class="nav-number">5.1.</span> <span class="nav-text">SDD&#x2F;SDT概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SDD"><span class="nav-number">5.1.1.</span> <span class="nav-text">SDD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SDT"><span class="nav-number">5.1.2.</span> <span class="nav-text">SDT</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDD-1"><span class="nav-number">5.2.</span> <span class="nav-text">SDD</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5-1"><span class="nav-number">5.2.1.</span> <span class="nav-text">概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%BC%E5%90%88%E5%B1%9E%E6%80%A7"><span class="nav-number">5.2.1.1.</span> <span class="nav-text">综合属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF%E5%B1%9E%E6%80%A7"><span class="nav-number">5.2.1.2.</span> <span class="nav-text">继承属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E6%96%87%E6%B3%95"><span class="nav-number">5.2.1.3.</span> <span class="nav-text">属性文法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%82%E5%80%BC%E9%A1%BA%E5%BA%8F"><span class="nav-number">5.2.2.</span> <span class="nav-text">求值顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#S-SDD"><span class="nav-number">5.2.3.</span> <span class="nav-text">S-SDD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#L-SDD"><span class="nav-number">5.2.4.</span> <span class="nav-text">L-SDD</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDT-1"><span class="nav-number">5.3.</span> <span class="nav-text">SDT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#S-SDD-gt-SDT"><span class="nav-number">5.3.1.</span> <span class="nav-text">S-SDD -&gt; SDT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#L-SDD-gt-SDT"><span class="nav-number">5.3.2.</span> <span class="nav-text">L-SDD -&gt; SDT</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E9%80%92%E5%BD%92%E7%9A%84%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90-1"><span class="nav-number">5.3.2.1.</span> <span class="nav-text">非递归的预测分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%92%E5%BD%92%E7%9A%84%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90-1"><span class="nav-number">5.3.2.2.</span> <span class="nav-text">递归的预测分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LR%E5%88%86%E6%9E%90-1"><span class="nav-number">5.3.2.3.</span> <span class="nav-text">LR分析</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E5%85%AD%E7%AB%A0-%E4%B8%AD%E9%97%B4%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-number">6.</span> <span class="nav-text">第六章  中间代码生成</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%A3%E7%A0%81%E7%9A%84%E5%BD%A2%E5%BC%8F"><span class="nav-number">6.1.</span> <span class="nav-text">中间代码的形式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%86%E6%B3%A2%E5%85%B0%EF%BC%88%E5%90%8E%E7%BC%80%EF%BC%89"><span class="nav-number">6.1.1.</span> <span class="nav-text">逆波兰（后缀）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E5%9C%B0%E5%9D%80%E7%A0%81"><span class="nav-number">6.1.2.</span> <span class="nav-text">三地址码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E5%85%83%E5%BC%8F"><span class="nav-number">6.1.3.</span> <span class="nav-text">四元式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DAG%E5%9B%BE"><span class="nav-number">6.1.4.</span> <span class="nav-text">DAG图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A3%B0%E6%98%8E%E8%AF%AD%E5%8F%A5"><span class="nav-number">6.2.</span> <span class="nav-text">声明语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">6.2.1.</span> <span class="nav-text">类型表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E5%A3%B0%E6%98%8E"><span class="nav-number">6.2.2.</span> <span class="nav-text">一般声明</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E5%B5%8C%E5%A5%97"><span class="nav-number">6.2.2.1.</span> <span class="nav-text">非嵌套</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B5%8C%E5%A5%97"><span class="nav-number">6.2.2.2.</span> <span class="nav-text">嵌套</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95"><span class="nav-number">6.2.3.</span> <span class="nav-text">记录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E8%B5%8B%E5%80%BC%E8%AF%AD%E5%8F%A5"><span class="nav-number">6.3.</span> <span class="nav-text">简单赋值语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">6.3.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B4%E6%97%B6%E5%8F%98%E9%87%8F%E5%A4%84%E7%90%86"><span class="nav-number">6.3.2.</span> <span class="nav-text">临时变量处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E5%85%83%E7%B4%A0%E5%AF%BB%E5%9D%80"><span class="nav-number">6.4.</span> <span class="nav-text">数组元素寻址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5"><span class="nav-number">6.5.</span> <span class="nav-text">类型检查</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%84%E5%88%99"><span class="nav-number">6.5.1.</span> <span class="nav-text">规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"><span class="nav-number">6.5.2.</span> <span class="nav-text">类型转换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E6%B5%81%E8%AF%AD%E5%8F%A5"><span class="nav-number">6.6.</span> <span class="nav-text">控制流语句</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E6%8E%A7%E5%88%B6%E6%B5%81"><span class="nav-number">6.6.1.</span> <span class="nav-text">简单控制流</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#if-then"><span class="nav-number">6.6.1.1.</span> <span class="nav-text">if-then</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#if-then-else"><span class="nav-number">6.6.1.2.</span> <span class="nav-text">if-then-else</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#while-do"><span class="nav-number">6.6.1.3.</span> <span class="nav-text">while-do</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">6.6.1.4.</span> <span class="nav-text">;</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%83%E5%B0%94%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">6.6.2.</span> <span class="nav-text">布尔表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%83%E5%B0%94%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%BF%BB%E8%AF%91"><span class="nav-number">6.6.2.1.</span> <span class="nav-text">布尔表达式翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC"><span class="nav-number">6.6.2.1.1.</span> <span class="nav-text">基本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E5%80%BC%E8%A1%A8%E7%A4%BA"><span class="nav-number">6.6.2.1.2.</span> <span class="nav-text">数值表示</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E6%B5%81%E8%A1%A8%E7%A4%BA"><span class="nav-number">6.6.2.1.3.</span> <span class="nav-text">控制流表示</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F%E5%B8%83%E5%B0%94%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">6.6.2.2.</span> <span class="nav-text">混合模式布尔表达式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E5%A1%AB"><span class="nav-number">6.6.2.3.</span> <span class="nav-text">回填</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC-1"><span class="nav-number">6.6.2.3.1.</span> <span class="nav-text">基本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%83%E5%B0%94%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E5%9B%9E%E5%A1%AB"><span class="nav-number">6.6.2.3.2.</span> <span class="nav-text">布尔表达式的回填</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E6%B5%81%E7%BB%93%E6%9E%84%E7%9A%84%E5%9B%9E%E5%A1%AB"><span class="nav-number">6.6.2.3.3.</span> <span class="nav-text">控制流结构的回填</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#if-then-1"><span class="nav-number">6.6.2.3.3.1.</span> <span class="nav-text">if-then</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#if-then-else-1"><span class="nav-number">6.6.2.3.3.2.</span> <span class="nav-text">if-then-else</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#while-do-1"><span class="nav-number">6.6.2.3.3.3.</span> <span class="nav-text">while-do</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#sequence"><span class="nav-number">6.6.2.3.3.4.</span> <span class="nav-text">sequence</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#for"><span class="nav-number">6.6.2.3.3.5.</span> <span class="nav-text">for</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#repeat"><span class="nav-number">6.6.2.3.3.6.</span> <span class="nav-text">repeat</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#switch-case"><span class="nav-number">6.6.2.3.3.7.</span> <span class="nav-text">switch-case</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E8%B0%83%E7%94%A8"><span class="nav-number">6.7.</span> <span class="nav-text">过程调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E8%AF%AD%E5%8F%A5"><span class="nav-number">6.8.</span> <span class="nav-text">输入输出语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%98%E5%9E%8B1-%E5%9B%9B%E5%85%83%E5%BA%8F%E5%88%97"><span class="nav-number">6.9.</span> <span class="nav-text">题型1  四元序列</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%83%E7%AB%A0-%E8%BF%90%E8%A1%8C%E5%AD%98%E5%82%A8%E5%88%86%E9%85%8D"><span class="nav-number">7.</span> <span class="nav-text">第七章  运行存储分配</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5-2"><span class="nav-number">7.1.</span> <span class="nav-text">概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%BB%84%E7%BB%87"><span class="nav-number">7.1.1.</span> <span class="nav-text">存储组织</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B4%BB%E5%8A%A8%E8%AE%B0%E5%BD%95"><span class="nav-number">7.1.1.1.</span> <span class="nav-text">活动记录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81-%E5%8A%A8%E6%80%81%E9%93%BE"><span class="nav-number">7.1.1.2.</span> <span class="nav-text">静态&#x2F;动态链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90"><span class="nav-number">7.1.1.3.</span> <span class="nav-text">内存对齐</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">7.1.2.</span> <span class="nav-text">作用域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E5%8F%82%E6%96%B9%E5%BC%8F"><span class="nav-number">7.1.3.</span> <span class="nav-text">传参方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E5%80%BC"><span class="nav-number">7.1.3.1.</span> <span class="nav-text">传值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E5%9C%B0%E5%9D%80"><span class="nav-number">7.1.3.2.</span> <span class="nav-text">传地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E5%80%BC%E7%BB%93%E6%9E%9C"><span class="nav-number">7.1.3.3.</span> <span class="nav-text">传值结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E5%90%8D"><span class="nav-number">7.1.3.4.</span> <span class="nav-text">传名</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%AD%98%E5%82%A8%E5%88%86%E9%85%8D"><span class="nav-number">7.2.</span> <span class="nav-text">静态存储分配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E5%88%86%E9%85%8D%E6%B3%95"><span class="nav-number">7.2.1.</span> <span class="nav-text">顺序分配法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%82%E6%AC%A1%E5%88%86%E9%85%8D%E6%B3%95"><span class="nav-number">7.2.2.</span> <span class="nav-text">层次分配法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%88%E5%BC%8F%E5%AD%98%E5%82%A8%E5%88%86%E9%85%8D"><span class="nav-number">7.3.</span> <span class="nav-text">栈式存储分配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5-3"><span class="nav-number">7.3.1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8-%E8%BF%94%E5%9B%9E%E5%BA%8F%E5%88%97"><span class="nav-number">7.3.2.</span> <span class="nav-text">调用&#x2F;返回序列</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">7.3.2.1.</span> <span class="nav-text">是什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E4%BB%A3%E7%A0%81"><span class="nav-number">7.3.2.2.</span> <span class="nav-text">生成代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E5%BA%8F%E5%88%97"><span class="nav-number">7.3.2.2.1.</span> <span class="nav-text">调用序列</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E5%BA%8F%E5%88%97"><span class="nav-number">7.3.2.2.2.</span> <span class="nav-text">返回序列</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%95%BF%E6%95%B0%E6%8D%AE"><span class="nav-number">7.3.3.</span> <span class="nav-text">变长数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">7.3.4.</span> <span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%88%E4%B8%AD%E9%9D%9E%E5%B1%80%E9%83%A8%E6%95%B0%E6%8D%AE%E7%9A%84%E8%AE%BF%E9%97%AE"><span class="nav-number">7.4.</span> <span class="nav-text">栈中非局部数据的访问</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E8%BF%87%E7%A8%8B%E5%B5%8C%E5%A5%97"><span class="nav-number">7.4.1.</span> <span class="nav-text">有过程嵌套</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">7.4.1.1.</span> <span class="nav-text">静态作用域</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E9%93%BE"><span class="nav-number">7.4.1.1.1.</span> <span class="nav-text">访问链</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E8%AE%BF%E9%97%AE%E9%93%BE"><span class="nav-number">7.4.1.1.2.</span> <span class="nav-text">建立访问链</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E5%8F%82%E6%95%B0%E7%9A%84%E8%AE%BF%E9%97%AE%E9%93%BE"><span class="nav-number">7.4.1.1.3.</span> <span class="nav-text">过程参数的访问链</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Display%E8%A1%A8"><span class="nav-number">7.4.1.2.</span> <span class="nav-text">Display表</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%9A%E4%BF%97%E8%A7%A3%E9%87%8A"><span class="nav-number">7.4.1.2.1.</span> <span class="nav-text">通俗解释</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89-1"><span class="nav-number">7.4.1.2.2.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E6%B5%81%E7%A8%8B"><span class="nav-number">7.4.1.2.3.</span> <span class="nav-text">访问流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E4%BB%A3%E7%A0%81-1"><span class="nav-number">7.4.1.2.4.</span> <span class="nav-text">生成代码</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">7.4.1.3.</span> <span class="nav-text">动态作用域</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E8%BF%87%E7%A8%8B%E5%B5%8C%E5%A5%97"><span class="nav-number">7.4.2.</span> <span class="nav-text">无过程嵌套</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E7%AE%A1%E7%90%86"><span class="nav-number">7.4.3.</span> <span class="nav-text">堆管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%99%A8"><span class="nav-number">7.4.3.1.</span> <span class="nav-text">内存管理器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E6%80%A7"><span class="nav-number">7.4.3.2.</span> <span class="nav-text">局部性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A0%86%E5%88%86%E9%85%8D%E7%AE%97%E6%B3%95"><span class="nav-number">7.4.3.3.</span> <span class="nav-text">堆分配算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%BA%E5%B7%A5%E5%9B%9E%E6%94%B6%E8%AF%B7%E6%B1%82"><span class="nav-number">7.4.3.4.</span> <span class="nav-text">人工回收请求</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="nav-number">7.5.</span> <span class="nav-text">符号表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E9%A2%98"><span class="nav-number">7.5.1.</span> <span class="nav-text">如题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E8%A1%A8%E7%9A%84%E5%BB%BA%E7%AB%8B"><span class="nav-number">7.5.2.</span> <span class="nav-text">符号表的建立</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B9%9D%E7%AB%A0-%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-number">8.</span> <span class="nav-text">第九章  代码生成</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0-3"><span class="nav-number">8.1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E4%BB%A3%E7%A0%81%E5%BD%A2%E5%BC%8F"><span class="nav-number">8.1.1.</span> <span class="nav-text">目标代码形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E9%80%89%E6%8B%A9"><span class="nav-number">8.1.2.</span> <span class="nav-text">指令选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E5%88%86%E9%85%8D"><span class="nav-number">8.1.3.</span> <span class="nav-text">寄存器分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E9%A1%BA%E5%BA%8F%E9%80%89%E6%8B%A9"><span class="nav-number">8.1.4.</span> <span class="nav-text">计算顺序选择</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E8%AF%AD%E8%A8%80"><span class="nav-number">8.2.</span> <span class="nav-text">目标语言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89-2"><span class="nav-number">8.2.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E5%BC%80%E9%94%80"><span class="nav-number">8.2.2.</span> <span class="nav-text">指令开销</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%88%BB%E5%9C%B0%E5%9D%80"><span class="nav-number">8.2.3.</span> <span class="nav-text">运行时刻地址</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90%E5%99%A8"><span class="nav-number">8.3.</span> <span class="nav-text">简单的代码生成器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8E%E7%BB%AD%E5%BC%95%E7%94%A8%E4%BF%A1%E6%81%AF"><span class="nav-number">8.3.1.</span> <span class="nav-text">后续引用信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E4%B8%8E%E5%9C%B0%E5%9D%80%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">8.3.2.</span> <span class="nav-text">寄存器与地址描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90%E7%AE%97%E6%B3%95"><span class="nav-number">8.3.3.</span> <span class="nav-text">代码生成算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AA%A5%E5%AD%94%E4%BC%98%E5%8C%96"><span class="nav-number">8.4.</span> <span class="nav-text">窥孔优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%97%E4%BD%99%E6%8C%87%E4%BB%A4%E6%B6%88%E9%99%A4"><span class="nav-number">8.4.1.</span> <span class="nav-text">冗余指令消除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%8F%AF%E8%BE%BE%E4%BB%A3%E7%A0%81%E6%B6%88%E9%99%A4"><span class="nav-number">8.4.2.</span> <span class="nav-text">不可达代码消除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%BA%E5%BA%A6%E5%89%8A%E5%BC%B1"><span class="nav-number">8.4.3.</span> <span class="nav-text">强度削弱</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%9C%BA%E5%99%A8%E6%8C%87%E4%BB%A4%E4%BD%BF%E7%94%A8"><span class="nav-number">8.4.4.</span> <span class="nav-text">特殊机器指令使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E5%88%86%E9%85%8D%E6%8C%87%E6%B4%BE"><span class="nav-number">8.5.</span> <span class="nav-text">寄存器分配指派</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E5%AF%84%E5%AD%98%E5%99%A8%E5%88%86%E9%85%8D"><span class="nav-number">8.5.1.</span> <span class="nav-text">全局寄存器分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0"><span class="nav-number">8.5.2.</span> <span class="nav-text">引用计数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%B1%82%E5%BE%AA%E7%8E%AF%E7%9A%84%E5%AF%84%E5%AD%98%E5%99%A8%E6%8C%87%E6%B4%BE"><span class="nav-number">8.5.3.</span> <span class="nav-text">外层循环的寄存器指派</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8B%93%E5%B1%95%E9%98%85%E8%AF%BB"><span class="nav-number">9.</span> <span class="nav-text">拓展阅读</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AC%E8%87%AA%E5%8A%A8%E6%9C%BA"><span class="nav-number">9.1.</span> <span class="nav-text">AC自动机</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="修年"
+      src="/images/head.png">
+  <p class="site-author-name" itemprop="name">修年</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+    <br>
+      <span class="links-of-author-item">
+          QQ: 1776527992
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">修年</span>
+</div>
+
+
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date(); 
+    function createtime() { 
+        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
+        now.setTime(now.getTime()+250); 
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+    } 
+setInterval("createtime()",250);
+</script>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+
+  <script type="text/javascript" src="/js/clicklove.js"></script>
+</body>
+</html>
