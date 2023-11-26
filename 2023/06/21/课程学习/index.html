@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://xiunianjun.github.io/2023/06/21/%E8%AF%BE%E7%A8%8B%E5%AD%A6%E4%B9%A0/image-20231118221309891.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/06/21/%E8%AF%BE%E7%A8%8B%E5%AD%A6%E4%B9%A0/image-20231118230609720.png">
 <meta property="article:published_time" content="2023-06-21T11:09:29.000Z">
-<meta property="article:modified_time" content="2023-11-26T07:05:13.169Z">
+<meta property="article:modified_time" content="2023-11-26T08:25:02.747Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://xiunianjun.github.io/2023/06/21/%E8%AF%BE%E7%A8%8B%E5%AD%A6%E4%B9%A0/image-20231118221309891.png">
@@ -207,7 +207,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-11-26 15:05:13" itemprop="dateModified" datetime="2023-11-26T15:05:13+08:00">2023-11-26</time>
+                <time title="修改时间：2023-11-26 16:25:02" itemprop="dateModified" datetime="2023-11-26T16:25:02+08:00">2023-11-26</time>
               </span>
 
           
@@ -261,7 +261,38 @@
 <p>相当于比如说以前想要访问父父过程，需要两次链式访问，但是通过display表就只需要一次，极大优化了嵌套深度大的情况。</p>
 </li>
 </ol>
-<h3 id="数据库原理"><a href="#数据库原理" class="headerlink" title="数据库原理"></a><a href="/2023/11/26/database">数据库原理</a></h3>
+<h3 id="数据库原理"><a href="#数据库原理" class="headerlink" title="数据库原理"></a><a href="/2023/11/26/database">数据库原理</a></h3><p>大概算是自顶向下地，从sql语句（以及相应的关系代数实现）、数据库核心技术（索引实现、查询实现/优化、事务处理、安全性与完整性、故障恢复）、与磁盘的交互（数据库存储、缓冲区策略）这几个方面全方位介绍了数据库的实现思路。</p>
+<p>sql语句和关系代数在此就不做赘述。</p>
+<ol>
+<li><p>概述</p>
+<p>收获最大还是了解了下网状/层次模型。我记得有说过现在好像有一些非关系模型也开始火了，感觉也算是比较前沿的方向。</p>
+</li>
+<li><p>索引实现</p>
+<p>主要介绍了稠密索引、稀疏索引、主索引、聚簇索引、辅助索引等这几类索引。它们都可以用b+树来实现性能更好的多级索引。还介绍了动态散列索引，通过线性增长和溢出桶实现。</p>
+</li>
+<li><p>查询实现和优化</p>
+<p>关系代数的各种操作的实现算法主要有一趟扫描、迭代器、两趟扫描等。</p>
+<p>优化和代价估算的算法也不做赘述了。</p>
+</li>
+<li><p>事务处理</p>
+<p>主要介绍了三种常见的并发控制方法：封锁协议、时间戳、有效性检测。感觉现实中应该主要还是用的封锁协议吧。冲突可串行性这个理论也是很有意思。</p>
+</li>
+<li><p>安全性与完整性</p>
+<p>主要通过静态约束和动态约束（trigger）来保障数据库的完整性。第一次知道trigger可以被视为约束，感觉这个角度也蛮酷。</p>
+<p>保障安全性有两种常见措施，一个就是我们在实践中也做了很多的授权机制，如grant、revoke之类的；另一个就是感觉比较罕见的那个什么表了。</p>
+</li>
+<li><p>故障恢复</p>
+<p>主要介绍了不同缓冲区策略对应的三种日志类型，看了也是让人收获颇深。</p>
+<p>复习过程中有个疑惑，也即Undo/Redo型日志的恢复顺序，似乎是因数据库实现而异。在mysql中，是先执行的redo log，再执行的undo log。</p>
+</li>
+<li><p>数据库存储</p>
+<p>主要介绍了文件的几种组织方式，如堆文件、有序文件、散列、聚簇等。</p>
+</li>
+<li><p>实验</p>
+<p>前两次实验就是写写sql没啥好说的。最后两次实验，一个是挣扎前端，另一个就比较有意思了，聚焦于关系代数几个操作的实现，有点像写了一个mini的数据库引擎。</p>
+</li>
+</ol>
+
     </div>
 
     
