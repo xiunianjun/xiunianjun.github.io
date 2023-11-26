@@ -13224,7 +13224,6 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <h2 id="传统密码体制分析"><a href="#传统密码体制分析" class="headerlink" title="传统密码体制分析"></a>传统密码体制分析</h2><h3 id="频率（单表代换）"><a href="#频率（单表代换）" class="headerlink" title="频率（单表代换）"></a>频率（单表代换）</h3><p><img src="/2023/11/26/cryptography/image-20231119223727942.png" alt="image"></p>
 <h3 id="重合指数（多表代换）"><a href="#重合指数（多表代换）" class="headerlink" title="重合指数（多表代换）"></a>重合指数（多表代换）</h3><p><img src="/2023/11/26/cryptography/image-20231119223857071.png" alt="image"></p>
 <h3 id="明文-密文对（hill密码）"><a href="#明文-密文对（hill密码）" class="headerlink" title="明文-密文对（hill密码）"></a>明文-密文对（hill密码）</h3><p><img src="/2023/11/26/cryptography/image-20231119223930902.png" alt="image"></p>
-<h2 id="作业一"><a href="#作业一" class="headerlink" title="作业一"></a>作业一</h2><p><img src="/2023/11/26/cryptography/image-20231119223954095.png" alt="image"></p>
 <h1 id="第三章-分组密码-DES"><a href="#第三章-分组密码-DES" class="headerlink" title="第三章  分组密码-DES"></a>第三章  分组密码-DES</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p><img src="/2023/11/26/cryptography/image-20231119224132702.png" alt="image"></p>
 <ol>
 <li>分组密码一般指对称分组密码</li>
@@ -13538,12 +13537,12 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <p><img src="/2023/11/26/cryptography/image-20231120151940364.png" alt="image"></p>
 <h3 id="CCM"><a href="#CCM" class="headerlink" title="CCM"></a>CCM</h3><p><img src="/2023/11/26/cryptography/image-20231120152019396.png" alt="image"></p>
 <h2 id="局限性"><a href="#局限性" class="headerlink" title="局限性"></a>局限性</h2><p><img src="/2023/11/26/cryptography/image-20231120152117383.png" alt="image"></p>
-<h1 id="第十三章-数字签名PKI"><a href="#第十三章-数字签名PKI" class="headerlink" title="第十三章  数字签名PKI"></a>第十三章  数字签名PKI</h1><h2 id="概述-9"><a href="#概述-9" class="headerlink" title="概述"></a>概述</h2><h4 id="简介-3"><a href="#简介-3" class="headerlink" title="简介"></a>简介</h4><p><img src="/2023/11/26/cryptography/image-20231120152316017.png" alt="image"></p>
+<h1 id="第十三章-数字签名PKI"><a href="#第十三章-数字签名PKI" class="headerlink" title="第十三章  数字签名PKI"></a>第十三章  数字签名PKI</h1><h2 id="概述-9"><a href="#概述-9" class="headerlink" title="概述"></a>概述</h2><h3 id="简介-3"><a href="#简介-3" class="headerlink" title="简介"></a>简介</h3><p><img src="/2023/11/26/cryptography/image-20231120152316017.png" alt="image"></p>
 <p><img src="/2023/11/26/cryptography/image-20231120152345163.png" alt="image"></p>
-<h4 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h4><p><img src="/2023/11/26/cryptography/image-20231120152419065.png" alt="image"></p>
+<h3 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h3><p><img src="/2023/11/26/cryptography/image-20231120152419065.png" alt="image"></p>
 <p><img src="/2023/11/26/cryptography/image-20231120152948628.png" alt="image"></p>
-<h4 id="安全性-3"><a href="#安全性-3" class="headerlink" title="安全性"></a>安全性</h4><p><img src="/2023/11/26/cryptography/image-20231120152440512.png" alt="image"></p>
-<h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><p><img src="/2023/11/26/cryptography/image-20231120152504878.png" alt="image"></p>
+<h3 id="安全性-3"><a href="#安全性-3" class="headerlink" title="安全性"></a>安全性</h3><p><img src="/2023/11/26/cryptography/image-20231120152440512.png" alt="image"></p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p><img src="/2023/11/26/cryptography/image-20231120152504878.png" alt="image"></p>
 <p><img src="/2023/11/26/cryptography/image-20231120152522261.png" alt="image"></p>
 <p><img src="/2023/11/26/cryptography/image-20231120152544925.png" alt="image"></p>
 <p><img src="/2023/11/26/cryptography/image-20231120152611098.png" alt="image"></p>
