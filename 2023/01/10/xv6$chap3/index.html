@@ -1,28 +1,14 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.2">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
-  <link rel="mask-icon" href="/images/cat.png" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
-  <script src="/lib/pace/pace.min.js"></script>
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="Page tablesPaging hardware为什么需要页表将主存储器以及各种外设接口卡里面内置的存储器连接起来，就形成了内存地址空间。内存地址空间中的地址是真实的物理地址。RISC-V架构的指令使用的地址是虚拟地址。为了通过指令中的虚拟地址访问到真实的物理内存，需要进行从虚拟地址到物理地址的转换。从虚拟地址到物理地址的转换，就需要通过页表来实现。 页表如何运作在RISC-V指令集中，当我们">
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>Page tables | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="Page tablesPaging hardware为什么需要页表将主存储器以及各种外设接口卡里面内置的存储器连接起来，就形成了内存地址空间。内存地址空间中的地址是真实的物理地址。RISC-V架构的指令使用的地址是虚拟地址。为了通过指令中的虚拟地址访问到真实的物理内存，需要进行从虚拟地址到物理地址的转换。从虚拟地址到物理地址的转换，就需要通过页表来实现。 页表如何运作在RISC-V指令集中，当我们">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Page tables">
 <meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap3/index.html">
@@ -50,200 +36,24 @@
 <meta property="article:modified_time" content="2023-10-30T06:26:00.912Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109153937459.png">
-
-<link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6$chap3/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>Page tables | 修年</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-  
-      <meta charset="UTF-8">
-    <title>live2d-demo</title>
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <!-- Live2DCubismCore -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
-    <!-- Include Pixi. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
-    <!-- Include Cubism Components. -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
-    <!-- User's Script -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
-    <style>
-    </style>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-	
-		<script type="text/javascript" 
-		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
-		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
-	
-
-  <div class="container use-motion">
-    <div class="headband"></div>
-<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">修年</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post posts-expand">
-            
-
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Page tables
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-10-30 14:26:00" itemprop="dateModified" datetime="2023-10-30T14:26:00+08:00">2023-10-30</time>
-              </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <h1 id="Page-tables"><a href="#Page-tables" class="headerlink" title="Page tables"></a>Page tables</h1><h2 id="Paging-hardware"><a href="#Paging-hardware" class="headerlink" title="Paging hardware"></a>Paging hardware</h2><h3 id="为什么需要页表"><a href="#为什么需要页表" class="headerlink" title="为什么需要页表"></a>为什么需要页表</h3><p>将主存储器以及各种外设接口卡里面内置的存储器连接起来，就形成了内存地址空间。内存地址空间中的地址是真实的物理地址。RISC-V架构的指令使用的地址是虚拟地址。为了通过指令中的虚拟地址访问到真实的物理内存，需要进行从虚拟地址到物理地址的转换。从虚拟地址到物理地址的转换，就需要通过页表来实现。</p>
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230109153937459.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">45</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Page-tables"><span class="toc-number">1.</span> <span class="toc-text">Page tables</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Paging-hardware"><span class="toc-number">1.1.</span> <span class="toc-text">Paging hardware</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E9%A1%B5%E8%A1%A8"><span class="toc-number">1.1.1.</span> <span class="toc-text">为什么需要页表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B5%E8%A1%A8%E5%A6%82%E4%BD%95%E8%BF%90%E4%BD%9C"><span class="toc-number">1.1.2.</span> <span class="toc-text">页表如何运作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B5%E8%A1%A8%E7%BB%84%E6%88%90"><span class="toc-number">1.1.3.</span> <span class="toc-text">页表组成</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%A1%B5%E8%A1%A8%E9%A1%B9"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">页表项</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E9%A1%B5%E8%A1%A8%E5%92%8C%E5%A4%9A%E7%BA%A7%E9%A1%B5%E8%A1%A8"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">单页表和多级页表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B5%E8%A1%A8%E4%BD%BF%E7%94%A8"><span class="toc-number">1.1.4.</span> <span class="toc-text">页表使用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kernel-address-space"><span class="toc-number">1.2.</span> <span class="toc-text">Kernel address space</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-creating-an-address-space"><span class="toc-number">1.3.</span> <span class="toc-text">Code: creating an address space</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#vm-c"><span class="toc-number">1.3.1.</span> <span class="toc-text">vm.c</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A5%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%BA%E4%BE%8B%E4%BB%8B%E7%BB%8D%E5%90%84%E4%B8%AA%E5%87%BD%E6%95%B0"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">以初始化为例介绍各个函数</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E9%A1%B5%E8%A1%A8"><span class="toc-number">1.3.1.1.1.</span> <span class="toc-text">创建页表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%A3%85%E4%B8%8A%E9%A1%B5%E8%A1%A8"><span class="toc-number">1.3.1.1.2.</span> <span class="toc-text">装上页表</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E7%96%91%E9%97%AE"><span class="toc-number">1.3.1.1.2.1.</span> <span class="toc-text">疑问</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%88%91%E7%9A%84%E9%94%99%E8%AF%AF%E6%83%B3%E6%B3%95"><span class="toc-number">1.3.1.1.2.2.</span> <span class="toc-text">我的错误想法</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%A7%A3%E7%AD%94"><span class="toc-number">1.3.1.1.2.3.</span> <span class="toc-text">解答</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Physical-memory-allocation"><span class="toc-number">1.4.</span> <span class="toc-text">Physical memory allocation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-Physical-memory-allocator"><span class="toc-number">1.5.</span> <span class="toc-text">Code: Physical memory allocator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Process-address-space"><span class="toc-number">1.6.</span> <span class="toc-text">Process address space</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-sbrk"><span class="toc-number">1.7.</span> <span class="toc-text">Code: sbrk</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-exec"><span class="toc-number">1.8.</span> <span class="toc-text">Code:exec</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Real-world"><span class="toc-number">1.9.</span> <span class="toc-text">Real world</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab%EF%BC%9APagetable"><span class="toc-number">1.10.</span> <span class="toc-text">Lab：Pagetable</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Speed-up-system-calls"><span class="toc-number">1.10.1.</span> <span class="toc-text">Speed up system calls</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">1.10.1.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B9%8C%E9%BE%99"><span class="toc-number">1.10.1.1.1.</span> <span class="toc-text">乌龙</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#panic-freewalk-leaf"><span class="toc-number">1.10.1.1.2.</span> <span class="toc-text">panic:freewalk leaf</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.10.1.1.3.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">1.10.1.2.</span> <span class="toc-text">代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%97%AE%E7%AD%94%E9%A2%98"><span class="toc-number">1.10.1.3.</span> <span class="toc-text">问答题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Print-a-page-table"><span class="toc-number">1.10.2.</span> <span class="toc-text">Print a page table</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-1"><span class="toc-number">1.10.2.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="toc-number">1.10.2.2.</span> <span class="toc-text">代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%97%AE%E7%AD%94%E9%A2%98-1"><span class="toc-number">1.10.2.3.</span> <span class="toc-text">问答题</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Detecting-which-pages-have-been-accessed"><span class="toc-number">1.10.3.</span> <span class="toc-text">Detecting which pages have been accessed</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-2"><span class="toc-number">1.10.3.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-2"><span class="toc-number">1.10.3.2.</span> <span class="toc-text">代码</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#A-kernel-page-table-per-process"><span class="toc-number">1.10.4.</span> <span class="toc-text">A kernel page table per process</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-3"><span class="toc-number">1.10.4.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%BF%99%E4%B9%88%E5%B9%B2"><span class="toc-number">1.10.4.1.1.</span> <span class="toc-text">为什么要这么干</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Emyproc"><span class="toc-number">1.10.4.1.2.</span> <span class="toc-text">关于myproc()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="toc-number">1.10.4.1.3.</span> <span class="toc-text">系统调用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%87%8A%E6%94%BE%E9%A1%B5%E8%A1%A8%E4%BD%86%E4%B8%8D%E9%87%8A%E6%94%BE%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98"><span class="toc-number">1.10.4.1.4.</span> <span class="toc-text">释放页表但不释放物理内存</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-3"><span class="toc-number">1.10.4.2.</span> <span class="toc-text">代码</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.10.4.2.1.</span> <span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#swtch%E6%97%B6%E5%88%87%E6%8D%A2%E9%A1%B5%E8%A1%A8"><span class="toc-number">1.10.4.2.2.</span> <span class="toc-text">swtch时切换页表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9kvmpa"><span class="toc-number">1.10.4.2.3.</span> <span class="toc-text">修改kvmpa</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%87%8A%E6%94%BE"><span class="toc-number">1.10.4.2.4.</span> <span class="toc-text">释放</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Simplify-copyin-copyinstr"><span class="toc-number">1.10.5.</span> <span class="toc-text">Simplify copyin&#x2F;copyinstr</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-4"><span class="toc-number">1.10.5.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AF%AF%E5%85%A5%E5%B9%BB%E6%83%B3"><span class="toc-number">1.10.5.1.1.</span> <span class="toc-text">误入幻想</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%B5%B0%E4%B8%8A%E6%AD%A3%E9%80%94"><span class="toc-number">1.10.5.1.2.</span> <span class="toc-text">走上正途</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-4"><span class="toc-number">1.10.5.2.</span> <span class="toc-text">代码</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%B8%94%E7%BF%81%E4%B9%8B%E5%88%A9%E5%87%BD%E6%95%B0"><span class="toc-number">1.10.5.2.1.</span> <span class="toc-text">渔翁之利函数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9fork%E3%80%81exec%E3%80%81sbrk"><span class="toc-number">1.10.5.2.2.</span> <span class="toc-text">修改fork、exec、sbrk</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#fork"><span class="toc-number">1.10.5.2.2.1.</span> <span class="toc-text">fork</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#exec"><span class="toc-number">1.10.5.2.2.2.</span> <span class="toc-text">exec</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#sbrk"><span class="toc-number">1.10.5.2.2.3.</span> <span class="toc-text">sbrk</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#userinit"><span class="toc-number">1.10.5.2.3.</span> <span class="toc-text">userinit</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%A0%E6%8E%89freewalk%E7%9A%84panic%EF%BC%88%E6%88%91%E7%89%B9%E6%9C%89%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%89"><span class="toc-number">1.10.5.2.4.</span> <span class="toc-text">删掉freewalk的panic（我特有的缺点）</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap3/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Page tables</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-10-30 14:26:00" itemprop="dateModified" datetime="2023-10-30T14:26:00+08:00">2023-10-30</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Page-tables"><a href="#Page-tables" class="headerlink" title="Page tables"></a>Page tables</h1><h2 id="Paging-hardware"><a href="#Paging-hardware" class="headerlink" title="Paging hardware"></a>Paging hardware</h2><h3 id="为什么需要页表"><a href="#为什么需要页表" class="headerlink" title="为什么需要页表"></a>为什么需要页表</h3><p>将主存储器以及各种外设接口卡里面内置的存储器连接起来，就形成了内存地址空间。内存地址空间中的地址是真实的物理地址。RISC-V架构的指令使用的地址是虚拟地址。为了通过指令中的虚拟地址访问到真实的物理内存，需要进行从虚拟地址到物理地址的转换。从虚拟地址到物理地址的转换，就需要通过页表来实现。</p>
 <h3 id="页表如何运作"><a href="#页表如何运作" class="headerlink" title="页表如何运作"></a>页表如何运作</h3><p>在RISC-V指令集中，当我们需要开启页表服务时，我们需要将我们预先配置好的页表首地址放入 <code>satp</code> 寄存器中。从此之后， <strong>计算机硬件</strong> 将把访存的地址 <strong>均视为虚拟地址</strong> ，都需要通过硬件查询页表，将其 <strong>翻译成为物理地址</strong> ，然后将其作为地址发送给内存进行访存。</p>
 <p>xv6采用的指令集标准为RISC-V标准，其中页表的标准为SV39标准，也就是虚拟地址最多为39位。</p>
 <p>虚实地址翻译流程：</p>
@@ -255,7 +65,7 @@
 <li>通过页表项可以找到找到 <strong>物理地址</strong> 的物理页帧号，通过虚拟地址的<code>Offset</code>，转成物理地址（<code>Offset</code>和虚拟地址<code>Offset</code>相同）。</li>
 </ol>
 <h3 id="页表组成"><a href="#页表组成" class="headerlink" title="页表组成"></a>页表组成</h3><h4 id="页表项"><a href="#页表项" class="headerlink" title="页表项"></a>页表项</h4><p>页表由页表项PTE（Page Table Entries）构成，每个页表项由44位的PPN（Physical Page Number）和一些参数flag组成。</p>
-<p><img src="/2023/01/10/xv6/image-20230109153937459.png" alt="image-20230109153937459"></p>
+<p><img src="/2023/01/10/xv6/image-20230109153937459.png" alt="image-20230109153937459" loading="lazy"></p>
 <blockquote>
 <p>Each PTE contains flflag bits that tell the paging hardware how the associated virtual address is allowed to be used. <strong>PTE_V</strong> indicates whether the PTE is <u>present</u>: if it is not set, a reference to the page causes an exception (i.e. is not allowed). <strong>PTE_R</strong> controls whether instructions are allowed to <u>read</u> to the page. PTE_W controls whether instructions are allowed to write to the page. <strong>PTE_X</strong> controls whether the CPU may interpret the content of the page <u>as instructions and execute them</u>. <strong>PTE_U</strong> controls whether instructions in <u>user</u> mode are allowed to <u>access</u> the page; if PTE_U is not set, the PTE can be used only in supervisor mode.</p>
 <p>这个表项的几个参数定义在kernel/riscv.h中的341行左右。</p>
@@ -263,17 +73,17 @@
 <p>虚拟地址有64bit，其中25bits未使用，39bits包含了27位的PTE索引号以及12位的offset。</p>
 <p>物理地址有56位，由PPN和offset拼接组成。</p>
 <h4 id="单页表和多级页表"><a href="#单页表和多级页表" class="headerlink" title="单页表和多级页表"></a>单页表和多级页表</h4><p>以单页表为例，物理地址形成过程如下图所示。</p>
-<p><img src="/2023/01/10/xv6/pagetable.png" alt="image"></p>
+<p><img src="/2023/01/10/xv6/pagetable.png" alt="image" loading="lazy"></p>
 <p><u>每个页表项PTE索引着一页</u>。因而，每一页的大小为2^12=4096B。单页表中PTE的索引号有2^27个，因而单页表中表项有134217728个，即可以代表134217728页。页表实际上也是以页的形式存储的。因而单页表需要的存储空间为(2^27x7)/2^12=2^15x7=229376页。</p>
 <p>RISC-V架构中真实情况是会有三级页表。三级页表结构相比于单级页表结构，会占据更多的<strong>物理存储空间</strong>。</p>
-<p><img src="/2023/01/10/xv6/image-20230109151346780.png" alt="image-20230109151346780"></p>
+<p><img src="/2023/01/10/xv6/image-20230109151346780.png" alt="image-20230109151346780" loading="lazy"></p>
 <p><u>每个页表项PTE索引着一页，这一页可能代表着另一个页表，也可能代表着内存中需要的指令和数据</u>。因而，每一页的大小为2^12=4096B。三页表中，一级页表中PTE的索引号有512个，可以代表的物理内存页数有512x515x512=2^27页，即可以代表134217728页。页表实际上也是以页的形式存储的，一个页表有2^9x7个字节，可以存储在1页中。因而三页表需要的存储空间为1+2^9+2^18 = 262657页。</p>
 <p>三级页表结构相比于单级页表结构，可以节省更多<strong>内存空间</strong>。</p>
 <blockquote>
 <p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/fuyuande/article/details/117616433">页表是啥以及为啥多级页表能够节省空间</a></p>
 </blockquote>
 <p>考虑到这样一个进程：</p>
-<p><img src="/2023/01/10/xv6/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70.png" alt="watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70"></p>
+<p><img src="/2023/01/10/xv6/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70.png" alt="watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Z1eXVhbmRl,size_16,color_FFFFFF,t_70" loading="lazy"></p>
 <p>进程使用页表时，需要将整个页表读入内存。</p>
 <p>如果使用单级页表，尽管一个进程仅使用到页表中的某两项，也需要把整个页表都读入内存，光是页表就占据了2^15x7x4k/2^20 约为1G的内存空间。</p>
 <p>如果使用三级页表，一个进程需要用到某两页。假设这两页存储在不同的二级页表中，则只需要读入1+2+2=5页 约为20K的内存空间。</p>
@@ -284,7 +94,7 @@
 <p>这里为了方便，就把三级页表省略了，只留下va和pa的对比</p>
 </blockquote>
 <p>每个进程都有一个用户级别的页表。xv6给内核提供了一个单独的内核地址空间的页表。其层级映射关系如下：</p>
-<p><img src="/2023/01/10/xv6/p3.png" alt="p3"></p>
+<p><img src="/2023/01/10/xv6/p3.png" alt="p3" loading="lazy"></p>
 <p>在kernel/memlayout.h中正记录了这些参数：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Physical memory layout</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// qemu -machine virt is set up like this,</span></span><br><span class="line"><span class="comment">// based on qemu&#x27;s hw/riscv/virt.c:</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 00001000 -- boot ROM, provided by qemu</span></span><br><span class="line"><span class="comment">// 02000000 -- CLINT</span></span><br><span class="line"><span class="comment">// 0C000000 -- PLIC</span></span><br><span class="line"><span class="comment">// 10000000 -- uart0 </span></span><br><span class="line"><span class="comment">// 10001000 -- virtio disk </span></span><br><span class="line"><span class="comment">// 80000000 -- boot ROM jumps here in machine mode</span></span><br><span class="line"><span class="comment">//             -kernel loads the kernel here</span></span><br><span class="line"><span class="comment">// unused RAM after 80000000.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// the kernel uses physical memory thus:</span></span><br><span class="line"><span class="comment">// 80000000 -- entry.S, then kernel text and data</span></span><br><span class="line"><span class="comment">// end -- start of kernel page allocation area</span></span><br><span class="line"><span class="comment">// PHYSTOP -- end RAM used by the kernel</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// qemu puts UART registers here in physical memory.</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> UART0 0x10000000L</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> UART0_IRQ 10</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// virtio mmio interface</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VIRTIO0 0x10001000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VIRTIO0_IRQ 1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// core local interruptor (CLINT), which contains the timer.</span></span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
 
@@ -325,14 +135,14 @@
 
 <p>其中sfence_vma()的用途是强制更新TLB的旧页表，类似于Java volatile的作用。</p>
 <h6 id="疑问"><a href="#疑问" class="headerlink" title="疑问"></a>疑问</h6><p>附上书里的详细解释：</p>
-<p><img src="/2023/01/10/xv6/image-20230109222917346.png" alt="image-20230109222917346"></p>
+<p><img src="/2023/01/10/xv6/image-20230109222917346.png" alt="image-20230109222917346" loading="lazy"></p>
 <p>TLB与页表类似于cache与主存的关系。TLB保存了页表的一部分。</p>
 <h6 id="我的错误想法"><a href="#我的错误想法" class="headerlink" title="我的错误想法"></a>我的错误想法</h6><p>我怎么感觉怪怪的啊？因为TLB既然是高速缓存，那么读写页表也应该优先从TLB读写【注：应该就是从这里开始错的hhh写应该是直接写入页表】。所以说，会陈旧的应该是主存中的页表，而不是TLB中的页表。但是，书里是说，改完页表必须通知TLB更改。也就是说，读写页表不是从TLB读写的，那该是从哪里？是TLB以外的free memory吗？</p>
 <p>不过，要是从多CPU的角度思考，说不定他这个意思是某个CPU的TLB变了，需要通知其他所有CPU的TLB也变。虽然不同CPU当前执行的进程是不一样的，使用的页表项不一样，切换进程的时候也会把用户地址空间的页表项flush掉。但是内核地址空间的页表项一般是不会随着进程切换而flush掉的。所以内核页表修改就需要手动多CPU同步。</p>
 <p>我认为多CPU角度考虑更加合理，因为它最后说了，xv6会在内核页表init后flush，以及在从内核态切换回用户态的时候flush。这两个（好像）都影响内核页表比较多，所以就需要手动flush一下。</p>
 <h6 id="解答"><a href="#解答" class="headerlink" title="解答"></a>解答</h6><p>之后学了缺页异常后，可以发现这里其实是没问题的。</p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq">计算机体系结构 – 虚拟内存</a></p>
-<p><img src="/2023/01/10/xv6/v2-e15454bf032baa4dc088b6e41ed4f4a4_1440w.jpg" alt="v2-e15454bf032baa4dc088b6e41ed4f4a4_1440w"></p>
+<p><img src="/2023/01/10/xv6/v2-e15454bf032baa4dc088b6e41ed4f4a4_1440w.jpg" alt="v2-e15454bf032baa4dc088b6e41ed4f4a4_1440w" loading="lazy"></p>
 <p>页表的管理（创建、更新、删除等）是由操作系统负责的。地址转换时，页表检索是由硬件内存管理单元（Memory Management Unit, MMU）负责的。MMU通常由两部分构成：表查找单元（Table Walk Unit, TWU）和转换旁路缓冲（Translation Lookaside Buffer, TLB）[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq#ref_2">2]</a>。TWU负责链式的访问PDE、PTE，完成上述的查表过程。</p>
 <p>应用多级页表之后，想要完成一次地址转换，需要访问多级目录和页表，这么多次的内存访问会严重降低性能。</p>
 <p>为了优化地址转换速度，人们在MMU中增加了一块高速cache，专门用来缓存虚拟地址到物理地址的映射，这块cache就是TLB[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq#ref_7">7]</a>[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/526684107?utm_medium=social&utm_oi=1266367922814697472&utm_psn=1598272295323197440&utm_source=qq#ref_8">8]</a>。MMU在做地址转换的时候，会先检索TLB，如果命中则直接返回对应的物理地址，如果不命中则会调用TWU查找页表。</p>
@@ -343,7 +153,7 @@
 <p>The kernel must allocate and free physical memory at run-time for page tables, user memory, kernel stacks, and pipe buffers.</p>
 </blockquote>
 <p>用的是这段空闲内存：</p>
-<p><img src="/2023/01/10/xv6/image-20230109225700837.png" alt="image-20230109225700837"></p>
+<p><img src="/2023/01/10/xv6/image-20230109225700837.png" alt="image-20230109225700837" loading="lazy"></p>
 <blockquote>
 <p> It keeps track of which pages are free by threading a <strong>linked list</strong> through the pages themselves.</p>
 </blockquote>
@@ -363,7 +173,7 @@
 <blockquote>
 <p>The stack is a single page, and is shown with the initial contents as created by exec. Strings containing the command-line arguments, as well as an array of pointers to them, are at the very top of the stack. Just under that are values that allow a program to start at main as if the function main(argc, argv) had just been called.</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/image-20230109234930690.png" alt="image-20230109234930690"></p>
+<p><img src="/2023/01/10/xv6/image-20230109234930690.png" alt="image-20230109234930690" loading="lazy"></p>
 <h2 id="Code-sbrk"><a href="#Code-sbrk" class="headerlink" title="Code: sbrk"></a>Code: sbrk</h2><blockquote>
 <p>Sbrk is the <strong>system call</strong> for a process to <strong>shrink or grow</strong> its memory. The system call is implemented by the function growproc (kernel/proc.c:239).</p>
 </blockquote>
@@ -377,7 +187,7 @@
 </blockquote>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">exec</span><span class="params">(<span class="type">char</span> *path, <span class="type">char</span> **argv)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *s, *last;</span><br><span class="line">  <span class="type">int</span> i, off;</span><br><span class="line">  uint64 argc, sz = <span class="number">0</span>, sp, ustack[MAXARG], stackbase;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">elfhdr</span> <span class="title">elf</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">inode</span> *<span class="title">ip</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proghdr</span> <span class="title">ph</span>;</span></span><br><span class="line">  <span class="type">pagetable_t</span> pagetable = <span class="number">0</span>, oldpagetable;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span> *<span class="title">p</span> =</span> myproc();</span><br><span class="line"></span><br><span class="line">  <span class="comment">//开始打开文件的意思吧（</span></span><br><span class="line">  begin_op();</span><br><span class="line"></span><br><span class="line">  <span class="comment">//ip是一个inode</span></span><br><span class="line">  <span class="comment">//打开路径为path的文件</span></span><br><span class="line">  <span class="keyword">if</span>((ip = namei(path)) == <span class="number">0</span>)&#123;</span><br><span class="line">    end_op();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//暂时锁住文件，别人不许动</span></span><br><span class="line">  ilock(ip);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//之后应该就是把文件读入内存吧</span></span><br><span class="line">  <span class="comment">// Check ELF header</span></span><br><span class="line">  <span class="keyword">if</span>(readi(ip, <span class="number">0</span>, (uint64)&amp;elf, <span class="number">0</span>, <span class="keyword">sizeof</span>(elf)) != <span class="keyword">sizeof</span>(elf))</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(elf.magic != ELF_MAGIC)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//分配新页表</span></span><br><span class="line">  <span class="keyword">if</span>((pagetable = proc_pagetable(p)) == <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//elfhd应该指的是可执行文件头</span></span><br><span class="line">  <span class="comment">// Load program into memory.</span></span><br><span class="line">  <span class="keyword">for</span>(i=<span class="number">0</span>, off=elf.phoff; i&lt;elf.phnum; i++, off+=<span class="keyword">sizeof</span>(ph))&#123;</span><br><span class="line">    <span class="keyword">if</span>(readi(ip, <span class="number">0</span>, (uint64)&amp;ph, off, <span class="keyword">sizeof</span>(ph)) != <span class="keyword">sizeof</span>(ph))</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="keyword">if</span>(ph.type != ELF_PROG_LOAD)</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">    <span class="keyword">if</span>(ph.memsz &lt; ph.filesz)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="keyword">if</span>(ph.vaddr + ph.memsz &lt; ph.vaddr)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="keyword">if</span>(ph.vaddr % PGSIZE != <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="comment">//总之顺利读到了</span></span><br><span class="line">    uint64 sz1;</span><br><span class="line">    <span class="comment">//读到了就给它分配新空间并且填入页表</span></span><br><span class="line">    <span class="keyword">if</span>((sz1 = uvmalloc(pagetable, sz, ph.vaddr + ph.memsz, flags2perm(ph.flags))) == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    sz = sz1;</span><br><span class="line">    <span class="keyword">if</span>(loadseg(pagetable, ph.vaddr, ip, ph.off, ph.filesz) &lt; <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//在这里解锁</span></span><br><span class="line">  iunlockput(ip);</span><br><span class="line">  end_op();</span><br><span class="line">  ip = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  p = myproc();</span><br><span class="line">  uint64 oldsz = p-&gt;sz;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//读完文件，开始造一个新的用户栈【fork之后用户栈是不会清空的】</span></span><br><span class="line">  <span class="comment">// Allocate two pages at the next page boundary.</span></span><br><span class="line">  <span class="comment">// Make the first inaccessible as a stack guard.</span></span><br><span class="line">  <span class="comment">// Use the second as the user stack.</span></span><br><span class="line">  sz = PGROUNDUP(sz);</span><br><span class="line">  uint64 sz1;</span><br><span class="line">  <span class="keyword">if</span>((sz1 = uvmalloc(pagetable, sz, sz + <span class="number">2</span>*PGSIZE, PTE_W)) == <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line">  sz = sz1;</span><br><span class="line">  <span class="comment">// mark a PTE invalid for user access.造guard page</span></span><br><span class="line">  uvmclear(pagetable, sz<span class="number">-2</span>*PGSIZE);</span><br><span class="line">  <span class="comment">// sp为栈顶</span></span><br><span class="line">  sp = sz;</span><br><span class="line">  <span class="comment">// 应该指的是栈尾</span></span><br><span class="line">  stackbase = sp - PGSIZE;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 开始往栈中填入执行参数</span></span><br><span class="line">  <span class="comment">// Push argument strings, prepare rest of stack in ustack.</span></span><br><span class="line">  <span class="keyword">for</span>(argc = <span class="number">0</span>; argv[argc]; argc++) &#123;</span><br><span class="line">    <span class="keyword">if</span>(argc &gt;= MAXARG)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    sp -= <span class="built_in">strlen</span>(argv[argc]) + <span class="number">1</span>;</span><br><span class="line">    sp -= sp % <span class="number">16</span>; <span class="comment">// riscv sp must be 16-byte aligned</span></span><br><span class="line">    <span class="keyword">if</span>(sp &lt; stackbase)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="comment">//argv来自用户空间，所以需要使用copyout</span></span><br><span class="line">    <span class="keyword">if</span>(copyout(pagetable, sp, argv[argc], <span class="built_in">strlen</span>(argv[argc]) + <span class="number">1</span>) &lt; <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">goto</span> bad;</span><br><span class="line">    <span class="comment">//这什么东西</span></span><br><span class="line">    <span class="comment">//exec一次将参数中的一个字符串复制到栈顶，并在ustack中记录指向它们的指针</span></span><br><span class="line">    ustack[argc] = sp;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//放置空指针</span></span><br><span class="line">  ustack[argc] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// push the array of argv[] pointers.</span></span><br><span class="line">  sp -= (argc+<span class="number">1</span>) * <span class="keyword">sizeof</span>(uint64);</span><br><span class="line">  sp -= sp % <span class="number">16</span>;</span><br><span class="line">  <span class="keyword">if</span>(sp &lt; stackbase)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line">  <span class="keyword">if</span>(copyout(pagetable, sp, (<span class="type">char</span> *)ustack, (argc+<span class="number">1</span>)*<span class="keyword">sizeof</span>(uint64)) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// arguments to user main(argc, argv)</span></span><br><span class="line">  <span class="comment">// argc is returned via the system call return</span></span><br><span class="line">  <span class="comment">// value, which goes in a0.</span></span><br><span class="line">  p-&gt;trapframe-&gt;a1 = sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Save program name for debugging.</span></span><br><span class="line">  <span class="keyword">for</span>(last=s=path; *s; s++)</span><br><span class="line">    <span class="keyword">if</span>(*s == <span class="string">&#x27;/&#x27;</span>)</span><br><span class="line">      last = s+<span class="number">1</span>;</span><br><span class="line">  safestrcpy(p-&gt;name, last, <span class="keyword">sizeof</span>(p-&gt;name));</span><br><span class="line">   </span><br><span class="line">  <span class="comment">//只有成功了才会来到这，才会覆盖掉旧的内存镜像</span></span><br><span class="line">  <span class="comment">// Commit to the user image.</span></span><br><span class="line">  oldpagetable = p-&gt;pagetable;</span><br><span class="line">  p-&gt;pagetable = pagetable;</span><br><span class="line">  p-&gt;sz = sz;</span><br><span class="line">  p-&gt;trapframe-&gt;epc = elf.entry;  <span class="comment">// initial program counter = main</span></span><br><span class="line">  p-&gt;trapframe-&gt;sp = sp; <span class="comment">// initial stack pointer</span></span><br><span class="line">  proc_freepagetable(oldpagetable, oldsz);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> argc; <span class="comment">// this ends up in a0, the first argument to main(argc, argv)</span></span><br><span class="line"></span><br><span class="line"> bad:</span><br><span class="line">  <span class="comment">//释放新镜像，不改变旧镜像</span></span><br><span class="line">  <span class="keyword">if</span>(pagetable)</span><br><span class="line">    proc_freepagetable(pagetable, sz);</span><br><span class="line">  <span class="keyword">if</span>(ip)&#123;</span><br><span class="line">    iunlockput(ip);</span><br><span class="line">    end_op();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="Real-world"><a href="#Real-world" class="headerlink" title="Real world"></a>Real world</h2><p><img src="/2023/01/10/xv6/image-20230110010651653.png" alt="image-20230110010651653"></p>
+<h2 id="Real-world"><a href="#Real-world" class="headerlink" title="Real world"></a>Real world</h2><p><img src="/2023/01/10/xv6/image-20230110010651653.png" alt="image-20230110010651653" loading="lazy"></p>
 <p>xv6内核缺少一个类似<code>malloc</code>可以为小对象提供内存的分配器，这使得内核无法使用需要动态分配的复杂数据结构。【确实，感觉一分配就是一页（】</p>
 <p>内存分配是一个长期的热门话题，基本问题是有效使用有限的内存并为将来的未知请求做好准备。今天，人们更关心速度而不是空间效率。此外，一个更复杂的内核可能会分配许多不同大小的小块，而不是（如xv6中）只有4096字节的块；一个真正的内核分配器需要处理小分配和大分配。</p>
 <h2 id="Lab：Pagetable"><a href="#Lab：Pagetable" class="headerlink" title="Lab：Pagetable"></a>Lab：Pagetable</h2><blockquote>
@@ -394,7 +204,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> USYSCALL (TRAPFRAME - PGSIZE)</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">usyscall</span>&#123;</span></span><br><span class="line">  <span class="type">int</span> pid;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>用户的ugetpid只找到了一个截图：</p>
-<p><img src="/2023/01/10/xv6/v2-0c2603da4c8102e46ae390a0d0b1191d_1440w.jpg" alt="v2-0c2603da4c8102e46ae390a0d0b1191d_1440w"></p>
+<p><img src="/2023/01/10/xv6/v2-0c2603da4c8102e46ae390a0d0b1191d_1440w.jpg" alt="v2-0c2603da4c8102e46ae390a0d0b1191d_1440w" loading="lazy"></p>
 <p>恕我愚钝实在不知道该把这段代码放在哪orz于是接下来写的东西就没有自测。</p>
 <h5 id="panic-freewalk-leaf"><a href="#panic-freewalk-leaf" class="headerlink" title="panic:freewalk leaf"></a>panic:freewalk leaf</h5><p>一开始写好代码准备启动xv6的时候爆出了这么一个panic，搜了一下得到如下解答：</p>
 <blockquote>
@@ -402,7 +212,7 @@
 <p>这时运行会发现freewalk函数panic：<code>freewalk: leaf</code>，这是因为freewalk希望所有虚拟地址已经被解绑并释放对应的物理空间了，该函数只负责释放页表。</p>
 </blockquote>
 <p>让我得知freewalk在vm.c下面【吐槽，我一开始还以为是自由自在地走（，看到这个才反应过来是free walk，跟页表有关的】。结合freewalk的代码</p>
-<p><img src="/2023/01/10/xv6/image-20230110225359361.png" alt="image-20230110225359361"></p>
+<p><img src="/2023/01/10/xv6/image-20230110225359361.png" alt="image-20230110225359361" loading="lazy"></p>
 <p>可以知道，造成这个panic的原因是需要手动释放页表项。而在这里</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in proc.c  freeproc()</span></span><br><span class="line"><span class="keyword">if</span>(p-&gt;usyscall)</span><br><span class="line">    kfree((<span class="type">void</span>*)p-&gt;usyscall);</span><br><span class="line">  p-&gt;usyscall = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
 
@@ -430,12 +240,12 @@
 <p>Define a function called <code>vmprint()</code>. </p>
 <p>It should take a <code>pagetable_t</code> argument, and print that pagetable in the format described below. </p>
 <p>Insert <code>if(p-&gt;pid==1) vmprint(p-&gt;pagetable)</code> in exec.c just before the <code>return argc</code>, to print the first process’s page table. </p>
-<p><img src="/2023/01/10/xv6/image-20230110231020570.png" alt="image-20230110231020570"></p>
+<p><img src="/2023/01/10/xv6/image-20230110231020570.png" alt="image-20230110231020570" loading="lazy"></p>
 <p>The first line displays the argument to <code>vmprint</code>. After that there is a <strong>line for each PTE</strong>, including PTEs that refer to page-table pages deeper in the tree. Each PTE line is indented by a number of <code>&quot; ..&quot;</code> that indicates its depth in the tree. </p>
 <p>Each PTE line shows the PTE <strong>index</strong> in its page-table page, the <strong>pte bits</strong>, and the <strong>physical address extracted from the PTE</strong>. <u>Don’t print PTEs that are not valid</u>. </p>
 <p>In the above example, the top-level page-table page has mappings for entries 0 and 255. The next level down for entry 0 has only index 0 mapped, and the bottom-level for that index 0 has entries 0, 1, and 2 mapped.</p>
 </blockquote>
-<h4 id="感想-1"><a href="#感想-1" class="headerlink" title="感想"></a>感想</h4><p><img src="/2023/01/10/xv6/image-20230111000329475.png" alt="image-20230111000329475"></p>
+<h4 id="感想-1"><a href="#感想-1" class="headerlink" title="感想"></a>感想</h4><p><img src="/2023/01/10/xv6/image-20230111000329475.png" alt="image-20230111000329475" loading="lazy"></p>
 <p>很可惜，我在上面检索<code>freewalk leaf</code>到底是什么东西的时候，不小心看到了这题需要去参照freewalk这个提示【悲】其实我觉得这点还是需要绕点弯才能想到的，可能直接想到有点难【谁知道呢，世界线已经变动了】。</p>
 <p>它这个打印页表其实最主要是考查如何遍历页表，这让人想起了walk这样的东西。但是walk是根据虚拟地址一级级找PTE的，中间很多地方会被跳过。有没有一个过程会在做事的时候遍历整个页表呢？答案是，这个过程就是释放页表的过程。释放页表才会一个个地看是否需要释放。释放页表的函数是freewalk，因而这道题参考freewalk的代码即可。</p>
 <p>我觉得从“遍历页表”联想到“释放页表”这点是很巧的。不过也不会很突兀，毕竟学数据结构时就知道释放就需要遍历，逆向思维有点难但问题不大。</p>
@@ -459,9 +269,9 @@
 
 <p>page0就填程序。这里重点说明一下为什么page1和page2分别是guard page和stack。</p>
 <p>按照它的那个算术关系，stack和guard page的虚拟内存位置关系应该是这样的：</p>
-<p><img src="/2023/01/10/xv6/image-20230111004330079.png" alt="image-20230111004330079"></p>
+<p><img src="/2023/01/10/xv6/image-20230111004330079.png" alt="image-20230111004330079" loading="lazy"></p>
 <p>那为什么最后在页表中，变成了page1是gurad page，page2是stack这样上下颠倒了呢？看vm.c中的uvmalloc就能明白。</p>
-<p><img src="/2023/01/10/xv6/image-20230111004500827.png" alt="image-20230111004500827"></p>
+<p><img src="/2023/01/10/xv6/image-20230111004500827.png" alt="image-20230111004500827" loading="lazy"></p>
 <p>在253行设置了新映射。可以看到，这里设置映射的顺序是sz-&gt;sz+PGSIZE，也即先设置guard page的映射，再设置stack的映射。所以，这两位才会上下颠倒了。</p>
 <h3 id="Detecting-which-pages-have-been-accessed"><a href="#Detecting-which-pages-have-been-accessed" class="headerlink" title="Detecting which pages have been accessed"></a>Detecting which pages have been accessed</h3><blockquote>
 <p>Some garbage collectors (a form of automatic memory management) can benefit from information about <strong>which pages have been accessed (read or write)</strong>. In this part of the lab, you will add a new feature to xv6 that detects and reports this information to userspace by inspecting <strong>the access bits in the RISC-V page table.</strong> The RISC-V hardware page walker marks these bits in the <strong>PTE</strong> whenever it resolves a TLB miss.</p>
@@ -509,7 +319,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in vm.c</span></span><br><span class="line"><span class="type">pagetable_t</span></span><br><span class="line"><span class="title function_">perproc_kvminit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">  p-&gt;kpgtbl = (<span class="type">pagetable_t</span>) kalloc();</span><br><span class="line">  <span class="built_in">memset</span>(p-&gt;kpgtbl, <span class="number">0</span>, PGSIZE);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// uart registers</span></span><br><span class="line">  pkvmmap(p-&gt;kpgtbl,UART0, UART0, PGSIZE, PTE_R | PTE_W);</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">return</span> pt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这样会死得很惨，爆出如下panic：</p>
-<p><img src="/2023/01/10/xv6/image-20230114011100370.png" alt="image-20230114011100370"></p>
+<p><img src="/2023/01/10/xv6/image-20230114011100370.png" alt="image-20230114011100370" loading="lazy"></p>
 <p>通过hints的调试贴士</p>
 <blockquote>
 <p>A missing page table mapping will likely cause the kernel to encounter a page fault. It will print an error that includes <code>sepc=0x00000000XXXXXXXX</code>. You can find out where the fault occurred by searching for <code>XXXXXXXX</code> in <code>kernel/kernel.asm</code>.</p>
@@ -639,244 +449,4 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in proc.c userinit()</span></span><br><span class="line">  uvminit(p-&gt;pagetable, initcode, <span class="keyword">sizeof</span>(initcode));</span><br><span class="line">  p-&gt;sz = PGSIZE;</span><br><span class="line">  <span class="comment">// 加这个！</span></span><br><span class="line">  kvmcopy(p-&gt;pagetable, p-&gt;kpgtbl, p-&gt;sz);</span><br></pre></td></tr></table></figure>
 
 <h5 id="删掉freewalk的panic（我特有的缺点）"><a href="#删掉freewalk的panic（我特有的缺点）" class="headerlink" title="删掉freewalk的panic（我特有的缺点）"></a>删掉freewalk的panic（我特有的缺点）</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in vm.c freewalk()    </span></span><br><span class="line">    <span class="keyword">if</span>((pte &amp; PTE_V) &amp;&amp; (pte &amp; (PTE_R|PTE_W|PTE_X)) == <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(pte &amp; PTE_V)&#123;</span><br><span class="line">      <span class="comment">//panic(&quot;freewalk: leaf&quot;);</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-    </div>
-
-    
-    
-    
-
-		<div>
-		  
-			<div>
-    
-        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-		  
-		</div>
-
-      <footer class="post-footer">
-
-        
-
-
-        
-      </footer>
-    
-  </article>
-  
-  
-  
-
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Page-tables"><span class="nav-number">1.</span> <span class="nav-text">Page tables</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Paging-hardware"><span class="nav-number">1.1.</span> <span class="nav-text">Paging hardware</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E9%A1%B5%E8%A1%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">为什么需要页表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E8%A1%A8%E5%A6%82%E4%BD%95%E8%BF%90%E4%BD%9C"><span class="nav-number">1.1.2.</span> <span class="nav-text">页表如何运作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E8%A1%A8%E7%BB%84%E6%88%90"><span class="nav-number">1.1.3.</span> <span class="nav-text">页表组成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B5%E8%A1%A8%E9%A1%B9"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">页表项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E9%A1%B5%E8%A1%A8%E5%92%8C%E5%A4%9A%E7%BA%A7%E9%A1%B5%E8%A1%A8"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">单页表和多级页表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E8%A1%A8%E4%BD%BF%E7%94%A8"><span class="nav-number">1.1.4.</span> <span class="nav-text">页表使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kernel-address-space"><span class="nav-number">1.2.</span> <span class="nav-text">Kernel address space</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-creating-an-address-space"><span class="nav-number">1.3.</span> <span class="nav-text">Code: creating an address space</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#vm-c"><span class="nav-number">1.3.1.</span> <span class="nav-text">vm.c</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A5%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%BA%E4%BE%8B%E4%BB%8B%E7%BB%8D%E5%90%84%E4%B8%AA%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">以初始化为例介绍各个函数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E9%A1%B5%E8%A1%A8"><span class="nav-number">1.3.1.1.1.</span> <span class="nav-text">创建页表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A3%85%E4%B8%8A%E9%A1%B5%E8%A1%A8"><span class="nav-number">1.3.1.1.2.</span> <span class="nav-text">装上页表</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%96%91%E9%97%AE"><span class="nav-number">1.3.1.1.2.1.</span> <span class="nav-text">疑问</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%88%91%E7%9A%84%E9%94%99%E8%AF%AF%E6%83%B3%E6%B3%95"><span class="nav-number">1.3.1.1.2.2.</span> <span class="nav-text">我的错误想法</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%A7%A3%E7%AD%94"><span class="nav-number">1.3.1.1.2.3.</span> <span class="nav-text">解答</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Physical-memory-allocation"><span class="nav-number">1.4.</span> <span class="nav-text">Physical memory allocation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-Physical-memory-allocator"><span class="nav-number">1.5.</span> <span class="nav-text">Code: Physical memory allocator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Process-address-space"><span class="nav-number">1.6.</span> <span class="nav-text">Process address space</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-sbrk"><span class="nav-number">1.7.</span> <span class="nav-text">Code: sbrk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-exec"><span class="nav-number">1.8.</span> <span class="nav-text">Code:exec</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Real-world"><span class="nav-number">1.9.</span> <span class="nav-text">Real world</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab%EF%BC%9APagetable"><span class="nav-number">1.10.</span> <span class="nav-text">Lab：Pagetable</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Speed-up-system-calls"><span class="nav-number">1.10.1.</span> <span class="nav-text">Speed up system calls</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3"><span class="nav-number">1.10.1.1.</span> <span class="nav-text">感想</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B9%8C%E9%BE%99"><span class="nav-number">1.10.1.1.1.</span> <span class="nav-text">乌龙</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#panic-freewalk-leaf"><span class="nav-number">1.10.1.1.2.</span> <span class="nav-text">panic:freewalk leaf</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.10.1.1.3.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.10.1.2.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E7%AD%94%E9%A2%98"><span class="nav-number">1.10.1.3.</span> <span class="nav-text">问答题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Print-a-page-table"><span class="nav-number">1.10.2.</span> <span class="nav-text">Print a page table</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-1"><span class="nav-number">1.10.2.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="nav-number">1.10.2.2.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E7%AD%94%E9%A2%98-1"><span class="nav-number">1.10.2.3.</span> <span class="nav-text">问答题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Detecting-which-pages-have-been-accessed"><span class="nav-number">1.10.3.</span> <span class="nav-text">Detecting which pages have been accessed</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-2"><span class="nav-number">1.10.3.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-2"><span class="nav-number">1.10.3.2.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#A-kernel-page-table-per-process"><span class="nav-number">1.10.4.</span> <span class="nav-text">A kernel page table per process</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-3"><span class="nav-number">1.10.4.1.</span> <span class="nav-text">感想</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%BF%99%E4%B9%88%E5%B9%B2"><span class="nav-number">1.10.4.1.1.</span> <span class="nav-text">为什么要这么干</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Emyproc"><span class="nav-number">1.10.4.1.2.</span> <span class="nav-text">关于myproc()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-number">1.10.4.1.3.</span> <span class="nav-text">系统调用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8A%E6%94%BE%E9%A1%B5%E8%A1%A8%E4%BD%86%E4%B8%8D%E9%87%8A%E6%94%BE%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98"><span class="nav-number">1.10.4.1.4.</span> <span class="nav-text">释放页表但不释放物理内存</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-3"><span class="nav-number">1.10.4.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.10.4.2.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swtch%E6%97%B6%E5%88%87%E6%8D%A2%E9%A1%B5%E8%A1%A8"><span class="nav-number">1.10.4.2.2.</span> <span class="nav-text">swtch时切换页表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9kvmpa"><span class="nav-number">1.10.4.2.3.</span> <span class="nav-text">修改kvmpa</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8A%E6%94%BE"><span class="nav-number">1.10.4.2.4.</span> <span class="nav-text">释放</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Simplify-copyin-copyinstr"><span class="nav-number">1.10.5.</span> <span class="nav-text">Simplify copyin&#x2F;copyinstr</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-4"><span class="nav-number">1.10.5.1.</span> <span class="nav-text">感想</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%AF%E5%85%A5%E5%B9%BB%E6%83%B3"><span class="nav-number">1.10.5.1.1.</span> <span class="nav-text">误入幻想</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B5%B0%E4%B8%8A%E6%AD%A3%E9%80%94"><span class="nav-number">1.10.5.1.2.</span> <span class="nav-text">走上正途</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-4"><span class="nav-number">1.10.5.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B8%94%E7%BF%81%E4%B9%8B%E5%88%A9%E5%87%BD%E6%95%B0"><span class="nav-number">1.10.5.2.1.</span> <span class="nav-text">渔翁之利函数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9fork%E3%80%81exec%E3%80%81sbrk"><span class="nav-number">1.10.5.2.2.</span> <span class="nav-text">修改fork、exec、sbrk</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#fork"><span class="nav-number">1.10.5.2.2.1.</span> <span class="nav-text">fork</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#exec"><span class="nav-number">1.10.5.2.2.2.</span> <span class="nav-text">exec</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#sbrk"><span class="nav-number">1.10.5.2.2.3.</span> <span class="nav-text">sbrk</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#userinit"><span class="nav-number">1.10.5.2.3.</span> <span class="nav-text">userinit</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A0%E6%8E%89freewalk%E7%9A%84panic%EF%BC%88%E6%88%91%E7%89%B9%E6%9C%89%E7%9A%84%E7%BC%BA%E7%82%B9%EF%BC%89"><span class="nav-number">1.10.5.2.4.</span> <span class="nav-text">删掉freewalk的panic（我特有的缺点）</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="修年"
-      src="/images/head.png">
-  <p class="site-author-name" itemprop="name">修年</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">46</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-    <br>
-      <span class="links-of-author-item">
-          QQ: 1776527992
-      </span>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2023</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">修年</span>
-</div>
-
-
-<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
-<script>
-    var now = new Date(); 
-    function createtime() { 
-        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
-        now.setTime(now.getTime()+250); 
-        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
-        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
-        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
-        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
-        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
-        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
-        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
-        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
-    } 
-setInterval("createtime()",250);
-</script>
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-user"></i>
-      </span>
-      <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span>
-      </span>
-    </span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-eye"></i>
-      </span>
-      <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span>
-      </span>
-    </span>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-  
-
-
-
-  <script type="text/javascript" src="/js/clicklove.js"></script>
-</body>
-</html>
+</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap3/" title="Page tables">https://xiunianjun.github.io/2023/01/10/xv6$chap3/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/02/25/cs144/" rel="prev" title="cs144"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">cs144</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/01/10/xv6/" rel="next" title="xv6"><span class="post-nav-text">xv6</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>

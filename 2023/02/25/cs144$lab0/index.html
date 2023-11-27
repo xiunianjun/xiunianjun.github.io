@@ -1,28 +1,14 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.2">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
-  <link rel="mask-icon" href="/images/cat.png" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
-  <script src="/lib/pace/pace.min.js"></script>
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="Lab0 本次实验一直在强调的一点就是，TCP的功能是将底层的零散数据包，拼接成一个reliable in-order的byte stream。这个对我来说非常“振聋发聩”（夸张了233），以前只是背诵地知道TCP的可靠性，这次我算是第一次知道了所谓“可靠”究竟可靠在哪：一是保证了序列有序性，二是保证了数据不丢失（从软件层面）。 还有一个就是大致了解了cs144的主题：实现TCP协议。也就是说，运">
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>Lab0 | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="Lab0 本次实验一直在强调的一点就是，TCP的功能是将底层的零散数据包，拼接成一个reliable in-order的byte stream。这个对我来说非常“振聋发聩”（夸张了233），以前只是背诵地知道TCP的可靠性，这次我算是第一次知道了所谓“可靠”究竟可靠在哪：一是保证了序列有序性，二是保证了数据不丢失（从软件层面）。 还有一个就是大致了解了cs144的主题：实现TCP协议。也就是说，运">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Lab0">
 <meta property="og:url" content="https://xiunianjun.github.io/2023/02/25/cs144$lab0/index.html">
@@ -41,200 +27,24 @@
 <meta property="article:modified_time" content="2023-03-11T14:03:35.416Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/02/25/cs144/194758.png">
-
-<link rel="canonical" href="https://xiunianjun.github.io/2023/02/25/cs144$lab0/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>Lab0 | 修年</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-  
-      <meta charset="UTF-8">
-    <title>live2d-demo</title>
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <!-- Live2DCubismCore -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
-    <!-- Include Pixi. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
-    <!-- Include Cubism Components. -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
-    <!-- User's Script -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
-    <style>
-    </style>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-	
-		<script type="text/javascript" 
-		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
-		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
-	
-
-  <div class="container use-motion">
-    <div class="headband"></div>
-<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">修年</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post posts-expand">
-            
-
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/02/25/cs144$lab0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Lab0
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-02-25 22:19:00" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-03-11 22:03:35" itemprop="dateModified" datetime="2023-03-11T22:03:35+08:00">2023-03-11</time>
-              </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <h1 id="Lab0"><a href="#Lab0" class="headerlink" title="Lab0"></a>Lab0</h1><blockquote>
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/02/25/cs144/194758.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">45</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Lab0"><span class="toc-number">1.</span> <span class="toc-text">Lab0</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Fetch-a-Web-page"><span class="toc-number">1.1.</span> <span class="toc-text">Fetch a Web page</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Send-yourself-an-email"><span class="toc-number">1.2.</span> <span class="toc-text">Send yourself an email</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Listening-and-connecting"><span class="toc-number">1.3.</span> <span class="toc-text">Listening and connecting</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Use-socket-to-write-webget"><span class="toc-number">1.4.</span> <span class="toc-text">Use socket to write webget</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#An-in-memory-reliable-byte-stream"><span class="toc-number">1.5.</span> <span class="toc-text">An in-memory reliable byte stream</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">1.5.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%94%99%E8%AF%AF1-member-initialization-list"><span class="toc-number">1.5.1.0.1.</span> <span class="toc-text">错误1 member initialization list</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%94%99%E8%AF%AF2-%E4%BD%BF%E7%94%A8%E4%BA%86vector%E4%BD%9C%E4%B8%BAbuffer%E7%9A%84%E8%BD%BD%E4%BD%93"><span class="toc-number">1.5.1.0.2.</span> <span class="toc-text">错误2 使用了vector作为buffer的载体</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%94%99%E8%AF%AF3-%E9%94%99%E8%AF%AF%E5%9C%B0%E9%98%BB%E5%A1%9E"><span class="toc-number">1.5.1.0.3.</span> <span class="toc-text">错误3 错误地阻塞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">1.5.2.</span> <span class="toc-text">代码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6%E5%A3%B0%E6%98%8E"><span class="toc-number">1.5.2.1.</span> <span class="toc-text">头文件声明</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.5.2.2.</span> <span class="toc-text">具体实现</span></a></li></ol></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/02/25/cs144$lab0/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Lab0</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-02-25 22:19:00" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-03-11 22:03:35" itemprop="dateModified" datetime="2023-03-11T22:03:35+08:00">2023-03-11</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Lab0"><a href="#Lab0" class="headerlink" title="Lab0"></a>Lab0</h1><blockquote>
 <p>本次实验一直在强调的一点就是，TCP的功能是将底层的零散数据包，拼接成一个reliable in-order的byte stream。这个对我来说非常“振聋发聩”（夸张了233），以前只是背诵地知道TCP的可靠性，这次我算是第一次知道了所谓“可靠”究竟可靠在哪：一是保证了序列有序性，二是保证了数据不丢失（从软件层面）。</p>
 <p>还有一个就是大致了解了cs144的主题：实现TCP协议。也就是说，运输层下面的那些层是不用管的吗？不过这样也挺恰好，我正好在学校的实验做过对下面这些层的实现了，就差一个TCP23333这样一来，我的协议栈就可以完整了。</p>
 </blockquote>
@@ -245,11 +55,11 @@
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(is_input_end == <span class="literal">false</span>&amp;&amp;pointer&lt;length)&#123;</span><br><span class="line">    <span class="keyword">if</span>(buffer.<span class="built_in">size</span>() == capacity)   <span class="keyword">break</span>;</span><br><span class="line">    buffer.<span class="built_in">push_back</span>(data[pointer]);</span><br><span class="line">    pointer++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </blockquote>
 <h2 id="Fetch-a-Web-page"><a href="#Fetch-a-Web-page" class="headerlink" title="Fetch a Web page"></a>Fetch a Web page</h2><p>主要是介绍了<code>telnet</code>指令</p>
-<p><img src="/2023/02/25/cs144/194758.png" alt="屏幕截图 2023-02-23 194758"></p>
+<p><img src="/2023/02/25/cs144/194758.png" alt="屏幕截图 2023-02-23 194758" loading="lazy"></p>
 <h2 id="Send-yourself-an-email"><a href="#Send-yourself-an-email" class="headerlink" title="Send yourself an email"></a>Send yourself an email</h2><p>用的是telnet带smtp参</p>
 <h2 id="Listening-and-connecting"><a href="#Listening-and-connecting" class="headerlink" title="Listening and connecting"></a>Listening and connecting</h2><p>上面的telnet是一个client program。接下来我们要把自己放在server的位置上。</p>
 <p>用的是<code>netcat</code>指令。</p>
-<p><img src="/2023/02/25/cs144/image-20230223202202509.png" alt="image-20230223202202509"></p>
+<p><img src="/2023/02/25/cs144/image-20230223202202509.png" alt="image-20230223202202509" loading="lazy"></p>
 <h2 id="Use-socket-to-write-webget"><a href="#Use-socket-to-write-webget" class="headerlink" title="Use socket to write webget"></a>Use socket to write webget</h2><p>这个确实不难，就是这个地方有点坑：</p>
 <blockquote>
 <p>Please note that in HTTP, each line must be ended with “\r\n” (it’s not sufficient to use just “\n” or endl).</p>
@@ -272,19 +82,19 @@
 <h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><p>这东西其实是很简单的，但是我还是花了一定的时间，主要原因有两点，一是我不懂c++，所以一些地方错得我很懵逼，二是因为我是sb。</p>
 <p>下面就记录下三个我印象比较深刻的错误吧。</p>
 <h5 id="错误1-member-initialization-list"><a href="#错误1-member-initialization-list" class="headerlink" title="错误1 member initialization list"></a>错误1 member initialization list</h5><p>构造函数我一开始是这么写的：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113108208.png" alt="image-20230224113108208"></p>
+<p><img src="/2023/02/25/cs144/image-20230224113108208.png" alt="image-20230224113108208" loading="lazy"></p>
 <p>结果爆出了这样的错：</p>
-<p><img src="/2023/02/25/cs144/image-20230224112056879.png" alt="image-20230224112056879"></p>
+<p><img src="/2023/02/25/cs144/image-20230224112056879.png" alt="image-20230224112056879" loading="lazy"></p>
 <p>搜了半天也没看懂怎么回事，去求助了下某场外c艹选手，才知道了还有成员变量初始化列表这玩意，这个东西似乎比较高效安全。</p>
 <p>于是我改成了这么写：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113333962.png" alt="image-20230224113333962"></p>
+<p><img src="/2023/02/25/cs144/image-20230224113333962.png" alt="image-20230224113333962" loading="lazy"></p>
 <p>它告诉我<code>buffer</code>也得初始化。于是我又这么写：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113358856.png" alt="image-20230224113358856"></p>
+<p><img src="/2023/02/25/cs144/image-20230224113358856.png" alt="image-20230224113358856" loading="lazy"></p>
 <p>又是奇奇怪怪的错误，说明vector不能这么初始化。</p>
 <p>场外c艹选手看到了这个：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113456432.png" alt="image-20230224113456432"></p>
+<p><img src="/2023/02/25/cs144/image-20230224113456432.png" alt="image-20230224113456432" loading="lazy"></p>
 <p>所以说vector应该这样初始化：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113549970.png" alt="image-20230224113549970"></p>
+<p><img src="/2023/02/25/cs144/image-20230224113549970.png" alt="image-20230224113549970" loading="lazy"></p>
 <h5 id="错误2-使用了vector作为buffer的载体"><a href="#错误2-使用了vector作为buffer的载体" class="headerlink" title="错误2 使用了vector作为buffer的载体"></a>错误2 使用了<code>vector</code>作为buffer的载体</h5><p>应该使用的是可以从front删除数据的数据结构，比如说deque。【vector也行，但是效率较低】</p>
 <p>具体为什么，可以以数据流为cat为例。执行<code>peek(2)</code>时，使用vector得到的是at，使用deque得到的是ca。</p>
 <h5 id="错误3-错误地阻塞"><a href="#错误3-错误地阻塞" class="headerlink" title="错误3 错误地阻塞"></a>错误3 错误地阻塞</h5><p>一开始在<code>write</code>方法，我是这么写的：</p>
@@ -298,244 +108,4 @@
 <h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><h4 id="头文件声明"><a href="#头文件声明" class="headerlink" title="头文件声明"></a>头文件声明</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ByteStream</span> &#123;</span><br><span class="line">  <span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// Your code here -- add private members as necessary.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Hint: This doesn&#x27;t need to be a sophisticated data structure at</span></span><br><span class="line">    <span class="comment">// all, but if any of your tests are taking longer than a second,</span></span><br><span class="line">    <span class="comment">// that&#x27;s a sign that you probably want to keep exploring</span></span><br><span class="line">    <span class="comment">// different approaches.</span></span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> total_write;</span><br><span class="line">    <span class="type">size_t</span> total_read;</span><br><span class="line">    <span class="type">bool</span> is_input_end;</span><br><span class="line">    <span class="type">const</span> <span class="type">size_t</span> capacity;</span><br><span class="line">    deque&lt;<span class="type">char</span>&gt; buffer;</span><br></pre></td></tr></table></figure>
 
 <h4 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">ByteStream::<span class="built_in">ByteStream</span>(<span class="type">const</span> <span class="type">size_t</span> cap) : <span class="built_in">total_write</span>(<span class="number">0</span>),<span class="built_in">total_read</span>(<span class="number">0</span>),<span class="built_in">is_input_end</span>(<span class="literal">false</span>),<span class="built_in">capacity</span>(cap),<span class="built_in">buffer</span>()&#123; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//! Write a string of bytes into the stream. Write as many</span></span><br><span class="line">    <span class="comment">//! as will fit, and return how many were written.</span></span><br><span class="line">    <span class="comment">//! \returns the number of bytes accepted into the stream</span></span><br><span class="line"><span class="function"><span class="type">size_t</span> <span class="title">ByteStream::write</span><span class="params">(<span class="type">const</span> string &amp;data)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(is_input_end == <span class="literal">true</span>)    is_input_end = <span class="literal">false</span>;</span><br><span class="line">    <span class="type">int</span> pointer = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> length = data.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">while</span>(is_input_end == <span class="literal">false</span>&amp;&amp;pointer&lt;length)&#123;</span><br><span class="line">        <span class="keyword">if</span>(buffer.<span class="built_in">size</span>() == capacity)   <span class="keyword">break</span>;</span><br><span class="line">        buffer.<span class="built_in">push_back</span>(data[pointer]);</span><br><span class="line">        pointer++;</span><br><span class="line">    &#125;</span><br><span class="line">    total_write+=pointer;</span><br><span class="line">    <span class="keyword">return</span> pointer;</span><br><span class="line">&#125;</span><br><span class="line">    <span class="comment">//! Peek at next &quot;len&quot; bytes of the stream</span></span><br><span class="line"><span class="comment">//! \param[in] len bytes will be copied from the output side of the buffer</span></span><br><span class="line"><span class="function">string <span class="title">ByteStream::peek_output</span><span class="params">(<span class="type">const</span> <span class="type">size_t</span> len)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    string res;</span><br><span class="line">    <span class="type">size_t</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = buffer.<span class="built_in">begin</span>(); it != buffer.<span class="built_in">end</span>(); it++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (i &gt;= len)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        i++;</span><br><span class="line">        res.<span class="built_in">push_back</span>(*it);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//! Remove bytes from the buffer</span></span><br><span class="line"><span class="comment">//! \param[in] len bytes will be removed from the output side of the buffer</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ByteStream::pop_output</span><span class="params">(<span class="type">const</span> <span class="type">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    <span class="type">size_t</span> i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (buffer.<span class="built_in">empty</span>())</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        buffer.<span class="built_in">pop_front</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    total_read+=i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//! Read (i.e., copy and then pop) the next &quot;len&quot; bytes of the stream</span></span><br><span class="line"><span class="comment">//! \param[in] len bytes will be popped and returned</span></span><br><span class="line"><span class="comment">//! \returns a string</span></span><br><span class="line"><span class="function">std::string <span class="title">ByteStream::read</span><span class="params">(<span class="type">const</span> <span class="type">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    string res = <span class="built_in">peek_output</span>(len);</span><br><span class="line">    <span class="built_in">pop_output</span>(len);</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ByteStream::end_input</span><span class="params">()</span> </span>&#123;is_input_end = <span class="literal">true</span>;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">ByteStream::input_ended</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> is_input_end; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">size_t</span> <span class="title">ByteStream::buffer_size</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> buffer.<span class="built_in">size</span>(); &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">ByteStream::buffer_empty</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> buffer.<span class="built_in">empty</span>(); &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">ByteStream::eof</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> is_input_end &amp;&amp; buffer.<span class="built_in">empty</span>(); &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">size_t</span> <span class="title">ByteStream::bytes_written</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> total_write; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">size_t</span> <span class="title">ByteStream::bytes_read</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> total_read; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">size_t</span> <span class="title">ByteStream::remaining_capacity</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> capacity - buffer.<span class="built_in">size</span>(); &#125;</span><br></pre></td></tr></table></figure>
-
-    </div>
-
-    
-    
-    
-
-		<div>
-		  
-			<div>
-    
-        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-		  
-		</div>
-
-      <footer class="post-footer">
-
-        
-
-
-        
-      </footer>
-    
-  </article>
-  
-  
-  
-
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Lab0"><span class="nav-number">1.</span> <span class="nav-text">Lab0</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Fetch-a-Web-page"><span class="nav-number">1.1.</span> <span class="nav-text">Fetch a Web page</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Send-yourself-an-email"><span class="nav-number">1.2.</span> <span class="nav-text">Send yourself an email</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Listening-and-connecting"><span class="nav-number">1.3.</span> <span class="nav-text">Listening and connecting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Use-socket-to-write-webget"><span class="nav-number">1.4.</span> <span class="nav-text">Use socket to write webget</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#An-in-memory-reliable-byte-stream"><span class="nav-number">1.5.</span> <span class="nav-text">An in-memory reliable byte stream</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%9F%E6%83%B3"><span class="nav-number">1.5.1.</span> <span class="nav-text">感想</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%94%99%E8%AF%AF1-member-initialization-list"><span class="nav-number">1.5.1.0.1.</span> <span class="nav-text">错误1 member initialization list</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%94%99%E8%AF%AF2-%E4%BD%BF%E7%94%A8%E4%BA%86vector%E4%BD%9C%E4%B8%BAbuffer%E7%9A%84%E8%BD%BD%E4%BD%93"><span class="nav-number">1.5.1.0.2.</span> <span class="nav-text">错误2 使用了vector作为buffer的载体</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%94%99%E8%AF%AF3-%E9%94%99%E8%AF%AF%E5%9C%B0%E9%98%BB%E5%A1%9E"><span class="nav-number">1.5.1.0.3.</span> <span class="nav-text">错误3 错误地阻塞</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.5.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6%E5%A3%B0%E6%98%8E"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">头文件声明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">具体实现</span></a></li></ol></li></ol></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="修年"
-      src="/images/head.png">
-  <p class="site-author-name" itemprop="name">修年</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">46</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-    <br>
-      <span class="links-of-author-item">
-          QQ: 1776527992
-      </span>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2023</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">修年</span>
-</div>
-
-
-<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
-<script>
-    var now = new Date(); 
-    function createtime() { 
-        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
-        now.setTime(now.getTime()+250); 
-        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
-        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
-        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
-        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
-        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
-        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
-        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
-        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
-    } 
-setInterval("createtime()",250);
-</script>
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-user"></i>
-      </span>
-      <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span>
-      </span>
-    </span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-eye"></i>
-      </span>
-      <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span>
-      </span>
-    </span>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-  
-
-
-
-  <script type="text/javascript" src="/js/clicklove.js"></script>
-</body>
-</html>
+</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab0/" title="Lab0">https://xiunianjun.github.io/2023/02/25/cs144$lab0/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/03/13/cmu15445/" rel="prev" title="CMU15445"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">CMU15445</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/02/25/cs144/" rel="next" title="cs144"><span class="post-nav-text">cs144</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>

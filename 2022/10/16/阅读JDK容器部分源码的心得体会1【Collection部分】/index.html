@@ -1,28 +1,14 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.2">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
-  <link rel="mask-icon" href="/images/cat.png" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
-  <script src="/lib/pace/pace.min.js"></script>
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="idea 替换注释正则表达式&#x2F;\*&amp;#123;1,2&amp;#125;[\s\S]*?\*&#x2F; typora 替换图片asset   \!\[.*\]\(D:\\aWorkStorage\\hexo\\blog\\source\\_posts\\阅读JDK容器部分源码的心得体会1【Collection部分】\\(.*)\.png\)， 替换结果&amp;#123;% asset_img $1.png %&amp;#12">
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>阅读JDK容器部分源码的心得体会1【Collection部分】 | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="idea 替换注释正则表达式&#x2F;\*&amp;#123;1,2&amp;#125;[\s\S]*?\*&#x2F; typora 替换图片asset   \!\[.*\]\(D:\\aWorkStorage\\hexo\\blog\\source\\_posts\\阅读JDK容器部分源码的心得体会1【Collection部分】\\(.*)\.png\)， 替换结果&amp;#123;% asset_img $1.png %&amp;#12">
 <meta property="og:type" content="article">
 <meta property="og:title" content="阅读JDK容器部分源码的心得体会1【Collection部分】">
 <meta property="og:url" content="https://xiunianjun.github.io/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/index.html">
@@ -45,208 +31,32 @@
 <meta property="article:author" content="修年">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/2243690-9cd9c896e0d512ed.gif">
-
-<link rel="canonical" href="https://xiunianjun.github.io/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>阅读JDK容器部分源码的心得体会1【Collection部分】 | 修年</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-  
-      <meta charset="UTF-8">
-    <title>live2d-demo</title>
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <!-- Live2DCubismCore -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
-    <!-- Include Pixi. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
-    <!-- Include Cubism Components. -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
-    <!-- User's Script -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
-    <style>
-    </style>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-	
-		<script type="text/javascript" 
-		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
-		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
-	
-
-  <div class="container use-motion">
-    <div class="headband"></div>
-<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">修年</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post posts-expand">
-            
-
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          阅读JDK容器部分源码的心得体会1【Collection部分】
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-10-16 10:58:09" itemprop="dateCreated datePublished" datetime="2022-10-16T10:58:09+08:00">2022-10-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-11-02 19:49:05" itemprop="dateModified" datetime="2022-11-02T19:49:05+08:00">2022-11-02</time>
-              </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <blockquote>
+<meta name="twitter:image" content="https://xiunianjun.github.io/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/2243690-9cd9c896e0d512ed.gif"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">45</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%AD%E4%BB%A3%E5%99%A8%E7%9B%B8%E5%85%B3%E6%8E%A5%E5%8F%A3"><span class="toc-number">1.</span> <span class="toc-text">迭代器相关接口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Iterable-I"><span class="toc-number">1.1.</span> <span class="toc-text">Iterable(I)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Iterator-I"><span class="toc-number">1.2.</span> <span class="toc-text">Iterator(I)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ListIterator-I"><span class="toc-number">1.3.</span> <span class="toc-text">ListIterator(I)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Collection"><span class="toc-number">2.</span> <span class="toc-text">Collection</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Collection-I"><span class="toc-number">2.1.</span> <span class="toc-text">Collection(I)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">2.1.1.</span> <span class="toc-text">代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%8C"><span class="toc-number">2.1.2.</span> <span class="toc-text">其中，</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E2%80%9CBags-or-multisets-unordered-collections-that-may-contain-duplicate-elements-should-implement-this-interface-directly-%E2%80%9D"><span class="toc-number">2.1.2.1.</span> <span class="toc-text">“Bags or multisets (unordered collections that may contain duplicate elements) should implement this interface directly.”</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E2%80%9Cdestructive%E2%80%9D-methods-%E5%92%8C%E2%80%9Dundestructive%E2%80%9D-methods"><span class="toc-number">2.1.2.2.</span> <span class="toc-text">“destructive” methods 和”undestructive” methods</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#recursive-traversal-of-the-collection"><span class="toc-number">2.1.2.3.</span> <span class="toc-text">recursive traversal of the collection</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8EtoArray%E7%9A%84%E8%AE%A8%E8%AE%BA"><span class="toc-number">2.1.2.4.</span> <span class="toc-text">关于toArray的讨论</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Edefault%E5%85%B3%E9%94%AE%E5%AD%97"><span class="toc-number">2.1.2.5.</span> <span class="toc-text">关于default关键字</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AbstractCollection-A"><span class="toc-number">2.2.</span> <span class="toc-text">AbstractCollection(A)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9C%A8toArray%E6%96%B9%E6%B3%95%E4%B8%AD%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%86%99%E8%BF%99%E4%B9%88%E5%A5%87%E6%80%AA%E7%9A%84%E4%BB%A3%E7%A0%81%EF%BC%9F"><span class="toc-number">2.2.0.1.</span> <span class="toc-text">在toArray方法中，为什么需要写这么奇怪的代码？</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Queue"><span class="toc-number">3.</span> <span class="toc-text">Queue</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Queue-I"><span class="toc-number">3.1.</span> <span class="toc-text">Queue(I)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A"><span class="toc-number">3.1.1.</span> <span class="toc-text">代码：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Deque-I"><span class="toc-number">3.2.</span> <span class="toc-text">Deque(I)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-1"><span class="toc-number">3.2.1.</span> <span class="toc-text">代码：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ArrayDeque"><span class="toc-number">3.3.</span> <span class="toc-text">ArrayDeque</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-2"><span class="toc-number">3.3.1.</span> <span class="toc-text">代码：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A"><span class="toc-number">3.3.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E5%AE%B9%E9%87%8F"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">默认容量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#head-1-amp-elements-length-1"><span class="toc-number">3.3.2.2.</span> <span class="toc-text">(head - 1) &amp; (elements.length - 1)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#if-delete-lastRet"><span class="toc-number">3.3.2.3.</span> <span class="toc-text">if (delete(lastRet))</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#forEachRemaining"><span class="toc-number">3.3.2.4.</span> <span class="toc-text">forEachRemaining</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#List"><span class="toc-number">4.</span> <span class="toc-text">List</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#List-I"><span class="toc-number">4.1.</span> <span class="toc-text">List(I)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="toc-number">4.1.1.</span> <span class="toc-text">代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-1"><span class="toc-number">4.1.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#hashcode%E4%B8%8D%E5%85%81%E8%AE%B8%E8%87%AA%E7%8E%AF"><span class="toc-number">4.1.2.1.</span> <span class="toc-text">hashcode不允许自环</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#structural-and-non-structural-change-in-list"><span class="toc-number">4.1.2.2.</span> <span class="toc-text">structural and non-structural change in list</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Esublist"><span class="toc-number">4.1.2.3.</span> <span class="toc-text">关于sublist</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E2%91%A0-view"><span class="toc-number">4.1.2.3.1.</span> <span class="toc-text">① view</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E2%91%A1-%E7%95%99%E4%B8%8B%E4%B8%80%E4%B8%AA%E9%97%AE%E9%A2%98"><span class="toc-number">4.1.2.3.2.</span> <span class="toc-text">② 留下一个问题</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E2%91%A2-%E5%85%B3%E4%BA%8Esublis%E5%92%8C%E5%8E%9Flist%E3%80%81non-structral%E5%92%8Cstructural%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9A"><span class="toc-number">4.1.2.3.3.</span> <span class="toc-text">③ 关于sublis和原list、non-structral和structural的区别：</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AbstractList-A"><span class="toc-number">4.2.</span> <span class="toc-text">AbstractList(A)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-2"><span class="toc-number">4.2.1.</span> <span class="toc-text">代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-2"><span class="toc-number">4.2.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%86%85%E9%83%A8%E7%B1%BBListItr%E5%92%8CItr%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.2.2.1.</span> <span class="toc-text">内部类ListItr和Itr的实现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#RandomAccess"><span class="toc-number">4.2.2.2.</span> <span class="toc-text">RandomAccess</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8EmodCount%E5%AD%97%E6%AE%B5%E4%B8%8Efail-fast%E6%9C%BA%E5%88%B6"><span class="toc-number">4.2.2.3.</span> <span class="toc-text">关于modCount字段与fail-fast机制</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ArrayList"><span class="toc-number">4.3.</span> <span class="toc-text">ArrayList</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-3"><span class="toc-number">4.3.1.</span> <span class="toc-text">代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-3"><span class="toc-number">4.3.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Cloneable%E6%8E%A5%E5%8F%A3"><span class="toc-number">4.3.2.1.</span> <span class="toc-text">Cloneable接口</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#clone%E4%B8%8E%E6%B5%85%E6%8B%B7%E8%B4%9D%EF%BC%88shallow-copy%EF%BC%89"><span class="toc-number">4.3.2.2.</span> <span class="toc-text">clone与浅拷贝（shallow copy）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E5%AD%90%E7%B1%BB%E7%BB%A7%E6%89%BF%E5%88%B0%E7%9A%84%E7%88%B6%E7%B1%BB%E5%86%85%E9%83%A8%E7%B1%BB"><span class="toc-number">4.3.2.3.</span> <span class="toc-text">关于子类继承到的父类内部类</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96versionID"><span class="toc-number">4.3.2.4.</span> <span class="toc-text">序列化versionID</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#transient"><span class="toc-number">4.3.2.5.</span> <span class="toc-text">transient</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ArrayList%E7%9A%84elementData%E8%99%BD%E7%84%B6%E8%A2%ABtransient%E4%BF%AE%E9%A5%B0%EF%BC%8C%E4%BD%86%E4%BB%8D%E7%84%B6%E8%83%BD%E5%A4%9F%E5%BA%8F%E5%88%97%E5%8C%96"><span class="toc-number">4.3.2.6.</span> <span class="toc-text">ArrayList的elementData虽然被transient修饰，但仍然能够序列化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Estatic%E7%9A%84%E7%A9%BA%E6%95%B0%E7%BB%84"><span class="toc-number">4.3.2.7.</span> <span class="toc-text">关于static的空数组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E6%89%A9%E5%AE%B9%E7%9A%84%E8%BF%9E%E7%8E%AF%E8%AE%A1"><span class="toc-number">4.3.2.8.</span> <span class="toc-text">关于扩容的连环计</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Eclear%E6%88%91%E7%9A%84%E5%86%99%E6%B3%95"><span class="toc-number">4.3.2.9.</span> <span class="toc-text">关于clear我的写法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#heap-write-traffic"><span class="toc-number">4.3.2.10.</span> <span class="toc-text">heap write traffic</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#if-i-gt-elementData-length"><span class="toc-number">4.3.2.11.</span> <span class="toc-text">if (i &gt;&#x3D; elementData.length)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#sublist%E4%B8%8D%E5%8F%AF%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%8C%E4%B8%94not-cloneable"><span class="toc-number">4.3.2.12.</span> <span class="toc-text">sublist不可序列化，且not cloneable</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#parent%E5%92%8CArrayList-this"><span class="toc-number">4.3.2.13.</span> <span class="toc-text">parent和ArrayList.this</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AbstractSequentialList-A"><span class="toc-number">4.4.</span> <span class="toc-text">AbstractSequentialList(A)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-3"><span class="toc-number">4.4.1.</span> <span class="toc-text">代码：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-4"><span class="toc-number">4.4.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#get%E5%92%8Cset%E6%96%B9%E6%B3%95%E9%80%9A%E8%BF%87Iterator%E5%AE%9E%E7%8E%B0"><span class="toc-number">4.4.2.1.</span> <span class="toc-text">get和set方法通过Iterator实现</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LinkedList"><span class="toc-number">4.5.</span> <span class="toc-text">LinkedList</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-4"><span class="toc-number">4.5.1.</span> <span class="toc-text">代码：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD"><span class="toc-number">4.5.2.</span> <span class="toc-text">其中</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E5%88%86%E4%BB%A3GC"><span class="toc-number">4.5.2.1.</span> <span class="toc-text">关于分代GC</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%99%8D%E5%BA%8F%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="toc-number">4.5.2.2.</span> <span class="toc-text">降序迭代器</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8EunlinkLast-First%E7%9A%84%E5%8F%82%E6%95%B0%E9%97%AE%E9%A2%98"><span class="toc-number">4.5.2.3.</span> <span class="toc-text">关于unlinkLast&#x2F;First的参数问题</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#sublist"><span class="toc-number">4.5.2.4.</span> <span class="toc-text">sublist</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#transient%E7%9A%84%E4%B8%89%E4%B8%AA%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F"><span class="toc-number">4.5.2.5.</span> <span class="toc-text">transient的三个成员变量</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Vector"><span class="toc-number">4.6.</span> <span class="toc-text">Vector</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-5"><span class="toc-number">4.6.1.</span> <span class="toc-text">代码：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-5"><span class="toc-number">4.6.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E5%AE%B9%E9%87%8F-1"><span class="toc-number">4.6.2.1.</span> <span class="toc-text">默认容量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%89%A9%E5%AE%B9%E6%93%8D%E4%BD%9C"><span class="toc-number">4.6.2.2.</span> <span class="toc-text">扩容操作</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#setsize%E4%B8%8D%E6%94%B9%E5%8F%98%E5%AE%B9%E9%87%8F"><span class="toc-number">4.6.2.3.</span> <span class="toc-text">setsize不改变容量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Vector%E5%8F%AF%E7%94%9F%E6%88%90%E6%9E%9A%E4%B8%BE%E7%B1%BB"><span class="toc-number">4.6.2.4.</span> <span class="toc-text">Vector可生成枚举类</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Set"><span class="toc-number">5.</span> <span class="toc-text">Set</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Set%EF%BC%88I%EF%BC%89"><span class="toc-number">5.1.</span> <span class="toc-text">Set（I）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-6"><span class="toc-number">5.1.1.</span> <span class="toc-text">代码：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-6"><span class="toc-number">5.1.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#set%E4%B8%AD%E5%8C%85%E5%90%AB%E5%8F%AF%E5%8F%98%E5%AF%B9%E8%B1%A1"><span class="toc-number">5.1.2.1.</span> <span class="toc-text">set中包含可变对象</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C"><span class="toc-number">5.1.2.2.</span> <span class="toc-text">集合操作</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AbstratcSet%EF%BC%88A%EF%BC%89"><span class="toc-number">5.2.</span> <span class="toc-text">AbstratcSet（A）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-7"><span class="toc-number">5.2.1.</span> <span class="toc-text">代码：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HashSet"><span class="toc-number">5.3.</span> <span class="toc-text">HashSet</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-8"><span class="toc-number">5.3.1.</span> <span class="toc-text">代码：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-7"><span class="toc-number">5.3.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#PRESENT"><span class="toc-number">5.3.2.1.</span> <span class="toc-text">PRESENT</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SortedSet%EF%BC%88I%EF%BC%89"><span class="toc-number">5.4.</span> <span class="toc-text">SortedSet（I）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-4"><span class="toc-number">5.4.1.</span> <span class="toc-text">代码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-8"><span class="toc-number">5.4.2.</span> <span class="toc-text">其中：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#subset"><span class="toc-number">5.4.2.1.</span> <span class="toc-text">subset</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#subSet-low-high-%E2%80%9D-0%E2%80%9D"><span class="toc-number">5.4.2.2.</span> <span class="toc-text">subSet(low, high+”\0”);</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NavigableSet%EF%BC%88I%EF%BC%89"><span class="toc-number">5.5.</span> <span class="toc-text">NavigableSet（I）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-9"><span class="toc-number">5.5.1.</span> <span class="toc-text">代码：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TreeSet"><span class="toc-number">5.6.</span> <span class="toc-text">TreeSet</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-10"><span class="toc-number">5.6.1.</span> <span class="toc-text">代码：</span></a></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">阅读JDK容器部分源码的心得体会1【Collection部分】</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2022-10-16 10:58:09" itemprop="dateCreated datePublished" datetime="2022-10-16T10:58:09+08:00">2022-10-16</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2022-11-02 19:49:05" itemprop="dateModified" datetime="2022-11-02T19:49:05+08:00">2022-11-02</time></div><div class="post-classify"><span class="post-tag"><a class="tag-item" href="/tags/Java/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="tag-name">Java</span></a></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><blockquote>
 <p>idea 替换注释正则表达式<code>/\*&#123;1,2&#125;[\s\S]*?\*/</code></p>
 <p>typora 替换图片asset</p>
 <p>  <code>\!\[.*\]\(D:\\aWorkStorage\\hexo\\blog\\source\\_posts\\阅读JDK容器部分源码的心得体会1【Collection部分】\\(.*)\.png\)</code>，</p>
 <p>替换结果<code>&#123;% asset_img $1.png %&#125;</code></p>
 </blockquote>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/2243690-9cd9c896e0d512ed.gif" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/2243690-9cd9c896e0d512ed.gif" class loading="lazy"> 
 
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/format,png.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/format,png.png" class loading="lazy"> 
 
 <h2 id="迭代器相关接口"><a href="#迭代器相关接口" class="headerlink" title="迭代器相关接口"></a>迭代器相关接口</h2><h3 id="Iterable-I"><a href="#Iterable-I" class="headerlink" title="Iterable(I)"></a>Iterable(I)</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*实现这个接口的类可用于for-each循环*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Iterable</span>&lt;T&gt; &#123;</span><br><span class="line">      </span><br><span class="line">    Iterator&lt;T&gt; <span class="title function_">iterator</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*对Iterator内每个元素实施此操作，直到遍历完或者抛出异常。*/</span></span><br><span class="line">    <span class="keyword">default</span> <span class="keyword">void</span> <span class="title function_">forEach</span><span class="params">(Consumer&lt;? <span class="built_in">super</span> T&gt; action)</span> &#123;</span><br><span class="line">        Objects.requireNonNull(action);</span><br><span class="line">        <span class="keyword">for</span> (T t : <span class="built_in">this</span>) &#123;</span><br><span class="line">            action.accept(t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">default</span> Spliterator&lt;T&gt; <span class="title function_">spliterator</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Spliterators.spliteratorUnknownSize(iterator(), <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -258,7 +68,7 @@
 <blockquote>
 <p><strong><u>注意，iterator并不指向具体元素，它指向的是元素的间隙</u></strong></p>
 <p>这些^就是iterator所指的位置。这样就能理解iterator的next和previous了吧2333</p>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221016135757094.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221016135757094.png" class loading="lazy"> 
 
 <p>而set()所修改的元素，是其上一次调用next()或者previous()方法所返回的元素。</p>
 <p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/74010115/whats-the-meaning-of-this-source-code-of-interface-collection-in-java">What’s the meaning of this source code of interface Collection in JAVA?</a></p>
@@ -328,7 +138,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Yes, you&#x27;re right, as the javadoc sais, this method is prepared to return correctlly even if the Collection has been modified in the mean time.【并发安全】 That&#x27;s why the initial size is just a hint. The usage of the iterator also ensures avoidance from the &quot;concurrent modification&quot; exception.</span><br></pre></td></tr></table></figure></li>
 </ol>
 <h2 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h2><h3 id="Queue-I"><a href="#Queue-I" class="headerlink" title="Queue(I)"></a>Queue(I)</h3><blockquote>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221014220036842.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221014220036842.png" class loading="lazy"> 
 
 <p>The Queue interface does not define the <strong>blocking queue methods</strong>, which are common in <strong>concurrent</strong> programming. These methods, which wait for elements to appear or for space to become available, are defined in the <strong>java.util.concurrent.BlockingQueue</strong> interface, which extends this interface.</p>
 <p>Queue implementations generally <strong>do not define element-based versions</strong> of methods <strong>equals</strong> and <strong>hashCode</strong>【就是不会像之前的list一样遍历一遍通过单个元素的hashcode计算整体的hashcode】 but instead inherit the identity based versions from class Object【hashcode由对象决定】, because element-based equality is not always well-defined for queues with the same elements but different ordering properties.</p>
@@ -339,12 +149,12 @@
 <h3 id="Deque-I"><a href="#Deque-I" class="headerlink" title="Deque(I)"></a>Deque(I)</h3><blockquote>
 <p>双端队列。</p>
 <p>The name deque is short for “double ended queue” and is usually pronounced “deck”.</p>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221014221328185.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221014221328185.png" class loading="lazy"> 
 
 <p>This interface provides two methods to remove interior elements, removeFirstOccurrence and removeLastOccurrence.</p>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221014221450351.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221014221450351.png" class loading="lazy"> 
 
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221014221511718.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221014221511718.png" class loading="lazy"> 
 
 
 </blockquote>
@@ -438,11 +248,11 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">按经验来说, a List implementation should implement <span class="built_in">this</span> interface, <span class="keyword">if</span> <span class="built_in">this</span> loop:</span><br><span class="line">      <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>, n=list.size(); i &lt; n; i++)</span><br><span class="line">          list.get(i);</span><br><span class="line">  </span><br><span class="line">runs faster than <span class="built_in">this</span> loop:</span><br><span class="line">      <span class="keyword">for</span> (Iterator i=list.iterator(); i.hasNext(); )</span><br><span class="line">          i.next();</span><br></pre></td></tr></table></figure></li>
 <li><h5 id="关于modCount字段与fail-fast机制"><a href="#关于modCount字段与fail-fast机制" class="headerlink" title="关于modCount字段与fail-fast机制"></a>关于modCount字段与fail-fast机制</h5><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1nU4y117WL?share_source=copy_web">你真的知道集合中modCount字段作用吗？</a></p>
 <p>modCount字段就是保证一定程度并发安全的变量，fail-fast就是指马上抛出异常。</p>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221012193831742.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221012193831742.png" class loading="lazy"> 
 
 <p>modCount不能保证绝对的并发安全，因为它只负责防范结构改变，而不负责看某位置的数据更新。</p>
 <p>在现实中要实现对集合的边迭代边修改，下面三种方式都是错的：</p>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221012193303762.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221012193303762.png" class loading="lazy"> 
 
 <p>第一种方法也可以把for里的size换成list.size()</p>
 <p>其中乐观锁与悲观锁可见：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/766093f59687">乐观锁</a></p>
@@ -483,7 +293,7 @@
 <p>结合内部代码可知，确实跟上面那个toArray的原理是一样的，只拷贝地址。</p>
 <p>clone是浅拷贝。</p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/SSophia/article/details/123964733">浅拷贝与深拷贝的区别</a></p>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221013182706272.png" class> </li>
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/image-20221013182706272.png" class loading="lazy"> </li>
 <li><h5 id="关于子类继承到的父类内部类"><a href="#关于子类继承到的父类内部类" class="headerlink" title="关于子类继承到的父类内部类"></a>关于子类继承到的父类内部类</h5><p>本来在犹豫，子类默认继承到的内部类里面用到的外部类方法的版本是取父还是取子，经过以下实验可知，是取能访问到的最新版本。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">ChildOuter</span> <span class="variable">chldot</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChildOuter</span>();</span><br><span class="line">        chldot.printname();</span><br><span class="line">        chldot.in.printall();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*结果：子类声明为private的成员字段不能被从父类继承而来的方法访问到</span></span><br><span class="line"><span class="comment">Father</span></span><br><span class="line"><span class="comment">I am father!*/</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">FatherOuter</span>&#123;</span><br><span class="line">    String name=<span class="string">&quot;Father&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">print</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;I am father!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">Inner</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Inner</span>();</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Inner</span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> haha=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">printall</span><span class="params">()</span>&#123;</span><br><span class="line">            print();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">printname</span><span class="params">()</span>&#123;</span><br><span class="line">        System.out.println(name);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ChildOuter</span> <span class="keyword">extends</span> <span class="title class_">FatherOuter</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name=<span class="string">&quot;Child&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">print</span><span class="params">()</span>&#123;System.out.println(<span class="string">&quot;I am child!&quot;</span>);&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -534,7 +344,7 @@
 </li>
 <li><h5 id="heap-write-traffic"><a href="#heap-write-traffic" class="headerlink" title="heap write traffic"></a>heap write traffic</h5><p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/49075220/what-is-heap-write-traffic-and-why-it-is-required-in-arraylist">What is heap write traffic and why it is required in ArrayList?</a></p>
 <p>详见第二个答案。</p>
-<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/Cadte.png" class> 
+<img src="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/Cadte.png" class loading="lazy"> 
 
 <p>栈放在一级缓存，堆放在二级缓存</p>
 <p>总之意思就是成员变量写在堆里，局部变量写在栈里，做</p>
@@ -712,248 +522,4 @@
 </blockquote>
 <h4 id="代码：-10"><a href="#代码：-10" class="headerlink" title="代码："></a>代码：</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TreeSet</span>&lt;E&gt; <span class="keyword">extends</span> <span class="title class_">AbstractSet</span>&lt;E&gt;</span><br><span class="line">        <span class="keyword">implements</span> <span class="title class_">NavigableSet</span>&lt;E&gt;, Cloneable, java.io.Serializable</span><br><span class="line">&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//依然用了个map</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">transient</span> NavigableMap&lt;E,Object&gt; m;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Dummy value to associate with an Object in the backing Map</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Object</span> <span class="variable">PRESENT</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">    </span><br><span class="line">    TreeSet(NavigableMap&lt;E,Object&gt; m) &#123;</span><br><span class="line">        <span class="built_in">this</span>.m = m;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">TreeSet</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(<span class="keyword">new</span> <span class="title class_">TreeMap</span>&lt;E,Object&gt;());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">TreeSet</span><span class="params">(Comparator&lt;? <span class="built_in">super</span> E&gt; comparator)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(<span class="keyword">new</span> <span class="title class_">TreeMap</span>&lt;&gt;(comparator));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">TreeSet</span><span class="params">(Collection&lt;? extends E&gt; c)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>();</span><br><span class="line">        addAll(c);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">TreeSet</span><span class="params">(SortedSet&lt;E&gt; s)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(s.comparator());</span><br><span class="line">        addAll(s);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> Iterator&lt;E&gt; <span class="title function_">iterator</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.navigableKeySet().iterator();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> Iterator&lt;E&gt; <span class="title function_">descendingIterator</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.descendingKeySet().iterator();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//确实直接让map倒序就可以了</span></span><br><span class="line">    <span class="keyword">public</span> NavigableSet&lt;E&gt; <span class="title function_">descendingSet</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">TreeSet</span>&lt;&gt;(m.descendingMap());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">size</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.size();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isEmpty</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.isEmpty();</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">contains</span><span class="params">(Object o)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.containsKey(o);</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">add</span><span class="params">(E e)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.put(e, PRESENT)==<span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">remove</span><span class="params">(Object o)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.remove(o)==PRESENT;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">clear</span><span class="params">()</span> &#123;</span><br><span class="line">        m.clear();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span>  <span class="type">boolean</span> <span class="title function_">addAll</span><span class="params">(Collection&lt;? extends E&gt; c)</span> &#123;</span><br><span class="line">        <span class="comment">// Use linear-time version if applicable</span></span><br><span class="line">        <span class="keyword">if</span> (m.size()==<span class="number">0</span> &amp;&amp; c.size() &gt; <span class="number">0</span> &amp;&amp;</span><br><span class="line">                c <span class="keyword">instanceof</span> SortedSet &amp;&amp;</span><br><span class="line">                m <span class="keyword">instanceof</span> TreeMap) &#123;</span><br><span class="line">            SortedSet&lt;? <span class="keyword">extends</span> <span class="title class_">E</span>&gt; set = (SortedSet&lt;? <span class="keyword">extends</span> <span class="title class_">E</span>&gt;) c;</span><br><span class="line">            TreeMap&lt;E,Object&gt; map = (TreeMap&lt;E, Object&gt;) m;</span><br><span class="line">            Comparator&lt;?&gt; cc = set.comparator();</span><br><span class="line">            Comparator&lt;? <span class="built_in">super</span> E&gt; mc = map.comparator();</span><br><span class="line">            <span class="keyword">if</span> (cc==mc || (cc != <span class="literal">null</span> &amp;&amp; cc.equals(mc))) &#123;</span><br><span class="line">                map.addAllForTreeSet(set, PRESENT);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.addAll(c);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> NavigableSet&lt;E&gt; <span class="title function_">subSet</span><span class="params">(E fromElement, <span class="type">boolean</span> fromInclusive,</span></span><br><span class="line"><span class="params">                                  E toElement,   <span class="type">boolean</span> toInclusive)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">TreeSet</span>&lt;&gt;(m.subMap(fromElement, fromInclusive,</span><br><span class="line">                toElement,   toInclusive));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> NavigableSet&lt;E&gt; <span class="title function_">headSet</span><span class="params">(E toElement, <span class="type">boolean</span> inclusive)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">TreeSet</span>&lt;&gt;(m.headMap(toElement, inclusive));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> NavigableSet&lt;E&gt; <span class="title function_">tailSet</span><span class="params">(E fromElement, <span class="type">boolean</span> inclusive)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">TreeSet</span>&lt;&gt;(m.tailMap(fromElement, inclusive));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> SortedSet&lt;E&gt; <span class="title function_">subSet</span><span class="params">(E fromElement, E toElement)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> subSet(fromElement, <span class="literal">true</span>, toElement, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> SortedSet&lt;E&gt; <span class="title function_">headSet</span><span class="params">(E toElement)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> headSet(toElement, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//注意此处为true。严格遵循左闭右开</span></span><br><span class="line">    <span class="keyword">public</span> SortedSet&lt;E&gt; <span class="title function_">tailSet</span><span class="params">(E fromElement)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> tailSet(fromElement, <span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Comparator&lt;? <span class="built_in">super</span> E&gt; comparator() &#123;</span><br><span class="line">        <span class="keyword">return</span> m.comparator();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> E <span class="title function_">first</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.firstKey();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> E <span class="title function_">last</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.lastKey();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// NavigableSet API methods</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> E <span class="title function_">lower</span><span class="params">(E e)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.lowerKey(e);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> E <span class="title function_">floor</span><span class="params">(E e)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.floorKey(e);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> E <span class="title function_">ceiling</span><span class="params">(E e)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.ceilingKey(e);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> E <span class="title function_">higher</span><span class="params">(E e)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> m.higherKey(e);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> E <span class="title function_">pollFirst</span><span class="params">()</span> &#123;</span><br><span class="line">        Map.Entry&lt;E,?&gt; e = m.pollFirstEntry();</span><br><span class="line">        <span class="keyword">return</span> (e == <span class="literal">null</span>) ? <span class="literal">null</span> : e.getKey();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> E <span class="title function_">pollLast</span><span class="params">()</span> &#123;</span><br><span class="line">        Map.Entry&lt;E,?&gt; e = m.pollLastEntry();</span><br><span class="line">        <span class="keyword">return</span> (e == <span class="literal">null</span>) ? <span class="literal">null</span> : e.getKey();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> Object <span class="title function_">clone</span><span class="params">()</span> &#123;</span><br><span class="line">        TreeSet&lt;E&gt; clone;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            clone = (TreeSet&lt;E&gt;) <span class="built_in">super</span>.clone();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (CloneNotSupportedException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">InternalError</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        clone.m = <span class="keyword">new</span> <span class="title class_">TreeMap</span>&lt;&gt;(m);</span><br><span class="line">        <span class="keyword">return</span> clone;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">writeObject</span><span class="params">(java.io.ObjectOutputStream s)</span></span><br><span class="line">            <span class="keyword">throws</span> java.io.IOException &#123;...&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">readObject</span><span class="params">(java.io.ObjectInputStream s)</span></span><br><span class="line">            <span class="keyword">throws</span> java.io.IOException, ClassNotFoundException &#123;...&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> Spliterator&lt;E&gt; <span class="title function_">spliterator</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> TreeMap.keySpliteratorFor(m);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">serialVersionUID</span> <span class="operator">=</span> -<span class="number">2479143000061671589L</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-
-    </div>
-
-    
-    
-    
-
-		<div>
-		  
-			<div>
-    
-        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-		  
-		</div>
-
-      <footer class="post-footer">
-          
-          <div class="post-tags">
-              <a href="/tags/Java/" rel="tag"><i class="fa fa-tag"></i> Java</a>
-          </div>
-
-        
-
-
-        
-      </footer>
-    
-  </article>
-  
-  
-  
-
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E5%99%A8%E7%9B%B8%E5%85%B3%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.</span> <span class="nav-text">迭代器相关接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Iterable-I"><span class="nav-number">1.1.</span> <span class="nav-text">Iterable(I)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Iterator-I"><span class="nav-number">1.2.</span> <span class="nav-text">Iterator(I)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ListIterator-I"><span class="nav-number">1.3.</span> <span class="nav-text">ListIterator(I)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Collection"><span class="nav-number">2.</span> <span class="nav-text">Collection</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Collection-I"><span class="nav-number">2.1.</span> <span class="nav-text">Collection(I)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">2.1.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%8C"><span class="nav-number">2.1.2.</span> <span class="nav-text">其中，</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%80%9CBags-or-multisets-unordered-collections-that-may-contain-duplicate-elements-should-implement-this-interface-directly-%E2%80%9D"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">“Bags or multisets (unordered collections that may contain duplicate elements) should implement this interface directly.”</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%80%9Cdestructive%E2%80%9D-methods-%E5%92%8C%E2%80%9Dundestructive%E2%80%9D-methods"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">“destructive” methods 和”undestructive” methods</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#recursive-traversal-of-the-collection"><span class="nav-number">2.1.2.3.</span> <span class="nav-text">recursive traversal of the collection</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8EtoArray%E7%9A%84%E8%AE%A8%E8%AE%BA"><span class="nav-number">2.1.2.4.</span> <span class="nav-text">关于toArray的讨论</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Edefault%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">2.1.2.5.</span> <span class="nav-text">关于default关键字</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AbstractCollection-A"><span class="nav-number">2.2.</span> <span class="nav-text">AbstractCollection(A)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9C%A8toArray%E6%96%B9%E6%B3%95%E4%B8%AD%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%86%99%E8%BF%99%E4%B9%88%E5%A5%87%E6%80%AA%E7%9A%84%E4%BB%A3%E7%A0%81%EF%BC%9F"><span class="nav-number">2.2.0.1.</span> <span class="nav-text">在toArray方法中，为什么需要写这么奇怪的代码？</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Queue"><span class="nav-number">3.</span> <span class="nav-text">Queue</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Queue-I"><span class="nav-number">3.1.</span> <span class="nav-text">Queue(I)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A"><span class="nav-number">3.1.1.</span> <span class="nav-text">代码：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deque-I"><span class="nav-number">3.2.</span> <span class="nav-text">Deque(I)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">代码：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ArrayDeque"><span class="nav-number">3.3.</span> <span class="nav-text">ArrayDeque</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-2"><span class="nav-number">3.3.1.</span> <span class="nav-text">代码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A"><span class="nav-number">3.3.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%AE%B9%E9%87%8F"><span class="nav-number">3.3.2.1.</span> <span class="nav-text">默认容量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#head-1-amp-elements-length-1"><span class="nav-number">3.3.2.2.</span> <span class="nav-text">(head - 1) &amp; (elements.length - 1)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#if-delete-lastRet"><span class="nav-number">3.3.2.3.</span> <span class="nav-text">if (delete(lastRet))</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#forEachRemaining"><span class="nav-number">3.3.2.4.</span> <span class="nav-text">forEachRemaining</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#List"><span class="nav-number">4.</span> <span class="nav-text">List</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#List-I"><span class="nav-number">4.1.</span> <span class="nav-text">List(I)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="nav-number">4.1.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-1"><span class="nav-number">4.1.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#hashcode%E4%B8%8D%E5%85%81%E8%AE%B8%E8%87%AA%E7%8E%AF"><span class="nav-number">4.1.2.1.</span> <span class="nav-text">hashcode不允许自环</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#structural-and-non-structural-change-in-list"><span class="nav-number">4.1.2.2.</span> <span class="nav-text">structural and non-structural change in list</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Esublist"><span class="nav-number">4.1.2.3.</span> <span class="nav-text">关于sublist</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E2%91%A0-view"><span class="nav-number">4.1.2.3.1.</span> <span class="nav-text">① view</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E2%91%A1-%E7%95%99%E4%B8%8B%E4%B8%80%E4%B8%AA%E9%97%AE%E9%A2%98"><span class="nav-number">4.1.2.3.2.</span> <span class="nav-text">② 留下一个问题</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E2%91%A2-%E5%85%B3%E4%BA%8Esublis%E5%92%8C%E5%8E%9Flist%E3%80%81non-structral%E5%92%8Cstructural%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9A"><span class="nav-number">4.1.2.3.3.</span> <span class="nav-text">③ 关于sublis和原list、non-structral和structural的区别：</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AbstractList-A"><span class="nav-number">4.2.</span> <span class="nav-text">AbstractList(A)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-2"><span class="nav-number">4.2.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-2"><span class="nav-number">4.2.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%86%85%E9%83%A8%E7%B1%BBListItr%E5%92%8CItr%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">内部类ListItr和Itr的实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#RandomAccess"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">RandomAccess</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8EmodCount%E5%AD%97%E6%AE%B5%E4%B8%8Efail-fast%E6%9C%BA%E5%88%B6"><span class="nav-number">4.2.2.3.</span> <span class="nav-text">关于modCount字段与fail-fast机制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ArrayList"><span class="nav-number">4.3.</span> <span class="nav-text">ArrayList</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-3"><span class="nav-number">4.3.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-3"><span class="nav-number">4.3.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Cloneable%E6%8E%A5%E5%8F%A3"><span class="nav-number">4.3.2.1.</span> <span class="nav-text">Cloneable接口</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#clone%E4%B8%8E%E6%B5%85%E6%8B%B7%E8%B4%9D%EF%BC%88shallow-copy%EF%BC%89"><span class="nav-number">4.3.2.2.</span> <span class="nav-text">clone与浅拷贝（shallow copy）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E5%AD%90%E7%B1%BB%E7%BB%A7%E6%89%BF%E5%88%B0%E7%9A%84%E7%88%B6%E7%B1%BB%E5%86%85%E9%83%A8%E7%B1%BB"><span class="nav-number">4.3.2.3.</span> <span class="nav-text">关于子类继承到的父类内部类</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BA%8F%E5%88%97%E5%8C%96versionID"><span class="nav-number">4.3.2.4.</span> <span class="nav-text">序列化versionID</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#transient"><span class="nav-number">4.3.2.5.</span> <span class="nav-text">transient</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ArrayList%E7%9A%84elementData%E8%99%BD%E7%84%B6%E8%A2%ABtransient%E4%BF%AE%E9%A5%B0%EF%BC%8C%E4%BD%86%E4%BB%8D%E7%84%B6%E8%83%BD%E5%A4%9F%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">4.3.2.6.</span> <span class="nav-text">ArrayList的elementData虽然被transient修饰，但仍然能够序列化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Estatic%E7%9A%84%E7%A9%BA%E6%95%B0%E7%BB%84"><span class="nav-number">4.3.2.7.</span> <span class="nav-text">关于static的空数组</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E6%89%A9%E5%AE%B9%E7%9A%84%E8%BF%9E%E7%8E%AF%E8%AE%A1"><span class="nav-number">4.3.2.8.</span> <span class="nav-text">关于扩容的连环计</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Eclear%E6%88%91%E7%9A%84%E5%86%99%E6%B3%95"><span class="nav-number">4.3.2.9.</span> <span class="nav-text">关于clear我的写法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#heap-write-traffic"><span class="nav-number">4.3.2.10.</span> <span class="nav-text">heap write traffic</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#if-i-gt-elementData-length"><span class="nav-number">4.3.2.11.</span> <span class="nav-text">if (i &gt;&#x3D; elementData.length)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sublist%E4%B8%8D%E5%8F%AF%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%8C%E4%B8%94not-cloneable"><span class="nav-number">4.3.2.12.</span> <span class="nav-text">sublist不可序列化，且not cloneable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#parent%E5%92%8CArrayList-this"><span class="nav-number">4.3.2.13.</span> <span class="nav-text">parent和ArrayList.this</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AbstractSequentialList-A"><span class="nav-number">4.4.</span> <span class="nav-text">AbstractSequentialList(A)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-3"><span class="nav-number">4.4.1.</span> <span class="nav-text">代码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-4"><span class="nav-number">4.4.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#get%E5%92%8Cset%E6%96%B9%E6%B3%95%E9%80%9A%E8%BF%87Iterator%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.4.2.1.</span> <span class="nav-text">get和set方法通过Iterator实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LinkedList"><span class="nav-number">4.5.</span> <span class="nav-text">LinkedList</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-4"><span class="nav-number">4.5.1.</span> <span class="nav-text">代码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD"><span class="nav-number">4.5.2.</span> <span class="nav-text">其中</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E5%88%86%E4%BB%A3GC"><span class="nav-number">4.5.2.1.</span> <span class="nav-text">关于分代GC</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%99%8D%E5%BA%8F%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">4.5.2.2.</span> <span class="nav-text">降序迭代器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8EunlinkLast-First%E7%9A%84%E5%8F%82%E6%95%B0%E9%97%AE%E9%A2%98"><span class="nav-number">4.5.2.3.</span> <span class="nav-text">关于unlinkLast&#x2F;First的参数问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sublist"><span class="nav-number">4.5.2.4.</span> <span class="nav-text">sublist</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#transient%E7%9A%84%E4%B8%89%E4%B8%AA%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F"><span class="nav-number">4.5.2.5.</span> <span class="nav-text">transient的三个成员变量</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vector"><span class="nav-number">4.6.</span> <span class="nav-text">Vector</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-5"><span class="nav-number">4.6.1.</span> <span class="nav-text">代码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-5"><span class="nav-number">4.6.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%AE%B9%E9%87%8F-1"><span class="nav-number">4.6.2.1.</span> <span class="nav-text">默认容量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%89%A9%E5%AE%B9%E6%93%8D%E4%BD%9C"><span class="nav-number">4.6.2.2.</span> <span class="nav-text">扩容操作</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#setsize%E4%B8%8D%E6%94%B9%E5%8F%98%E5%AE%B9%E9%87%8F"><span class="nav-number">4.6.2.3.</span> <span class="nav-text">setsize不改变容量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Vector%E5%8F%AF%E7%94%9F%E6%88%90%E6%9E%9A%E4%B8%BE%E7%B1%BB"><span class="nav-number">4.6.2.4.</span> <span class="nav-text">Vector可生成枚举类</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Set"><span class="nav-number">5.</span> <span class="nav-text">Set</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Set%EF%BC%88I%EF%BC%89"><span class="nav-number">5.1.</span> <span class="nav-text">Set（I）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-6"><span class="nav-number">5.1.1.</span> <span class="nav-text">代码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-6"><span class="nav-number">5.1.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#set%E4%B8%AD%E5%8C%85%E5%90%AB%E5%8F%AF%E5%8F%98%E5%AF%B9%E8%B1%A1"><span class="nav-number">5.1.2.1.</span> <span class="nav-text">set中包含可变对象</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C"><span class="nav-number">5.1.2.2.</span> <span class="nav-text">集合操作</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AbstratcSet%EF%BC%88A%EF%BC%89"><span class="nav-number">5.2.</span> <span class="nav-text">AbstratcSet（A）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-7"><span class="nav-number">5.2.1.</span> <span class="nav-text">代码：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HashSet"><span class="nav-number">5.3.</span> <span class="nav-text">HashSet</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-8"><span class="nav-number">5.3.1.</span> <span class="nav-text">代码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-7"><span class="nav-number">5.3.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PRESENT"><span class="nav-number">5.3.2.1.</span> <span class="nav-text">PRESENT</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SortedSet%EF%BC%88I%EF%BC%89"><span class="nav-number">5.4.</span> <span class="nav-text">SortedSet（I）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-4"><span class="nav-number">5.4.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%B8%AD%EF%BC%9A-8"><span class="nav-number">5.4.2.</span> <span class="nav-text">其中：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#subset"><span class="nav-number">5.4.2.1.</span> <span class="nav-text">subset</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#subSet-low-high-%E2%80%9D-0%E2%80%9D"><span class="nav-number">5.4.2.2.</span> <span class="nav-text">subSet(low, high+”\0”);</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NavigableSet%EF%BC%88I%EF%BC%89"><span class="nav-number">5.5.</span> <span class="nav-text">NavigableSet（I）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-9"><span class="nav-number">5.5.1.</span> <span class="nav-text">代码：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TreeSet"><span class="nav-number">5.6.</span> <span class="nav-text">TreeSet</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%EF%BC%9A-10"><span class="nav-number">5.6.1.</span> <span class="nav-text">代码：</span></a></li></ol></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="修年"
-      src="/images/head.png">
-  <p class="site-author-name" itemprop="name">修年</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">46</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-    <br>
-      <span class="links-of-author-item">
-          QQ: 1776527992
-      </span>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2023</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">修年</span>
-</div>
-
-
-<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
-<script>
-    var now = new Date(); 
-    function createtime() { 
-        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
-        now.setTime(now.getTime()+250); 
-        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
-        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
-        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
-        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
-        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
-        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
-        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
-        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
-    } 
-setInterval("createtime()",250);
-</script>
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-user"></i>
-      </span>
-      <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span>
-      </span>
-    </span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-eye"></i>
-      </span>
-      <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span>
-      </span>
-    </span>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-  
-
-
-
-  <script type="text/javascript" src="/js/clicklove.js"></script>
-</body>
-</html>
+</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/" title="阅读JDK容器部分源码的心得体会1【Collection部分】">https://xiunianjun.github.io/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2022/10/22/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A2%E3%80%90Map%E9%83%A8%E5%88%86%E3%80%91/" rel="prev" title="阅读JDK容器部分源码的心得体会2【Map部分】"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">阅读JDK容器部分源码的心得体会2【Map部分】</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/" rel="next" title="哈工大操作系统实验"><span class="post-nav-text">哈工大操作系统实验</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>

@@ -1,28 +1,14 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.2">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
-  <link rel="mask-icon" href="/images/cat.png" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
-  <script src="/lib/pace/pace.min.js"></script>
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="其他的对实验未涉及的思考由mkfs引发的对虚拟机的学习 懂了！VMware&#x2F;KVM&#x2F;Docker原来是这么回事儿这篇文章对虚拟化、虚拟机技术讲解很到位，写得通俗易懂，非常值得一看 KVM 的「基于内核的虚拟机」是什么意思？这篇文章对QEMU-KVM架构进行了详细的介绍。还有这篇文章对应的知乎问题下面的高赞回答有机会也可以去看看。 QEMU&#x2F;KVM原理概述这篇文章前面的原理和上面那个差不多，后面有使">
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>其他的对实验未涉及的思考 | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="其他的对实验未涉及的思考由mkfs引发的对虚拟机的学习 懂了！VMware&#x2F;KVM&#x2F;Docker原来是这么回事儿这篇文章对虚拟化、虚拟机技术讲解很到位，写得通俗易懂，非常值得一看 KVM 的「基于内核的虚拟机」是什么意思？这篇文章对QEMU-KVM架构进行了详细的介绍。还有这篇文章对应的知乎问题下面的高赞回答有机会也可以去看看。 QEMU&#x2F;KVM原理概述这篇文章前面的原理和上面那个差不多，后面有使">
 <meta property="og:type" content="article">
 <meta property="og:title" content="其他的对实验未涉及的思考">
 <meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap9/index.html">
@@ -49,200 +35,24 @@
 <meta property="article:modified_time" content="2023-11-18T13:21:09.429Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/640.png">
-
-<link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6$chap9/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>其他的对实验未涉及的思考 | 修年</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-  
-      <meta charset="UTF-8">
-    <title>live2d-demo</title>
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <!-- Live2DCubismCore -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
-    <!-- Include Pixi. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
-    <!-- Include Cubism Components. -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
-    <!-- User's Script -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
-    <style>
-    </style>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-	
-		<script type="text/javascript" 
-		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
-		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
-	
-
-  <div class="container use-motion">
-    <div class="headband"></div>
-<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">修年</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post posts-expand">
-            
-
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap9/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          其他的对实验未涉及的思考
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-11-18 21:21:09" itemprop="dateModified" datetime="2023-11-18T21:21:09+08:00">2023-11-18</time>
-              </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <h1 id="其他的对实验未涉及的思考"><a href="#其他的对实验未涉及的思考" class="headerlink" title="其他的对实验未涉及的思考"></a>其他的对实验未涉及的思考</h1><h2 id="由mkfs引发的对虚拟机的学习"><a href="#由mkfs引发的对虚拟机的学习" class="headerlink" title="由mkfs引发的对虚拟机的学习"></a>由mkfs引发的对虚拟机的学习</h2><blockquote>
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/640.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">45</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E7%9A%84%E5%AF%B9%E5%AE%9E%E9%AA%8C%E6%9C%AA%E6%B6%89%E5%8F%8A%E7%9A%84%E6%80%9D%E8%80%83"><span class="toc-number">1.</span> <span class="toc-text">其他的对实验未涉及的思考</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%B1mkfs%E5%BC%95%E5%8F%91%E7%9A%84%E5%AF%B9%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E5%AD%A6%E4%B9%A0"><span class="toc-number">1.1.</span> <span class="toc-text">由mkfs引发的对虚拟机的学习</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#qemu"><span class="toc-number">1.1.1.</span> <span class="toc-text">qemu</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">1.1.1.1.1.</span> <span class="toc-text">虚拟化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-number">1.1.1.1.2.</span> <span class="toc-text">虚拟机</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B"><span class="toc-number">1.1.1.1.2.1.</span> <span class="toc-text">进程</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9F%E5%99%A8"><span class="toc-number">1.1.1.1.2.2.</span> <span class="toc-text">模拟器</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E9%AB%98%E7%BA%A7%E8%AF%AD%E8%A8%80%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-number">1.1.1.1.2.3.</span> <span class="toc-text">高级语言虚拟机</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-number">1.1.1.1.2.4.</span> <span class="toc-text">系统虚拟机</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#qemu-1"><span class="toc-number">1.1.1.1.3.</span> <span class="toc-text">qemu</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#qemu-kvm%E6%9E%B6%E6%9E%84"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">qemu-kvm架构</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AF%9E%E7%94%9F%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-number">1.1.1.2.1.</span> <span class="toc-text">诞生的原因</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%B8%A4%E7%A7%8D%E8%99%9A%E6%8B%9F%E5%8C%96%E6%96%B9%E6%A1%88"><span class="toc-number">1.1.1.2.1.1.</span> <span class="toc-text">两种虚拟化方案</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%8A%E8%BF%B0%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8C%96%E6%96%B9%E6%A1%88"><span class="toc-number">1.1.1.2.1.2.</span> <span class="toc-text">实现上述的虚拟化方案</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#x86%E6%9E%B6%E6%9E%84%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.1.1.2.1.3.</span> <span class="toc-text">x86架构的问题</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.1.2.1.4.</span> <span class="toc-text">解决方法</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#kvm"><span class="toc-number">1.1.1.2.1.5.</span> <span class="toc-text">kvm</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#qemu-kvm"><span class="toc-number">1.1.1.2.1.6.</span> <span class="toc-text">qemu-kvm</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#qemu-kvm%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-number">1.1.1.2.2.</span> <span class="toc-text">qemu-kvm总体架构</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#VMX-root%E5%92%8CVMX-non-root"><span class="toc-number">1.1.1.2.2.1.</span> <span class="toc-text">VMX root和VMX non root</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#qemu%E5%B1%82%EF%BC%88%E5%B7%A6%E4%B8%8A%EF%BC%89"><span class="toc-number">1.1.1.2.2.2.</span> <span class="toc-text">qemu层（左上）</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#kvm%E5%B1%82%EF%BC%88%E4%B8%8B%E6%96%B9%EF%BC%89"><span class="toc-number">1.1.1.2.2.3.</span> <span class="toc-text">kvm层（下方）</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%B1%82%EF%BC%88%E5%8F%B3%E4%B8%8A%EF%BC%89"><span class="toc-number">1.1.1.2.2.4.</span> <span class="toc-text">虚拟机层（右上）</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%9C%A8QEMU-KVM%E6%9E%B6%E6%9E%84%E7%9A%84%E6%89%A7%E8%A1%8C%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.1.2.3.</span> <span class="toc-text">虚拟机在QEMU-KVM架构的执行方法</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">1.1.1.2.3.1.</span> <span class="toc-text">状态管理虚拟化</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">1.1.1.2.3.2.</span> <span class="toc-text">内存管理虚拟化</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%A4%96%E8%AE%BE%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">1.1.1.2.3.3.</span> <span class="toc-text">外设管理虚拟化</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="toc-number">1.1.1.2.3.4.</span> <span class="toc-text">中断处理虚拟化</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#xv6%E7%9A%84%E5%85%A8%E5%90%AF%E5%8A%A8%E8%BF%90%E8%A1%8C%E8%BF%87%E7%A8%8B%E6%A2%B3%E7%90%86"><span class="toc-number">1.1.1.3.</span> <span class="toc-text">xv6的全启动运行过程梳理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mkfs%E7%9A%84%E4%BD%9C%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB"><span class="toc-number">1.1.1.4.</span> <span class="toc-text">mkfs的作用及源码解读</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8"><span class="toc-number">1.1.1.4.1.</span> <span class="toc-text">作用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%A3%E8%AF%BB"><span class="toc-number">1.1.1.4.2.</span> <span class="toc-text">代码解读</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#user-mem-allocator"><span class="toc-number">1.2.</span> <span class="toc-text">user mem-allocator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="toc-number">1.2.1.</span> <span class="toc-text">数据结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">环形链表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%B0%E5%9D%80%E4%BB%8E%E4%BD%8E%E5%88%B0%E9%AB%98"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">地址从低到高</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.2.</span> <span class="toc-text">具体实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#malloc"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">malloc</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#morecore"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">morecore</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#free"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">free</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#malloc-1"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">malloc</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#free-1"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">free</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.2.3.</span> <span class="toc-text">总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#m-s-u%E6%9D%83%E9%99%90%E5%88%87%E6%8D%A2"><span class="toc-number">1.3.</span> <span class="toc-text">m-s-u权限切换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lock%E5%AE%9E%E9%AA%8C%E7%9A%84%E8%AF%84%E6%B5%8B%E6%9C%BA%E5%88%B6"><span class="toc-number">1.4.</span> <span class="toc-text">Lock实验的评测机制</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap9/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">其他的对实验未涉及的思考</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-11-18 21:21:09" itemprop="dateModified" datetime="2023-11-18T21:21:09+08:00">2023-11-18</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="其他的对实验未涉及的思考"><a href="#其他的对实验未涉及的思考" class="headerlink" title="其他的对实验未涉及的思考"></a>其他的对实验未涉及的思考</h1><h2 id="由mkfs引发的对虚拟机的学习"><a href="#由mkfs引发的对虚拟机的学习" class="headerlink" title="由mkfs引发的对虚拟机的学习"></a>由mkfs引发的对虚拟机的学习</h2><blockquote>
 <p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU0OTE4MzYzMw==&mid=2247489645&idx=5&sn=a6ad41806effb6bc8ff4815f4eab968a&chksm=fbb29193ccc51885348ce6dfb81661ecc17cd271bf6fb79a78a656b49d4eccaa9de7606c01cc&scene=27">懂了！VMware/KVM/Docker原来是这么回事儿</a>这篇文章对虚拟化、虚拟机技术讲解很到位，写得通俗易懂，非常值得一看</p>
 <p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/24123210/answer/2852910075">KVM 的「基于内核的虚拟机」是什么意思？</a>这篇文章对QEMU-KVM架构进行了详细的介绍。还有这篇文章对应的知乎问题下面的高赞回答有机会也可以去看看。</p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hbuxiaofei/article/details/113556046">QEMU/KVM原理概述</a>这篇文章前面的原理和上面那个差不多，后面有使用kvm做一个精简内核的实例，有兴趣/有精力/有需要可以看看。</p>
@@ -283,12 +93,12 @@
 <p>其对于虚拟化技术的优化，以及发展的前因后果，具体可以看<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU0OTE4MzYzMw==&mid=2247489645&idx=5&sn=a6ad41806effb6bc8ff4815f4eab968a&chksm=fbb29193ccc51885348ce6dfb81661ecc17cd271bf6fb79a78a656b49d4eccaa9de7606c01cc&scene=27">懂了！VMware/KVM/Docker原来是这么回事儿</a>这篇文章。</p>
 <p>概括来讲，大致有以下几个要点：</p>
 </blockquote>
-<h6 id="两种虚拟化方案"><a href="#两种虚拟化方案" class="headerlink" title="两种虚拟化方案"></a>两种虚拟化方案</h6><p><img src="/2023/01/10/xv6/640.png" alt="640"></p>
-<p><img src="/2023/01/10/xv6/640-1676793944101-7.png" alt="640-1676793944101-7"></p>
+<h6 id="两种虚拟化方案"><a href="#两种虚拟化方案" class="headerlink" title="两种虚拟化方案"></a>两种虚拟化方案</h6><p><img src="/2023/01/10/xv6/640.png" alt="640" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/640-1676793944101-7.png" alt="640-1676793944101-7" loading="lazy"></p>
 <h6 id="实现上述的虚拟化方案"><a href="#实现上述的虚拟化方案" class="headerlink" title="实现上述的虚拟化方案"></a>实现上述的虚拟化方案</h6><p>一个典型的做法是——<code>陷阱 &amp; 模拟</code>技术</p>
 <p>什么意思？<strong>简单来说就是正常情况下直接把虚拟机中的代码指令放到物理的CPU上去执行，一旦执行到一些敏感指令，就触发异常，控制流程交给VMM，由VMM来进行对应的处理，以此来营造出一个虚拟的计算机环境。</strong></p>
 <h6 id="x86架构的问题"><a href="#x86架构的问题" class="headerlink" title="x86架构的问题"></a>x86架构的问题</h6><p>x86架构使得上述做法用不了了。因为它引入了四种权限</p>
-<p><img src="/2023/01/10/xv6/image-20230219160725978.png" alt="image-20230219160725978"></p>
+<p><img src="/2023/01/10/xv6/image-20230219160725978.png" alt="image-20230219160725978" loading="lazy"></p>
 <h6 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h6><ol>
 <li><p>全虚拟化</p>
 <p>VMware的二进制翻译技术、QEMU的模拟指令集</p>
@@ -311,7 +121,7 @@
 </blockquote>
 <h6 id="qemu-kvm"><a href="#qemu-kvm" class="headerlink" title="qemu-kvm"></a>qemu-kvm</h6><p>KVM本身基于硬件辅助虚拟化，仅仅实现CPU和内存的虚拟化，但一台计算机不仅仅有CPU和内存，还需要各种各样的I/O设备，不过KVM不负责这些。这个时候，QEMU就和KVM搭上了线，经过改造后的QEMU，负责外部设备的虚拟，KVM负责底层执行引擎和内存的虚拟，两者彼此互补，成为新一代云计算虚拟化方案的宠儿。</p>
 <h5 id="qemu-kvm总体架构"><a href="#qemu-kvm总体架构" class="headerlink" title="qemu-kvm总体架构"></a>qemu-kvm总体架构</h5><p>KVM只负责最核心的<strong>CPU虚拟化和内存虚拟化</strong>部分；QEMU作为其用户态组件，负责完成<strong>大量外设的模拟</strong>。</p>
-<p><img src="/2023/01/10/xv6/v2-249a3f162de88198bbe415110fc71c7f_1440w.jpg" alt="v2-249a3f162de88198bbe415110fc71c7f_1440w"></p>
+<p><img src="/2023/01/10/xv6/v2-249a3f162de88198bbe415110fc71c7f_1440w.jpg" alt="v2-249a3f162de88198bbe415110fc71c7f_1440w" loading="lazy"></p>
 <h6 id="VMX-root和VMX-non-root"><a href="#VMX-root和VMX-non-root" class="headerlink" title="VMX root和VMX non root"></a>VMX root和VMX non root</h6><blockquote>
 <p>VMX root是宿主机模式，此时CPU在运行包括QEMU在内的普通进程和宿主机的操作系统内核；</p>
 <p>VMX non-root是<a target="_blank" rel="noopener" href="https://www.zhihu.com/search?q=%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A8%A1%E5%BC%8F&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22:%22answer%22,%22sourceId%22:2852910075%7D">虚拟机模式</a>，此时CPU在运行虚拟机中的用户程序和操作系统代码。</p>
@@ -366,7 +176,7 @@
 <p>虚拟机的用户程序和内核程序都是直接由宿主机的操作系统正常调度，我们可以将其看作虚拟态。QEMU—KVM可以看作是宿主机的进程，我们可以将其看作宿主态。因而，当虚拟机一些事情希望由QEMU—KVM来做，我们就需要从虚拟态转移到宿主态。</p>
 <p>听起来有没有感觉很耳熟？是的，“从用户态陷入内核态”，跟这个的原理是一样的。</p>
 <p>因而，虚拟机与硬件环境交互，实际上是虚拟态和宿主态状态的转换，如下图：</p>
-<p><img src="/2023/01/10/xv6/v2-9377a260d034d2904b1807d3fe53dcd9_1440w.jpg" alt="v2-9377a260d034d2904b1807d3fe53dcd9_1440w"></p>
+<p><img src="/2023/01/10/xv6/v2-9377a260d034d2904b1807d3fe53dcd9_1440w.jpg" alt="v2-9377a260d034d2904b1807d3fe53dcd9_1440w" loading="lazy"></p>
 <p><strong>VM Exit</strong></p>
 <p>当虚拟机中的代码是敏感指令或者说满足了一定的退出条件时，CPU会从虚拟态退出到KVM，这叫作VM Exit。</p>
 <p>这就像在用户态执行指令陷入内核一样。</p>
@@ -379,7 +189,7 @@
 <p>虚拟机在运行过程中，首先需要将虚拟机的虚拟地址（Guest Virtual Address，GVA）转换成虚拟机的物理地址（Guest Physical Address，GPA），然后将虚拟机的物理地址转换成宿主机的虚拟地址（Host Virtual Address，HVA），最终转换成宿主机的物理地址（Host Physical Address，HPA）。</p>
 <p>整个寻址过程由硬件实现，具体实现方式为扩展页表（Extended Page Table，EPT）。</p>
 <p>在支持EPT的环境中，虚拟机在<strong>第一次访问内存的时候就会陷入到KVM</strong>，KVM会<strong>逐渐建立</strong>起所谓的EPT页面【lazy思想贯穿始终，还是该叫自适应？】。这样虚拟机的虚拟CPU在后面访问虚拟机虚拟内存地址的时候，首先会被转换为虚拟机物理地址，接着会查找EPT页表，然后得到宿主机物理地址。【有种TLB的感觉】</p>
-<p><img src="/2023/01/10/xv6/v2-942e1ed598eed3d401d00e4719224d27_1440w.jpg" alt="v2-942e1ed598eed3d401d00e4719224d27_1440w"></p>
+<p><img src="/2023/01/10/xv6/v2-942e1ed598eed3d401d00e4719224d27_1440w.jpg" alt="v2-942e1ed598eed3d401d00e4719224d27_1440w" loading="lazy"></p>
 <h6 id="外设管理虚拟化"><a href="#外设管理虚拟化" class="headerlink" title="外设管理虚拟化"></a>外设管理虚拟化</h6><p>设备模拟的本质是要为虚拟机提供一个<strong>与物理设备接口完全一致的虚拟接口</strong>。</p>
 <p>虚拟机中的操作系统与设备进行的数据交互或者由QEMU和（或）KVM完成，或者由宿主机上对应的后端设备完成。</p>
 <p>QEMU在初始化过程中会创建好模拟芯片组和必要的模拟设备，包括南北桥芯片、PCI根总线、ISA根总线等总线系统，以及各种PCI设备、ISA设备等。</p>
@@ -398,7 +208,7 @@
 <p>设备直通经常搭配硬件虚拟化支持技术SRIOV（Single Root I/O Virtualization，单根输入/输出虚拟化）使用，SRIOV能够将单个的物理硬件高效地虚拟出多个虚拟硬件。</p>
 </li>
 </ol>
-<p><img src="/2023/01/10/xv6/v2-555d017ce5b65457f98617a5fdf232af_1440w.jpg" alt="v2-555d017ce5b65457f98617a5fdf232af_1440w"></p>
+<p><img src="/2023/01/10/xv6/v2-555d017ce5b65457f98617a5fdf232af_1440w.jpg" alt="v2-555d017ce5b65457f98617a5fdf232af_1440w" loading="lazy"></p>
 <h6 id="中断处理虚拟化"><a href="#中断处理虚拟化" class="headerlink" title="中断处理虚拟化"></a>中断处理虚拟化</h6><p>操作系统通过写设备的I/O端口或者MMIO地址来与设备交互，设备通过发送中断来通知操作系统事件。</p>
 <p>QEMU/KVM一方面需要完成这项<strong>中断设备的模拟</strong>，另一方面需要模拟<strong>中断的请求处理</strong>。</p>
 <blockquote>
@@ -416,7 +226,7 @@
 <p>具体的<code>Makefile</code>相关内容我不大了解，但结合输出，我想大概是先通过<code>riscv64-linux-gnu-gcc</code>编译链接完所有文件，然后再执行<code>mkfs</code>产生<code>fs.img</code>镜像（<code>mkfs</code>后面那些东西应该是文件参数，对应于源码中的读取可执行程序进磁盘的部分），最后再运行<code>qemu-system-riscv64</code>开始对虚拟机进行boot。</p>
 <p>boot直至启动后的所有代码，都是通过QEMU-KVM架构处理，直接运行在宿主机的CPU上的。其余的各种管理，可以详见小标题<code>虚拟机在QEMU-KVM架构的执行方法</code>。</p>
 <h4 id="mkfs的作用及源码解读"><a href="#mkfs的作用及源码解读" class="headerlink" title="mkfs的作用及源码解读"></a>mkfs的作用及源码解读</h4><h5 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h5><p>上面的知识表明，<strong>操作系统的启动在于文件系统初始化之后</strong>，这是因为操作系统本身的启动代码，放在磁盘映像<code>fs.img</code>中，而<code>fs.img</code>正是由文件系统初始化时弄出来的。也就是说，<strong>文件系统是操作系统的爸爸</strong>。【我以前一直以为是反过来的】</p>
-<p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747"></p>
+<p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747" loading="lazy"></p>
 <blockquote>
 <p>图中的boot块就是操作系统的引导扇区。</p>
 </blockquote>
@@ -432,15 +242,15 @@
 <p>在内核态中，我们使用<code>kalloc</code>和<code>kfree</code>来申请和释放内存页。在用户态中，我们使用<code>malloc</code>和<code>free</code>来对动态内存进行管理。【也就是说这个实现的是<strong>堆管理</strong>】</p>
 <p>内核中的最小单位只能是页，但user mem-allocator对外提供的申请内存服务的<strong>最小单位不是页</strong>，而是<code>sizeof(Header)</code>。因而，这就需要我们的user mem-allocator进行数据结构的管理，来统一这二者的实现。</p>
 <h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><h4 id="环形链表"><a href="#环形链表" class="headerlink" title="环形链表"></a>环形链表</h4><p>user mem-allocator的数据结构是<strong>环形链表</strong>，起始结点为一个空数据载体。</p>
-<p><img src="/2023/01/10/xv6/image-20230316140158908.png" alt="image-20230316140158908"></p>
-<p><img src="/2023/01/10/xv6/image-20230316140450988.png" alt="image-20230316140450988"></p>
+<p><img src="/2023/01/10/xv6/image-20230316140158908.png" alt="image-20230316140158908" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230316140450988.png" alt="image-20230316140450988" loading="lazy"></p>
 <h4 id="地址从低到高"><a href="#地址从低到高" class="headerlink" title="地址从低到高"></a>地址从低到高</h4><p>链表的头结点的存储地址/所代表的内存地址的地址数值最小，并且其余结点按遍历顺序地址递增。</p>
 <h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><p>user mem-allocator由三个主要函数组成，分别是<code>morecore</code>、<code>malloc</code>和<code>free</code>。一个一个地来说未免有点不符合正常人的思路，所以我接下来会以用户初次调用<code>malloc</code>为例，来整理user mem-allocator的具体实现。</p>
 <h4 id="malloc"><a href="#malloc" class="headerlink" title="malloc"></a>malloc</h4><p>当用户初次调用<code>malloc</code>，此时freep仍为空指针，因而会进入如下分支：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>((prevp = freep) == <span class="number">0</span>)&#123;</span><br><span class="line">  <span class="comment">// 空闲mem为空的情况</span></span><br><span class="line">  base.s.ptr = freep = prevp = &amp;base;</span><br><span class="line">  base.s.size = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>也即初始化为这种情况：</p>
-<p><img src="/2023/01/10/xv6/image-20230316143711888.png" alt="image-20230316143711888"></p>
+<p><img src="/2023/01/10/xv6/image-20230316143711888.png" alt="image-20230316143711888" loading="lazy"></p>
 <p>随后，由于<code>prevp-&gt;ptr == freep</code>，故而会在循环中进入该分支：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(p = prevp-&gt;s.ptr; ; prevp = p, p = p-&gt;s.ptr)&#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">if</span>(p == freep) <span class="comment">// 一般情况下，此处表明已经完整遍历了一遍环形链表，因为prev的初值是freep，而我们是从prev-&gt;next开始遍历的</span></span><br><span class="line">    <span class="keyword">if</span>((p = morecore(nunits)) == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -463,22 +273,22 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(bp + bp-&gt;s.size == p-&gt;s.ptr)&#123;</span><br><span class="line">  bp-&gt;s.size += p-&gt;s.ptr-&gt;s.size;</span><br><span class="line">  bp-&gt;s.ptr = p-&gt;s.ptr-&gt;s.ptr;</span><br><span class="line">&#125; <span class="keyword">else</span></span><br><span class="line">  bp-&gt;s.ptr = p-&gt;s.ptr;</span><br><span class="line"><span class="keyword">if</span>(p + p-&gt;s.size == bp)&#123;</span><br><span class="line">  p-&gt;s.size += bp-&gt;s.size;</span><br><span class="line">  p-&gt;s.ptr = bp-&gt;s.ptr;</span><br><span class="line">&#125; <span class="keyword">else</span></span><br><span class="line">  p-&gt;s.ptr = bp;</span><br><span class="line">freep = p;</span><br></pre></td></tr></table></figure>
 
 <p>跳出循环后，我们会进入第一个if的第二个分支，以及第二个if的第二个分支。经过这些指针操作后，此时我们的数据结构如下图所示：</p>
-<p><img src="/2023/01/10/xv6/image-20230316145733160.png" alt="image-20230316145733160"></p>
+<p><img src="/2023/01/10/xv6/image-20230316145733160.png" alt="image-20230316145733160" loading="lazy"></p>
 <p>也即形成了一个两节点的环形链表。</p>
 <h4 id="malloc-1"><a href="#malloc-1" class="headerlink" title="malloc"></a>malloc</h4><p>经历完上述调用后，我们回到<code>malloc</code>的循环中：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(p = prevp-&gt;s.ptr; ; prevp = p, p = p-&gt;s.ptr)&#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">if</span>(p == freep)</span><br><span class="line">    <span class="keyword">if</span>((p = morecore(nunits)) == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>由<code>morecore</code>的返回值可知，此时我们的p应该指向freep。本轮循环结束后执行<code> p = p-&gt;s.ptr</code>，此时我们的p指向了我们刚在<code>morecore</code>中扩容出来的那一大段内存。</p>
-<p><img src="/2023/01/10/xv6/image-20230316150327569.png" alt="image-20230316150327569"></p>
+<p><img src="/2023/01/10/xv6/image-20230316150327569.png" alt="image-20230316150327569" loading="lazy"></p>
 <p>在下一轮循环中，由于我们刚刚通过<code>morecore</code>申请了至少<code>nunits</code>的空间，因而我们将进入该分支：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(p-&gt;s.size &gt;= nunits)&#123;</span><br><span class="line">  <span class="keyword">if</span>(p-&gt;s.size == nunits)</span><br><span class="line">    <span class="comment">// 如果与所需的内存刚好相等，那就直接返回该小单元就行</span></span><br><span class="line">    prevp-&gt;s.ptr = p-&gt;s.ptr;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 不等的话就只划分出一小部分</span></span><br><span class="line">    <span class="comment">// 一次划出几个header单元</span></span><br><span class="line">    p-&gt;s.size -= nunits;</span><br><span class="line">    p += p-&gt;s.size;</span><br><span class="line">    p-&gt;s.size = nunits;</span><br><span class="line">  &#125;</span><br><span class="line">  freep = prevp;</span><br><span class="line">  <span class="keyword">return</span> (<span class="type">void</span>*)(p + <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>当<code>nunits &gt;= 4096</code>，也即<code>p-&gt;s.size == nunits</code>，p所指向的地址恰好就是我们接下来会用的地址。因而，我们就将这部分内存空间从我们的freelist中剔除，在之后返回p的地址即可。</p>
 <p>当<code>nunits &lt; 4096</code>，也即<code>p-&gt;s.size != nunits</code>，说明p所指向的这块内存空间比我们需要的大，那么我们就仅将该段内存空间切割出需要的那一小部分，再把p指向那一小部分开头的地方，返回p地址即可，如图所示。</p>
-<p><img src="/2023/01/10/xv6/image-20230316150846709.png" alt="image-20230316150846709"></p>
+<p><img src="/2023/01/10/xv6/image-20230316150846709.png" alt="image-20230316150846709" loading="lazy"></p>
 <p>这样一来，我们就成功给用户它所需要的内存空间了。</p>
 <h4 id="free-1"><a href="#free-1" class="headerlink" title="free"></a>free</h4><p>进行malloc之后，用户还需要调用free来手动释放内存，防止内存泄漏。</p>
-<p><img src="/2023/01/10/xv6/image-20230316151116462.png" alt="image-20230316151116462"></p>
+<p><img src="/2023/01/10/xv6/image-20230316151116462.png" alt="image-20230316151116462" loading="lazy"></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(p = freep; !(bp &gt; p &amp;&amp; bp &lt; p-&gt;s.ptr); p = p-&gt;s.ptr)</span><br><span class="line">  <span class="keyword">if</span>(p &gt;= p-&gt;s.ptr &amp;&amp; (bp &gt; p || bp &lt; p-&gt;s.ptr))</span><br><span class="line">    <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
 
 <p>由于<code>ap &gt; base</code>且<code>ap &gt; 旧p-&gt;size = base-&gt;ptr</code>且<code>base &lt; base-&gt;ptr</code>，故而首先会进行一轮循环。再然后，由于<code>p = 旧p-&gt;size</code>，并且<code>p &gt; p-&gt;ptr = base</code>，并且<code>ap &gt; 旧size</code>，故而跳出循环。</p>
@@ -510,7 +320,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">statswrite</span><span class="params">(<span class="type">int</span> user_src, uint64 src, <span class="type">int</span> n)</span> &#123; <span class="comment">// WARNING: READ ONLY!!!</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可以看到其本质就是把<code>statslock</code>返回的东西copy到用户空间了。我们来结合最后的输出效果看看<code>statslock</code>的具体实现：</p>
-<p><img src="/2023/01/10/xv6/image-20231024232632816.png" alt="image-20231024232632816"></p>
+<p><img src="/2023/01/10/xv6/image-20231024232632816.png" alt="image-20231024232632816" loading="lazy"></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">statslock</span><span class="params">(<span class="type">char</span> *buf, <span class="type">int</span> sz)</span> &#123;</span><br><span class="line">  <span class="type">int</span> n;</span><br><span class="line">  <span class="type">int</span> tot = <span class="number">0</span>;</span><br><span class="line">  <span class="type">int</span> found = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  acquire(&amp;lock_locks);</span><br><span class="line">  n = <span class="built_in">snprintf</span>(buf, sz, <span class="string">&quot;--- lock kmem/bcache stats\n&quot;</span>);</span><br><span class="line">  <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; NLOCK; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span>(locks[i] == <span class="number">0</span>)	<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">strncmp</span>(locks[i]-&gt;name, <span class="string">&quot;bcache&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;bcache&quot;</span>)) == <span class="number">0</span> ||</span><br><span class="line">       <span class="built_in">strncmp</span>(locks[i]-&gt;name, <span class="string">&quot;kmem&quot;</span>, <span class="built_in">strlen</span>(<span class="string">&quot;kmem&quot;</span>)) == <span class="number">0</span>) &#123;</span><br><span class="line">      tot += locks[i]-&gt;nts; <span class="comment">// 记入-&gt;nts计数</span></span><br><span class="line">      <span class="comment">/*</span></span><br><span class="line"><span class="comment">        snprint_lock: lock: %s: #fetch-and-add %d #acquire() %d\n</span></span><br><span class="line"><span class="comment">      */</span></span><br><span class="line">      n += snprint_lock(buf +n, sz-n, locks[i]);</span><br><span class="line">      found += <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Require at least two locks name after kmem/bcache.</span></span><br><span class="line">  <span class="keyword">if</span> (found &lt; <span class="number">2</span>) &#123;</span><br><span class="line">    tot = <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 简单粗暴地计算前五多争用的进程</span></span><br><span class="line">  n += <span class="built_in">snprintf</span>(buf+n, sz-n, <span class="string">&quot;--- top 5 contended locks:\n&quot;</span>);</span><br><span class="line">  <span class="type">int</span> last = <span class="number">100000000</span>;</span><br><span class="line">  <span class="comment">// stupid way to compute top 5 contended locks</span></span><br><span class="line">  <span class="keyword">for</span>(<span class="type">int</span> t = <span class="number">0</span>; t &lt; <span class="number">5</span>; t++) &#123;</span><br><span class="line">    <span class="type">int</span> top = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; NLOCK; i++) &#123;</span><br><span class="line">      <span class="keyword">if</span>(locks[i] == <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">if</span>(locks[i]-&gt;nts &gt; locks[top]-&gt;nts &amp;&amp; locks[i]-&gt;nts &lt; last) &#123;</span><br><span class="line">        top = i;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">      snprint_lock: lock: %s: #fetch-and-add %d #acquire() %d\n</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    n += snprint_lock(buf+n, sz-n, locks[top]);</span><br><span class="line">    last = locks[top]-&gt;nts;</span><br><span class="line">  &#125;</span><br><span class="line">  n += <span class="built_in">snprintf</span>(buf+n, sz-n, <span class="string">&quot;tot= %d\n&quot;</span>, tot);</span><br><span class="line">  release(&amp;lock_locks);  </span><br><span class="line">  <span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可以看到其争用本质计算是通过<code>spinlock::nts</code>字段记录。我们来看看这玩意的引用：</p>
@@ -518,244 +328,4 @@
 
 <p>很好，逻辑很简单，就是记录acquire时等待的次数，非常简单粗暴（（（</p>
 <p>总的来说这个思路还是挺酷的，而且这个“一切皆文件”的思想再次震撼了我，一个小小的xv6确实能做到那么多。</p>
-
-    </div>
-
-    
-    
-    
-
-		<div>
-		  
-			<div>
-    
-        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-		  
-		</div>
-
-      <footer class="post-footer">
-
-        
-
-
-        
-      </footer>
-    
-  </article>
-  
-  
-  
-
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%9A%84%E5%AF%B9%E5%AE%9E%E9%AA%8C%E6%9C%AA%E6%B6%89%E5%8F%8A%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">1.</span> <span class="nav-text">其他的对实验未涉及的思考</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B1mkfs%E5%BC%95%E5%8F%91%E7%9A%84%E5%AF%B9%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.1.</span> <span class="nav-text">由mkfs引发的对虚拟机的学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#qemu"><span class="nav-number">1.1.1.</span> <span class="nav-text">qemu</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.1.1.</span> <span class="nav-text">虚拟化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">1.1.1.1.2.</span> <span class="nav-text">虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.1.1.1.2.1.</span> <span class="nav-text">进程</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E5%99%A8"><span class="nav-number">1.1.1.1.2.2.</span> <span class="nav-text">模拟器</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E8%AF%AD%E8%A8%80%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">1.1.1.1.2.3.</span> <span class="nav-text">高级语言虚拟机</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">1.1.1.1.2.4.</span> <span class="nav-text">系统虚拟机</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#qemu-1"><span class="nav-number">1.1.1.1.3.</span> <span class="nav-text">qemu</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#qemu-kvm%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">qemu-kvm架构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%9E%E7%94%9F%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.1.1.2.1.</span> <span class="nav-text">诞生的原因</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E8%99%9A%E6%8B%9F%E5%8C%96%E6%96%B9%E6%A1%88"><span class="nav-number">1.1.1.2.1.1.</span> <span class="nav-text">两种虚拟化方案</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%8A%E8%BF%B0%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8C%96%E6%96%B9%E6%A1%88"><span class="nav-number">1.1.1.2.1.2.</span> <span class="nav-text">实现上述的虚拟化方案</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#x86%E6%9E%B6%E6%9E%84%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.1.2.1.3.</span> <span class="nav-text">x86架构的问题</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.2.1.4.</span> <span class="nav-text">解决方法</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#kvm"><span class="nav-number">1.1.1.2.1.5.</span> <span class="nav-text">kvm</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#qemu-kvm"><span class="nav-number">1.1.1.2.1.6.</span> <span class="nav-text">qemu-kvm</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#qemu-kvm%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.1.2.2.</span> <span class="nav-text">qemu-kvm总体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#VMX-root%E5%92%8CVMX-non-root"><span class="nav-number">1.1.1.2.2.1.</span> <span class="nav-text">VMX root和VMX non root</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#qemu%E5%B1%82%EF%BC%88%E5%B7%A6%E4%B8%8A%EF%BC%89"><span class="nav-number">1.1.1.2.2.2.</span> <span class="nav-text">qemu层（左上）</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#kvm%E5%B1%82%EF%BC%88%E4%B8%8B%E6%96%B9%EF%BC%89"><span class="nav-number">1.1.1.2.2.3.</span> <span class="nav-text">kvm层（下方）</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%B1%82%EF%BC%88%E5%8F%B3%E4%B8%8A%EF%BC%89"><span class="nav-number">1.1.1.2.2.4.</span> <span class="nav-text">虚拟机层（右上）</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%9C%A8QEMU-KVM%E6%9E%B6%E6%9E%84%E7%9A%84%E6%89%A7%E8%A1%8C%E6%96%B9%E6%B3%95"><span class="nav-number">1.1.1.2.3.</span> <span class="nav-text">虚拟机在QEMU-KVM架构的执行方法</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.2.3.1.</span> <span class="nav-text">状态管理虚拟化</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.2.3.2.</span> <span class="nav-text">内存管理虚拟化</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%A4%96%E8%AE%BE%E7%AE%A1%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.2.3.3.</span> <span class="nav-text">外设管理虚拟化</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.1.2.3.4.</span> <span class="nav-text">中断处理虚拟化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#xv6%E7%9A%84%E5%85%A8%E5%90%AF%E5%8A%A8%E8%BF%90%E8%A1%8C%E8%BF%87%E7%A8%8B%E6%A2%B3%E7%90%86"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">xv6的全启动运行过程梳理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mkfs%E7%9A%84%E4%BD%9C%E7%94%A8%E5%8F%8A%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB"><span class="nav-number">1.1.1.4.</span> <span class="nav-text">mkfs的作用及源码解读</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.1.4.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%A3%E8%AF%BB"><span class="nav-number">1.1.1.4.2.</span> <span class="nav-text">代码解读</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#user-mem-allocator"><span class="nav-number">1.2.</span> <span class="nav-text">user mem-allocator</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">环形链表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E4%BB%8E%E4%BD%8E%E5%88%B0%E9%AB%98"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">地址从低到高</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.2.2.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#malloc"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">malloc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#morecore"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">morecore</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#free"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">free</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#malloc-1"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">malloc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#free-1"><span class="nav-number">1.2.2.5.</span> <span class="nav-text">free</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.2.3.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#m-s-u%E6%9D%83%E9%99%90%E5%88%87%E6%8D%A2"><span class="nav-number">1.3.</span> <span class="nav-text">m-s-u权限切换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lock%E5%AE%9E%E9%AA%8C%E7%9A%84%E8%AF%84%E6%B5%8B%E6%9C%BA%E5%88%B6"><span class="nav-number">1.4.</span> <span class="nav-text">Lock实验的评测机制</span></a></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="修年"
-      src="/images/head.png">
-  <p class="site-author-name" itemprop="name">修年</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">46</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-    <br>
-      <span class="links-of-author-item">
-          QQ: 1776527992
-      </span>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2023</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">修年</span>
-</div>
-
-
-<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
-<script>
-    var now = new Date(); 
-    function createtime() { 
-        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
-        now.setTime(now.getTime()+250); 
-        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
-        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
-        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
-        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
-        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
-        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
-        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
-        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
-    } 
-setInterval("createtime()",250);
-</script>
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-user"></i>
-      </span>
-      <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span>
-      </span>
-    </span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-eye"></i>
-      </span>
-      <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span>
-      </span>
-    </span>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-  
-
-
-
-  <script type="text/javascript" src="/js/clicklove.js"></script>
-</body>
-</html>
+</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap9/" title="其他的对实验未涉及的思考">https://xiunianjun.github.io/2023/01/10/xv6$chap9/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/01/10/xv6/" rel="prev" title="xv6"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">xv6</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2022/12/21/JavaWeb/" rel="next" title="JavaWeb"><span class="post-nav-text">JavaWeb</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>

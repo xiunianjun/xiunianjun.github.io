@@ -1,28 +1,14 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.2">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/cat.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/cat.png">
-  <link rel="mask-icon" href="/images/cat.png" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
-  <script src="/lib/pace/pace.min.js"></script>
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"xiunianjun.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="Operating system oganization Before you start coding, read Chapter 2 of the xv6 book, and Sections 4.3 and 4.4 of Chapter 4, and related source files:  The user-space code for systems calls is in user">
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>Operating system oganization | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
+  [".post-card",".markdown-body img"].forEach((target)=> {
+    ScrollReveal().reveal(target);
+  })
+}
+document.addEventListener("DOMContentLoaded", initScrollReveal);
+document.addEventListener("pjax:success", initScrollReveal);
+</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
+    window.Yun = {}
+    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","say":{"api":"https://el-bot-api.vercel.app/api/words/young"},"fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
+  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="Operating system oganization Before you start coding, read Chapter 2 of the xv6 book, and Sections 4.3 and 4.4 of Chapter 4, and related source files:  The user-space code for systems calls is in user">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Operating system oganization">
 <meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap2/index.html">
@@ -40,200 +26,24 @@
 <meta property="article:modified_time" content="2023-10-16T06:22:44.441Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230107232802540.png">
-
-<link rel="canonical" href="https://xiunianjun.github.io/2023/01/10/xv6$chap2/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>Operating system oganization | 修年</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-  
-      <meta charset="UTF-8">
-    <title>live2d-demo</title>
-    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <!-- Live2DCubismCore -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
-    <!-- Include Pixi. -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
-    <!-- Include Cubism Components. -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
-    <!-- User's Script -->
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
-    <style>
-    </style>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-	
-		<script type="text/javascript" 
-		color="244,180,180" opacity='0.5' zIndex="-2" count="80"
-		src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
-	
-
-  <div class="container use-motion">
-    <div class="headband"></div>
-<a target="_blank" rel="noopener" href="https://github.com/xiunianjun" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#FD6C6C; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">修年</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post posts-expand">
-            
-
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/head.png">
-      <meta itemprop="name" content="修年">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="修年">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Operating system oganization
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-10-16 14:22:44" itemprop="dateModified" datetime="2023-10-16T14:22:44+08:00">2023-10-16</time>
-              </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <h1 id="Operating-system-oganization"><a href="#Operating-system-oganization" class="headerlink" title="Operating system oganization"></a>Operating system oganization</h1><blockquote>
+<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230107232802540.png"><script>(function() {
+  if (CONFIG.mode !== 'auto') return
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const setting = localStorage.getItem('darken-mode') || 'auto'
+  if (setting === 'dark' || (prefersDark && setting !== 'light'))
+    document.documentElement.classList.toggle('dark', true)
+})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
+IconifyProviders = {
+  // Empty prefix: overwrite default API provider configuration
+  '': {
+    // Use custom API first, use Iconify public API as backup
+    resources: [
+        'https://api.iconify.design',
+    ],
+    // Wait for 1 second before switching API hosts
+    rotate: 1000,
+  },
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">45</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Operating-system-oganization"><span class="toc-number">1.</span> <span class="toc-text">Operating system oganization</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Kernel-organization"><span class="toc-number">1.1.</span> <span class="toc-text">Kernel organization</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8F%E5%86%85%E6%A0%B8%E4%B8%8E%E5%BE%AE%E5%86%85%E6%A0%B8"><span class="toc-number">1.1.1.</span> <span class="toc-text">宏内核与微内核</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Code-xv6-organization"><span class="toc-number">1.1.2.</span> <span class="toc-text">Code: xv6 organization</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Process-overview"><span class="toc-number">1.2.</span> <span class="toc-text">Process overview</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-starting-xv6-and-the-first-process"><span class="toc-number">1.3.</span> <span class="toc-text">Code: starting xv6 and the first process</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#xv6"><span class="toc-number">1.3.1.</span> <span class="toc-text">xv6</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">加载操作系统</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.3.1.2.</span> <span class="toc-text">操作系统初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#entry-S%E9%85%8D%E7%BD%AE%E6%A0%88%E7%A9%BA%E9%97%B4"><span class="toc-number">1.3.1.2.1.</span> <span class="toc-text">entry.S配置栈空间</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#start-c"><span class="toc-number">1.3.1.2.2.</span> <span class="toc-text">start.c</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#main-c"><span class="toc-number">1.3.1.2.3.</span> <span class="toc-text">main.c</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#proc-c%E4%B8%AD%E7%9A%84userinit"><span class="toc-number">1.3.1.2.4.</span> <span class="toc-text">proc.c中的userinit()</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#initcode-S"><span class="toc-number">1.3.1.2.5.</span> <span class="toc-text">initcode.S</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#init-c"><span class="toc-number">1.3.1.2.6.</span> <span class="toc-text">init.c</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">1.3.1.3.</span> <span class="toc-text">感想</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#linux0-11"><span class="toc-number">1.3.2.</span> <span class="toc-text">linux0.11</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-1"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">加载操作系统</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AF%BB%E5%85%A5bootsect-s"><span class="toc-number">1.3.2.1.1.</span> <span class="toc-text">读入bootsect.s</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#bootsect-s"><span class="toc-number">1.3.2.1.2.</span> <span class="toc-text">bootsect.s</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#setup-s"><span class="toc-number">1.3.2.1.3.</span> <span class="toc-text">setup.s</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96-1"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">操作系统初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#head-s"><span class="toc-number">1.3.2.2.1.</span> <span class="toc-text">head.s</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#main-c-1"><span class="toc-number">1.3.2.2.2.</span> <span class="toc-text">main.c</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-1"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">感想</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Real-world"><span class="toc-number">1.4.</span> <span class="toc-text">Real world</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-system-calls"><span class="toc-number">1.5.</span> <span class="toc-text">Lab system calls</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#trace"><span class="toc-number">1.5.1.</span> <span class="toc-text">trace</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-2"><span class="toc-number">1.5.1.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.5.1.2.</span> <span class="toc-text">代码步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9C%A8%E5%90%84%E7%A7%8D%E6%96%87%E4%BB%B6%E6%B7%BB%E5%8A%A0%E7%AD%BE%E5%90%8D"><span class="toc-number">1.5.1.2.1.</span> <span class="toc-text">在各种文件添加签名</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#user-user-h"><span class="toc-number">1.5.1.2.1.1.</span> <span class="toc-text">user&#x2F;user.h</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#user-usys-pl"><span class="toc-number">1.5.1.2.1.2.</span> <span class="toc-text">user&#x2F;usys.pl</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#syscall-h"><span class="toc-number">1.5.1.2.1.3.</span> <span class="toc-text">syscall.h</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#syscall-c"><span class="toc-number">1.5.1.2.1.4.</span> <span class="toc-text">syscall.c</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9Makefile"><span class="toc-number">1.5.1.2.1.5.</span> <span class="toc-text">修改Makefile</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">1.5.1.2.2.</span> <span class="toc-text">代码</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9proc-h"><span class="toc-number">1.5.1.2.2.1.</span> <span class="toc-text">修改proc.h</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E7%BC%96%E5%86%99trace-c"><span class="toc-number">1.5.1.2.2.2.</span> <span class="toc-text">编写trace.c</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9syscall-c"><span class="toc-number">1.5.1.2.2.3.</span> <span class="toc-text">修改syscall.c</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%9C%A8sysproc-c%E4%B8%AD%E6%B7%BB%E5%8A%A0%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="toc-number">1.5.1.2.2.4.</span> <span class="toc-text">在sysproc.c中添加系统调用</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9fork"><span class="toc-number">1.5.1.2.2.5.</span> <span class="toc-text">修改fork</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%9C%A8defs-h%E4%B8%AD%E6%B7%BB%E5%8A%A0%E9%9C%80%E8%A6%81public%E7%9A%84%E5%87%BD%E6%95%B0%E7%AD%BE%E5%90%8D"><span class="toc-number">1.5.1.2.2.6.</span> <span class="toc-text">在defs.h中添加需要public的函数签名</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sysinfotest"><span class="toc-number">1.5.2.</span> <span class="toc-text">sysinfotest</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-3"><span class="toc-number">1.5.2.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="toc-number">1.5.2.2.</span> <span class="toc-text">代码</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#sysinfo-c"><span class="toc-number">1.5.2.2.1.</span> <span class="toc-text">sysinfo.c</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#sysproc-c%E4%B8%AD"><span class="toc-number">1.5.2.2.2.</span> <span class="toc-text">sysproc.c中</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#kalloc-c%E4%B8%AD"><span class="toc-number">1.5.2.2.3.</span> <span class="toc-text">kalloc.c中</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#proc-c%E4%B8%AD"><span class="toc-number">1.5.2.2.4.</span> <span class="toc-text">proc.c中</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%99%84%E5%8A%A0%E9%A2%98"><span class="toc-number">1.5.2.3.</span> <span class="toc-text">附加题</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#trace-plus"><span class="toc-number">1.5.2.3.1.</span> <span class="toc-text">trace plus</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#sysinfo-plus"><span class="toc-number">1.5.2.3.2.</span> <span class="toc-text">sysinfo plus</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap2/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Operating system oganization</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-10-16 14:22:44" itemprop="dateModified" datetime="2023-10-16T14:22:44+08:00">2023-10-16</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Operating-system-oganization"><a href="#Operating-system-oganization" class="headerlink" title="Operating system oganization"></a>Operating system oganization</h1><blockquote>
 <p>Before you start coding, read Chapter 2 of the <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/xv6/book-riscv-rev1.pdf">xv6 book</a>, and Sections 4.3 and 4.4 of Chapter 4, and related source files:</p>
 <ul>
 <li>The user-space code for systems calls is in <code>user/user.h</code> and <code>user/usys.pl</code>.</li>
@@ -245,7 +55,7 @@
 <h2 id="Kernel-organization"><a href="#Kernel-organization" class="headerlink" title="Kernel organization"></a>Kernel organization</h2><h3 id="宏内核与微内核"><a href="#宏内核与微内核" class="headerlink" title="宏内核与微内核"></a>宏内核与微内核</h3><p>操作系统一个很重要的设计问题就是，哪部分的代码需要run在内核态，哪部分的需要run在用户态。</p>
 <p>如果将操作系统所有系统调用统统都在内核态run，这种设计方式就叫宏内核<em>monolithic kernel</em>。</p>
 <p>如果仅将系统调用中必要的部分在内核态run，其他部分都在用户态run，并且采取Client/Server这样的异步通信方式，这种设计方式就叫微内核<em>microkernel</em>。</p>
-<p><img src="/2023/01/10/xv6/image-20230107232802540.png" alt="image-20230107232802540"></p>
+<p><img src="/2023/01/10/xv6/image-20230107232802540.png" alt="image-20230107232802540" loading="lazy"></p>
 <blockquote>
 <p>由于客户/服务器（Client/Server）模式，具有非常多的优点，故在单机<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%BE%AE%E5%86%85%E6%A0%B8">微内核</a>操作系统中几乎无一例外地都采用客户/服务器模式，将操作系统中最基本的部分放入内核中，而把操作系统的绝大部分功能都放在微内核外面的一组服务器(<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E8%BF%9B%E7%A8%8B">进程</a>)中实现。</p>
 </blockquote>
@@ -373,7 +183,7 @@
 <p>为了帮助加强隔离，进程抽象给程序提供了一种错觉，即它有自己的专用机器。进程为程序提供了一个看起来像是私有内存系统或地址空间的东西，其他进程不能读取或写入。进程还为程序提供了看起来像是自己的CPU来执行程序的指令。</p>
 <p>Xv6使用页表（由硬件实现）为每个进程提供自己的地址空间。RISC-V页表将虚拟地址（RISC-V指令操纵的地址）转换（或“映射”）为物理地址（CPU芯片发送到主存储器的地址）。</p>
 <p>每个进程也有自己的页表，页表中记录了以虚拟地址0开始的内存区域。</p>
-<p><img src="/2023/01/10/xv6/image-20230107233741922.png" alt="image-20230107233741922"></p>
+<p><img src="/2023/01/10/xv6/image-20230107233741922.png" alt="image-20230107233741922" loading="lazy"></p>
 <p>xv6内核为每个进程维护许多状态片段，并将它们聚集到一个<code>proc</code>(*<strong>kernel/proc.h*</strong>:86)结构体中。一个进程最重要的内核状态片段是它的页表、内核栈区和运行状态。我们将使用符号<code>p-&gt;xxx</code>来引用<code>proc</code>结构体的元素；例如，<code>p-&gt;pagetable</code>是一个指向该进程页表的指针。</p>
 <blockquote>
 <p>这应该相当于pcb表。</p>
@@ -383,7 +193,7 @@
 <blockquote>
 <p>这个过程由qemu模拟。</p>
 <p>首先会通过<code>mkfs</code>造出操作系统镜像。然后由qemu将引导扇区，也即下面的filesys这图里的第0块：</p>
-<p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747"></p>
+<p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747" loading="lazy"></p>
 <p>读入到主存中，然后开始执行引导扇区的程序，下同。</p>
 </blockquote>
 <p><code>boot loader</code>目的是把xv6加载进内存到<code>0x8000 0000</code>，然后跳转到xv6初始化程序。</p>
@@ -452,9 +262,9 @@
 <h5 id="读入bootsect-s"><a href="#读入bootsect-s" class="headerlink" title="读入bootsect.s"></a>读入bootsect.s</h5><p>加载程序的512个字节被读入到内存从<code>0x7c00</code>开始的一段内存中，并且BIOS设置<code>CS=07c0,ip=0</code>，开始执行加载程序的每一条指令。</p>
 <h5 id="bootsect-s"><a href="#bootsect-s" class="headerlink" title="bootsect.s"></a>bootsect.s</h5><p>加载程序的代码为<code>bootsect.s</code>。在<code>bootsect.s</code>中，首先将自身从<code>7c00</code>处移动到了<code>9000</code>处【留下空间放操作系统】，然后分别依次读取磁盘的<u>setup</u>和<u>system</u>模块，最后bootsect将控制权转交给setup。</p>
 <h5 id="setup-s"><a href="#setup-s" class="headerlink" title="setup.s"></a>setup.s</h5><p>setup首先获取操作系统运行的<strong>必要硬件参数</strong>。</p>
-<p><img src="/2023/01/10/xv6/image-20230108011824655.png" alt="image-20230108011824655"></p>
+<p><img src="/2023/01/10/xv6/image-20230108011824655.png" alt="image-20230108011824655" loading="lazy"></p>
 <p>再然后，<u>将system代码移到0地址</u>。然后，我们就需要进入system代码块。</p>
-<p><img src="/2023/01/10/xv6/image-20230108012316631.png" alt="image-20230108012316631"></p>
+<p><img src="/2023/01/10/xv6/image-20230108012316631.png" alt="image-20230108012316631" loading="lazy"></p>
 <p>最后一句jmpi指令本来应该是要跳到system代码段首0地址处的的，可此处却跳到了80处，这显然不合理。但它写的肯定是没错的。之所以会有这样的矛盾，是因为setup在此之前，还做了一件事情：<strong>改变寻址方式</strong>。jmpi上面的那条mov指令便做了这点。</p>
 <p>我们之前的寻址方式一直是<code>cs&lt;&lt;4+ip</code>。但是这东西只能是16位的内存，<u>无法满足寻址需求</u>。故而setup要从16位切换到32位。32位模式也叫保护模式。</p>
 <blockquote>
@@ -463,14 +273,14 @@
 <p>在保护模式下，寻址方式发生了改变。此时cs不再代表基址，而是表示地址在gdb表<code>global description table</code>中的偏移下标。真正的基址放在表项中。cs被称为selector，从表中取得基址，再和ip加在一起得到地址。</p>
 <blockquote>
 <p>gdt表的内容由setup初始化</p>
-<p><img src="/2023/01/10/xv6/image-20230108013156116.png" alt="image-20230108013156116"></p>
+<p><img src="/2023/01/10/xv6/image-20230108013156116.png" alt="image-20230108013156116" loading="lazy"></p>
 </blockquote>
 <p>这样一来，就正确跳到了system模块。</p>
 <h4 id="操作系统初始化-1"><a href="#操作系统初始化-1" class="headerlink" title="操作系统初始化"></a>操作系统初始化</h4><h5 id="head-s"><a href="#head-s" class="headerlink" title="head.s"></a>head.s</h5><p>跳到system第一个文件，也就是head.s去执行。</p>
 <p>head.s也是在保护模式下进行的，是在保护模式下的初始化。</p>
 <p>head.s建立了真正的gdt表，然后就要跳转到main.c执行初始化和Shell的启动。此处有汇编语言和C语言的转化，也就是push参数然后push main的地址。</p>
 <h5 id="main-c-1"><a href="#main-c-1" class="headerlink" title="main.c"></a>main.c</h5><p>对各种东西的初始化。</p>
-<p><img src="/2023/01/10/xv6/image-20230108013849664.png" alt="image-20230108013849664"></p>
+<p><img src="/2023/01/10/xv6/image-20230108013849664.png" alt="image-20230108013849664" loading="lazy"></p>
 <p>最后完成从内核态到用户态的切换。</p>
 <h4 id="感想-1"><a href="#感想-1" class="headerlink" title="感想"></a>感想</h4><blockquote>
 <p>linux0.11的启动的具体思路是：</p>
@@ -554,244 +364,4 @@
 <p>Compute the load average and export it through sysinfo</p>
 </blockquote>
 <p>说实话没太看懂，不就加个 running process/ncpu就行了吗？</p>
-
-    </div>
-
-    
-    
-    
-
-		<div>
-		  
-			<div>
-    
-        <div style="text-align:center;color: #f7cdcd;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-		  
-		</div>
-
-      <footer class="post-footer">
-
-        
-
-
-        
-      </footer>
-    
-  </article>
-  
-  
-  
-
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Operating-system-oganization"><span class="nav-number">1.</span> <span class="nav-text">Operating system oganization</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kernel-organization"><span class="nav-number">1.1.</span> <span class="nav-text">Kernel organization</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8F%E5%86%85%E6%A0%B8%E4%B8%8E%E5%BE%AE%E5%86%85%E6%A0%B8"><span class="nav-number">1.1.1.</span> <span class="nav-text">宏内核与微内核</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-xv6-organization"><span class="nav-number">1.1.2.</span> <span class="nav-text">Code: xv6 organization</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Process-overview"><span class="nav-number">1.2.</span> <span class="nav-text">Process overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code-starting-xv6-and-the-first-process"><span class="nav-number">1.3.</span> <span class="nav-text">Code: starting xv6 and the first process</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#xv6"><span class="nav-number">1.3.1.</span> <span class="nav-text">xv6</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">加载操作系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">操作系统初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#entry-S%E9%85%8D%E7%BD%AE%E6%A0%88%E7%A9%BA%E9%97%B4"><span class="nav-number">1.3.1.2.1.</span> <span class="nav-text">entry.S配置栈空间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#start-c"><span class="nav-number">1.3.1.2.2.</span> <span class="nav-text">start.c</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#main-c"><span class="nav-number">1.3.1.2.3.</span> <span class="nav-text">main.c</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#proc-c%E4%B8%AD%E7%9A%84userinit"><span class="nav-number">1.3.1.2.4.</span> <span class="nav-text">proc.c中的userinit()</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#initcode-S"><span class="nav-number">1.3.1.2.5.</span> <span class="nav-text">initcode.S</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#init-c"><span class="nav-number">1.3.1.2.6.</span> <span class="nav-text">init.c</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">感想</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#linux0-11"><span class="nav-number">1.3.2.</span> <span class="nav-text">linux0.11</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-1"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">加载操作系统</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%BB%E5%85%A5bootsect-s"><span class="nav-number">1.3.2.1.1.</span> <span class="nav-text">读入bootsect.s</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#bootsect-s"><span class="nav-number">1.3.2.1.2.</span> <span class="nav-text">bootsect.s</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#setup-s"><span class="nav-number">1.3.2.1.3.</span> <span class="nav-text">setup.s</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96-1"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">操作系统初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#head-s"><span class="nav-number">1.3.2.2.1.</span> <span class="nav-text">head.s</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#main-c-1"><span class="nav-number">1.3.2.2.2.</span> <span class="nav-text">main.c</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-1"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">感想</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Real-world"><span class="nav-number">1.4.</span> <span class="nav-text">Real world</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lab-system-calls"><span class="nav-number">1.5.</span> <span class="nav-text">Lab system calls</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#trace"><span class="nav-number">1.5.1.</span> <span class="nav-text">trace</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-2"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">代码步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9C%A8%E5%90%84%E7%A7%8D%E6%96%87%E4%BB%B6%E6%B7%BB%E5%8A%A0%E7%AD%BE%E5%90%8D"><span class="nav-number">1.5.1.2.1.</span> <span class="nav-text">在各种文件添加签名</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#user-user-h"><span class="nav-number">1.5.1.2.1.1.</span> <span class="nav-text">user&#x2F;user.h</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#user-usys-pl"><span class="nav-number">1.5.1.2.1.2.</span> <span class="nav-text">user&#x2F;usys.pl</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#syscall-h"><span class="nav-number">1.5.1.2.1.3.</span> <span class="nav-text">syscall.h</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#syscall-c"><span class="nav-number">1.5.1.2.1.4.</span> <span class="nav-text">syscall.c</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9Makefile"><span class="nav-number">1.5.1.2.1.5.</span> <span class="nav-text">修改Makefile</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.5.1.2.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9proc-h"><span class="nav-number">1.5.1.2.2.1.</span> <span class="nav-text">修改proc.h</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%BC%96%E5%86%99trace-c"><span class="nav-number">1.5.1.2.2.2.</span> <span class="nav-text">编写trace.c</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9syscall-c"><span class="nav-number">1.5.1.2.2.3.</span> <span class="nav-text">修改syscall.c</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%9C%A8sysproc-c%E4%B8%AD%E6%B7%BB%E5%8A%A0%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-number">1.5.1.2.2.4.</span> <span class="nav-text">在sysproc.c中添加系统调用</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9fork"><span class="nav-number">1.5.1.2.2.5.</span> <span class="nav-text">修改fork</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%9C%A8defs-h%E4%B8%AD%E6%B7%BB%E5%8A%A0%E9%9C%80%E8%A6%81public%E7%9A%84%E5%87%BD%E6%95%B0%E7%AD%BE%E5%90%8D"><span class="nav-number">1.5.1.2.2.6.</span> <span class="nav-text">在defs.h中添加需要public的函数签名</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sysinfotest"><span class="nav-number">1.5.2.</span> <span class="nav-text">sysinfotest</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E6%83%B3-3"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">感想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#sysinfo-c"><span class="nav-number">1.5.2.2.1.</span> <span class="nav-text">sysinfo.c</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sysproc-c%E4%B8%AD"><span class="nav-number">1.5.2.2.2.</span> <span class="nav-text">sysproc.c中</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#kalloc-c%E4%B8%AD"><span class="nav-number">1.5.2.2.3.</span> <span class="nav-text">kalloc.c中</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#proc-c%E4%B8%AD"><span class="nav-number">1.5.2.2.4.</span> <span class="nav-text">proc.c中</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%99%84%E5%8A%A0%E9%A2%98"><span class="nav-number">1.5.2.3.</span> <span class="nav-text">附加题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#trace-plus"><span class="nav-number">1.5.2.3.1.</span> <span class="nav-text">trace plus</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sysinfo-plus"><span class="nav-number">1.5.2.3.2.</span> <span class="nav-text">sysinfo plus</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="修年"
-      src="/images/head.png">
-  <p class="site-author-name" itemprop="name">修年</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">46</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="mailto:nniferyy@gmail.com" title="E-Mail → mailto:nniferyy@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-    <br>
-      <span class="links-of-author-item">
-          QQ: 1776527992
-      </span>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2023</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">修年</span>
-</div>
-
-
-<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
-<script>
-    var now = new Date(); 
-    function createtime() { 
-        var grt= new Date("10/04/2022 17:38:00");//在此处修改你的建站时间，格式：月/日/年 时:分:秒
-        now.setTime(now.getTime()+250); 
-        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
-        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
-        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
-        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
-        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
-        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
-        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
-        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
-    } 
-setInterval("createtime()",250);
-</script>
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-user"></i>
-      </span>
-      <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span>
-      </span>
-    </span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-eye"></i>
-      </span>
-      <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span>
-      </span>
-    </span>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-  
-
-
-
-  <script type="text/javascript" src="/js/clicklove.js"></script>
-</body>
-</html>
+</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap2/" title="Operating system oganization">https://xiunianjun.github.io/2023/01/10/xv6$chap2/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/02/25/cs144/" rel="prev" title="cs144"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">cs144</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/01/10/xv6/" rel="next" title="xv6"><span class="post-nav-text">xv6</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>
