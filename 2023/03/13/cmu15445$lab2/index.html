@@ -17,15 +17,13 @@ document.addEventListener("pjax:success", initScrollReveal);
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/B+-tree-remove-61.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230417181239196.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110917819.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110258801.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230418110753966.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505002652748.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505002731312.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505011731797.png">
 <meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230505011744924.png">
+<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20231130222702358.png">
 <meta property="article:published_time" content="2023-03-13T14:19:00.000Z">
-<meta property="article:modified_time" content="2023-11-18T13:20:25.274Z">
+<meta property="article:modified_time" content="2023-11-30T14:36:08.532Z">
 <meta property="article:author" content="修年">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/B+-tree-remove-61.png"><script>(function() {
@@ -45,7 +43,7 @@ IconifyProviders = {
     // Wait for 1 second before switching API hosts
     rotate: 1000,
   },
-};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">45</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Project2-B-Tree"><span class="toc-number">1.</span> <span class="toc-text">Project2   B+Tree</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Task1-B-Tree-Pages"><span class="toc-number">1.1.</span> <span class="toc-text">Task1   B+Tree Pages</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task2a-Insertion-and-Search"><span class="toc-number">1.2.</span> <span class="toc-text">Task2a   Insertion and Search</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab2/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Project2   B+Tree</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-03-13 22:19:00" itemprop="dateCreated datePublished" datetime="2023-03-13T22:19:00+08:00">2023-03-13</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-11-18 21:20:25" itemprop="dateModified" datetime="2023-11-18T21:20:25+08:00">2023-11-18</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Project2-B-Tree"><a href="#Project2-B-Tree" class="headerlink" title="Project2   B+Tree"></a>Project2   B+Tree</h1><blockquote>
+};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">45</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Project2-B-Tree"><span class="toc-number">1.</span> <span class="toc-text">Project2   B+Tree</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Task1-B-Tree-Pages"><span class="toc-number">1.1.</span> <span class="toc-text">Task1   B+Tree Pages</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Task2a-Insertion-and-Search-Task3-Iterator"><span class="toc-number">1.2.</span> <span class="toc-text">Task2a   Insertion and Search + Task3 Iterator</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">1.2.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">1.2.2.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.2.3.</span> <span class="toc-text">遇到的问题</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cmake%E6%8A%A5%E9%94%99"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">cmake报错</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#page-guard"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">page guard</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%94%A8%E9%94%99%E4%BA%86"><span class="toc-number">1.2.3.2.1.</span> <span class="toc-text">用错了</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="toc-number">1.2.3.2.2.</span> <span class="toc-text">作用域</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E7%82%B9c-%E5%BC%95%E7%94%A8%E9%9C%87%E6%92%BC"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">一点c++引用震撼</span></a></li></ol></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab2/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Project2   B+Tree</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-03-13 22:19:00" itemprop="dateCreated datePublished" datetime="2023-03-13T22:19:00+08:00">2023-03-13</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-11-30 22:36:08" itemprop="dateModified" datetime="2023-11-30T22:36:08+08:00">2023-11-30</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Project2-B-Tree"><a href="#Project2-B-Tree" class="headerlink" title="Project2   B+Tree"></a>Project2   B+Tree</h1><blockquote>
 <p>In this programming project you will implement a <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/B%2B_tree">B+Tree</a> index in your database system.</p>
 <p>Your implementation will support thread-safe <u>search, insertion, deletion</u> (including splitting and merging nodes包括分裂和合并结点), and an iterator to support in-order leaf scans.</p>
 </blockquote>
@@ -70,7 +68,8 @@ IconifyProviders = {
 </li>
 </ol>
 </blockquote>
-<h2 id="Task2a-Insertion-and-Search"><a href="#Task2a-Insertion-and-Search" class="headerlink" title="Task2a   Insertion and Search"></a>Task2a   Insertion and Search</h2><blockquote>
+<p>这个没什么好说，大概就是有一个基类结点，它有两个子类，一个表示b+树的leaf node，另一个表示b+树的internal node，每个结点都占据一个内存页。嗯写就是了。</p>
+<h2 id="Task2a-Insertion-and-Search-Task3-Iterator"><a href="#Task2a-Insertion-and-Search-Task3-Iterator" class="headerlink" title="Task2a   Insertion and Search + Task3 Iterator"></a>Task2a   Insertion and Search + Task3 Iterator</h2><blockquote>
 <p>The index should <strong>support only unique keys;</strong> if you try to reinsert an existing key into the index, it should not perform the insertion, and should return false. key必须unique</p>
 <p>B+Tree pages should be split (or keys should be redistributed) if an insertion would violate the B+Tree’s invariants. 插入时需要分裂</p>
 <p>If an insertion changes the page ID of the root, you must update the <code>root_page_id</code> in the B+Tree index’s header page. You can do this by accessing the <code>header_page_id_</code> page, which is given to you in the constructor.  Then, by using <code>reinterpret_cast</code>, you can interpret this page as a <code>BPlusTreeHeaderPage</code> (from <code>src/include/storage/page/b_plus_tree_header_page.h</code>) and update the root page ID from there. You also must implement <code>GetRootPageId</code>, which currently returns 0 by default.对<code>root_page_id</code>的一切访问，都需要通过<code>header_page_id_</code>。如果插入后改变了root的page ID，需要更新<code>root_page_id</code>。</p>
@@ -95,179 +94,51 @@ IconifyProviders = {
 </li>
 </ul>
 </blockquote>
-<p>这是我的get方法，这里简要记录下思路。</p>
-<p>我并没有使用到它说的context对象。我是类似对二叉搜索树查找的思路进行查找的。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BPLUSTREE_TYPE::GetValue</span><span class="params">(<span class="type">const</span> KeyType &amp;key, std::vector&lt;ValueType&gt; *result, Transaction *txn)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  BasicPageGuard guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(header_page_id_);</span><br><span class="line">  InternalPage* root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">  <span class="keyword">if</span>(root-&gt;<span class="built_in">GetSize</span>() == <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">    <span class="type">bool</span> flag=<span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;root-&gt;<span class="built_in">GetSize</span>();i++)&#123;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">comparator_</span>(key,root-&gt;<span class="built_in">KeyAt</span>(i)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">      <span class="comment">// if(key&lt;root-&gt;KeyAt(i))&#123;</span></span><br><span class="line">        guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(root-&gt;<span class="built_in">ValueAt</span>(i<span class="number">-1</span>));</span><br><span class="line">        root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">        flag = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(!flag)&#123;</span><br><span class="line">      guard = bpm_-&gt;<span class="built_in">FetchPageBasic</span>(root-&gt;<span class="built_in">ValueAt</span>(root-&gt;<span class="built_in">GetSize</span>()<span class="number">-1</span>));</span><br><span class="line">      root = guard.<span class="built_in">AsMut</span>&lt;InternalPage&gt;();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(root-&gt;<span class="built_in">IsLeafPage</span>())&#123;</span><br><span class="line">      <span class="keyword">auto</span> leaf = guard.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">      <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;leaf-&gt;<span class="built_in">GetSize</span>();i++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">comparator_</span>(key,leaf-&gt;<span class="built_in">KeyAt</span>(i)) == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">// if(key == leaf-&gt;KeyAt(i))&#123;</span></span><br><span class="line">          result-&gt;<span class="built_in">push_back</span>(<span class="built_in">static_cast</span>&lt;ValueType&gt;(leaf-&gt;<span class="built_in">ValueAt</span>(i)));</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<p>进度：编译成功，测试寄</p>
-<p>下一步目标：</p>
+<h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><p>由于各种原因，lab2的战线还是拉得太长了。四月份完成了代码初版，中间修了几个bug勉强通过了insertion test，然后一直到十一月底的现在才再次捡起来。不得不说，回看当初的代码，还是能够很清晰地感受到自己这半年多来的成长的，令人感慨。</p>
+<p>我先是花了一天的时间重构了下以前写的所有代码，然后再花了两天时间修bug终于通过了insertion test和sequence scale test，并且将b+树的代码修到了我满意的地步（指不像以前那样一坨重复代码和中文注释。。。）。</p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>这里简要介绍下B+树的插入实现及我觉得实现中需要注意的几个要点吧。</p>
+<p>B+树的插入流程大概是这样的：</p>
 <ol>
-<li>添加asset语句</li>
-<li>看看测试到底哪里出错了</li>
-</ol>
-<p>记录下我的全代码和思路吧</p>
+<li><p>查找到key要插入的叶子结点（途中需要维护write_set，也即查找路径）</p>
+</li>
+<li><p>判断结点是否满</p>
 <ol>
-<li><p>page</p>
-<p>都代表着一页物理页，并且其结构为header+value。如leaf page：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230418110917819.png" alt="image-20230418110917819" loading="lazy"></p>
+<li><p>未满，直接插入即可。（我采取插入排序的方法）</p>
+</li>
+<li><p>已满，需要对结点进行分裂。</p>
+<p>推举出中间结点tmp_key，它和新结点page_id接下来将插入到父节点中。</p>
+</li>
+</ol>
+</li>
+<li><p>持续进行分裂：</p>
+<p>需要注意具体的分裂方法，我认为其中internal page size == 3的情况尤为棘手。在具体实现中，我是这样分裂的：</p>
 <ol>
-<li><p>b_plus_tree_page        值得注意的就：IncreaseSize的amount可以是负数，代表减少size</p>
-</li>
-<li><p>b_plus_tree_internal_page</p>
+<li><p>推举出将要被插入到父节点的tmp_key</p>
+<p>该推举出的key将不会出现在分裂后的新旧结点中，而是会被加入到父节点中。默认为<code>(m + 1) / 2</code>【m为max size】。</p>
+<p>但是要尤其注意size为3的case，此时tmp_key为<code>array_[2]</code>，很有可能右边结点为空。所以我们需要做点特殊处理：</p>
 <ol>
-<li><p>增加了新的接口：SetValueAt</p>
-</li>
-<li><p>具体实现</p>
-<ol>
-<li><p>简述</p>
-<p>占据一个物理页大小，代表b+树非叶结点，其key表示结点关键字，value表示指向孩子的指针。由于其结构如下：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230418110258801.png" alt="image-20230418110258801" loading="lazy"></p>
-<p>因而key的个数比value小1，在具体实现中，key0被置为无效值。</p>
-<p>故而，比如说获取index的左区间页，则为[index - 1].second；右区间页则为[index].second。</p>
-</li>
-<li><p>空结点的size被置为1     因为我认为默认有key0和value0</p>
-</li>
-<li><p>key相关函数从1开始遍历，value相关函数从0开始遍历</p>
-</li>
-<li><p>进行了边界保护</p>
+<li>当要插入到该节点的<code>insert_key &gt; array_[(m + 1) / 2]</code>时，我们推举<code>(m + 1) / 2</code>这个结点。</li>
+<li>当<code>insert_key &lt; array_[m / 2]</code>，我们转而推举<code>m / 2</code>（此时为<code>array_[1]</code>）。</li>
+<li>当<code>insert_key &lt; array_[(m + 1) / 2]</code>且<code>insert_key &gt; array_[m / 2]</code>时，我们应该对此做出特殊处理，推举insert_key。在此为了代码实现方便，<strong>我们还需要调换insert_key和tmp_key的地位</strong>。</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">special = <span class="literal">false</span>;</span><br><span class="line">middle = (m + <span class="number">1</span>) / <span class="number">2</span>;</span><br><span class="line">tmp_key = root-&gt;<span class="built_in">KeyAt</span>(middle);</span><br><span class="line">insert_small_than_tmp_key = (<span class="built_in">comparator_</span>(insert_key, tmp_key) &lt; <span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span> (insert_small_than_tmp_key) &#123;</span><br><span class="line">  middle = m / <span class="number">2</span>;</span><br><span class="line">  tmp_key = root-&gt;<span class="built_in">KeyAt</span>(middle);</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">comparator_</span>(insert_key, tmp_key) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">    special = <span class="literal">true</span>;</span><br><span class="line">    swap = insert_key;</span><br><span class="line">    insert_key = tmp_key;</span><br><span class="line">    tmp_key = swap;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>分裂旧结点</p>
+<p>被推举出的tmp_key的value及其右部元素会变成新结点，左部依然留在旧结点，tmp_key会到父节点中去。也即如下图所示：</p>
+<p>![未命名文件 (1)](./cmu15445$lab2/未命名文件 (1).png)</p>
+<p>依然是注意上面那个case3特殊情况，需要交换insert key和middle key：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!special)</span><br><span class="line">  new_page-&gt;<span class="built_in">SetValueAt</span>(<span class="number">0</span>, root-&gt;<span class="built_in">ValueAt</span>(middle));</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">  new_page-&gt;<span class="built_in">SetValueAt</span>(<span class="number">0</span>, insert_val);</span><br><span class="line">  insert_val = root-&gt;<span class="built_in">ValueAt</span>(middle);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>持续进行推举和分裂，直到父节点不用分裂</p>
+<p>此时直接将insert key和insert value插入排序到父节点即可。</p>
 </li>
 </ol>
 </li>
 </ol>
-</li>
-<li><p>b_plus_tree_leaf_page</p>
-<ol>
-<li><p>增加了新的接口：ValueAt、SetKeyAt、SetValueAt</p>
-</li>
-<li><p>具体实现</p>
-<ol>
-<li><p>简述</p>
-<p>占据一个物理页大小，代表b+树叶结点，其key表示结点关键字，value为真正存储数据的RID。其结构如下：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230418110753966.png" alt="image-20230418110753966" loading="lazy"></p>
-<p>因而key与value数量一致。</p>
-</li>
-<li><p>相比于非叶结点，header新增了线性索引。<strong>这点我还没实现</strong>。</p>
-</li>
-<li><p>key和value都可以从0开始遍历</p>
-</li>
-<li><p>进行了边界保护</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>b+树</p>
-<p>b+树本身每个结点都是物理页，并且还额外用了另一个物理页header_page来记录其root page的id。这个header_page的id被记录在成员变量中，在构造函数中被初始化为root id = INVALID，并且在context中被获取写锁。</p>
-<ol>
-<li><p>判空</p>
-<ol>
-<li>获取header_page</li>
-<li>如果header page记录的root id INVALID，说明空</li>
-<li>否则，继续获取root page</li>
-<li>如果root_page为叶结点，当其size==0时为空；否则，size&lt;=1为空。</li>
-</ol>
-</li>
-<li><p>查找</p>
-<ol>
-<li>获取root page</li>
-<li>采用迭代方式进行查找。<ol>
-<li>对于叶结点，从0开始遍历其所有key，寻找是否有相同的key。注意应该使用<code>comparator_(a,b)</code>来判等。</li>
-<li>对于非叶结点，从1开始遍历其所有key。由于结点内部递增排序，因而当找到第一个比target大的key时，说明target应该插入到该key的左侧。</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>插入</p>
-<ol>
-<li><p>获取root page，登记context上下文，并且将root push进context的访问队列<code>write_set_</code>中</p>
-</li>
-<li><p>如果root page不存在</p>
-<ol>
-<li>新申请一页，更新header_page</li>
-<li>对新root page进行init，并且插入key和value。注意此时root应为叶结点</li>
-<li>return true</li>
-</ol>
-</li>
-<li><p>顺着b+树一级一级查找，直到找到目标leaf</p>
-<p>过程同查找，区别就是找到叶结点时应该break而非做别的事</p>
-</li>
-<li><p>如果key已存在，return false</p>
-</li>
-<li><p>插入new record到目标leaf中</p>
-<ol>
-<li><p>先分裂</p>
-<ol>
-<li><p>通过<code>write_set_</code>获取当前leaf的父节点root</p>
-<ol>
-<li><code>write_set_</code>为空，说明根节点就是leaf结点。此时新建一页，置root为该页</li>
-<li>否则，置为back()，并且pop_back()。</li>
-</ol>
-</li>
-<li><p>对leaf结点进行分裂</p>
-<ol>
-<li><p>创建新节点，并且copy旧结点的后半部分</p>
-</li>
-<li><p>缩小旧结点的size</p>
-</li>
-<li><p>改变leaf指针的值</p>
-<p>因为最后要将new record插入到新分裂出的结点</p>
-</li>
-</ol>
-</li>
-<li><p>将leaf中间的那个结点值copy插入到root中【注意，不同于b树，中间结点还是会存在于两个新leaf结点中之一的，所以这里用词为copy而非move】</p>
-<p>一个插入排序，从1开始遍历。最终，root的新key连接着新value（new node的page id）</p>
-</li>
-<li><p>向上生长</p>
-<ol>
-<li><p>当路径队列为空或者当前结点root无需分裂时退出</p>
-</li>
-<li><p>获取当前结点root的parent</p>
-</li>
-<li><p>分割root结点</p>
-<p>由于这是对internal page的分割，故而与上面对leaf page的分割稍有不同：idx从1开始复制。我们将新节点的最左孩子置为了空，保留了旧结点的最右孩子。</p>
-</li>
-<li><p>将root中间的那个结点值copy插入到parent中</p>
-</li>
-<li><p>移动root指针：root=parent</p>
-</li>
-</ol>
-</li>
-<li><p>退出4循环后，如果需要生长根节点</p>
-<ol>
-<li><p>创建并初始化根节点，登记</p>
-<p>注意，设置key0对于value指向旧结点。</p>
-</li>
-<li><p>分割当前结点</p>
-</li>
-<li><p>将中间部分的那个结点插入到新根节点中</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li><p>再插入new record到分裂出的新leaf中</p>
-<p>插入排序，从0开始遍历。</p>
-</li>
-<li><p>释放ctx，return true。</p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-<p>以上就是我的全部实现。下次写代码的时候可以复习下这整个流程，我只能帮到这里了！</p>
-<p>遇到个小插曲：</p>
+<p>然后是Iterator的话，我感觉这也是设计得很不错，让我们亲手写了下c++的重载运算符，也是让我学到了很多c++知识。。。</p>
+<h3 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h3><p>感觉问题其实不多，主要还是debug有点痛苦花了很长时间（）</p>
+<h4 id="cmake报错"><a href="#cmake报错" class="headerlink" title="cmake报错"></a>cmake报错</h4><p>切换内核前后报错。</p>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/minglee/p/9016306.html">Check for working C compiler: /usr/bin/cc - broken</a></p>
-<p>感觉可能是内核切来切去的问题？总之我最后在5.11内核把build文件删了，重新执行<code>cmake -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) ..</code>就突然ok了。</p>
-<p><img src="/2023/03/13/cmu15445/image-20230505002652748.png" alt="image-20230505002652748" loading="lazy"></p>
+<p>感觉可能是内核切来切去，导致cmake cache发生了点小问题？总之我最后在5.11内核把build文件删了，重新执行<code>cmake -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) ..</code>就ok了。</p>
+<h4 id="page-guard"><a href="#page-guard" class="headerlink" title="page guard"></a>page guard</h4><h5 id="用错了"><a href="#用错了" class="headerlink" title="用错了"></a>用错了</h5><p><img src="/2023/03/13/cmu15445/image-20230505002652748.png" alt="image-20230505002652748" loading="lazy"></p>
 <p>我发现在这里创建的root最后好像会被释放掉？</p>
 <p>比如我看到新root的page为6，连接也做得好好的，最后出了函数就寄了：</p>
 <p><img src="/2023/03/13/cmu15445/image-20230505002731312.png" alt="image-20230505002731312" loading="lazy"></p>
@@ -277,14 +148,20 @@ IconifyProviders = {
 <p>原来写的</p>
 <p><img src="/2023/03/13/cmu15445/image-20230505011744924.png" alt="image-20230505011744924" loading="lazy"></p>
 <p>改了之后test2马上ok，乐</p>
-<p>完成了index_iterator的编写。接下来需要修改b+tree.cpp，新增Begin的实现。</p>
-<p>不过index iterator报错了，之后再改</p>
-<p>乐，我过了iterator的编译之后，第一件事肯定是重构这沙比石山</p>
-<p>乐，重载++运算符的话，一定要特别注意：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">INDEX_TEMPLATE_ARGUMENTS</span><br><span class="line"><span class="keyword">auto</span> INDEXITERATOR_TYPE::<span class="keyword">operator</span>++() -&gt; INDEXITERATOR_TYPE &amp; &#123; </span><br><span class="line">    <span class="keyword">auto</span> page = guard_.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    cnt_ ++;</span><br><span class="line">    <span class="comment">// printf(&quot;cnt: %d, get size: %d, next id %d\n&quot;, cnt_, page-&gt;GetSize(), page-&gt;GetNextPageId());</span></span><br><span class="line">    <span class="keyword">if</span> (cnt_ &lt; page-&gt;<span class="built_in">GetSize</span>()) &#123;</span><br><span class="line">        <span class="comment">// printf(&quot;here\n&quot;);</span></span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> res = <span class="keyword">new</span> <span class="built_in">INDEXITERATOR_TYPE</span>(bpm_, page-&gt;<span class="built_in">GetNextPageId</span>());</span><br><span class="line">    <span class="comment">// printf(&quot;res: cnt %d, pgid %d\n&quot;, res-&gt;cnt_, res-&gt;pgid_);</span></span><br><span class="line">    <span class="keyword">return</span> *res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h5><p>还弄了个commit修:</p>
+<p><img src="/2023/03/13/cmu15445/image-20231130222702358.png" alt="image-20231130222702358" loading="lazy"></p>
+<h4 id="一点c-引用震撼"><a href="#一点c-引用震撼" class="headerlink" title="一点c++引用震撼"></a>一点c++引用震撼</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> INDEXITERATOR_TYPE::<span class="keyword">operator</span>*() -&gt; <span class="type">const</span> MappingType &amp;</span><br></pre></td></tr></table></figure>
 
-<p>我原来是这么写的，但这么写实际上正确的只是返回值，目前的这个this对象是没有变的。所以我们其实应该这么写：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">INDEX_TEMPLATE_ARGUMENTS</span><br><span class="line"><span class="keyword">auto</span> INDEXITERATOR_TYPE::<span class="keyword">operator</span>++() -&gt; INDEXITERATOR_TYPE &amp; &#123; </span><br><span class="line">    <span class="keyword">auto</span> page = guard_.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    cnt_ ++;</span><br><span class="line">    <span class="keyword">if</span> (cnt_ &lt; page-&gt;<span class="built_in">GetSize</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    pgid_ = page-&gt;<span class="built_in">GetNextPageId</span>();</span><br><span class="line">    cnt_ = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数卡了我还挺久。。。里面逻辑很简单，不过难就难在怎么构造出一个<code>const MappingType &amp;</code>。</p>
+<p>如果这样：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">INDEX_TEMPLATE_ARGUMENTS</span><br><span class="line"><span class="keyword">auto</span> INDEXITERATOR_TYPE::<span class="keyword">operator</span>*() -&gt; <span class="type">const</span> MappingType &amp; &#123; </span><br><span class="line">    <span class="keyword">auto</span> page = guard_.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="keyword">return</span> std::<span class="built_in">pair</span>&lt;KeyType, ValueType&gt;(page-&gt;<span class="built_in">KeyAt</span>(cnt_), page-&gt;<span class="built_in">ValueAt</span>(cnt_));</span><br><span class="line">    <span class="comment">// or use make_pair. the same result</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>泪目！</p>
+<p>会说你临时对象不能作为引用。如果这样：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">INDEX_TEMPLATE_ARGUMENTS</span><br><span class="line"><span class="keyword">auto</span> INDEXITERATOR_TYPE::<span class="keyword">operator</span>*() -&gt; <span class="type">const</span> MappingType &amp; &#123; </span><br><span class="line">    <span class="keyword">auto</span> page = guard_.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="keyword">auto</span> res = <span class="keyword">new</span> <span class="built_in">MappingType</span>(std::<span class="built_in">pair</span>&lt;KeyType, ValueType&gt;(page-&gt;<span class="built_in">KeyAt</span>(cnt_), page-&gt;<span class="built_in">ValueAt</span>(cnt_)));</span><br><span class="line">    <span class="keyword">return</span> *res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>又会找不到机会delete导致内存泄漏。冥思苦想了半天不知道该怎么办，最后从网上看了别人怎么写的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">INDEX_TEMPLATE_ARGUMENTS</span><br><span class="line"><span class="keyword">auto</span> INDEXITERATOR_TYPE::<span class="keyword">operator</span>*() -&gt; <span class="type">const</span> MappingType &amp; &#123; </span><br><span class="line">    <span class="keyword">auto</span> page = guard_.<span class="built_in">As</span>&lt;LeafPage&gt;();</span><br><span class="line">    <span class="keyword">return</span> page-&gt;<span class="built_in">PairAt</span>(cnt_);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">INDEX_TEMPLATE_ARGUMENTS</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">B_PLUS_TREE_LEAF_PAGE_TYPE::PairAt</span><span class="params">(<span class="type">int</span> index)</span> <span class="type">const</span> -&gt; <span class="type">const</span> MappingType &amp; </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> array_[index];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我服了。</p>
+<p>不过可能有更好的解决方法？可惜我c++水平不大够，所以暂时想不出来了。</p>
 </div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab2/" title="Project2   B+Tree">https://xiunianjun.github.io/2023/03/13/cmu15445$lab2/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/" rel="prev" title="对GRUB和initramfs的小探究"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">对GRUB和initramfs的小探究</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/03/13/cmu15445/" rel="next" title="CMU15445"><span class="post-nav-text">CMU15445</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2023 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>
