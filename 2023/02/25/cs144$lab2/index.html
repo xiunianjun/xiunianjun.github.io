@@ -1,61 +1,219 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>Lab2   TCPReceiver | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
-  [".post-card",".markdown-body img"].forEach((target)=> {
-    ScrollReveal().reveal(target);
-  })
-}
-document.addEventListener("DOMContentLoaded", initScrollReveal);
-document.addEventListener("pjax:success", initScrollReveal);
-</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
-    window.Yun = {}
-    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
-  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="Lab2   TCPReceiver前置学习Overview承上启下在前两个实验中，我们可以说只是做了点算法上的抽象工作，跟TCP协议还是没什么显著的关系的。但来到了本次实验，一切就都不一样了。  依然还是这张图。相信此时做过前两个实验之后，看到这张图就会有了不一样的发现。 我们对TCP协议的实现是由内向外的，先实现里面再实现最外层。前两节实验，我们由内而外实现了ByteStream和Stream">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Lab2   TCPReceiver">
-<meta property="og:url" content="https://xiunianjun.github.io/2023/02/25/cs144$lab2/index.html">
-<meta property="og:site_name" content="修年">
-<meta property="og:description" content="Lab2   TCPReceiver前置学习Overview承上启下在前两个实验中，我们可以说只是做了点算法上的抽象工作，跟TCP协议还是没什么显著的关系的。但来到了本次实验，一切就都不一样了。  依然还是这张图。相信此时做过前两个实验之后，看到这张图就会有了不一样的发现。 我们对TCP协议的实现是由内向外的，先实现里面再实现最外层。前两节实验，我们由内而外实现了ByteStream和Stream">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230226194708398.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230226200935395.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230226202631406.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230227135255525.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230226202631406.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230227141242426.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230227133550293.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230227231044428.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230227224055002.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230227224429692.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230227224449780.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230225232723083-1677510449924-1.png">
-<meta property="article:published_time" content="2023-02-25T14:19:00.000Z">
-<meta property="article:modified_time" content="2023-03-05T15:20:40.651Z">
-<meta property="article:author" content="修年">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/02/25/cs144/image-20230226194708398.png"><script>(function() {
-  if (CONFIG.mode !== 'auto') return
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  const setting = localStorage.getItem('darken-mode') || 'auto'
-  if (setting === 'dark' || (prefersDark && setting !== 'light'))
-    document.documentElement.classList.toggle('dark', true)
-})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
-IconifyProviders = {
-  // Empty prefix: overwrite default API provider configuration
-  '': {
-    // Use custom API first, use Iconify public API as backup
-    resources: [
-        'https://api.iconify.design',
-    ],
-    // Wait for 1 second before switching API hosts
-    rotate: 1000,
-  },
-};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">47</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Lab2-TCPReceiver"><span class="toc-number">1.</span> <span class="toc-text">Lab2   TCPReceiver</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E5%AD%A6%E4%B9%A0"><span class="toc-number">1.1.</span> <span class="toc-text">前置学习</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Overview"><span class="toc-number">1.1.1.</span> <span class="toc-text">Overview</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%BF%E4%B8%8A%E5%90%AF%E4%B8%8B"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">承上启下</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%B1%E5%A4%96%E8%80%8C%E5%86%85"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">由外而内</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#TCPConnection"><span class="toc-number">1.1.1.2.1.</span> <span class="toc-text">TCPConnection</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E8%AF%B4%E6%98%8E"><span class="toc-number">1.1.1.2.2.</span> <span class="toc-text">对象说明</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#seq"><span class="toc-number">1.1.1.2.2.1.</span> <span class="toc-text">seq</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#SYN"><span class="toc-number">1.1.1.2.2.2.</span> <span class="toc-text">SYN</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#ACK"><span class="toc-number">1.1.1.2.2.3.</span> <span class="toc-text">ACK</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#ack"><span class="toc-number">1.1.1.2.2.4.</span> <span class="toc-text">ack</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#FIN"><span class="toc-number">1.1.1.2.2.5.</span> <span class="toc-text">FIN</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8E%A5%E6%94%B6%E6%8A%A5%E6%96%87%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.1.1.2.3.</span> <span class="toc-text">接收报文类型</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#TCPReceiver%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.1.1.2.4.</span> <span class="toc-text">TCPReceiver的作用</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93TCPReceiver%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">1.1.1.3.</span> <span class="toc-text">总结TCPReceiver的作用</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#64-bit-indexes-%E2%86%90%E2%86%92-32-bit-seqnos"><span class="toc-number">1.1.2.</span> <span class="toc-text">64-bit indexes ←→ 32-bit seqnos</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">1.2.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#64-bit-indexes-%E2%86%90%E2%86%92-32-bit-seqnos-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">64-bit indexes ←→ 32-bit seqnos</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCPReceiver"><span class="toc-number">1.2.2.</span> <span class="toc-text">TCPReceiver</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BF%83%E5%BE%97"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">心得</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">思路</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="toc-number">1.2.2.2.1.</span> <span class="toc-text">基本流程</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E7%BB%86%E8%8A%82"><span class="toc-number">1.2.2.2.2.</span> <span class="toc-text">一些细节</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#SYN%E5%92%8CFIN%E5%90%84%E5%8D%A0%E4%B8%80%E4%B8%AAseqno"><span class="toc-number">1.2.2.2.2.1.</span> <span class="toc-text">SYN和FIN各占一个seqno</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BB%A5abstract-seqno%E7%9A%84%E5%BD%A2%E5%BC%8F%E4%BF%9D%E5%AD%98ackno"><span class="toc-number">1.2.2.2.2.2.</span> <span class="toc-text">以abstract seqno的形式保存ackno</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%96%91%E6%83%91"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">疑惑</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E7%89%B9%E6%AE%8A%E6%8A%A5%E6%96%87"><span class="toc-number">1.2.2.3.1.</span> <span class="toc-text">关于特殊报文</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Ewindow-size%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="toc-number">1.2.2.3.2.</span> <span class="toc-text">关于window size的定义</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">1.3.</span> <span class="toc-text">代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#64-bit-indexes-%E2%86%90%E2%86%92-32-bit-seqnos-2"><span class="toc-number">1.3.1.</span> <span class="toc-text">64-bit indexes ←→ 32-bit seqnos</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TCPReceiver-1"><span class="toc-number">1.3.2.</span> <span class="toc-text">TCPReceiver</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">头文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">具体实现</span></a></li></ol></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/02/25/cs144$lab2/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Lab2   TCPReceiver</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-02-25 22:19:00" itemprop="dateCreated datePublished" datetime="2023-02-25T22:19:00+08:00">2023-02-25</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-03-05 23:20:40" itemprop="dateModified" datetime="2023-03-05T23:20:40+08:00">2023-03-05</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Lab2-TCPReceiver"><a href="#Lab2-TCPReceiver" class="headerlink" title="Lab2   TCPReceiver"></a>Lab2   TCPReceiver</h1><h2 id="前置学习"><a href="#前置学习" class="headerlink" title="前置学习"></a>前置学习</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><h4 id="承上启下"><a href="#承上启下" class="headerlink" title="承上启下"></a>承上启下</h4><p>在前两个实验中，我们可以说只是做了点算法上的抽象工作，跟TCP协议还是没什么显著的关系的。但来到了本次实验，一切就都不一样了。</p>
-<p><img src="/2023/02/25/cs144/image-20230226194708398.png" alt="image-20230226194708398" loading="lazy"></p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>Lab2   TCPReceiver | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Lab2   TCPReceiver</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">二月 25, 2023&nbsp;&nbsp;22:19:00</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Lab2-TCPReceiver"><a href="#Lab2-TCPReceiver" class="headerlink" title="Lab2   TCPReceiver"></a>Lab2   TCPReceiver</h1><h2 id="前置学习"><a href="#前置学习" class="headerlink" title="前置学习"></a>前置学习</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><h4 id="承上启下"><a href="#承上启下" class="headerlink" title="承上启下"></a>承上启下</h4><p>在前两个实验中，我们可以说只是做了点算法上的抽象工作，跟TCP协议还是没什么显著的关系的。但来到了本次实验，一切就都不一样了。</p>
+<p><img src="/2023/02/25/cs144/image-20230226194708398.png" alt="image-20230226194708398"></p>
 <p>依然还是这张图。相信此时做过前两个实验之后，看到这张图就会有了不一样的发现。</p>
 <p>我们对TCP协议的实现是由内向外的，先实现里面再实现最外层。前两节实验，我们由内而外实现了<code>ByteStream</code>和<code>StreamReassembler</code>；在这次实验中，我们会实现更外层一点的<code>TCPReceiver</code>。</p>
 <p>根据我们前两次实验内容，我们可以知道，<code>TCPReceiver</code>的功能之一就是，将数据包<code>TCPSegment</code>拆分成一个个<code>data</code>，并且通过<code>seq</code>生成出这些<code>data</code>的<code>index</code>，然后传递给<code>StreamReassembler</code>。</p>
 <h4 id="由外而内"><a href="#由外而内" class="headerlink" title="由外而内"></a>由外而内</h4><h5 id="TCPConnection"><a href="#TCPConnection" class="headerlink" title="TCPConnection"></a>TCPConnection</h5><p>在说明<code>TCPReceiver</code>的其他功能前，不妨先从外面的<code>TCPConnection</code>说起，由外而内回忆一下整个TCP协议过程。</p>
-<p><img src="/2023/02/25/cs144/image-20230226200935395.png" alt="image-20230226200935395" loading="lazy"></p>
-<p><img src="/2023/02/25/cs144/image-20230226202631406.png" alt="image-20230226202631406" loading="lazy"></p>
+<p><img src="/2023/02/25/cs144/image-20230226200935395.png" alt="image-20230226200935395"></p>
+<p><img src="/2023/02/25/cs144/image-20230226202631406.png" alt="image-20230226202631406"></p>
 <p>这期间最关键需要理解的，是SYN FIN ACK ack seq这些东西究竟是什么东西。</p>
 <h5 id="对象说明"><a href="#对象说明" class="headerlink" title="对象说明"></a>对象说明</h5><h6 id="seq"><a href="#seq" class="headerlink" title="seq"></a>seq</h6><p>seq用来标识字节流中某个字节的序号，在TCP报文中，它表示的是该报文携带的数据的第一个字节的序号。</p>
 <p>与我们在Lab1实现的<code>StreamReassembler</code>的参数index相比，它有三方面不同：</p>
@@ -70,7 +228,7 @@ IconifyProviders = {
 </li>
 </ol>
 <h6 id="SYN"><a href="#SYN" class="headerlink" title="SYN"></a>SYN</h6><p>SYN是TCP“三握手”中服务器端接收到的来自客户端的第一个报文。它是TCP报文中的一个标识位：</p>
-<p><img src="/2023/02/25/cs144/image-20230227135255525.png" alt="image-20230227135255525" loading="lazy"></p>
+<p><img src="/2023/02/25/cs144/image-20230227135255525.png" alt="image-20230227135255525"></p>
 <p>它用以标识数据传输的开始，并且<strong>携带</strong>seq最初随机的序号ISN。</p>
 <blockquote>
 <p>除了确保收到所有字节的数据外，TCP必须确保也能收到流的开始和结束</p>
@@ -80,7 +238,7 @@ IconifyProviders = {
 <h6 id="ack"><a href="#ack" class="headerlink" title="ack"></a>ack</h6><p>ack表示当前endpoint【包括客户端和服务器端】希望接收到的下一个数据流的起始字节的seq。</p>
 <blockquote>
 <p>关于seq和ack，听起来还是有点抽象，不如以连接释放图中ack和seq的值变化为例来说明。</p>
-<p><img src="/2023/02/25/cs144/image-20230226202631406.png" alt="image-20230226202631406" loading="lazy"></p>
+<p><img src="/2023/02/25/cs144/image-20230226202631406.png" alt="image-20230226202631406"></p>
 <p>为什么一开始seq=u，ack=v，但下一个就是seq=v，ack=u+1？</p>
 <p>这是因为，ack和seq的语义对于客户端和服务器端都是不变的。ack为已经收到的数据的seq+1表示第一个应该接收的值，seq为已经发送的数据的seq+1表示已经发送的值。并且还需要意识到，图中其实有两个数据流（一个是C→S，另一个是S→C），也即有两套seq和ack。</p>
 <ul>
@@ -137,15 +295,15 @@ IconifyProviders = {
 </ol>
 <h3 id="64-bit-indexes-←→-32-bit-seqnos"><a href="#64-bit-indexes-←→-32-bit-seqnos" class="headerlink" title="64-bit indexes ←→ 32-bit seqnos"></a>64-bit indexes ←→ 32-bit seqnos</h3><p>从Overview中可以看出来，至关重要的一点就是，将环绕的32bit的seq转化为我们在<code>StreamReassembler</code>中使用的index。</p>
 <p>我们不妨再引入一个中间变量<code>abstract seqno</code>。则<code>seqno</code>、<code>abstract seqno</code>、<code>stream index</code>三者关系如下图：</p>
-<p><img src="/2023/02/25/cs144/image-20230227141242426.png" alt="image-20230227141242426" loading="lazy"></p>
+<p><img src="/2023/02/25/cs144/image-20230227141242426.png" alt="image-20230227141242426"></p>
 <p>显然从<code>seqno</code>转化为<code>abstract seqno</code>更加复杂。因而，我们要做的第一个实验部分就是实现这个转化。</p>
 <p>我们需要实现类<code>WrappingInt32</code>。它的<code>wrap</code>函数将64位的<code>abstract seqno</code>转化为32位的<code>seqno</code>，它的<code>unwrap</code>将32位的<code>seqno</code>转化为64位的<code>abstract seqno</code>。</p>
 <h2 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h2><h3 id="64-bit-indexes-←→-32-bit-seqnos-1"><a href="#64-bit-indexes-←→-32-bit-seqnos-1" class="headerlink" title="64-bit indexes ←→ 32-bit seqnos"></a>64-bit indexes ←→ 32-bit seqnos</h3><p>这个实验完美地触及到了我的雷点：对这种环绕来环绕去的东西非常头疼……因而昨天晚上做的时候晕晕乎乎的什么也思考不了，今天过来边画了下图才知道要怎么做。</p>
 <p><code>wrap</code>很简单我就不说了。对于<code>unwrap</code>，我的做法是，先让checkpoint和n-isn都处在同一个区间（红圈）内【也即都让它们对2^32取余】，再通过几个东西之间的关系来确定最终的res是否需要+-HEAD_ONE：</p>
 <p>【蓝线表示n-isn，橙线表示红圈区间的中点】</p>
-<p><img src="/2023/02/25/cs144/image-20230227133550293.png" alt="image-20230227133550293" loading="lazy"></p>
+<p><img src="/2023/02/25/cs144/image-20230227133550293.png" alt="image-20230227133550293"></p>
 <p>具体的就不多说了。直接看下面的代码，多画画图就能明白了。</p>
-<h3 id="TCPReceiver"><a href="#TCPReceiver" class="headerlink" title="TCPReceiver"></a>TCPReceiver</h3><p><img src="/2023/02/25/cs144/image-20230227231044428.png" alt="image-20230227231044428" loading="lazy"></p>
+<h3 id="TCPReceiver"><a href="#TCPReceiver" class="headerlink" title="TCPReceiver"></a>TCPReceiver</h3><p><img src="/2023/02/25/cs144/image-20230227231044428.png" alt="image-20230227231044428"></p>
 <h4 id="心得"><a href="#心得" class="headerlink" title="心得"></a>心得</h4><p>我一开始头晕晕地去写，对很多地方产生了疑问，激情地写下了一些消极的话语。刚刚出去吹了会儿风回来，bug全都改对了，于是狂喜着把消极的话语全部删掉了（）</p>
 <p>怎么说呢，我的错误发生是因为我<strong>没有意识到</strong>sponge的TCP也许算是一个“简化版”。</p>
 <p>在学习本章内容之前，我特地先去回顾了下TCP协议的全过程，并且所有的SYN，FIN等等等概念都是按照网上的概念来的。因而我在面对自己的错误时真的是一脸懵逼……好在，吹完风之后我还是及时醒悟了。</p>
@@ -165,7 +323,7 @@ IconifyProviders = {
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(header.fin)&#123;</span><br><span class="line">   	ack += <span class="number">1</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 <p>也即一发现FIN报文到了就++，是因为可能会发生这种情况：</p>
-<p><img src="/2023/02/25/cs144/image-20230227224055002.png" alt="image-20230227224055002" loading="lazy"></p>
+<p><img src="/2023/02/25/cs144/image-20230227224055002.png" alt="image-20230227224055002"></p>
 <p>也即FIN报文虽然到了，但是中间有一段数据还没到，ack应该等于中间那段数据的开头，你这时候想要跳过FIN而把ack+1那肯定是不对的。</p>
 <p>也因而，我们需要记录fin是否有过，并且仅当：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">StreamReassembler::empty</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> buffer.<span class="built_in">empty</span>()&amp;&amp;is_eof; &#125;</span><br></pre></td></tr></table></figure>
@@ -173,8 +331,8 @@ IconifyProviders = {
 <p>成立时，才能表示数据传输真正结束，让ack++。</p>
 <h6 id="以abstract-seqno的形式保存ackno"><a href="#以abstract-seqno的形式保存ackno" class="headerlink" title="以abstract seqno的形式保存ackno"></a>以abstract seqno的形式保存ackno</h6><p>说实话我一开始ackno的数据结构是WrappingInt32。为了这么搞，我还得特地维护一个checkpoint变量用来做unwrap的参数，然后ackno也不能用<code>_reassembler.get_left_bound()</code>来获取，总之就搞得非常非常麻烦。这时候我不小心【是故意的还是不小心的？】看到了<a target="_blank" rel="noopener" href="https://github.com/shootfirst/CS144/">感恩</a>的代码，对其用abstract seqno保存ackno这个想法大为赞叹，于是就果断地沿用了（）果然设计思想方面我还是有很大不足啊。</p>
 <h4 id="疑惑"><a href="#疑惑" class="headerlink" title="疑惑"></a>疑惑</h4><h5 id="关于特殊报文"><a href="#关于特殊报文" class="headerlink" title="关于特殊报文"></a>关于特殊报文</h5><p>我一开始被这个图以及百度得到的结果受影响：</p>
-<p><img src="/2023/02/25/cs144/image-20230227224429692.png" alt="image-20230227224429692" loading="lazy"></p>
-<p><img src="/2023/02/25/cs144/image-20230227224449780.png" alt="image-20230227224449780" loading="lazy"></p>
+<p><img src="/2023/02/25/cs144/image-20230227224429692.png" alt="image-20230227224429692"></p>
+<p><img src="/2023/02/25/cs144/image-20230227224449780.png" alt="image-20230227224449780"></p>
 <p>认为SYN报文不能携带数据【同理FIN也是】，因而在最初实现的时候看到test case人都麻透了开始怀疑人生……</p>
 <p>不过这也怪我没有意识到实验和业界可能是不一样的，但指导书也没说SYN和FIN到底会不会携带数据……emm，我感觉这一点做得不够详细，也许可以改进一下。</p>
 <h5 id="关于window-size的定义"><a href="#关于window-size的定义" class="headerlink" title="关于window size的定义"></a>关于window size的定义</h5><p>我现在还是搞不懂这东西究竟是什么玩意……</p>
@@ -186,7 +344,7 @@ IconifyProviders = {
 <p>所谓的“first <strong>unassembled</strong>”正是ackno。而，我正是理解错了所谓“first <strong>unacceptable</strong>” 的意思，才导致我想了好久好久都没想出来，最后看了答案被薄纱到现在。</p>
 <p>看到这个“first <strong>unacceptable</strong>” ，我的第一反应就是，维护一个变量right_bound，当packet过来的时候，如果packet的index范围(seqno + data.length())比right_bound大就更新。我认为这才叫做“first <strong>unacceptable</strong>”。但其实！我会这么想是因为我英语不好……</p>
 <p>“first <strong>unacceptable</strong>” ，unacceptable，意为<strong>无法接受的</strong>，也就是说，它跟容量有关。第一个无法接受的，就是第一个超出容量的。而结合我们上面的那张图：</p>
-<p><img src="/2023/02/25/cs144/image-20230225232723083-1677510449924-1.png" alt="image-20230225232723083" loading="lazy"></p>
+<p><img src="/2023/02/25/cs144/image-20230225232723083-1677510449924-1.png" alt="image-20230225232723083"></p>
 <p>可以看出，事实上window size就是黑框部分，也即紫框部分减去绿色部分，也即<code>ByteStream</code>的<code>remaining_capacity()</code>……</p>
 <p>而我以为它是<strong>还未收到的</strong>的意思，故而才理解成了上面那样。</p>
 <p>看来英语不好也是原罪23333</p>
@@ -195,4 +353,44 @@ IconifyProviders = {
 <h3 id="TCPReceiver-1"><a href="#TCPReceiver-1" class="headerlink" title="TCPReceiver"></a>TCPReceiver</h3><h4 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TCPReceiver</span> &#123;</span><br><span class="line">    StreamReassembler _reassembler;</span><br><span class="line"></span><br><span class="line">    <span class="type">size_t</span> _capacity;</span><br><span class="line">    <span class="type">uint64_t</span> ack = <span class="number">0</span>;</span><br><span class="line">    WrappingInt32 isn = <span class="built_in">WrappingInt32</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">bool</span> syn = <span class="literal">false</span>;</span><br><span class="line">    <span class="type">bool</span> fin = <span class="literal">false</span>;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">TCPReceiver::segment_received</span><span class="params">(<span class="type">const</span> TCPSegment &amp;seg)</span> </span>&#123;</span><br><span class="line">    TCPHeader header = seg.<span class="built_in">header</span>();</span><br><span class="line">    WrappingInt32 seqno = header.seqno;</span><br><span class="line">    string data = seg.<span class="built_in">payload</span>().<span class="built_in">copy</span>();</span><br><span class="line">    <span class="type">size_t</span> index = <span class="number">0</span>; <span class="comment">// the param of the reassembler</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// LISTENING -&gt; SYN_SENT</span></span><br><span class="line">    <span class="keyword">if</span>(!syn&amp;&amp;header.syn)&#123; <span class="comment">// is the first packet</span></span><br><span class="line">        _reassembler.<span class="built_in">set_is_eof</span>();<span class="comment">// reset the eof flag</span></span><br><span class="line">        fin = <span class="literal">false</span>;<span class="comment">// reset the fin flag</span></span><br><span class="line">        isn = header.seqno;</span><br><span class="line">        seqno = seqno + <span class="number">1</span>; <span class="comment">// plus one to skip the SYN byte</span></span><br><span class="line">        syn = <span class="literal">true</span>;<span class="comment">// mark the start of the byte stream</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// must keep after the last if branch to avoid the case &quot;flag = SF&quot;</span></span><br><span class="line">    <span class="comment">// FIN_RECEIVED</span></span><br><span class="line">    <span class="keyword">if</span>(header.fin)      fin = <span class="literal">true</span>; </span><br><span class="line">    <span class="keyword">if</span>(syn)&#123;</span><br><span class="line">        <span class="type">uint64_t</span> abs_seqno = <span class="built_in">unwrap</span>(seqno,isn,ack);</span><br><span class="line">        index = abs_seqno - <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (abs_seqno != <span class="number">0</span>)<span class="comment">// write into the assembler</span></span><br><span class="line">        	_reassembler.<span class="built_in">push_substring</span>(data,index,header.fin);</span><br><span class="line">        ack = _reassembler.<span class="built_in">get_left_bound</span>() + <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (_reassembler.<span class="built_in">stream_out</span>().<span class="built_in">input_ended</span>() &amp;&amp; fin)</span><br><span class="line">            ack += <span class="number">1</span>;<span class="comment">// plus one to skip the FIN byte</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">optional&lt;WrappingInt32&gt; <span class="title">TCPReceiver::ackno</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(syn)     <span class="keyword">return</span> <span class="built_in">wrap</span>(ack,isn);</span><br><span class="line">    <span class="keyword">else</span>        <span class="keyword">return</span> &#123;&#125;;<span class="comment">// empty</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">size_t</span> <span class="title">TCPReceiver::window_size</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">stream_out</span>().<span class="built_in">remaining_capacity</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/02/25/cs144$lab2/" title="Lab2   TCPReceiver">https://xiunianjun.github.io/2023/02/25/cs144$lab2/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/03/13/cmu15445/" rel="prev" title="CMU15445"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">CMU15445</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/02/25/cs144/" rel="next" title="cs144"><span class="post-nav-text">cs144</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2024 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2023/02/25/cs144$else/">其他的对实验未涉及的思考</a>
+            
+            
+            <a class="next" rel="next" href="/2023/02/25/cs144$lab3/">Lab3   TCPSender</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

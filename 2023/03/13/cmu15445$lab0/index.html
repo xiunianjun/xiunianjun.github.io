@@ -1,67 +1,219 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>Project0   C++ Primer | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
-  [".post-card",".markdown-body img"].forEach((target)=> {
-    ScrollReveal().reveal(target);
-  })
-}
-document.addEventListener("DOMContentLoaded", initScrollReveal);
-document.addEventListener("pjax:success", initScrollReveal);
-</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
-    window.Yun = {}
-    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
-  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="Project0   C++ Primer相比于fall2022（Trie），spring2023（COW-Trie）的难度更大，算法更复杂【毕竟是要实现一个cow的数据结构】，我认为两个都很有意义，故而两个都做了。 其中在Trie中，由于我是第一次接触cpp，所以遇到了很多麻烦。好在经过18h+的cpp拷打后，cow-trie虽然难度大，语法也更复杂一些，但我还是很快（话虽如此也花了7、8小时2">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Project0   C++ Primer">
-<meta property="og:url" content="https://xiunianjun.github.io/2023/03/13/cmu15445$lab0/index.html">
-<meta property="og:site_name" content="修年">
-<meta property="og:description" content="Project0   C++ Primer相比于fall2022（Trie），spring2023（COW-Trie）的难度更大，算法更复杂【毕竟是要实现一个cow的数据结构】，我认为两个都很有意义，故而两个都做了。 其中在Trie中，由于我是第一次接触cpp，所以遇到了很多麻烦。好在经过18h+的cpp拷打后，cow-trie虽然难度大，语法也更复杂一些，但我还是很快（话虽如此也花了7、8小时2">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230312150245669.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230318154940622.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230318165521340.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230318173941576.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230318174102171.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230322235159843.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230323000513767.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230323000601882.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230323000658620.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230323114435061.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230323115902073.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230321185244067.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230322221526353.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230322221634506.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230322221716462.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230323142137068.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230322154915206.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230322154849449.png">
-<meta property="article:published_time" content="2023-03-13T14:19:00.000Z">
-<meta property="article:modified_time" content="2023-11-30T14:38:26.762Z">
-<meta property="article:author" content="修年">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/03/13/cmu15445/image-20230312150245669.png"><script>(function() {
-  if (CONFIG.mode !== 'auto') return
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  const setting = localStorage.getItem('darken-mode') || 'auto'
-  if (setting === 'dark' || (prefersDark && setting !== 'light'))
-    document.documentElement.classList.toggle('dark', true)
-})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
-IconifyProviders = {
-  // Empty prefix: overwrite default API provider configuration
-  '': {
-    // Use custom API first, use Iconify public API as backup
-    resources: [
-        'https://api.iconify.design',
-    ],
-    // Wait for 1 second before switching API hosts
-    rotate: 1000,
-  },
-};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">47</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Project0-C-Primer"><span class="toc-number">1.</span> <span class="toc-text">Project0   C++ Primer</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Trie"><span class="toc-number">1.1.</span> <span class="toc-text">Trie</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%83%E5%BE%97"><span class="toc-number">1.1.1.</span> <span class="toc-text">心得</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E9%9B%86%E9%94%A6"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">错误集锦</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#sb%E9%94%99%E8%AF%AF"><span class="toc-number">1.1.1.2.1.</span> <span class="toc-text">sb错误</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E4%BD%BF%E7%94%A8unique-ptr-get"><span class="toc-number">1.1.1.2.2.</span> <span class="toc-text">错误使用unique_ptr::get</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B1%E4%BA%ABunique-ptr"><span class="toc-number">1.1.1.2.3.</span> <span class="toc-text">共享unique_ptr</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83"><span class="toc-number">1.1.1.2.4.</span> <span class="toc-text">代码规范</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%87%AA%E6%B5%8B"><span class="toc-number">1.1.1.2.5.</span> <span class="toc-text">自测</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#COW-Trie"><span class="toc-number">1.2.</span> <span class="toc-text">COW-Trie</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Task1-cow-trie"><span class="toc-number">1.2.1.</span> <span class="toc-text">Task1 cow-trie</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-1"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E9%9B%86%E9%94%A6-1"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">错误集锦</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#const%E8%BD%AC%E7%A7%BB"><span class="toc-number">1.2.1.2.1.</span> <span class="toc-text">const转移</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#make-shared"><span class="toc-number">1.2.1.2.2.</span> <span class="toc-text">make_shared</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E5%A5%87%E5%A6%99%E7%9A%84%E6%8A%A5%E9%94%99"><span class="toc-number">1.2.1.2.3.</span> <span class="toc-text">一个奇妙的报错</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%98%BE%E5%BC%8F%E4%BF%9D%E5%AD%98is-value-node"><span class="toc-number">1.2.1.2.4.</span> <span class="toc-text">显式保存is_value_node_</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task2-concurrency"><span class="toc-number">1.2.2.</span> <span class="toc-text">Task2  concurrency</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-2"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E9%9B%86%E9%94%A6-2"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">错误集锦</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%88%E6%9C%AC1"><span class="toc-number">1.2.2.2.1.</span> <span class="toc-text">版本1</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%88%E6%9C%AC2"><span class="toc-number">1.2.2.2.2.</span> <span class="toc-text">版本2</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%89%88%E6%9C%AC3"><span class="toc-number">1.2.2.2.3.</span> <span class="toc-text">版本3</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E7%89%88%E6%9C%AC"><span class="toc-number">1.2.2.2.4.</span> <span class="toc-text">正确版本</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task3-debugging"><span class="toc-number">1.2.3.</span> <span class="toc-text">Task3  debugging</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-3"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">感想</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#debug%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">debug过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%8F%E9%97%AE%E9%A2%98"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">小问题</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#gdb%EF%BC%9AAttempt-to-take-address-of-value-not-located-in-memory"><span class="toc-number">1.2.3.3.1.</span> <span class="toc-text">gdb：Attempt to take address of value not located in memory.</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%AD%94%E6%A1%88%E5%AF%B9%E4%BD%86%E6%98%AF%E8%BF%87%E4%B8%8D%E4%BA%86%E8%AF%84%E6%B5%8B"><span class="toc-number">1.2.3.3.2.</span> <span class="toc-text">答案对但是过不了评测</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Task4-SQL-String-Functions"><span class="toc-number">1.2.4.</span> <span class="toc-text">Task4  SQL String Functions</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-4"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">感想</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83-1"><span class="toc-number">1.2.5.</span> <span class="toc-text">代码规范</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E9%9B%86%E9%94%A6-3"><span class="toc-number">1.2.5.1.</span> <span class="toc-text">错误集锦</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Esanitizer"><span class="toc-number">1.2.5.1.1.</span> <span class="toc-text">关于sanitizer</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab0/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Project0   C++ Primer</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-03-13 22:19:00" itemprop="dateCreated datePublished" datetime="2023-03-13T22:19:00+08:00">2023-03-13</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-11-30 22:38:26" itemprop="dateModified" datetime="2023-11-30T22:38:26+08:00">2023-11-30</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a>Project0   C++ Primer</h1><p>相比于fall2022（Trie），<u>spring2023（COW-Trie）的难度更大，算法更复杂</u>【毕竟是要实现一个cow的数据结构】，我认为两个都很有意义，故而两个都做了。</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>Project0   C++ Primer | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Project0   C++ Primer</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">三月 13, 2023&nbsp;&nbsp;22:19:00</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a>Project0   C++ Primer</h1><p>相比于fall2022（Trie），<u>spring2023（COW-Trie）的难度更大，算法更复杂</u>【毕竟是要实现一个cow的数据结构】，我认为两个都很有意义，故而两个都做了。</p>
 <p>其中在Trie中，由于我是第一次接触cpp，所以遇到了很多麻烦。好在经过18h+的cpp拷打后，cow-trie虽然难度大，语法也更复杂一些，但我还是很快（话虽如此也花了7、8小时23333）就完美pass了。不过效率可能还是不大高，毕竟我不熟悉cpp，很多地方可能都直接拷贝了emm希望后续学习可以加把劲。</p>
 <h2 id="Trie"><a href="#Trie" class="headerlink" title="Trie"></a>Trie</h2><blockquote>
 <p>In this project, you will implement a key-value store backed by a concurrent <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Trie">trie</a>. 实现并发安全的trie</p>
 <p>To simplify the explaination, we will assume tha the keys are all <u>non-empty</u> <u>variable-length</u> <strong>strings</strong> but in practice they can be any arbitrary type.  key为非空变长字符串</p>
 <p>The key-value store you will implement can store string keys mapped to values of any type. key必须是字符串类型，但value可以是任意类型</p>
 <p>The value of a key is stored in the node representing the <strong>last</strong> character of that key.</p>
-<p><img src="/2023/03/13/cmu15445/image-20230312150245669.png" alt="image-20230312150245669" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230312150245669.png" alt="image-20230312150245669"></p>
 </blockquote>
 <h3 id="心得"><a href="#心得" class="headerlink" title="心得"></a>心得</h3><h4 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h4><p>本次实验完成时间总计18h+。是的，lab0就做了这么久【难绷】</p>
 <p>其实光就实验内容来看，无非就是实现trie树，算法上没有很难，最难的应该是Remove函数的编写，因为它是个递归。</p>
@@ -70,7 +222,7 @@ IconifyProviders = {
 <p>因而，整个实验在我看来<strong>十分痛苦</strong>。coding阶段，就是 语法错误-看了半天报错信息才发现哪错了-改错误-改得不对-再改-再改-再改……这样的痛苦过程在循环往复；运行阶段，就是看着stack trace发呆、用gdb调来调去还不知道为什么错了这样的痛苦过程在循环往复。好在，我还是坚持下来了，虽然内心还是很浮躁很浮躁（</p>
 <p>不过总而言之，我认为这次实验给我收获挺大的。它帮助我熟悉了C++，但我认为更重要的，是它帮我矫正了心态。做这个实验之前，我内心是很浮躁的（那会破事太多了），而且因为它是lab0所以有点轻敌（对不起。。），因而我所采取的策略是“错误驱动”，也即哪里报错就百度下怎么改就行。这样的心态就导致我的debug过程极度痛苦，因为完全看不懂报错信息，压根不知道错在哪里，百度也百度不出来。于是我被迫修改了战略，去看了我一直不想看的书，学了我一直很害怕的cpp，用了我一直很抗拒的gdb调试，才发现其实都没有我想象的这么恐怖。这期间、这几天的种种心路历程，我认为是十分可贵的。</p>
 <h4 id="错误集锦"><a href="#错误集锦" class="headerlink" title="错误集锦"></a>错误集锦</h4><h5 id="sb错误"><a href="#sb错误" class="headerlink" title="sb错误"></a>sb错误</h5><p>我下载下来starter code的时候，发现找不到它要我们实现的<code>p0_trie.h</code>，只有这几个：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230318154940622.png" alt="image-20230318154940622" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230318154940622.png" alt="image-20230318154940622"></p>
 <p>我便觉得可能是实验代码改版了。但是我<strong>并没有多想</strong>，我觉得可能只是代码模板改版了但实验内容不变QAQ【为什么会这么觉得呢？因为我看到指导书的url为fall2022便以为这是最新版指导书，没有想到春季学期也可以开课，还有个spring2023呃呃】而且代码看起来也确实是要我们实现Trie树【虽然跟指导书说得不大一样】。故而，我就这么直接开干了。</p>
 <p>写完了Tire树的逻辑【这部分确实挺简单的】之后，我就开始了漫长的痛苦且折磨的原地兜圈之旅。由于真正的spring2023的代码模板是实现COW-Trie，故而代码模板中很多地方都使用了const关键字，包括树结点以及树的children_成员。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in class Trie</span></span><br><span class="line">  std::shared_ptr&lt;<span class="type">const</span> TrieNode&gt; root_&#123;<span class="literal">nullptr</span>&#125;;</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt; <span class="function"><span class="keyword">auto</span> <span class="title">Get</span><span class="params">(std::string_view key)</span> <span class="type">const</span> -&gt; <span class="type">const</span> T *</span>;</span><br><span class="line">  <span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt; <span class="function"><span class="keyword">auto</span> <span class="title">Put</span><span class="params">(std::string_view key, T value)</span> <span class="type">const</span> -&gt; Trie</span>;</span><br><span class="line">  <span class="function"><span class="keyword">auto</span> <span class="title">Remove</span><span class="params">(std::string_view key)</span> <span class="type">const</span> -&gt; Trie</span>;</span><br><span class="line"><span class="comment">// in class TrieNode</span></span><br><span class="line">  std::map&lt;<span class="type">char</span>, std::shared_ptr&lt;<span class="type">const</span> TrieNode&gt;&gt; children_;</span><br></pre></td></tr></table></figure>
@@ -93,20 +245,20 @@ IconifyProviders = {
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make format</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make check-lint</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make check-clang-tidy-p0</span></span><br></pre></td></tr></table></figure>
 
 <h5 id="自测"><a href="#自测" class="headerlink" title="自测"></a>自测</h5><p>我暂时没进行gradescope的自测，原因是它上面报了个跟我没啥关系的错，我不知道怎么改呃呃。</p>
-<p><img src="/2023/03/13/cmu15445/image-20230318165521340.png" alt="image-20230318165521340" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230318165521340.png" alt="image-20230318165521340"></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">In file included from /autograder/bustub/src/common/bustub_instance.cpp:17:</span><br><span class="line">/autograder/bustub/src/include/common/bustub_instance.h:30:10: fatal error: &#x27;libfort/lib/fort.hpp&#x27; file not found</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">include <span class="string">&quot;libfort/lib/fort.hpp&quot;</span></span></span><br></pre></td></tr></table></figure>
 
 <p>都指向说找不到这个fort。但我真的不知道它为啥找不到，因为我看CMakeLists.txt中已经加了<code>third_party/</code>这个include目录了，并且这个东西的路径也确实是<code>third_party/libfort/lib/for.hpp</code>。</p>
 <p>我还在<code>CMackLists.txt</code>、<code>src/CMackLists.txt</code>、<code>tools/shell/CMackLists.txt</code>里面都加了<code>include($&#123;PROJECT_SOURCE_DIR&#125;/third_party/libfort/lib/fort.hpp)</code>，但是依然报了这样的错：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230318173941576.png" alt="image-20230318173941576" loading="lazy"></p>
-<p><img src="/2023/03/13/cmu15445/image-20230318174102171.png" alt="image-20230318174102171" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230318173941576.png" alt="image-20230318173941576"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230318174102171.png" alt="image-20230318174102171"></p>
 <p>它这为啥找不到我是真的很不理解。</p>
 <p>所以真的很奇怪。暂且先放着吧，之后有精力研究下这些编译链接过程。</p>
 <h2 id="COW-Trie"><a href="#COW-Trie" class="headerlink" title="COW-Trie"></a>COW-Trie</h2><blockquote>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/613920859">CMU 15445 Project 0 (Spring 2023) 学习记录</a>  参考了task2和一个bug</p>
 </blockquote>
 <p>先放个通关截图~</p>
-<p><img src="/2023/03/13/cmu15445/image-20230322235159843.png" alt="image-20230322235159843" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230322235159843.png" alt="image-20230322235159843"></p>
 <p>总体用时（coding+debug+note）10h+</p>
 <p>本次实验是在它给的接口的基础上，实现一株并发安全的cow的trie树，还有一个小小的实现<code>upper</code>和<code>lower</code>函数的实验用来熟悉我们之后要写的db的东西。算法难度还是有一些的，我的coding和debug时间估摸着可能有46开。</p>
 <p>总体来说整个实验还是非常有价值的，相比往年难度和意义都更上了一层。感谢实验设计者让我做到设计得这么好的实验~</p>
@@ -114,11 +266,11 @@ IconifyProviders = {
 <p>In this task, you will need to modify <code>trie.h</code> and <code>trie.cpp</code> to implement a copy-on-write trie.</p>
 <p>下面举例说明</p>
 <p>Consider inserting <code>(&quot;ad&quot;, 2)</code> in the above example. We create a new <code>Node2</code> by reusing two of the child nodes from the original tree, and creating a new value node 2. (See figure below)</p>
-<p><img src="/2023/03/13/cmu15445/image-20230323000513767.png" alt="image-20230323000513767" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230323000513767.png" alt="image-20230323000513767"></p>
 <p>If we then insert <code>(&quot;b&quot;, 3)</code>, we will create a new root, a new node and reuse the previous nodes. In this way, we can get the content of the trie before and after each insertion operation. As long as we have the root object (<code>Trie</code> class), we can access the data inside the trie at that time. (See figure below)</p>
-<p><img src="/2023/03/13/cmu15445/image-20230323000601882.png" alt="image-20230323000601882" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230323000601882.png" alt="image-20230323000601882"></p>
 <p>One more example: if we then insert <code>(&quot;a&quot;, &quot;abc&quot;)</code> and remove <code>(&quot;ab&quot;, 1)</code>, we can get the below trie. Note that parent nodes can have values, and you will need to purge all unnecessary nodes after removal.</p>
-<p><img src="/2023/03/13/cmu15445/image-20230323000658620.png" alt="image-20230323000658620" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230323000658620.png" alt="image-20230323000658620"></p>
 <p>To create a new node, you should use the <code>Clone</code> function on the <code>TrieNode</code> class. To reuse an existing node in the new trie, you can copy <code>std::shared_ptr&lt;TrieNode&gt;</code>: copying a shared pointer doesn’t copy the underlying data.</p>
 <p>You <strong>should not</strong> manually allocate memory by using <code>new</code> and <code>delete</code> in this project. <code>std::shared_ptr</code> will deallocate the object when no one has a reference to the underlying object.</p>
 </blockquote>
@@ -162,14 +314,14 @@ IconifyProviders = {
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (i != key.<span class="built_in">length</span>() - <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="comment">// 注意此处需要保留原来的is_value_node_，之后再赋值回去！！！</span></span><br><span class="line">    <span class="type">bool</span> tmp_val = node-&gt;second-&gt;is_value_node_;</span><br><span class="line">    std::shared_ptr&lt;TrieNode&gt; tmp = std::<span class="built_in">shared_ptr</span>&lt;TrieNode&gt;(node-&gt;second-&gt;<span class="built_in">Clone</span>());</span><br><span class="line">    tmp-&gt;is_value_node_ = tmp_val;</span><br><span class="line">    </span><br><span class="line">    root-&gt;children_.<span class="built_in">erase</span>(key.<span class="built_in">at</span>(i));</span><br><span class="line">    root-&gt;children_.<span class="built_in">insert</span>(std::<span class="built_in">make_pair</span>(key.<span class="built_in">at</span>(i), tmp));</span><br><span class="line">    flag = <span class="built_in">RemoveHelper</span>(tmp, key, i + <span class="number">1</span>);</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
 
 <p>否则会：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230323114435061.png" alt="image-20230323114435061" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230323114435061.png" alt="image-20230323114435061"></p>
 <p>查看<code>trie_test.cpp</code>的代码：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">TEST</span>(TrieTest, BasicRemoveTest2) &#123;</span><br><span class="line">  <span class="keyword">auto</span> trie = <span class="built_in">Trie</span>();</span><br><span class="line">  <span class="comment">// Put something</span></span><br><span class="line">  trie = trie.<span class="built_in">Put</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;test&quot;</span>, <span class="number">2333</span>);</span><br><span class="line">  <span class="built_in">ASSERT_EQ</span>(*trie.<span class="built_in">Get</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;test&quot;</span>), <span class="number">2333</span>);</span><br><span class="line">  trie = trie.<span class="built_in">Put</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;te&quot;</span>, <span class="number">23</span>);</span><br><span class="line">  <span class="built_in">ASSERT_EQ</span>(*trie.<span class="built_in">Get</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;te&quot;</span>), <span class="number">23</span>);</span><br><span class="line">  trie = trie.<span class="built_in">Put</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;tes&quot;</span>, <span class="number">233</span>);</span><br><span class="line">  <span class="built_in">ASSERT_EQ</span>(*trie.<span class="built_in">Get</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;tes&quot;</span>), <span class="number">233</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Delete something</span></span><br><span class="line">  trie = trie.<span class="built_in">Remove</span>(<span class="string">&quot;te&quot;</span>);</span><br><span class="line">  trie = trie.<span class="built_in">Remove</span>(<span class="string">&quot;tes&quot;</span>);</span><br><span class="line">  trie = trie.<span class="built_in">Remove</span>(<span class="string">&quot;test&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">ASSERT_EQ</span>(trie.<span class="built_in">Get</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;te&quot;</span>), <span class="literal">nullptr</span>);</span><br><span class="line">  <span class="built_in">ASSERT_EQ</span>(trie.<span class="built_in">Get</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;tes&quot;</span>), <span class="literal">nullptr</span>);</span><br><span class="line">  <span class="built_in">ASSERT_EQ</span>(trie.<span class="built_in">Get</span>&lt;<span class="type">uint32_t</span>&gt;(<span class="string">&quot;test&quot;</span>), <span class="literal">nullptr</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>它是在<code>ASSERT_EQ(trie.Get&lt;uint32_t&gt;(&quot;te&quot;), nullptr);</code>这句报错的。这确实很奇怪，因为“te”已经被remove了。这是为什么呢？</p>
 <p>经过gdb调试，trie的Remove和Put功能都确实很正常，但是我发现了一个诡异的现象。</p>
 <p>在经过<code>trie = trie.Remove(&quot;te&quot;);</code>这句话后，trie的状态是t-e-(s)-(t)【括号表示为有值结点，类型为<code>TireNodeWithValue</code>】，符合预期。但是，经过紧随其后的<code>trie = trie.Remove(&quot;tes&quot;);</code>之后，trie的状态却变成了t-(e)-s-(t)。</p>
-<p><img src="/2023/03/13/cmu15445/image-20230323115902073.png" alt="image-20230323115902073" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230323115902073.png" alt="image-20230323115902073"></p>
 <p>这实在是很诡异，为什么经过了一次Remove之后，<code>trie = trie.Remove(&quot;te&quot;);</code>这句话的效果就被重置了？</p>
 <p>我想了挺久，最终认为这是构造方法的问题。</p>
 <p>再次看一遍我们的Remove的代码：</p>
@@ -199,7 +351,7 @@ IconifyProviders = {
 <h4 id="感想-2"><a href="#感想-2" class="headerlink" title="感想"></a>感想</h4><p>task2的内容是实现cow-trie并发安全版本的包装类<code>TrieStore</code>。</p>
 <p>相比于fall2022的并发内容，由于加上了cow的特性，本次实验更加复杂。我写了三版都没写对，看到别人的才豁然开朗（很遗憾没有自己再多想会儿……）接下来就从我的错误版本开始，逐步过渡到正确版本吧。</p>
 <h4 id="错误集锦-2"><a href="#错误集锦-2" class="headerlink" title="错误集锦"></a>错误集锦</h4><h5 id="版本1"><a href="#版本1" class="headerlink" title="版本1"></a>版本1</h5><p><code>Get</code>的实现很简单，按他说的一步步做就行，在这边不做赘述。<code>Put</code>和<code>Remove</code>思路差不多，在此只放<code>Put</code>的代码。</p>
-<p><img src="/2023/03/13/cmu15445/image-20230321185244067.png" alt="image-20230321185244067" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230321185244067.png" alt="image-20230321185244067"></p>
 <p>这样看起来很合理：同一时刻似乎确实只有一个writer对root_进行修改，也似乎确实同时可以有别的线程获取root_lock_对其进行读取。但其实，前者是错误的。</p>
 <p>假如说进程A和进程B都在<code>Put</code>逻辑中。进程A执行到了<code>root_ = new_trie</code>这句话，然后进程B进入到<code>root_.Put</code>中。</p>
 <p><code>root_ = new_trie</code>使用了运算符=的默认实现，进行浅拷贝，故而会修改<code>root_-&gt;root_</code>；<code>root_.Put</code>中会对<code>root_-&gt;root_</code>进行移动。</p>
@@ -222,14 +374,14 @@ IconifyProviders = {
 <p>可以看到整个思维过程是线性的，逐步改进下来，正确答案其实很容易想到。只可惜我太浮躁了，没有静下心来好好想，在版本3之后就去看了眼别人怎么写的（罪过）没有独立思考，算是一个小遗憾。</p>
 <h3 id="Task3-debugging"><a href="#Task3-debugging" class="headerlink" title="Task3  debugging"></a>Task3  debugging</h3><h4 id="感想-3"><a href="#感想-3" class="headerlink" title="感想"></a>感想</h4><p>一个考查我们debug入门技巧的小任务，简单，但我觉得形势很新颖。</p>
 <h4 id="debug过程"><a href="#debug过程" class="headerlink" title="debug过程"></a>debug过程</h4><p>随便贴点debug过程的截图。</p>
-<p><img src="/2023/03/13/cmu15445/image-20230322221526353.png" alt="image-20230322221526353" loading="lazy"></p>
-<p><img src="/2023/03/13/cmu15445/image-20230322221634506.png" alt="image-20230322221634506" loading="lazy"></p>
-<p><img src="/2023/03/13/cmu15445/image-20230322221716462.png" alt="image-20230322221716462" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230322221526353.png" alt="image-20230322221526353"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230322221634506.png" alt="image-20230322221634506"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230322221716462.png" alt="image-20230322221716462"></p>
 <h4 id="小问题"><a href="#小问题" class="headerlink" title="小问题"></a>小问题</h4><h5 id="gdb：Attempt-to-take-address-of-value-not-located-in-memory"><a href="#gdb：Attempt-to-take-address-of-value-not-located-in-memory" class="headerlink" title="gdb：Attempt to take address of value not located in memory."></a>gdb：Attempt to take address of value not located in memory.</h5><p>任务中，需要获取root_的孙子。所以我就这么写了个gdb指令：<code>p root_-&gt;children_.find(&#39;9&#39;)-&gt;second</code>，然后就爆出了标题这个错误。</p>
 <p>百度了下看到了这个：</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/sy4331/article/details/121587271">gdb调试时好用的命令</a></p>
-<p><img src="/2023/03/13/cmu15445/image-20230323142137068.png" alt="image-20230323142137068" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230323142137068.png" alt="image-20230323142137068"></p>
 </blockquote>
 <p>也许是因为我们通过.访问了children_的成员find吧（</p>
 <p>总之，我最后是在<code>trie_debug_test</code>添加了这几行代码解决的：</p>
@@ -260,13 +412,53 @@ IconifyProviders = {
 <p>本次实验内容其实就是实现sql的转换大小写的函数。知道了要做什么之后，任务就很简单了，按着它提示一步步做就行。</p>
 <p>不过此task重点其实也是在稍微了解下我们接下来要打交道的sql框架的代码。比如说，此次我们的实现涉及到的，居然是一个差不多是工厂模式（其实更像策略模式？）的一部分：</p>
 <p>外界传入想调用的函数名，通过<code>GetFuncCallFromFactory</code>获取对应的处理对象</p>
-<p><img src="/2023/03/13/cmu15445/image-20230322154915206.png" alt="image-20230322154915206" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230322154915206.png" alt="image-20230322154915206"></p>
 <p>得到处理对象后调用其<code>Compute</code>方法就行</p>
-<p><img src="/2023/03/13/cmu15445/image-20230322154849449.png" alt="image-20230322154849449" loading="lazy"></p>
+<p><img src="/2023/03/13/cmu15445/image-20230322154849449.png" alt="image-20230322154849449"></p>
 <p>第一次如此鲜明地看到一个设计模式在cpp的应用，真是让我非常震撼。</p>
 <h3 id="代码规范-1"><a href="#代码规范-1" class="headerlink" title="代码规范"></a>代码规范</h3><p>依旧是这三件套：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">make format</span><br><span class="line">make check-lint</span><br><span class="line">make check-clang-tidy-p0</span><br></pre></td></tr></table></figure>
 
 <h4 id="错误集锦-3"><a href="#错误集锦-3" class="headerlink" title="错误集锦"></a>错误集锦</h4><h5 id="关于sanitizer"><a href="#关于sanitizer" class="headerlink" title="关于sanitizer"></a>关于sanitizer</h5><p>执行了该命令：<code>cmake -DCMAKE_BUILD_TYPE=Debug -DBUSTUB_SANITIZER= ..</code>之后，执行<code>make</code>报错<code>missing argument to &#39;-fsanitize=&#39;</code></p>
 <p>发生这个的原因是cmake的命令中将<code>BUSTUB_SANITIZER</code>设置成了空。解决方法就是将其设置为别的值就好了，具体想设置成什么值可以参见：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/578225802">关于GCC/LLVM编译器中的sanitize选项用处用法详解</a> 我这里姑且随便设置了个<code>leak</code>。</p>
-</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/03/13/cmu15445$lab0/" title="Project0   C++ Primer">https://xiunianjun.github.io/2023/03/13/cmu15445$lab0/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/" rel="prev" title="对GRUB和initramfs的小探究"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">对GRUB和initramfs的小探究</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/03/13/cmu15445/" rel="next" title="CMU15445"><span class="post-nav-text">CMU15445</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2024 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/">对GRUB和initramfs的小探究</a>
+            
+            
+            <a class="next" rel="next" href="/2023/03/13/cmu15445$lab2/">Project2   B+Tree</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

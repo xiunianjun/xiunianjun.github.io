@@ -1,71 +1,216 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>Traps and system calls | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
-  [".post-card",".markdown-body img"].forEach((target)=> {
-    ScrollReveal().reveal(target);
-  })
-}
-document.addEventListener("DOMContentLoaded", initScrollReveal);
-document.addEventListener("pjax:success", initScrollReveal);
-</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
-    window.Yun = {}
-    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
-  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="Traps and system callstraps&#x3D;系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。 对trap的处理包含四个部分：硬件处理、中断向量、trap handler、对应的处理函数 RISC-V trap machinery   在RISC-V中，异常通常是由于程序执行过程中的错误或非预期事件而引起的，包括故障（faults）、陷阱（traps）和中止（a">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Traps and system calls">
-<meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap4/index.html">
-<meta property="og:site_name" content="修年">
-<meta property="og:description" content="Traps and system callstraps&#x3D;系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。 对trap的处理包含四个部分：硬件处理、中断向量、trap handler、对应的处理函数 RISC-V trap machinery   在RISC-V中，异常通常是由于程序执行过程中的错误或非预期事件而引起的，包括故障（faults）、陷阱（traps）和中止（a">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230618162437636.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230618162500928-1687077103154-2.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/p3.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111203357767.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111224927837.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/format,png.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230111232323444.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230112012358601.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230112010749756.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20231218164244526.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113002057893.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113002434093.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113002542335.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113005100895.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230113012355740.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230116154004538.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230116165910356.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230116154004538.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20231209011856305.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20231209011932500.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20231209015238219.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230116225124363.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230117161404719.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230117213903706.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230117235028133.png">
-<meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
-<meta property="article:modified_time" content="2023-12-18T15:47:36.430Z">
-<meta property="article:author" content="修年">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230618162437636.png"><script>(function() {
-  if (CONFIG.mode !== 'auto') return
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  const setting = localStorage.getItem('darken-mode') || 'auto'
-  if (setting === 'dark' || (prefersDark && setting !== 'light'))
-    document.documentElement.classList.toggle('dark', true)
-})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
-IconifyProviders = {
-  // Empty prefix: overwrite default API provider configuration
-  '': {
-    // Use custom API first, use Iconify public API as backup
-    resources: [
-        'https://api.iconify.design',
-    ],
-    // Wait for 1 second before switching API hosts
-    rotate: 1000,
-  },
-};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">47</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Traps-and-system-calls"><span class="toc-number">1.</span> <span class="toc-text">Traps and system calls</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#RISC-V-trap-machinery"><span class="toc-number">1.1.</span> <span class="toc-text">RISC-V trap machinery</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#control-register"><span class="toc-number">1.1.1.</span> <span class="toc-text">control register</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E4%BB%B6%E5%A4%84%E7%90%86%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.1.2.</span> <span class="toc-text">硬件处理步骤</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Traps-from-user-space"><span class="toc-number">1.2.</span> <span class="toc-text">Traps from user space</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#uservec"><span class="toc-number">1.2.1.</span> <span class="toc-text">uservec</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#usertrap"><span class="toc-number">1.2.2.</span> <span class="toc-text">usertrap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E5%AF%B9%E5%BA%94%E7%9A%84%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.3.</span> <span class="toc-text">执行对应的处理函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#usertrapret"><span class="toc-number">1.2.4.</span> <span class="toc-text">usertrapret</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#userret"><span class="toc-number">1.2.5.</span> <span class="toc-text">userret</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-calling-system-calls"><span class="toc-number">1.3.</span> <span class="toc-text">Code: calling system calls</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-system-call-arguments"><span class="toc-number">1.4.</span> <span class="toc-text">Code: system call arguments</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Traps-from-kernel-space"><span class="toc-number">1.5.</span> <span class="toc-text">Traps from kernel space</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#kernelvec"><span class="toc-number">1.5.1.</span> <span class="toc-text">kernelvec</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#kerneltrap"><span class="toc-number">1.5.2.</span> <span class="toc-text">kerneltrap</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Page-fault-exceptions"><span class="toc-number">1.6.</span> <span class="toc-text">Page-fault exceptions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab%EF%BC%9ATrap"><span class="toc-number">1.7.</span> <span class="toc-text">Lab：Trap</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#RISC-V-assembly"><span class="toc-number">1.7.1.</span> <span class="toc-text">RISC-V assembly</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E5%92%8C%E7%AD%94%E6%A1%88"><span class="toc-number">1.7.1.1.</span> <span class="toc-text">题目和答案</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Backtrace"><span class="toc-number">1.7.2.</span> <span class="toc-text">Backtrace</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">1.7.2.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AD%98%E5%82%A8%E5%9C%A8s0%E4%B8%AD%E7%9A%84%E6%A0%88%E5%B8%A7%E6%8C%87%E9%92%88"><span class="toc-number">1.7.2.1.1.</span> <span class="toc-text">存储在s0中的栈帧指针</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%A0%88%E7%9A%84%E7%BB%93%E6%9E%84%E4%B8%8E%E6%A0%88%E5%B8%A7%E7%9A%84%E7%90%86%E8%A7%A3"><span class="toc-number">1.7.2.1.2.</span> <span class="toc-text">栈的结构与栈帧的理解</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E5%BD%A2%E6%88%90"><span class="toc-number">1.7.2.1.3.</span> <span class="toc-text">思路形成</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">1.7.2.2.</span> <span class="toc-text">代码</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Alarm"><span class="toc-number">1.7.3.</span> <span class="toc-text">Alarm</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-number">1.7.3.1.</span> <span class="toc-text">分析</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%9D%E8%A7%81%E6%80%9D%E8%B7%AF"><span class="toc-number">1.7.3.1.1.</span> <span class="toc-text">初见思路</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%AD%A3%E7%A1%AE%E6%80%9D%E8%B7%AF"><span class="toc-number">1.7.3.1.2.</span> <span class="toc-text">正确思路</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#part-1"><span class="toc-number">1.7.3.1.2.1.</span> <span class="toc-text">part 1</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#part-2"><span class="toc-number">1.7.3.1.2.2.</span> <span class="toc-text">part 2</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#part-3"><span class="toc-number">1.7.3.1.2.3.</span> <span class="toc-text">part 3</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#part-4"><span class="toc-number">1.7.3.1.2.4.</span> <span class="toc-text">part 4</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#part-5"><span class="toc-number">1.7.3.1.2.5.</span> <span class="toc-text">part 5</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-1"><span class="toc-number">1.7.3.1.3.</span> <span class="toc-text">感想</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab%EF%BC%9Axv6-lazy-page-allocation"><span class="toc-number">1.8.</span> <span class="toc-text">Lab：xv6 lazy page allocation</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Eliminate-allocation-from-sbrk"><span class="toc-number">1.8.1.</span> <span class="toc-text">Eliminate allocation from sbrk()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lazy-allocation"><span class="toc-number">1.8.2.</span> <span class="toc-text">Lazy allocation</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-2"><span class="toc-number">1.8.2.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">1.8.2.1.1.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E9%9A%BE%E4%BB%A5%E5%AF%9F%E8%A7%89%E7%9A%84%E9%94%99%E8%AF%AF"><span class="toc-number">1.8.2.1.2.</span> <span class="toc-text">一个难以察觉的错误</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0"><span class="toc-number">1.8.2.1.2.1.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#debug%E8%BF%87%E7%A8%8B"><span class="toc-number">1.8.2.1.2.2.</span> <span class="toc-text">debug过程</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E6%BC%8F%E6%8E%89%E6%9C%AA%E8%80%83%E8%99%91%E7%9A%84%E7%BB%86%E8%8A%82"><span class="toc-number">1.8.2.1.3.</span> <span class="toc-text">一个漏掉未考虑的细节</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lazytests-and-Usertests"><span class="toc-number">1.8.3.</span> <span class="toc-text">Lazytests and Usertests</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-3"><span class="toc-number">1.8.3.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%BB%B7%E4%B8%8D%E4%BD%8F%E7%9A%84%E9%94%99%E8%AF%AF"><span class="toc-number">1.8.3.1.1.</span> <span class="toc-text">一个绷不住的错误</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-1"><span class="toc-number">1.8.3.2.</span> <span class="toc-text">代码</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-Copy-on-Write-Fork-for-xv6"><span class="toc-number">1.9.</span> <span class="toc-text">Lab: Copy-on-Write Fork for xv6</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%84%9F%E6%83%B3-4"><span class="toc-number">1.9.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF-1"><span class="toc-number">1.9.1.1.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E6%9E%90-1"><span class="toc-number">1.9.1.2.</span> <span class="toc-text">分析</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%BB%E5%88%86%E6%9E%90"><span class="toc-number">1.9.1.2.1.</span> <span class="toc-text">总分析</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%BC%95%E7%94%A8%E6%95%B0%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90"><span class="toc-number">1.9.1.2.2.</span> <span class="toc-text">引用数实现分析</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E7%9A%84%E5%A4%A7%E5%B0%8F%E5%92%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">1.9.1.2.2.1.</span> <span class="toc-text">数组的大小和数据类型</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%A2%9E%E5%87%8F%E5%BC%95%E7%94%A8"><span class="toc-number">1.9.1.2.2.2.</span> <span class="toc-text">什么时候增减引用</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#%E5%B9%B6%E5%8F%91%E5%AE%89%E5%85%A8"><span class="toc-number">1.9.1.2.2.3.</span> <span class="toc-text">并发安全</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E9%9A%BE%E7%82%B9%E4%B8%8E%E9%94%99%E8%AF%AF"><span class="toc-number">1.9.1.3.</span> <span class="toc-text">主要难点与错误</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#scause-2"><span class="toc-number">1.9.1.3.1.</span> <span class="toc-text">scause&#x3D;2</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#kernel%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8"><span class="toc-number">1.9.1.3.2.</span> <span class="toc-text">kernel无法启动</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9C%A8%E7%BC%BA%E9%A1%B5%E4%B8%AD%E6%96%AD%E6%97%B6%E5%87%8F%E5%B0%91%E5%AF%B9%E7%89%A9%E7%90%86%E9%A1%B5%E7%9A%84%E5%BC%95%E7%94%A8%E6%95%B0"><span class="toc-number">1.9.1.3.3.</span> <span class="toc-text">在缺页中断时减少对物理页的引用数</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9C%A8%E5%86%85%E6%A0%B8%E6%80%81%E4%B8%AD%E5%BC%95%E5%8F%91%E5%B9%B6%E5%A4%84%E7%90%86%E7%BC%BA%E9%A1%B5%E4%B8%AD%E6%96%AD"><span class="toc-number">1.9.1.3.4.</span> <span class="toc-text">在内核态中引发并处理缺页中断</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BF%83%E5%BE%97"><span class="toc-number">1.9.1.4.</span> <span class="toc-text">心得</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81-2"><span class="toc-number">1.9.2.</span> <span class="toc-text">代码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89COW%E6%A0%87%E8%AE%B0"><span class="toc-number">1.9.2.1.</span> <span class="toc-text">定义COW标记</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%95%E7%94%A8%E6%95%B0%E7%BB%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.9.2.2.</span> <span class="toc-text">引用数组初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%B3%E8%AF%B7%E5%92%8C%E9%87%8A%E6%94%BE%E9%A1%B5%E6%97%B6%E5%A2%9E%E5%88%A0%E5%BC%95%E7%94%A8"><span class="toc-number">1.9.2.3.</span> <span class="toc-text">申请和释放页时增删引用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9fork%E6%97%B6%E5%AF%B9%E9%A1%B5%E8%A1%A8%E7%9A%84%E5%A4%8D%E5%88%B6%E6%93%8D%E4%BD%9C%EF%BC%8C%E5%B9%B6%E6%A0%87%E8%AE%B0%E5%BC%95%E7%94%A8%E6%95%B0%E5%A2%9E%E5%8A%A0"><span class="toc-number">1.9.2.4.</span> <span class="toc-text">修改fork时对页表的复制操作，并标记引用数增加</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E7%BC%BA%E9%A1%B5%E4%B8%AD%E6%96%AD%EF%BC%8C%E6%A0%87%E8%AE%B0%E5%BC%95%E7%94%A8%E6%95%B0%E5%87%8F%E5%B0%91"><span class="toc-number">1.9.2.5.</span> <span class="toc-text">处理缺页中断，标记引用数减少</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#uvmunmap%E6%97%B6%E5%87%8F%E5%B0%91%E5%BC%95%E7%94%A8%E6%95%B0"><span class="toc-number">1.9.2.6.</span> <span class="toc-text">uvmunmap时减少引用数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9walkaddr"><span class="toc-number">1.9.2.7.</span> <span class="toc-text">修改walkaddr</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9C%A8walkaddr%E4%B8%AD%E8%A7%A6%E5%8F%91%E7%BC%BA%E9%A1%B5%E4%B8%AD%E6%96%AD"><span class="toc-number">1.9.2.7.1.</span> <span class="toc-text">在walkaddr中触发缺页中断</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9C%A8kerneltrap%E5%86%85%E8%A1%A5%E4%B8%8A%E5%AF%B9%E7%BC%BA%E9%A1%B5%E4%B8%AD%E6%96%AD%E7%9A%84%E5%A4%84%E7%90%86"><span class="toc-number">1.9.2.7.2.</span> <span class="toc-text">在kerneltrap内补上对缺页中断的处理</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap4/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Traps and system calls</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-12-18 23:47:36" itemprop="dateModified" datetime="2023-12-18T23:47:36+08:00">2023-12-18</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Traps-and-system-calls"><a href="#Traps-and-system-calls" class="headerlink" title="Traps and system calls"></a>Traps and system calls</h1><p>traps=系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>Traps and system calls | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Traps and system calls</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">一月 10, 2023&nbsp;&nbsp;20:25:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Traps-and-system-calls"><a href="#Traps-and-system-calls" class="headerlink" title="Traps and system calls"></a>Traps and system calls</h1><p>traps=系统调用+异常+中断。本章着重讲traps概述以及traps中的系统调用。</p>
 <p>对trap的处理包含四个部分：硬件处理、中断向量、trap handler、对应的处理函数</p>
 <h2 id="RISC-V-trap-machinery"><a href="#RISC-V-trap-machinery" class="headerlink" title="RISC-V trap machinery"></a>RISC-V trap machinery</h2><blockquote>
-<p><img src="/2023/01/10/xv6/image-20230618162437636.png" alt="image-20230618162437636" loading="lazy"></p>
-<p><img src="/2023/01/10/xv6/image-20230618162500928-1687077103154-2.png" alt="image-20230618162500928" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230618162437636.png" alt="image-20230618162437636"></p>
+<p><img src="/2023/01/10/xv6/image-20230618162500928-1687077103154-2.png" alt="image-20230618162500928"></p>
 <p>在RISC-V中，异常通常是由于程序执行过程中的错误或非预期事件而引起的，包括<strong>故障（faults）、陷阱（traps）和中止（aborts）</strong>。中断（interrupts）则是由外部事件触发的，例如定时器到期、外部设备请求等。中断是异步事件，与当前正在执行的指令无关，因此会在任何时候发生。</p>
 <p>xv6是基于RISC-V架构的。因此，发生异常的时候，就会跳转到统一的kernel trap，然后再在里面通过读取scause来进行相应处理。</p>
 <p>发生中断的处理方式就和x86差不多了，都是通过中断向量实现的。</p>
@@ -111,11 +256,11 @@ IconifyProviders = {
 <p>我感觉这段大概可以这么理解：</p>
 <p>通过查看代码，可知trampoline段实际上存储的是trampoline.S中的数据，也即uservec和userret的汇编代码，也即<strong>执行切换页表我们实际上就是在执行trampoline里的代码</strong>。trampoline的存在，就可以使得每个页表的这部分都是这两个的代码，这样一来切换页表也就不影响指令流的执行。</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/p3.png" alt="p3" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/p3.png" alt="p3"></p>
 <p>stevc存储的正是trampoline段中的uservec。</p>
 <h3 id="uservec"><a href="#uservec" class="headerlink" title="uservec"></a>uservec</h3><p>sscratch里面存的是trapframe的值。</p>
 <p>trapframe存在于用户空间中，并且每个进程的trapframe所处位置固定是在trampoline下方。</p>
-<p><img src="/2023/01/10/xv6/image-20230111203357767.png" alt="image-20230111203357767" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230111203357767.png" alt="image-20230111203357767"></p>
 <p>首先将寄存器的值都存入trapframe中；然后，再从trapframe中读取内核栈指针、当前CPUid，下一步要跳转的usertrap的地址，以及内核页表。最后，uservec切换到内核页表，并且jmp到usertrap。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">#in kernel/trampoline.S</span><br><span class="line">	.section trampsec</span><br><span class="line">.globl trampoline</span><br><span class="line">trampoline:</span><br><span class="line">.align 4</span><br><span class="line">.globl uservec</span><br><span class="line">uservec:    </span><br><span class="line">	#</span><br><span class="line">        # trap.c sets stvec to point here, so</span><br><span class="line">        # traps from user space start here,</span><br><span class="line">        # in supervisor mode, but with a</span><br><span class="line">        # user page table.</span><br><span class="line">        #</span><br><span class="line">        # sscratch points to where the process&#x27;s p-&gt;trapframe is</span><br><span class="line">        # mapped into user space, at TRAPFRAME.</span><br><span class="line">        #</span><br><span class="line">        </span><br><span class="line">		# swap a0 and sscratch</span><br><span class="line">        # so that a0 is TRAPFRAME</span><br><span class="line">        csrrw a0, sscratch, a0</span><br><span class="line"></span><br><span class="line">        # save the user registers in TRAPFRAME</span><br><span class="line">        sd ra, 40(a0)</span><br><span class="line">        sd sp, 48(a0)</span><br><span class="line">        # ...</span><br><span class="line">        sd t6, 280(a0)</span><br><span class="line"></span><br><span class="line">		# save the user a0 in p-&gt;trapframe-&gt;a0</span><br><span class="line">        csrr t0, sscratch</span><br><span class="line">        sd t0, 112(a0)</span><br><span class="line"></span><br><span class="line">        # restore kernel stack pointer from p-&gt;trapframe-&gt;kernel_sp</span><br><span class="line">        # 完成了内核栈的切换</span><br><span class="line">        ld sp, 8(a0)</span><br><span class="line"></span><br><span class="line">        # make tp hold the current hartid, from p-&gt;trapframe-&gt;kernel_hartid</span><br><span class="line">        ld tp, 32(a0)</span><br><span class="line"></span><br><span class="line">        # load the address of usertrap(), p-&gt;trapframe-&gt;kernel_trap</span><br><span class="line">        ld t0, 16(a0)</span><br><span class="line"></span><br><span class="line">        # restore kernel page table from p-&gt;trapframe-&gt;kernel_satp</span><br><span class="line">        ld t1, 0(a0)</span><br><span class="line">        # 这里完成了页表的切换</span><br><span class="line">        csrw satp, t1</span><br><span class="line">        sfence.vma zero, zero</span><br><span class="line"></span><br><span class="line">        # a0 is no longer valid, since the kernel page</span><br><span class="line">        # table does not specially map p-&gt;tf.</span><br><span class="line"></span><br><span class="line">        # jump to usertrap(), which does not return</span><br><span class="line">        jr t0</span><br></pre></td></tr></table></figure>
 
@@ -165,7 +310,7 @@ IconifyProviders = {
 <li><p>被inline掉了</p>
 </li>
 <li><p>0x64A</p>
-<p><img src="/2023/01/10/xv6/image-20230111224927837.png" alt="image-20230111224927837" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230111224927837.png" alt="image-20230111224927837"></p>
 <p>auipc的作用是把立即数左移12位，低12位补0，和pc相加赋给指定寄存器。这里立即数是0，指定寄存器是ra，即ra=pc=0x30=48。jalr作用是跳转到立即数+指定寄存器处并且把ra的值置为下一条指令。因此jalr会跳转1562+48=1594=0x64A处，观察汇编代码可知确实在000000000000064a处。</p>
 </li>
 <li><p>0x38</p>
@@ -176,7 +321,7 @@ IconifyProviders = {
 
 <p>What is the output? <a target="_blank" rel="noopener" href="http://web.cs.mun.ca/~michael/c/ascii-table.html">Here’s an ASCII table</a> that maps bytes to characters.</p>
 <p>The output depends on that fact that the RISC-V is <strong>little-endian</strong>. If the RISC-V were instead big-endian what would you set <code>i</code> to in order to yield the same output? Would you need to change <code>57616</code> to a different value?</p>
-<p><img src="/2023/01/10/xv6/format,png.png" alt="format,png" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/format,png.png" alt="format,png"></p>
 </blockquote>
 </li>
 <li><p>取决于寄存器a2（第3个参数）的值。</p>
@@ -184,7 +329,7 @@ IconifyProviders = {
 </ol>
 <h3 id="Backtrace"><a href="#Backtrace" class="headerlink" title="Backtrace"></a>Backtrace</h3><blockquote>
 <p>For debugging it is often useful to have a backtrace: a list of the function calls on the stack above the point at which the error occurred.</p>
-<p><img src="/2023/01/10/xv6/image-20230111232323444.png" alt="image-20230111232323444" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230111232323444.png" alt="image-20230111232323444"></p>
 <p>The compiler puts in each stack frame a frame pointer that holds the address of the caller’s frame pointer. Your <code>backtrace</code> should use these frame pointers to walk up the stack and print the saved return address in each stack frame.</p>
 </blockquote>
 <blockquote>
@@ -207,10 +352,10 @@ IconifyProviders = {
 <h5 id="存储在s0中的栈帧指针"><a href="#存储在s0中的栈帧指针" class="headerlink" title="存储在s0中的栈帧指针"></a>存储在s0中的栈帧指针</h5><p>这个应该是risc-v的约定成俗的特性。我搜了一下risc-v的栈帧指针保存在哪个寄存器，看到了这样一篇文章：</p>
 <blockquote>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/dai_xiangjun/article/details/126541174">risc-v 栈分析</a></p>
-<p><img src="/2023/01/10/xv6/image-20230112012358601.png" alt="image-20230112012358601" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230112012358601.png" alt="image-20230112012358601"></p>
 </blockquote>
 <p>这个信息没有放在题干提示，是在考察信息检索能力吗（</p>
-<h5 id="栈的结构与栈帧的理解"><a href="#栈的结构与栈帧的理解" class="headerlink" title="栈的结构与栈帧的理解"></a>栈的结构与栈帧的理解</h5><p><img src="/2023/01/10/xv6/image-20230112010749756.png" alt="image-20230112010749756" loading="lazy"></p>
+<h5 id="栈的结构与栈帧的理解"><a href="#栈的结构与栈帧的理解" class="headerlink" title="栈的结构与栈帧的理解"></a>栈的结构与栈帧的理解</h5><p><img src="/2023/01/10/xv6/image-20230112010749756.png" alt="image-20230112010749756"></p>
 <p>这是来自hint的栈结构。整个栈存储在一页中，由高地址向低地址增长。栈帧代表了一次函数调用，其中会存储如函数名、函数参数、局部变量等等信息。有几次函数调用就有几个栈帧，栈由栈帧组成。</p>
 <p>s0中存储的栈帧指针fp指向的是栈帧的最高地址，如图fp所示。</p>
 <blockquote>
@@ -228,7 +373,7 @@ IconifyProviders = {
 <p>You should add a new <code>sigalarm(interval, handler)</code> system call. If an application calls <code>sigalarm(n, fn)</code>, then after every <code>n</code> “ticks” of CPU time that the program consumes, the kernel should cause application function <code>fn</code> to be called. When <code>fn</code> returns, the application should resume where it left off.</p>
 </blockquote>
 <p>感觉从alarm中可以窥见信号的实现思路：</p>
-<p><img src="/2023/01/10/xv6/image-20231218164244526.png" alt="image-20231218164244526" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20231218164244526.png" alt="image-20231218164244526"></p>
 <p>而alarm的机理感觉也有点类似。用户先通过sigalarm注册定时函数，内核在时钟中断的时候对该标记位进行检查，然后去do_signal回到用户态执行用户的signal handler，再通过sigreturn回到用户模式。sigalarm相当于一个信号注册函数，sigreturn也就是上图的sigreturn。</p>
 <h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><h5 id="初见思路"><a href="#初见思路" class="headerlink" title="初见思路"></a>初见思路</h5><p>思路：sigalarm需要在用户程序在用户态运行的情况下，监测到用户程序已经运行了n个时间片，然后发出中断请求。我们会新设置一个中断类型alarm。kerneltrap接收到sigalarm的中断请求，检测到中断类型为alarm，就会在处理的时候调用fn。fn调用完就自然而然利用中断恢复到原来的现场了。所以要做的可以分为两部分。但问题是，如何让sigalarm在用户程序运行的同时监测n个时间片呢？难道得fork一个新的进程吗？然后父进程返回，子进程执行类似sleep里面那样的监测，直到时间片到了，就发送一个中断请求，让父进程停止，执行完fn回来之后就exit。</p>
 <h5 id="正确思路"><a href="#正确思路" class="headerlink" title="正确思路"></a>正确思路</h5><p>可以看到，初见思路很多地方跟最后是不一样的。其中错得最离谱的，也是比较隐坑很容易因为想不明白就寄了的，是handler是个用户态的函数（。你不可能在内核态中调用fn，然后fn执行完后再自然而然地通过中断机制返回，因为你想要执行fn就必须进入用户态。这一点是需要一开始明确的。</p>
@@ -246,19 +391,19 @@ IconifyProviders = {
 <p>可知，我们可以用ticks表示当前系统滴答数。这样，我们就可以在proc域里维护一个变量lasttick，记录上一次执行handler时的滴答数。每次在时钟中断时检测，所以需要写在<code>kernel/trap.c</code>中的<code>usertrap</code>中。</p>
 <h6 id="part-4"><a href="#part-4" class="headerlink" title="part 4"></a>part 4</h6><p>然后，是怎么从usertrap出来跳到指定程序结束点。在书中，我们知道，sepc寄存器保存了中断前原程序的下一个执行点，sepc的备份存储在了proc域中的栈帧中。当中断返回时（在usertrapret中），会从栈帧中的epc字段读取sepc的备份赋值给sepc，再由sret帮助我们跳转到原程序点。因而，如果想要改变跳转点，我们只需要修改<code>p-&gt;trapframe-&gt;epc</code>就行。</p>
 <h6 id="part-5"><a href="#part-5" class="headerlink" title="part 5"></a>part 5</h6><p>最后，是如何从periodic回到原程序执行点。</p>
-<p><img src="/2023/01/10/xv6/image-20230113002057893.png" alt="image-20230113002057893" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230113002057893.png" alt="image-20230113002057893"></p>
 <p>这是每次进行时钟中断时的栈情况和执行代码链：t1-&gt;trampoline-&gt;usertrap-&gt;handler。</p>
 <p>再然后，handler调用了sigreturn，用户栈中就会产生sigreturn的栈帧：</p>
-<p><img src="/2023/01/10/xv6/image-20230113002434093.png" alt="image-20230113002434093" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230113002434093.png" alt="image-20230113002434093"></p>
 <p>此时，如果sigreturn执行完，就会在这样的情况下执行handler的ret指令：</p>
-<p><img src="/2023/01/10/xv6/image-20230113002542335.png" alt="image-20230113002542335" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230113002542335.png" alt="image-20230113002542335"></p>
 <p>ret指令会把栈帧弄走，也就是说会直接回到某个错误的地方去。这显然不大合适。所以，我们要做的，就是在sigreturn之后，<u>不执行handler的ret指令，也不执行sigreturn的ret指令，而是直接恢复到时钟中断前的上下文</u>。时钟中断前的上下文，会因在handler中调用sigreturn系统调用，而被<strong>覆盖</strong>，因而，我们就需要记录时钟中断前的上下文，也即在proc域中保存trapframe的一份拷贝savedtrap，每次时钟中断都更新一次savedtrap，然后在sigreturn调用的时候将proc原本的trapframe替换为savedtrap即可。这样一来，就完成了这道题。</p>
 <h5 id="感想-1"><a href="#感想-1" class="headerlink" title="感想"></a>感想</h5><p>这题目确实最终代码看起来完全不难，但是非常地拷打。。。。我前前后后修修补补差不多一共花了五个小时之久。</p>
 <p>计时怎么计，以及使用trapframe-&gt;epc来跳转这两点还是很容易想到的【话虽如此，其实也很曲折】。主要难点还是在怎么恢复现场。怎么说呢，我花了这么久做实验，但是实际笔记却写不出个鬼来，足以看出其复杂程度。</p>
 <p>我主要还是思维固化了点，一直在想，怎么确保它正确返回现场。我一开始以为proc域保存一个寄存器状态，且只用在一开始设置定时函数也即sigalarm的时候保存一次就行了，并且认为其是epc。然而实际操作后发现usertrap崩了，并且epc中存储的并不是程序被时钟中断的地方，而是各种神奇的地方，具体我也忘了，反正不能行。我印象最深刻的是有一次停在了usys.S中的sigreturn的最后一个ret处。我就在想，也许是栈出了问题。于是我就想着直接在sigreturn的时候把epc指向栈帧中的return address，直接回到原执行段。我百度了一下，确实有这么个寄存器ra，存储着return address。于是我就把proc域的状态换成了ra，依然仅保存一次，最后发现还是不行，程序在test0之后就异常终止了，main也回不去，十分古怪，十分匪夷所思。我实在没忍住，百度了一下大家怎么做的，发现大家压根没有我这样的二选一的烦恼，是直接保存整个栈帧。而且也不是仅保存一次，而是每次时钟中断触发都保存一次。我觉得十分奇怪震惊，但此时已是差不多晚饭时间，我就先去吃了个饭（）</p>
 <p>回来之后，我细细画了图【向正确思路part5中的那样】，发现我原来那个只保存两者之一，且都只保存一次的方式，确实完全不能行。但是，我发现两个一起保存，并且每次时钟中断保存的方法，似乎能行，而且，比保存一整个栈帧要聪明得多。于是我就去试了，发现还是不行。我再细想了一遍，发现，如果想回去原程序的现场，除了ra和epc，还有一个很重要的东西需要保存，那就是——用户栈指针sp！</p>
 <p>也就是说，<strong>只需保存ra、epc、sp，就可以保证回到正确的时钟中断前的位置</strong>：</p>
-<p><img src="/2023/01/10/xv6/image-20230113005100895.png" alt="image-20230113005100895" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230113005100895.png" alt="image-20230113005100895"></p>
 <p>此为handler中sigreturn执行完要返回时的状态。</p>
 <p>当处在handler中时，sp的值为sigreturn处的栈帧。执行系统调用时，proc域中的上下文被覆盖，也即时钟中断前的上下文被覆盖。如果此时不对栈帧中的sp进行恢复，仅恢复ra和epc，在从sigreturn返回到epc对应处也即t1，t1执行ret想回到main的时候，就会回不去，而是回到了sigreturn要回的位置，也即handler的位置，然后不知不觉就寄了。所以，就需要防止sp被覆盖。因而，再保存一个状态sp，就可以保障回到正确的地方了。测试出来，kernel确实不再会panic了。</p>
 <p>但是由于运行时很多除这三个以外的寄存器都被改过了，回是回得去，接下来干的活就不一定对了。因此为了保险以及通用性以及便利性来看，还是像别人那样直接保存栈帧比较ok。</p>
@@ -266,7 +411,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usertrap:unexpected cause scause = <span class="number">0x0c</span></span><br></pre></td></tr></table></figure>
 
 <p>我留意了一下是什么意思。网上搜索得，scause=12，说明这是一个instruction page fault，而这个缺页错误说明了什么？：</p>
-<p><img src="/2023/01/10/xv6/image-20230113012355740.png" alt="image-20230113012355740" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230113012355740.png" alt="image-20230113012355740"></p>
 <p>这样，一切都明朗了。出现了scause=0x0c的意思就是说pc里的值不恰当，也就是说上面错误的方法都会跳转到错误的地方去。</p>
 <h2 id="Lab：xv6-lazy-page-allocation"><a href="#Lab：xv6-lazy-page-allocation" class="headerlink" title="Lab：xv6 lazy page allocation"></a>Lab：xv6 lazy page allocation</h2><blockquote>
 <p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_53157173/article/details/131349366">https://blog.csdn.net/m0_53157173/article/details/131349366</a></p>
@@ -293,7 +438,7 @@ IconifyProviders = {
 <h4 id="感想-2"><a href="#感想-2" class="headerlink" title="感想"></a>感想</h4><h5 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h5><p>首先，要知道缺页中断的scause为13或15.【论我怎么知道的：被以前的实验逼出来的hhh】然后，要写在if条件的第二个分支。在该分支内，我们需要先获取出问题的地方的虚拟地址的值，然后申请新的一页，再map到当前页表中。</p>
 <h5 id="一个难以察觉的错误"><a href="#一个难以察觉的错误" class="headerlink" title="一个难以察觉的错误"></a>一个难以察觉的错误</h5><h6 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h6><p>思路是很简单的，就是有小细节需要格外注意。</p>
 <p>trap.c在<code>mappages</code>时，一定不能直接传入va，必须传入<code>PGROUNDDOWN(va)</code>。如果直接传入va，会爆出如下错误：</p>
-<p><img src="/2023/01/10/xv6/image-20230116154004538.png" alt="image-20230116154004538" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230116154004538.png" alt="image-20230116154004538"></p>
 <p>但是，查看<code>mappages</code>的代码：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">mappages</span><span class="params">(<span class="type">pagetable_t</span> pagetable, uint64 va, uint64 size, uint64 pa, <span class="type">int</span> perm)</span></span><br><span class="line">&#123;</span><br><span class="line">  uint64 a, last;</span><br><span class="line">  <span class="type">pte_t</span> *pte;</span><br><span class="line"></span><br><span class="line">  a = PGROUNDDOWN(va);</span><br><span class="line">  last = PGROUNDDOWN(va + size - <span class="number">1</span>);</span><br><span class="line">  <span class="keyword">for</span>(;;)&#123;</span><br><span class="line">    <span class="keyword">if</span>((pte = walk(pagetable, a, <span class="number">1</span>)) == <span class="number">0</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">if</span>(*pte &amp; PTE_V)</span><br><span class="line">      panic(<span class="string">&quot;remap&quot;</span>);</span><br><span class="line">    *pte = PA2PTE(pa) | perm | PTE_V;</span><br><span class="line">    <span class="keyword">if</span>(a == last)</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    a += PGSIZE;</span><br><span class="line">    pa += PGSIZE;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -309,7 +454,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;trap: %p,+PGSIZE = %p\n&quot;</span>,PGROUNDDOWN(va),PGROUNDDOWN(va)+PGSIZE);</span><br><span class="line">   <span class="keyword">if</span>(mappages(p-&gt;pagetable,va, PGSIZE, (uint64)mem, PTE_W|PTE_X|PTE_R|PTE_U) != <span class="number">0</span>)&#123;</span><br><span class="line">     kfree(mem);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 <p>图：</p>
-<p><img src="/2023/01/10/xv6/image-20230116165910356.png" alt="image-20230116165910356" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230116165910356.png" alt="image-20230116165910356"></p>
 <h6 id="debug过程"><a href="#debug过程" class="headerlink" title="debug过程"></a>debug过程</h6><p>看到<code>freewalk: leaf</code>这一错误，很容易联想到跟页表的释放有关。并且加上PGGROUNDDOWN就没问题，不加上才有问题，也很容易联想到跟mappages中多申请的那一页有关。但是具体是什么关系，这一点想要想到对我来说还是非常曲折的。</p>
 <p>我一开始，以为是因为多申请的那一页（下面简称为B页好了）很有可能是其他进程在使用的，然后其他进程在echo进程释放页表前释放了页表，从而导致B页已经free了，这样一来<code>uvmunmap</code>说不定就能监测到对应物理页已经free，然后爆出panic。我一开始认为<code>uvmunmap</code>的这句话是用来监测物理页是否free的：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>((*pte &amp; PTE_V) == <span class="number">0</span>)&#123;</span><br><span class="line">   <span class="keyword">continue</span>;</span><br><span class="line">   <span class="comment">//panic(&quot;uvmunmap: not mapped&quot;);</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
@@ -317,7 +462,7 @@ IconifyProviders = {
 <p>然后顺理成章地，这边条件==0成立，然后continue，然后直到freewalk才发现该pte未释放。</p>
 <p>但是，我仔细过脑子想了想，发现，就算物理页已经free了，但是，*pte依然存在，PTE_V也依然为1，这个条件是不成立的。也就是说，B页不会continue，而是会继续下面的正常释放的流程。也就是说，B页是可以正常释放的，我们的“B页已经free导致uvmunmap释放失败”的推论是错误的。</p>
 <p>但究竟是为什么呢？肯定跟B页有关系，但是又不是这种关系，这让我十分地苦恼且烦躁，于是我就去打了会儿游戏。边玩的时候突然注意到一件非常可疑的事情。</p>
-<p><img src="/2023/01/10/xv6/image-20230116154004538.png" alt="image-20230116154004538" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230116154004538.png" alt="image-20230116154004538"></p>
 <p>这是发生错误时退出的截图。有一个点引起了我的注意，就是echo hi并没有打印hi在console上。也就是说，这个panic是在echo执行前产生的！那么这个执行前是在哪呢？答案就是在exec中！</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in exec.c</span></span><br><span class="line">  <span class="comment">// Commit to the user image.</span></span><br><span class="line">  oldpagetable = p-&gt;pagetable;</span><br><span class="line">  p-&gt;pagetable = pagetable;</span><br><span class="line">  p-&gt;sz = sz;</span><br><span class="line">  p-&gt;trapframe-&gt;epc = elf.entry;  <span class="comment">// initial program counter = main</span></span><br><span class="line">  p-&gt;trapframe-&gt;sp = sp; <span class="comment">// initial stack pointer</span></span><br><span class="line">  <span class="comment">// 这里！！！！！</span></span><br><span class="line">  proc_freepagetable(oldpagetable, oldsz);</span><br></pre></td></tr></table></figure>
 
@@ -330,10 +475,10 @@ IconifyProviders = {
 <p>虽然这一段debug没有改变我们要证明“是B页在释放内存中出错的”的这个目的，但是确实带给了我很多这种执行时申请内存的知识，并且也让我突然想起了可以用printf debug。于是，我就去做了上面那个在trap.c中和uvmunmap中printf的调试语句，最终成功发现了结论。</p>
 <p>实在是太艰苦了（）这告诉我们以后千万千万要注意，是否需要用到PGGROUNDDOWN。</p>
 <h5 id="一个漏掉未考虑的细节"><a href="#一个漏掉未考虑的细节" class="headerlink" title="一个漏掉未考虑的细节"></a>一个漏掉未考虑的细节</h5><p>摘自<a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_53157173/article/details/131349366">https://blog.csdn.net/m0_53157173/article/details/131349366</a></p>
-<p><img src="/2023/01/10/xv6/image-20231209011856305.png" alt="image-20231209011856305" loading="lazy"></p>
-<p><img src="/2023/01/10/xv6/image-20231209011932500.png" alt="image-20231209011932500" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20231209011856305.png" alt="image-20231209011856305"></p>
+<p><img src="/2023/01/10/xv6/image-20231209011932500.png" alt="image-20231209011932500"></p>
 <p>不过我以前好像是有考虑到这个的，但是我是这么做的：</p>
-<p><img src="/2023/01/10/xv6/image-20231209015238219.png" alt="image-20231209015238219" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20231209015238219.png" alt="image-20231209015238219"></p>
 <p>也就是相当于把它在addr parse的那段代码移进了walkaddr中。但是这样是不行的，查找可知argaddr的应用范围可比walkaddr广得多……</p>
 <p>而为什么我下面的COW也是修改了walkaddr，而非修改argaddr，就可以达到同样的效果呢？这是因为cow只需对在内核中写用户页这种情况进行特殊处理，而这只有一个情况，也即只在copyout中发生。因而，我们只需修改walkaddr，就可以完全防范该情况了。</p>
 <h3 id="Lazytests-and-Usertests"><a href="#Lazytests-and-Usertests" class="headerlink" title="Lazytests and Usertests"></a>Lazytests and Usertests</h3><blockquote>
@@ -347,7 +492,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in sys_sbrk()</span></span><br><span class="line">  <span class="keyword">if</span>(n &gt;= <span class="number">0</span>)&#123;</span><br><span class="line">    uint64 tmp = n + sz;</span><br><span class="line">    <span class="keyword">if</span>(tmp &gt; MAXVA || n + sz &lt; n)       <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    myproc()-&gt;sz = tmp;</span><br><span class="line">    <span class="comment">//printf(&quot;haha sb!sz=%p,n=%p\n&quot;,myproc()-&gt;sz,n);</span></span><br><span class="line">  &#125; </span><br></pre></td></tr></table></figure>
 
 <p>然后发现了这样的输出：</p>
-<p><img src="/2023/01/10/xv6/image-20230116225124363.png" alt="image-20230116225124363" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230116225124363.png" alt="image-20230116225124363"></p>
 <p>可以看到，最后一次sz发生了数值溢出。</p>
 <p>但是，此时我并没有悔改。我反而认为，“原本代码就是这么写的”。也就是说，我认为<code>int sz</code>是它原本内核代码给的。。。。。。在这样的情况下，我选择加上这样的条件判断：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(tmp &gt; MAXVA || ((tmp &gt;&gt; <span class="number">31</span>)&amp; <span class="number">1</span>) == <span class="number">1</span>)       <span class="keyword">return</span> <span class="number">-1</span>;</span><br></pre></td></tr></table></figure>
@@ -445,7 +590,7 @@ IconifyProviders = {
 <p>这里我也没想到【悲】</p>
 </blockquote>
 <p>由于我们的pages数组会在多个文件、多个进程间使用，所以它必须在被锁保护的区域中被使用。</p>
-<h4 id="主要难点与错误"><a href="#主要难点与错误" class="headerlink" title="主要难点与错误"></a>主要难点与错误</h4><h5 id="scause-2"><a href="#scause-2" class="headerlink" title="scause=2"></a>scause=2</h5><p><img src="/2023/01/10/xv6/image-20230117161404719.png" alt="image-20230117161404719" loading="lazy"></p>
+<h4 id="主要难点与错误"><a href="#主要难点与错误" class="headerlink" title="主要难点与错误"></a>主要难点与错误</h4><h5 id="scause-2"><a href="#scause-2" class="headerlink" title="scause=2"></a>scause=2</h5><p><img src="/2023/01/10/xv6/image-20230117161404719.png" alt="image-20230117161404719"></p>
 <p>这个发生在我还没有实现第二部分的时候。搜索了一下，scause=2为<code>Illegal instruction</code>，而且sepc的这个1004的值也非常诡异。这应该是因为fork子进程释放了指令段内存，导致主进程执行错误</p>
 <h5 id="kernel无法启动"><a href="#kernel无法启动" class="headerlink" title="kernel无法启动"></a>kernel无法启动</h5><p>在kinit中</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kinit</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  initlock(&amp;kmem.lock, <span class="string">&quot;kmem&quot;</span>);</span><br><span class="line">  initlock(&amp;pages_lock,<span class="string">&quot;pages&quot;</span>);</span><br><span class="line">  <span class="built_in">memset</span>(pages, <span class="number">0</span>, (<span class="number">2</span>&lt;&lt;<span class="number">19</span>));</span><br><span class="line">  freerange(end, (<span class="type">void</span>*)PHYSTOP);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -454,7 +599,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">freerange</span><span class="params">(<span class="type">void</span> *pa_start, <span class="type">void</span> *pa_end)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *p;</span><br><span class="line">  p = (<span class="type">char</span>*)PGROUNDUP((uint64)pa_start);</span><br><span class="line">  <span class="keyword">for</span>(; p + PGSIZE &lt;= (<span class="type">char</span>*)pa_end; p += PGSIZE)&#123;</span><br><span class="line">    kfree(p);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>会对每一项进行一次kfree。因而，我们需要在kfree前先增加一次引用，要不然会寄。</p>
-<h5 id="在缺页中断时减少对物理页的引用数"><a href="#在缺页中断时减少对物理页的引用数" class="headerlink" title="在缺页中断时减少对物理页的引用数"></a>在缺页中断时减少对物理页的引用数</h5><p><img src="/2023/01/10/xv6/image-20230117213903706.png" alt="image-20230117213903706" loading="lazy"></p>
+<h5 id="在缺页中断时减少对物理页的引用数"><a href="#在缺页中断时减少对物理页的引用数" class="headerlink" title="在缺页中断时减少对物理页的引用数"></a>在缺页中断时减少对物理页的引用数</h5><p><img src="/2023/01/10/xv6/image-20230117213903706.png" alt="image-20230117213903706"></p>
 <p>注意此处不能直接让pages[pa/PGSIZE]–，一定要借助kfree。当此进程为引用pa的最后一个进程的时候，如果仅减少引用数，就会造成内存泄漏。kfree可以既减少引用数，又在适当的时候对物理页释放，可谓一举两得。kfree的这个双重作用思想也在uvmunmap中体现了。</p>
 <h5 id="在内核态中引发并处理缺页中断"><a href="#在内核态中引发并处理缺页中断" class="headerlink" title="在内核态中引发并处理缺页中断"></a>在内核态中引发并处理缺页中断</h5><blockquote>
 <p>Modify copyout() to use the same scheme as page faults when it encounters a COW page.</p>
@@ -470,7 +615,7 @@ IconifyProviders = {
 <p>但是，这样做是不行的。</p>
 <blockquote>
 <p>会在这里卡住，会无限次不断进入kerneltrap。</p>
-<p><img src="/2023/01/10/xv6/image-20230117235028133.png" alt="image-20230117235028133" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230117235028133.png" alt="image-20230117235028133"></p>
 </blockquote>
 <p>造成这个的原因，经过一番曲折的debug之后，我发现，只要像usertrap中的syscall分支一样：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(r_scause() == <span class="number">8</span>)&#123;</span><br><span class="line">    <span class="comment">// system call</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 重点是这里</span></span><br><span class="line">    <span class="comment">// sepc points to the ecall instruction,</span></span><br><span class="line">    <span class="comment">// but we want to return to the next instruction.</span></span><br><span class="line">    p-&gt;trapframe-&gt;epc += <span class="number">4</span>;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125; </span><br></pre></td></tr></table></figure>
@@ -510,4 +655,44 @@ IconifyProviders = {
 
 <h5 id="在kerneltrap内补上对缺页中断的处理"><a href="#在kerneltrap内补上对缺页中断的处理" class="headerlink" title="在kerneltrap内补上对缺页中断的处理"></a>在kerneltrap内补上对缺页中断的处理</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">kerneltrap</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  uint64 sepc = r_sepc();</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">if</span>(r_scause() == <span class="number">15</span>)&#123;</span><br><span class="line">    <span class="comment">// 只要写入引起的缺页中断</span></span><br><span class="line">    uint64 va = r_stval();</span><br><span class="line">    <span class="type">pte_t</span> *pte;</span><br><span class="line">    uint64 pa;</span><br><span class="line">    uint flags;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>((pte = walk(p-&gt;pagetable, va, <span class="number">0</span>)) == <span class="number">0</span>)</span><br><span class="line">        p-&gt;killed = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>((*pte &amp; PTE_V) == <span class="number">0</span>)</span><br><span class="line">        p-&gt;killed = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 注意，这个很重要！！！！！</span></span><br><span class="line">        sepc += <span class="number">4</span>;</span><br><span class="line">        pa = PTE2PA(*pte);</span><br><span class="line">        flags = PTE_FLAGS(*pte);</span><br><span class="line">                                 </span><br><span class="line">        <span class="type">char</span>* mem;</span><br><span class="line">        <span class="keyword">if</span>((mem = kalloc())!=<span class="number">0</span>)&#123;</span><br><span class="line">            memmove(mem, (<span class="type">char</span>*)pa, PGSIZE);</span><br><span class="line">            <span class="comment">// 设置为新的物理页地址</span></span><br><span class="line">            *pte = PA2PTE(mem);</span><br><span class="line">            kfree((<span class="type">void</span>*)pa);</span><br><span class="line">            <span class="comment">// 设置新的flag，标记为可写</span></span><br><span class="line">            flags = (flags | PTE_W | PTE_COW);</span><br><span class="line">            *pte = ((*pte) | flags);</span><br><span class="line">        &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">            p-&gt;killed = <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span>((which_dev = devintr()) == <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;scause %p\n&quot;</span>, scause);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;sepc=%p stval=%p\n&quot;</span>, r_sepc(), r_stval());</span><br><span class="line">    panic(<span class="string">&quot;kerneltrap&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap4/" title="Traps and system calls">https://xiunianjun.github.io/2023/01/10/xv6$chap4/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/02/25/cs144/" rel="prev" title="cs144"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">cs144</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/01/10/xv6/" rel="next" title="xv6"><span class="post-nav-text">xv6</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2024 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2023/01/10/xv6$chap3/">Page tables</a>
+            
+            
+            <a class="next" rel="next" href="/2023/01/10/xv6$chap1/">Operating system interface</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

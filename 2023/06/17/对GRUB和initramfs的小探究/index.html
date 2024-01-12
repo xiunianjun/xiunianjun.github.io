@@ -1,48 +1,212 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>对GRUB和initramfs的小探究 | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
-  [".post-card",".markdown-body img"].forEach((target)=> {
-    ScrollReveal().reveal(target);
-  })
-}
-document.addEventListener("DOMContentLoaded", initScrollReveal);
-document.addEventListener("pjax:success", initScrollReveal);
-</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
-    window.Yun = {}
-    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
-  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="竞赛时对操作系统启动过程产生了些疑问，于是问题导向地浅浅探究了下GRUB和initramfs相关机制，相关笔记先放在这里了。 内核启动流程在传统的BIOS系统中，计算机具体的启动流程如下：  电源启动：当计算机的电源打开时，电源供电给计算机的硬件设备。 BIOS自检：计算机的BIOS固件会自检硬件设备，包括RAM、处理器、硬盘等，以确保它们正常工作。 引导设备选择：BIOS会根据预先定义的启动顺序">
-<meta property="og:type" content="article">
-<meta property="og:title" content="对GRUB和initramfs的小探究">
-<meta property="og:url" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/index.html">
-<meta property="og:site_name" content="修年">
-<meta property="og:description" content="竞赛时对操作系统启动过程产生了些疑问，于是问题导向地浅浅探究了下GRUB和initramfs相关机制，相关笔记先放在这里了。 内核启动流程在传统的BIOS系统中，计算机具体的启动流程如下：  电源启动：当计算机的电源打开时，电源供电给计算机的硬件设备。 BIOS自检：计算机的BIOS固件会自检硬件设备，包括RAM、处理器、硬盘等，以确保它们正常工作。 引导设备选择：BIOS会根据预先定义的启动顺序">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616143835953.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151055620.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151122738.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151938951.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616153420011.png">
-<meta property="article:published_time" content="2023-06-17T08:36:11.000Z">
-<meta property="article:modified_time" content="2023-08-28T08:52:04.450Z">
-<meta property="article:author" content="修年">
-<meta property="article:tag" content="os竞赛">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616143835953.png"><script>(function() {
-  if (CONFIG.mode !== 'auto') return
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  const setting = localStorage.getItem('darken-mode') || 'auto'
-  if (setting === 'dark' || (prefersDark && setting !== 'light'))
-    document.documentElement.classList.toggle('dark', true)
-})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
-IconifyProviders = {
-  // Empty prefix: overwrite default API provider configuration
-  '': {
-    // Use custom API first, use Iconify public API as backup
-    resources: [
-        'https://api.iconify.design',
-    ],
-    // Wait for 1 second before switching API hosts
-    rotate: 1000,
-  },
-};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">47</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">1.</span> <span class="toc-text">内核启动流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-number">1.1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GRUB"><span class="toc-number">1.2.</span> <span class="toc-text">GRUB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#grub-cfg"><span class="toc-number">1.2.1.</span> <span class="toc-text">grub.cfg</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#grub-cfg%E7%9A%84%E7%94%9F%E6%88%90%E4%B8%8E%E4%BF%AE%E6%94%B9"><span class="toc-number">1.2.2.</span> <span class="toc-text">grub.cfg的生成与修改</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#etc-default-grub"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">&#x2F;etc&#x2F;default&#x2F;grub</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%A8GRUB%E7%95%8C%E9%9D%A2%E7%9B%B4%E6%8E%A5%E4%BF%AE%E6%94%B9"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">在GRUB界面直接修改</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#initramfs"><span class="toc-number">1.3.</span> <span class="toc-text">initramfs</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">对GRUB和initramfs的小探究</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-06-17 16:36:11" itemprop="dateCreated datePublished" datetime="2023-06-17T16:36:11+08:00">2023-06-17</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-08-28 16:52:04" itemprop="dateModified" datetime="2023-08-28T16:52:04+08:00">2023-08-28</time></div><div class="post-classify"><span class="post-tag"><a class="tag-item" href="/tags/os%E7%AB%9E%E8%B5%9B/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="tag-name">os竞赛</span></a></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><p>竞赛时对操作系统启动过程产生了些疑问，于是问题导向地浅浅探究了下GRUB和initramfs相关机制，相关笔记先放在这里了。</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>对GRUB和initramfs的小探究 | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">对GRUB和initramfs的小探究</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">六月 17, 2023&nbsp;&nbsp;16:36:11</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>竞赛时对操作系统启动过程产生了些疑问，于是问题导向地浅浅探究了下GRUB和initramfs相关机制，相关笔记先放在这里了。</p>
 <h1 id="内核启动流程"><a href="#内核启动流程" class="headerlink" title="内核启动流程"></a>内核启动流程</h1><p>在传统的BIOS系统中，计算机具体的启动流程如下：</p>
 <ol>
 <li>电源启动：当计算机的电源打开时，电源供电给计算机的硬件设备。</li>
@@ -87,7 +251,7 @@ IconifyProviders = {
 <li><p><code>insmod gzio </code></p>
 <p>由于加载gzio模块，提供对GZIP压缩和解压缩功能的支持。</p>
 <p>看到这里我第一反应是觉得有点割裂，为啥这看着比较无关紧要的解压缩功能要在内核启动之前就需要有呢？于是我想起来在配置内核时，有一个选项是这样的：</p>
-<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616143835953.png" alt="image-20230616143835953" loading="lazy"></p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616143835953.png" alt="image-20230616143835953"></p>
 <p>在配置选项中，我们选择了对initramfs的支持，并且勾选了<code>Support initial ramdisk/ramfs compressed using gzip </code>，也即在编译时通过gzip压缩initramfs的大小以节省空间。</p>
 <p>所以说，我们在内核启动之前，持有的initramfs处于被压缩的状态。故而，我们自然需要在内核启动之前安装gzio模块，从而支持之后对initramfs的解压缩了。</p>
 </li>
@@ -120,9 +284,9 @@ IconifyProviders = {
 </li>
 </ol>
 <p>在修改完<code>grub</code>文件之后，我们需要执行<code>sudo update-grub</code>，来重新生成<code>grub.cfg</code>文件供下次启动使用。</p>
-<h4 id="在GRUB界面直接修改"><a href="#在GRUB界面直接修改" class="headerlink" title="在GRUB界面直接修改"></a>在GRUB界面直接修改</h4><p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151055620.png" alt="image-20230616151055620" loading="lazy"></p>
+<h4 id="在GRUB界面直接修改"><a href="#在GRUB界面直接修改" class="headerlink" title="在GRUB界面直接修改"></a>在GRUB界面直接修改</h4><p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151055620.png" alt="image-20230616151055620"></p>
 <p>我们可以在GRUB界面选中所需内核，按下e键：</p>
-<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151122738.png" alt="image-20230616151122738" loading="lazy"></p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151122738.png" alt="image-20230616151122738"></p>
 <p>然后就可以对启动参数进行修改，^X退出。</p>
 <p>值得注意的是，此修改仅对本次启动有效。如果需要长期修改，建议还是通过第一种方法去修改。</p>
 <h2 id="initramfs"><a href="#initramfs" class="headerlink" title="initramfs"></a>initramfs</h2><p>GRUB程序会通过<code>initrd.img</code>启动initramfs，从而进行真正的根文件系统挂载。</p>
@@ -133,7 +297,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">├── bin -&gt; usr/bin</span><br><span class="line">├── conf</span><br><span class="line">├── etc</span><br><span class="line">├── init</span><br><span class="line">├── lib -&gt; usr/lib</span><br><span class="line">├── lib32 -&gt; usr/lib32</span><br><span class="line">├── lib64 -&gt; usr/lib64</span><br><span class="line">├── libx32 -&gt; usr/libx32</span><br><span class="line">├── run</span><br><span class="line">├── sbin -&gt; usr/sbin</span><br><span class="line">├── scripts</span><br><span class="line">├── usr</span><br><span class="line">└── var</span><br><span class="line">init</span><br></pre></td></tr></table></figure>
 
 <p>可以看到，这实际上就是一个小型的文件系统，也即initramfs。它有自己的built-in Shell（BusyBox）：</p>
-<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151938951.png" alt="image-20230616151938951" loading="lazy"></p>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616151938951.png" alt="image-20230616151938951"></p>
 <p>有一些较少的Shell命令（bin和sbin目录下），以及用来挂载真正的根文件系统的代码逻辑（存储在scripts目录下）。【我猜】在正常情况下，系统会执行scripts下的脚本代码挂载真正的文件系统。当挂载出现异常时，系统就会将控制权交给initramfs内置的Shell BusyBox，由用户自己探究出了什么问题。</p>
 <p>我们接下来可以追踪下initramfs的script目录下的文件系统挂载流程。</p>
 <p>挂载真正文件系统的主要函数为<code>local_mount_root</code>：</p>
@@ -143,5 +307,49 @@ IconifyProviders = {
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$1</span>=device ID to mount设备ID</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$2</span>=optionname (<span class="keyword">for</span> root and etc)要挂载的是什么玩意，此处应为root file system</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$3</span>=panic <span class="keyword">if</span> device is missing (<span class="literal">true</span> or <span class="literal">false</span>, default: <span class="literal">true</span>)</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Sets <span class="variable">$DEV</span> to the resolved device node <span class="variable">$DEV</span>是最终获取到的块设备</span></span><br><span class="line">local_device_setup()</span><br><span class="line">&#123;</span><br><span class="line">	local dev_id=&quot;$1&quot;</span><br><span class="line">	local name=&quot;$2&quot;</span><br><span class="line">	local may_panic=&quot;$&#123;3:-true&#125;&quot;</span><br><span class="line">	local real_dev</span><br><span class="line">	local time_elapsed</span><br><span class="line">	local count</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">获取grub.cfg的rootdelay参数的设备等待时间。如果没有该参数，默认是30秒</span></span><br><span class="line">	local slumber=30</span><br><span class="line">	if [ &quot;$&#123;ROOTDELAY:-0&#125;&quot; -gt $slumber ]; then</span><br><span class="line">		slumber=$ROOTDELAY</span><br><span class="line">	fi</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">等待设备</span></span><br><span class="line">	case &quot;$dev_id&quot; in</span><br><span class="line">	UUID=*|LABEL=*|PARTUUID=*|/dev/*)</span><br><span class="line">		FSTYPE=$( wait-for-root &quot;$dev_id&quot; &quot;$slumber&quot; )</span><br><span class="line">		;;</span><br><span class="line">	*)</span><br><span class="line">		wait_for_udev 10</span><br><span class="line">		;;</span><br><span class="line">	esac</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">等待结束了。如果条件为真，说明还是获取不到对应的设备，那就只能说明这个设备死了</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">所以我们就得把问题告诉用户，让用户自己解决，并且进入BusyBox Shell</span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">We<span class="string">&#x27;ve given up, but we&#x27;</span>ll <span class="built_in">let</span> the user fix matters <span class="keyword">if</span> they can</span></span><br><span class="line">	while ! real_dev=$(resolve_device &quot;$&#123;dev_id&#125;&quot;) ||</span><br><span class="line">	      ! get_fstype &quot;$&#123;real_dev&#125;&quot; &gt;/dev/null; do</span><br><span class="line">		if ! $may_panic; then</span><br><span class="line">			echo &quot;Gave up waiting for $&#123;name&#125;&quot;</span><br><span class="line">			return 1</span><br><span class="line">		fi</span><br><span class="line">		echo &quot;Gave up waiting for $&#123;name&#125; device.  Common problems:&quot;</span><br><span class="line">		echo &quot; - Boot args (cat /proc/cmdline)&quot;</span><br><span class="line">		echo &quot;   - Check rootdelay= (did the system wait long enough?)&quot;</span><br><span class="line">		if [ &quot;$&#123;name&#125;&quot; = root ]; then</span><br><span class="line">			echo &quot;   - Check root= (did the system wait for the right device?)&quot;</span><br><span class="line">		fi</span><br><span class="line">		echo &quot; - Missing modules (cat /proc/modules; ls /dev)&quot;</span><br><span class="line">		panic &quot;ALERT!  $&#123;dev_id&#125; does not exist.  Dropping to a shell!&quot;</span><br><span class="line">	done</span><br><span class="line"></span><br><span class="line">	DEV=&quot;$&#123;real_dev&#125;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可以看到，这里如果进入错误状态，最终就是这样的效果2333：</p>
-<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616153420011.png" alt="image-20230616153420011" loading="lazy"></p>
-</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/" title="对GRUB和initramfs的小探究">https://xiunianjun.github.io/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/06/21/%E8%AF%BE%E7%A8%8B%E5%AD%A6%E4%B9%A0/" rel="prev" title="课程学习"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">课程学习</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/03/13/cmu15445/" rel="next" title="CMU15445"><span class="post-nav-text">CMU15445</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2024 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>
+<p><img src="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/image-20230616153420011.png" alt="image-20230616153420011"></p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/os%E7%AB%9E%E8%B5%9B/"># os竞赛</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2023/06/21/%E8%AF%BE%E7%A8%8B%E5%AD%A6%E4%B9%A0/">课程学习</a>
+            
+            
+            <a class="next" rel="next" href="/2023/03/13/cmu15445$lab0/">Project0   C++ Primer</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

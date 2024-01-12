@@ -1,51 +1,212 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>哈工大操作系统实验 | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
-  [".post-card",".markdown-body img"].forEach((target)=> {
-    ScrollReveal().reveal(target);
-  })
-}
-document.addEventListener("DOMContentLoaded", initScrollReveal);
-document.addEventListener("pjax:success", initScrollReveal);
-</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
-    window.Yun = {}
-    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
-  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="实验入口主要参考文章lseek()函数:用于移动打开文件的指针linux系统调用之write源码解析（基于linux0.11）get_fs_bytes解析VIM与系统剪贴板的复制粘贴操作系统实验六 信号量的实现和应用(哈工大李治军)哈工大操作系统实验6 信号量的实现 pc.c 编译时报错 对‘sem_open‘未定义的引用Linux 文件编程 open函数哈工大-操作系统-HitOSlab-李治">
-<meta property="og:type" content="article">
-<meta property="og:title" content="哈工大操作系统实验">
-<meta property="og:url" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/index.html">
-<meta property="og:site_name" content="修年">
-<meta property="og:description" content="实验入口主要参考文章lseek()函数:用于移动打开文件的指针linux系统调用之write源码解析（基于linux0.11）get_fs_bytes解析VIM与系统剪贴板的复制粘贴操作系统实验六 信号量的实现和应用(哈工大李治军)哈工大操作系统实验6 信号量的实现 pc.c 编译时报错 对‘sem_open‘未定义的引用Linux 文件编程 open函数哈工大-操作系统-HitOSlab-李治">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/userid19614labid573time1424086247964.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/d3d839723b44d3e6a9407cbbd684d976.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928205823674.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928201814131.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928201821476.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928204140436.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20221006141358458.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20221006210732995.png">
-<meta property="article:published_time" content="2022-10-04T03:10:57.000Z">
-<meta property="article:modified_time" content="2022-10-06T03:10:57.000Z">
-<meta property="article:author" content="修年">
-<meta property="article:tag" content="labs">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/userid19614labid573time1424086247964.png"><script>(function() {
-  if (CONFIG.mode !== 'auto') return
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  const setting = localStorage.getItem('darken-mode') || 'auto'
-  if (setting === 'dark' || (prefersDark && setting !== 'light'))
-    document.documentElement.classList.toggle('dark', true)
-})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
-IconifyProviders = {
-  // Empty prefix: overwrite default API provider configuration
-  '': {
-    // Use custom API first, use Iconify public API as backup
-    resources: [
-        'https://api.iconify.design',
-    ],
-    // Wait for 1 second before switching API hosts
-    rotate: 1000,
-  },
-};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">47</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB"><span class="toc-number">1.</span> <span class="toc-text">地址映射与共享</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%85%E5%A4%87%E7%9F%A5%E8%AF%86"><span class="toc-number">1.1.</span> <span class="toc-text">必备知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B91-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="toc-number">1.1.1.</span> <span class="toc-text">要点1 共享内存</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-shmget"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">1.shmget</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-shmat"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">2.shmat</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-shmdt"><span class="toc-number">1.1.1.3.</span> <span class="toc-text">3.shmdt</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-shmctl"><span class="toc-number">1.1.1.4.</span> <span class="toc-text">4.shmctl</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C1-%E5%9C%A8Ubuntu%E4%B8%8B%E7%BC%96%E5%86%99%E7%A8%8B%E5%BA%8F%E2%80%9C%E5%9F%BA%E4%BA%8E%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E7%9A%84%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B%E2%80%9D"><span class="toc-number">1.2.</span> <span class="toc-text">实验1 在Ubuntu下编写程序“基于共享内存的生产者消费者模型”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C2-%E5%9C%A8Linux0-11%E5%AE%9E%E7%8E%B0%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="toc-number">1.3.</span> <span class="toc-text">实验2 在Linux0.11实现共享内存</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F"><span class="toc-number">2.</span> <span class="toc-text">信号量</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E4%B8%80-%E5%AE%9E%E7%8E%B0pc-c"><span class="toc-number">2.1.</span> <span class="toc-text">任务一  实现pc.c</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B91-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E7%9A%84IO%E8%AF%BB%E5%86%99"><span class="toc-number">2.1.1.</span> <span class="toc-text">要点1 系统调用的IO读写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B92-%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E8%B0%83%E7%94%A8"><span class="toc-number">2.1.2.</span> <span class="toc-text">要点2  信号量的调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B93-%E7%BC%96%E5%86%99%E7%A8%8B%E5%BA%8F"><span class="toc-number">2.1.3.</span> <span class="toc-text">要点3 编写程序</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E4%BA%8C-%E8%87%AA%E5%B7%B1%E5%AE%9E%E7%8E%B0%E4%BF%A1%E5%8F%B7%E9%87%8F"><span class="toc-number">2.2.</span> <span class="toc-text">任务二 自己实现信号量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B91-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E4%BF%AE%E6%94%B9"><span class="toc-number">2.2.1.</span> <span class="toc-text">要点1 系统调用修改</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B92-sem-c%E6%96%87%E4%BB%B6%E7%9A%84%E7%BC%96%E5%86%99"><span class="toc-number">2.2.2.</span> <span class="toc-text">要点2  sem.c文件的编写</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#proc%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-number">3.</span> <span class="toc-text">proc文件系统</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C08-proc%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.0.0.0.0.1.</span> <span class="toc-text">操作系统实验08-proc文件系统的实现</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BF%85%E5%A4%87%E7%9F%A5%E8%AF%86-1"><span class="toc-number">3.1.</span> <span class="toc-text">必备知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B91-procfs%E7%AE%80%E4%BB%8B"><span class="toc-number">3.1.1.</span> <span class="toc-text">要点1 procfs简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B92-%E5%9F%BA%E6%9C%AC%E6%80%9D%E8%B7%AF"><span class="toc-number">3.1.2.</span> <span class="toc-text">要点2 基本思路</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A5%E9%AA%A4"><span class="toc-number">3.2.</span> <span class="toc-text">步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B91-%E6%96%B0%E5%A2%9Eproc%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.2.1.</span> <span class="toc-text">要点1 新增proc文件类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B92-%E4%BF%AE%E6%94%B9mknod-%E5%87%BD%E6%95%B0%E5%92%8Cinit-%E5%87%BD%E6%95%B0"><span class="toc-number">3.2.2.</span> <span class="toc-text">要点2 修改mknod()函数和init()函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B93-%E4%BF%AE%E6%94%B9read-%EF%BC%8C%E8%AE%A9proc%E5%8F%AF%E8%AF%BB"><span class="toc-number">3.2.3.</span> <span class="toc-text">要点3 修改read()，让proc可读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A6%81%E7%82%B94-%E7%BC%96%E5%86%99pro%E6%96%87%E4%BB%B6%E7%9A%84%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0"><span class="toc-number">3.2.4.</span> <span class="toc-text">要点4 编写pro文件的处理函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%99%E9%83%A8%E5%88%86%E8%B8%A9%E8%BF%87%E7%9A%84%E5%9D%91%EF%BC%9A"><span class="toc-number">3.2.4.1.</span> <span class="toc-text">这部分踩过的坑：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">3.3.</span> <span class="toc-text">感想</span></a></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">哈工大操作系统实验</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2022-10-04 11:10:57" itemprop="dateCreated datePublished" datetime="2022-10-04T11:10:57+08:00">2022-10-04</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2022-10-06 11:10:57" itemprop="dateModified" datetime="2022-10-06T11:10:57+08:00">2022-10-06</time></div><div class="post-classify"><span class="post-tag"><a class="tag-item" href="/tags/labs/" style="--text-color:var(--hty-text-color)"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="tag-name">labs</span></a></span></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><blockquote>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>哈工大操作系统实验 | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">哈工大操作系统实验</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十月 4, 2022&nbsp;&nbsp;11:10:57</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
 <p><a target="_blank" rel="noopener" href="https://www.lanqiao.cn/courses/115">实验入口</a><br>主要参考文章<br><a target="_blank" rel="noopener" href="https://www.dotcpp.com/course/461">lseek()函数:用于移动打开文件的指针</a><br><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1425052">linux系统调用之write源码解析（基于linux0.11）</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/yuanren201/article/details/103207910">get_fs_bytes解析</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/to_free/article/details/115187981">VIM与系统剪贴板的复制粘贴</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/428283092">操作系统实验六 信号量的实现和应用(哈工大李治军)</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43987915/article/details/108949942">哈工大操作系统实验6 信号量的实现 pc.c 编译时报错 对‘sem_open‘未定义的引用</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_59804059/article/details/120634348">Linux 文件编程 open函数</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_42518941/article/details/119757885">哈工大-操作系统-HitOSlab-李治军-实验5-信号量的实现和应用</a></p>
 </blockquote>
 <h1 id="地址映射与共享"><a href="#地址映射与共享" class="headerlink" title="地址映射与共享"></a>地址映射与共享</h1><blockquote>
@@ -117,7 +278,7 @@ IconifyProviders = {
 
 <h2 id="实验2-在Linux0-11实现共享内存"><a href="#实验2-在Linux0-11实现共享内存" class="headerlink" title="实验2 在Linux0.11实现共享内存"></a>实验2 在Linux0.11实现共享内存</h2><blockquote>
 <p>进程之间可以通过页共享进行通信，被共享的页叫做共享内存，结构如下图所示：</p>
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/userid19614labid573time1424086247964.png" class loading="lazy"> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/userid19614labid573time1424086247964.png" class> 
 
 <p>本部分实验内容是在 Linux 0.11 上实现上述页面共享，并将上一部分实现的 producer.c 和 consumer.c 移植过来，验证页面共享的有效性。</p>
 </blockquote>
@@ -158,7 +319,7 @@ IconifyProviders = {
 <p>则该小段空闲数据段的虚拟地址就是我们的return值，address=return+data_base。</p>
 <p>问题就转化成了如何获取一段空闲数据段。</p>
 <p>我们由下图：</p>
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/d3d839723b44d3e6a9407cbbd684d976.png" class loading="lazy"> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/d3d839723b44d3e6a9407cbbd684d976.png" class> 
 
 <p>可知，brk指针指向堆区顶部，即空闲堆的起始位置。因而我们可以用这段空间作为我们要的空闲数据段，当前brk即为虚拟地址。</p>
 <p>我们的页有PAGE_SIZE那么大，因而自然也就要用PAGE_SIZE那么大的空闲数据段了。</p>
@@ -171,7 +332,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">char</span>* filename=<span class="string">&quot;buffer.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">sem_t</span>* empty;</span><br><span class="line"><span class="type">sem_t</span>* full;</span><br><span class="line"><span class="type">sem_t</span>* mutex;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> fd;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">Producer</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="type">char</span> s[<span class="number">5</span>]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line">	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;=<span class="number">500</span>;i++)&#123;</span><br><span class="line">		sem_wait(empty);</span><br><span class="line">		sem_wait(mutex);</span><br><span class="line">		<span class="type">int</span> tmp=lseek(fd,<span class="number">0</span>,SEEK_CUR);</span><br><span class="line">		lseek(fd,<span class="number">0</span>,SEEK_END);</span><br><span class="line">		<span class="built_in">sprintf</span>(s,<span class="string">&quot;%03d\n&quot;</span>,i);</span><br><span class="line">		write(fd,s,<span class="number">4</span>);</span><br><span class="line">		lseek(fd,tmp,SEEK_SET);</span><br><span class="line">		sem_post(mutex);</span><br><span class="line">		sem_post(full);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">Consumer</span><span class="params">()</span>&#123;</span><br><span class="line">	sem_wait(full);</span><br><span class="line">	sem_wait(mutex);</span><br><span class="line">	<span class="type">char</span> s[<span class="number">5</span>]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line">	read(fd,s,<span class="number">4</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;%d : %s&quot;</span>,getpid(),s);</span><br><span class="line">	sem_post(mutex);</span><br><span class="line">	sem_post(empty);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	sem_unlink(<span class="string">&quot;empty&quot;</span>);</span><br><span class="line">	sem_unlink(<span class="string">&quot;full&quot;</span>);</span><br><span class="line">	sem_unlink(<span class="string">&quot;mutex&quot;</span>);</span><br><span class="line">	fd=open(filename,O_RDWR|O_CREAT);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;%d\n&quot;</span>,errno);	</span><br><span class="line">	empty=sem_open(<span class="string">&quot;empty&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">10</span>);</span><br><span class="line">	full=sem_open(<span class="string">&quot;full&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">0</span>);</span><br><span class="line">	mutex=sem_open(<span class="string">&quot;mutex&quot;</span>,O_CREAT,<span class="number">0644</span>,<span class="number">1</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span>(!fork())&#123;</span><br><span class="line">		Producer();</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">		<span class="keyword">if</span>(!fork())&#123;</span><br><span class="line">			<span class="keyword">while</span>(<span class="number">1</span>)	Consumer();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	close(fd);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>运行效果：</p>
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928205823674.png" class loading="lazy"> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928205823674.png" class> 
 
 <h3 id="要点1-系统调用的IO读写"><a href="#要点1-系统调用的IO读写" class="headerlink" title="要点1 系统调用的IO读写"></a>要点1 系统调用的IO读写</h3><p>这部分耗费了我海量时间，主要原因还是因为我没有好好学就直接上手写导致很多地方都因为不清楚而寄了。。。</p>
 <p><u>先大致讲讲文件读写的原理吧。打开一个文件作为数据流，有一个文件指针，该指针指向的地方就是之后读写开始的地方，读写还有lseek都可以让指针移动。</u></p>
@@ -179,9 +340,9 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">@param 文件名 模式</span><br><span class="line"></span><br><span class="line">@<span class="keyword">return</span> 所需文件描述符</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> open(<span class="type">char</span>* filename,<span class="type">int</span> flag);</span><br></pre></td></tr></table></figure>
 
 <p>其中flag的可能取值：</p>
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928201814131.png" class loading="lazy"> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928201814131.png" class> 
 
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928201821476.png" class loading="lazy"> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928201821476.png" class> 
 
 <p>如果想要多个方式并行，则可以用|连接。【联系一下原理，这大概是用了标志位吧，每个标志只有一位是1】</p>
 <p><strong>这部分踩过的坑：</strong></p>
@@ -200,7 +361,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sys_write</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> fd,<span class="type">char</span> *buf,<span class="type">int</span> count)</span>&#123;</span><br><span class="line">	<span class="comment">//...</span></span><br><span class="line">	<span class="keyword">if</span>(!count)	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="comment">//...</span></span><br><span class="line">	<span class="keyword">while</span>(c--&gt;<span class="number">0</span>)	*(p++)=get_fs_byte(buf++);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>而get_fs_byte：</p>
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928204140436.png" class loading="lazy"> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20220928204140436.png" class> 
 
 <p>确实感觉空的话挺危险的【】</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@param 文件描述符</span><br><span class="line">@<span class="keyword">return</span> 报错信息</span><br><span class="line"><span class="type">int</span> close(fd);</span><br></pre></td></tr></table></figure>
@@ -343,7 +504,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir(<span class="string">&quot;/proc&quot;</span>,<span class="number">0755</span>);</span><br><span class="line">mknod(<span class="string">&quot;/proc/psinfo&quot;</span>,S_IFPROC|<span class="number">0400</span>,<span class="number">0</span>);</span><br><span class="line"><span class="comment">//其余文件以此类推...</span></span><br></pre></td></tr></table></figure>
 
 <p>编译运行即可看到：</p>
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20221006141358458.png" class loading="lazy"> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20221006141358458.png" class> 
 
 <blockquote>
 <p>这些信息至少说明，psinfo 被正确 <code>open()</code> 了。所以我们不需要对 <code>sys_open()</code> 动任何手脚，唯一要打补丁的，是 <code>sys_read()</code>。</p>
@@ -386,7 +547,7 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/segment.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdarg.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/sched.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> set_bit(nr,addr) (&#123;\</span></span><br><span class="line"><span class="meta">register int res ; \</span></span><br><span class="line"><span class="meta">__asm__ __volatile__(<span class="string">&quot;btsl %2,%3\n\tsetb %%al&quot;</span>: \</span></span><br><span class="line"><span class="meta"><span class="string">&quot;=a&quot;</span> (res):<span class="string">&quot;0&quot;</span> (0),<span class="string">&quot;r&quot;</span> (nr),<span class="string">&quot;m&quot;</span> (*(addr))); \</span></span><br><span class="line"><span class="meta">res;&#125;)</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span>** <span class="title">p</span>=</span>&amp;FIRST_TASK;</span><br><span class="line"><span class="type">char</span> s[<span class="number">100</span>];</span><br><span class="line"><span class="type">int</span> flag;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> <span class="title function_">psinfo_handler</span><span class="params">(<span class="type">off_t</span>* f_pos,<span class="type">char</span>* buf)</span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> <span class="title function_">hdinfo_handler</span><span class="params">(<span class="type">off_t</span>* f_pos,<span class="type">char</span>* buf)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">proc_handler</span><span class="params">(<span class="type">unsigned</span> <span class="type">short</span> dev,<span class="type">char</span>* buf,<span class="type">int</span> count,<span class="type">off_t</span>* f_pos)</span>&#123;</span><br><span class="line">    <span class="comment">//根据设备编号，把不同的内容写入到用户空间的 buf</span></span><br><span class="line">	<span class="keyword">switch</span>(dev)&#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">			<span class="keyword">return</span> psinfo_handler(f_pos,buf);</span><br><span class="line">		<span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">			<span class="keyword">return</span> hdinfo_handler(f_pos,buf);</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">	&#125;	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//在内核态和用户态间传递数据</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">put_into_buf</span><span class="params">(<span class="type">char</span>* buf,<span class="type">char</span>* s)</span>&#123;</span><br><span class="line">	<span class="type">int</span> cnt=<span class="number">0</span>;</span><br><span class="line">	<span class="keyword">while</span>(s[cnt]!=<span class="string">&#x27;\0&#x27;</span>)&#123;</span><br><span class="line">		put_fs_byte(s[cnt++],buf++);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> cnt;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">sprintf</span><span class="params">(<span class="type">char</span>* buf,<span class="type">const</span> <span class="type">char</span>* fmt,...)</span>&#123;</span><br><span class="line">	va_list args;<span class="type">int</span> i;</span><br><span class="line">	va_start(args,fmt);</span><br><span class="line">	i=<span class="built_in">vsprintf</span>(buf,fmt,args);</span><br><span class="line">	va_end(args);</span><br><span class="line">	<span class="keyword">return</span> i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">psinfo_handler</span><span class="params">(<span class="type">off_t</span>* f_pos,<span class="type">char</span>* buf)</span>&#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">    <span class="comment">//初始化字符串</span></span><br><span class="line">	<span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;<span class="number">100</span>;i++)	s[i]=<span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//如果是第一次read，需要在屏幕上打印列表头，并且重置p指针为进程队列头</span></span><br><span class="line">	<span class="keyword">if</span>((*f_pos)==<span class="number">0</span>)&#123;</span><br><span class="line">		<span class="built_in">sprintf</span>(s,<span class="string">&quot;pid\tstate\tfather\tcounter\tstart_time\n&quot;</span>);</span><br><span class="line">		p=&amp;FIRST_TASK;</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">//到达文件末尾</span></span><br><span class="line">	<span class="keyword">if</span>((*p)==<span class="literal">NULL</span>)&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//每次仅输出一行</span></span><br><span class="line">	<span class="keyword">if</span>((*f_pos)!=<span class="number">0</span>)&#123;</span><br><span class="line">		<span class="built_in">sprintf</span>(s,<span class="string">&quot;%ld\t%ld\t%ld\t%ld\t%ld\n&quot;</span>,(*p)-&gt;pid,(*p)-&gt;state,(*p)-&gt;father,(*p)-&gt;counter,(*p)-&gt;start_time);</span><br><span class="line">		p++;</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">	<span class="type">int</span> cnt=put_into_buf(buf,s);</span><br><span class="line">	*f_pos+=cnt;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> cnt;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//可参考fs/super.c mount_root()</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">hdinfo_handler</span><span class="params">(<span class="type">off_t</span>* f_pos,<span class="type">char</span>* buf)</span>&#123;</span><br><span class="line">    <span class="comment">//防止循环多次打印</span></span><br><span class="line">	<span class="keyword">if</span>(flag==<span class="number">1</span>)&#123;</span><br><span class="line">		flag=<span class="number">0</span>;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">super_block</span>* <span class="title">sb</span>;</span></span><br><span class="line">	sb=get_super(<span class="number">0x301</span>);<span class="comment">/*磁盘设备号 3*256+1*/</span></span><br><span class="line">	</span><br><span class="line">	<span class="type">int</span> <span class="built_in">free</span>=<span class="number">0</span>;</span><br><span class="line">	<span class="type">int</span> i=sb-&gt;s_nzones;</span><br><span class="line">	<span class="keyword">while</span> (-- i &gt;= <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">if</span> (!set_bit(i&amp;<span class="number">8191</span>,sb-&gt;s_zmap[i&gt;&gt;<span class="number">13</span>]-&gt;b_data))</span><br><span class="line">			<span class="built_in">free</span>++;</span><br><span class="line">	<span class="built_in">sprintf</span>(s,<span class="string">&quot;total_blocks:\t%d\nfree_blocks:\t%d\nused_blocks:\t%d\n&quot;</span>,sb-&gt;s_nzones,<span class="built_in">free</span>,sb-&gt;s_nzones-<span class="built_in">free</span>);</span><br><span class="line">	<span class="type">int</span> cnt=put_into_buf(buf,s);</span><br><span class="line">	flag=<span class="number">1</span>;</span><br><span class="line">	<span class="keyword">return</span> cnt;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>运行结果：</p>
-<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20221006210732995.png" class loading="lazy"> 
+<img src="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/image-20221006210732995.png" class> 
 
 <h4 id="这部分踩过的坑："><a href="#这部分踩过的坑：" class="headerlink" title="这部分踩过的坑："></a>这部分踩过的坑：</h4><p>1.LAST_TASK 的定义</p>
 <p>对于LAST_TASK，我本来的理解是，当前所有进程的最后一个。</p>
@@ -417,4 +578,46 @@ IconifyProviders = {
 <p>对于终端设备和磁盘，其read/write函数本质上是在用out指令跟它的缓冲区交互，只不过磁盘比终端设备抽象层次更深，包含了文件系统的层层封装。</p>
 <p>对于虚拟文件，其read/write函数本质上就是与内存交互，通过一段逻辑【处理函数】将内存存储的当前操作系统信息实时显示出来，而不需要存储。</p>
 <p>还有，参考文章那篇的代码写的很好，快去看！</p>
-</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/" title="哈工大操作系统实验">https://xiunianjun.github.io/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/" rel="prev" title="阅读JDK容器部分源码的心得体会1【Collection部分】"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">阅读JDK容器部分源码的心得体会1【Collection部分】</span></a></div><div class="post-nav-item"></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2024 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/labs/"># labs</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2022/10/16/%E9%98%85%E8%AF%BBJDK%E5%AE%B9%E5%99%A8%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81%E7%9A%84%E5%BF%83%E5%BE%97%E4%BD%93%E4%BC%9A1%E3%80%90Collection%E9%83%A8%E5%88%86%E3%80%91/">阅读JDK容器部分源码的心得体会1【Collection部分】</a>
+            
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

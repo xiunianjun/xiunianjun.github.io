@@ -1,58 +1,218 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0078E7"><meta name="author" content="修年"><meta name="copyright" content="修年"><meta name="generator" content="Hexo 5.4.2"><meta name="theme" content="hexo-theme-yun"><title>Scheduling | 修年</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@900&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/star-markdown-css@0.4.1/dist/yun/yun-markdown.min.css"><link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/prism-theme-vars/base.css"><script src="https://fastly.jsdelivr.net/npm/scrollreveal/dist/scrollreveal.min.js" defer></script><script>function initScrollReveal() {
-  [".post-card",".markdown-body img"].forEach((target)=> {
-    ScrollReveal().reveal(target);
-  })
-}
-document.addEventListener("DOMContentLoaded", initScrollReveal);
-document.addEventListener("pjax:success", initScrollReveal);
-</script><link rel="icon" type="image/svg+xml" href="/yun.svg"><link rel="mask-icon" href="/yun.svg" color="#0078E7"><link rel="preload" href="/css/hexo-theme-yun.css" as="style"><link rel="prefetch" href="/js/sidebar.js" as="script"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://fastly.jsdelivr.net/npm/" crossorigin><script id="yun-config">
-    window.Yun = {}
-    window.CONFIG = {"hostname":"xiunianjun.github.io","root":"/","title":"修年","version":"1.10.11","mode":"auto","copycode":true,"page":{"isPost":true},"i18n":{"placeholder":"搜索...","empty":"找不到您查询的内容: ${query}","hits":"找到 ${hits} 条结果","hits_time":"找到 ${hits} 条结果（用时 ${time} 毫秒）"},"anonymous_image":"https://cdn.yunyoujun.cn/img/avatar/none.jpg","fireworks":{"colors":null},"vendors":{"host":"https://fastly.jsdelivr.net/npm/","darken":"https://fastly.jsdelivr.net/npm/darken@1.5.0"}};
-  </script><link rel="stylesheet" href="/css/hexo-theme-yun.css"><script src="/js/hexo-theme-yun.js" type="module"></script><meta name="description" content="SchedulingCode: Context switchingxv6中，每个CPU中的scheduler都有一个专用的线程。这里线程的概念是，有自己的栈，有自己的寄存器状态。 当发生时钟中断时，当前进程调用yield，yield再通过swtch切换到scheduler线程。scheduler线程会通过swtch跳转到另外一个进程去执行。当另外一个进程发生时钟中断，又会通过yield回到sche">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Scheduling">
-<meta property="og:url" content="https://xiunianjun.github.io/2023/01/10/xv6$chap7/index.html">
-<meta property="og:site_name" content="修年">
-<meta property="og:description" content="SchedulingCode: Context switchingxv6中，每个CPU中的scheduler都有一个专用的线程。这里线程的概念是，有自己的栈，有自己的寄存器状态。 当发生时钟中断时，当前进程调用yield，yield再通过swtch切换到scheduler线程。scheduler线程会通过swtch跳转到另外一个进程去执行。当另外一个进程发生时钟中断，又会通过yield回到sche">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230118221757367.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120150659730.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120150715925.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120151051989.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120151353712.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120151807102.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120151820455.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230120232149776.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20231219000100763.png">
-<meta property="og:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20231219000047041.png">
-<meta property="article:published_time" content="2023-01-10T12:25:29.000Z">
-<meta property="article:modified_time" content="2023-12-18T16:03:36.118Z">
-<meta property="article:author" content="修年">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xiunianjun.github.io/2023/01/10/xv6/image-20230118221757367.png"><script>(function() {
-  if (CONFIG.mode !== 'auto') return
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  const setting = localStorage.getItem('darken-mode') || 'auto'
-  if (setting === 'dark' || (prefersDark && setting !== 'light'))
-    document.documentElement.classList.toggle('dark', true)
-})()</script></head><body><script src="https://code.iconify.design/2/2.1.1/iconify.min.js"></script><script>// Define global variable
-IconifyProviders = {
-  // Empty prefix: overwrite default API provider configuration
-  '': {
-    // Use custom API first, use Iconify public API as backup
-    resources: [
-        'https://api.iconify.design',
-    ],
-    // Wait for 1 second before switching API hosts
-    rotate: 1000,
-  },
-};</script><script defer src="https://fastly.jsdelivr.net/npm/animejs@latest"></script><script defer src="/js/ui/fireworks.js" type="module"></script><canvas class="fireworks"></canvas><div class="container"><a class="sidebar-toggle hty-icon-button" id="menu-btn"><div class="hamburger hamburger--spin" type="button"><span class="hamburger-box"><span class="hamburger-inner"></span></span></div></a><div class="sidebar-toggle sidebar-overlay"></div><aside class="sidebar"><script src="/js/sidebar.js" type="module"></script><ul class="sidebar-nav"><li class="sidebar-nav-item sidebar-nav-toc hty-icon-button sidebar-nav-active" data-target="post-toc-wrap" title="文章目录"><span class="icon iconify" data-icon="ri:list-ordered"></span></li><li class="sidebar-nav-item sidebar-nav-overview hty-icon-button" data-target="site-overview-wrap" title="站点概览"><span class="icon iconify" data-icon="ri:passport-line"></span></li></ul><div class="sidebar-panel" id="site-overview-wrap"><div class="site-info fix-top"><a class="site-author-avatar" href="/about/" title="修年"><img width="96" loading="lazy" src="/images/head.png" alt="修年"></a><div class="site-author-name"><a href="/about/">修年</a></div><span class="site-name">修年</span><sub class="site-subtitle"></sub><div class="site-description"></div></div><nav class="site-state"><a class="site-state-item hty-icon-button icon-home" href="/" title="首页"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:home-4-line"></span></span></a><div class="site-state-item"><a href="/archives/" title="归档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:archive-line"></span></span><span class="site-state-item-count">47</span></a></div><div class="site-state-item"><a href="/categories/" title="分类"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:folder-2-line"></span></span><span class="site-state-item-count">0</span></a></div><div class="site-state-item"><a href="/tags/" title="标签"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:price-tag-3-line"></span></span><span class="site-state-item-count">6</span></a></div><a class="site-state-item hty-icon-button" target="_blank" rel="noopener" href="https://yun.yunyoujun.cn" title="文档"><span class="site-state-item-icon"><span class="icon iconify" data-icon="ri:settings-line"></span></span></a></nav><hr style="margin-bottom:0.5rem"><div class="links-of-author"><a class="links-of-author-item hty-icon-button" rel="noopener" href="/atom.xml" title="RSS" target="_blank" style="color:orange"><span class="icon iconify" data-icon="ri:rss-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://user.qzone.qq.com/1776527992/main" title="QQ" target="_blank" style="color:#12B7F5"><span class="icon iconify" data-icon="ri:qq-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="https://github.com/xiunianjun" title="GitHub" target="_blank" style="color:#6e5494"><span class="icon iconify" data-icon="ri:github-line"></span></a><a class="links-of-author-item hty-icon-button" rel="noopener" href="mailto:nniferyy@gmail.com" title="E-Mail" target="_blank" style="color:#8E71C1"><span class="icon iconify" data-icon="ri:mail-line"></span></a></div><hr style="margin:0.5rem 1rem"><div class="links"><a class="links-item hty-icon-button" href="/links/" title="我的小伙伴们" style="color:dodgerblue"><span class="icon iconify" data-icon="ri:genderless-line"></span></a></div><br><a class="links-item hty-icon-button" id="toggle-mode-btn" href="javascript:;" title="Mode" style="color: #f1cb64"><span class="icon iconify" data-icon="ri:contrast-2-line"></span></a></div><div class="sidebar-panel sidebar-panel-active" id="post-toc-wrap"><div class="post-toc"><div class="post-toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Scheduling"><span class="toc-number">1.</span> <span class="toc-text">Scheduling</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-Context-switching"><span class="toc-number">1.1.</span> <span class="toc-text">Code: Context switching</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#context"><span class="toc-number">1.1.1.</span> <span class="toc-text">context</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#swtch"><span class="toc-number">1.1.2.</span> <span class="toc-text">swtch</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sched"><span class="toc-number">1.1.3.</span> <span class="toc-text">sched</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#scheduler"><span class="toc-number">1.1.4.</span> <span class="toc-text">scheduler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E8%A1%A5%E5%85%85"><span class="toc-number">1.1.5.</span> <span class="toc-text">一些补充</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-Scheduling"><span class="toc-number">1.2.</span> <span class="toc-text">Code: Scheduling</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#sched%E5%89%8D%E8%A6%81%E5%81%9A%E7%9A%84%E4%BA%8B"><span class="toc-number">1.2.1.</span> <span class="toc-text">sched前要做的事</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sched%E4%B8%8Escheduler"><span class="toc-number">1.2.2.</span> <span class="toc-text">sched与scheduler</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#p-gt-lock%E4%BF%9D%E8%AF%81%E4%BA%86%E5%B9%B6%E5%8F%91%E5%AE%89%E5%85%A8%E6%80%A7"><span class="toc-number">1.2.3.</span> <span class="toc-text">p-&gt;lock保证了并发安全性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-mycpu-and-myproc"><span class="toc-number">1.3.</span> <span class="toc-text">Code: mycpu and myproc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sleep-and-wakeup"><span class="toc-number">1.4.</span> <span class="toc-text">Sleep and wakeup</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E6%97%8B%E9%94%81%E5%AE%9E%E7%8E%B0%E4%BF%A1%E5%8F%B7%E9%87%8F"><span class="toc-number">1.4.1.</span> <span class="toc-text">自旋锁实现信号量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84sleep-and-wakeup"><span class="toc-number">1.4.2.</span> <span class="toc-text">不安全的sleep and wakeup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sleep-and-wakeup"><span class="toc-number">1.4.3.</span> <span class="toc-text">sleep and wakeup</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-Sleep-and-wakeup"><span class="toc-number">1.5.</span> <span class="toc-text">Code: Sleep and wakeup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-Pipes"><span class="toc-number">1.6.</span> <span class="toc-text">Code: Pipes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Code-Wait-exit-and-kill"><span class="toc-number">1.7.</span> <span class="toc-text">Code: Wait, exit, and kill</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#exit%E5%92%8Cwait"><span class="toc-number">1.7.1.</span> <span class="toc-text">exit和wait</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#kill"><span class="toc-number">1.7.2.</span> <span class="toc-text">kill</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Real-world"><span class="toc-number">1.8.</span> <span class="toc-text">Real world</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Lab-Multithreading"><span class="toc-number">1.9.</span> <span class="toc-text">Lab: Multithreading</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Uthread-switching-between-threads"><span class="toc-number">1.9.1.</span> <span class="toc-text">Uthread: switching between threads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%84%9F%E6%83%B3"><span class="toc-number">1.9.1.1.</span> <span class="toc-text">感想</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF"><span class="toc-number">1.9.1.1.1.</span> <span class="toc-text">思路</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%9D%91"><span class="toc-number">1.9.1.1.2.</span> <span class="toc-text">坑</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B3%E4%BA%8Eswtch"><span class="toc-number">1.9.1.1.3.</span> <span class="toc-text">关于swtch</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81"><span class="toc-number">1.9.1.2.</span> <span class="toc-text">代码</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A2%9E%E5%8A%A0context%E7%BB%93%E6%9E%84%E4%BD%93%E5%AE%9A%E4%B9%89%EF%BC%8C%E4%BF%AE%E6%94%B9thread%E7%BB%93%E6%9E%84%E4%BD%93"><span class="toc-number">1.9.1.2.1.</span> <span class="toc-text">增加context结构体定义，修改thread结构体</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9thread-create"><span class="toc-number">1.9.1.2.2.</span> <span class="toc-text">修改thread_create</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9thread-schedule"><span class="toc-number">1.9.1.2.3.</span> <span class="toc-text">修改thread_schedule</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9thread-switch"><span class="toc-number">1.9.1.2.4.</span> <span class="toc-text">修改thread_switch</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Using-threads"><span class="toc-number">1.9.2.</span> <span class="toc-text">Using threads</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Barrier"><span class="toc-number">1.9.3.</span> <span class="toc-text">Barrier</span></a></li></ol></li></ol></li></ol></div></div></div></aside><main class="sidebar-translate" id="content"><div id="post"><article class="hty-card post-block" itemscope itemtype="https://schema.org/Article" style="--smc-primary:#0078E7;"><link itemprop="mainEntityOfPage" href="https://xiunianjun.github.io/2023/01/10/xv6$chap7/"><span hidden itemprop="author" itemscope itemtype="https://schema.org/Person"><meta itemprop="name" content="修年"><meta itemprop="description"></span><span hidden itemprop="publisher" itemscope itemtype="https://schema.org/Organization"><meta itemprop="name" content="修年"></span><header class="post-header"><h1 class="post-title" itemprop="name headline">Scheduling</h1><div class="post-meta"><div class="post-time"><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-line"></span></span> <time title="创建时间：2023-01-10 20:25:29" itemprop="dateCreated datePublished" datetime="2023-01-10T20:25:29+08:00">2023-01-10</time><span class="post-meta-divider">-</span><span class="post-meta-item-icon"><span class="icon iconify" data-icon="ri:calendar-2-line"></span></span> <time title="修改时间：2023-12-19 00:03:36" itemprop="dateModified" datetime="2023-12-19T00:03:36+08:00">2023-12-19</time></div><div class="post-classify"></div></div></header><section class="post-body" itemprop="articleBody"><div class="post-content markdown-body"><h1 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a>Scheduling</h1><h2 id="Code-Context-switching"><a href="#Code-Context-switching" class="headerlink" title="Code: Context switching"></a>Code: Context switching</h2><p>xv6中，每个CPU中的scheduler都有一个专用的线程。这里线程的概念是，有自己的栈，有自己的寄存器状态。</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>Scheduling | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Scheduling</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">一月 10, 2023&nbsp;&nbsp;20:25:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a>Scheduling</h1><h2 id="Code-Context-switching"><a href="#Code-Context-switching" class="headerlink" title="Code: Context switching"></a>Code: Context switching</h2><p>xv6中，每个CPU中的scheduler都有一个专用的线程。这里线程的概念是，有自己的栈，有自己的寄存器状态。</p>
 <p>当发生时钟中断时，当前进程调用yield，yield再通过swtch切换到scheduler线程。scheduler线程会通过swtch跳转到另外一个进程去执行。当另外一个进程发生时钟中断，又会通过yield回到scheduler，scheduler再调度原进程继续执行，如此周而复始。</p>
 <blockquote>
 <p>Linux的调度原理也差不多类似这样。每个CPU都有一个调度类为SCHED_CLASS_IDLE的IDLE进程，IDLE进程体大概就是间歇不断地执行__schedule()函数，CPU空闲时就会不断执行IDLE线程。</p>
 <p>而当有新的任务产生时（或任务被唤醒。可以从此看出task new和task wakeup的共通点，可以联想到竞赛中对该消息的处理方法），它首先通过调度类对应的select_cpu选择一个合适的（可以被抢占&amp;&amp;在该task对应的cpumask中）的cpu，迁移到cpu对应的rq；目标cpu通过IDLE进程体或者中断返回时检查到了NEED_SCHEDULE标记位，从而调用schedule函数pick新任务，然后进行context_switch切换到目标线程。如此周而复始。</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/image-20230118221757367.png" alt="image-20230118221757367" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230118221757367.png" alt="image-20230118221757367"></p>
 <p>下面就来讲讲这个所谓的“线程”以及xv6的上下文切换是怎么实现的。</p>
 <h3 id="context"><a href="#context" class="headerlink" title="context"></a>context</h3><p>上下文切换的操作对象是上下文，因而首先了解一下上下文的结构。各种寄存器的状态即是上下文context。xv6中的context定义如下:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">context</span> &#123;</span></span><br><span class="line">  uint64 ra;</span><br><span class="line">  uint64 sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// callee-saved</span></span><br><span class="line">  uint64 s0;</span><br><span class="line">  uint64 s1;</span><br><span class="line">  uint64 s2;</span><br><span class="line">  uint64 s3;</span><br><span class="line">  uint64 s4;</span><br><span class="line">  uint64 s5;</span><br><span class="line">  uint64 s6;</span><br><span class="line">  uint64 s7;</span><br><span class="line">  uint64 s8;</span><br><span class="line">  uint64 s9;</span><br><span class="line">  uint64 s10;</span><br><span class="line">  uint64 s11;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -143,8 +303,8 @@ IconifyProviders = {
 
 <p>注意，不同于<code>mycpu()</code>，使用<code>myproc()</code>的返回值不需要进行开关中断保护。因为当前进程的指针不论处于哪个CPU都是不变的。</p>
 <h2 id="Sleep-and-wakeup"><a href="#Sleep-and-wakeup" class="headerlink" title="Sleep and wakeup"></a>Sleep and wakeup</h2><p>前面我们已经介绍了进程隔离性的基本图像，接下来要讲xv6是如何让进程之间互动的。xv6使用的是经典的<em>sleep and wakeup</em>，也叫<em>序列协调（sequence coordination）</em>或<em>条件同步机制（conditional synchronization mechanisms</em>。下面，将从最基本的自旋锁实现信号量开始，来逐步讲解xv6的<em>sleep and wakeup</em>机制。</p>
-<h3 id="自旋锁实现信号量"><a href="#自旋锁实现信号量" class="headerlink" title="自旋锁实现信号量"></a>自旋锁实现信号量</h3><p><img src="/2023/01/10/xv6/image-20230120150659730.png" alt="image-20230120150659730" loading="lazy"></p>
-<p><img src="/2023/01/10/xv6/image-20230120150715925.png" alt="image-20230120150715925" loading="lazy"></p>
+<h3 id="自旋锁实现信号量"><a href="#自旋锁实现信号量" class="headerlink" title="自旋锁实现信号量"></a>自旋锁实现信号量</h3><p><img src="/2023/01/10/xv6/image-20230120150659730.png" alt="image-20230120150659730"></p>
+<p><img src="/2023/01/10/xv6/image-20230120150715925.png" alt="image-20230120150715925"></p>
 <p>缺点就是自旋太久了，因而我们需要在等待的时候调用yield，直到资源生产出来之后再继续执行。</p>
 <h3 id="不安全的sleep-and-wakeup"><a href="#不安全的sleep-and-wakeup" class="headerlink" title="不安全的sleep and wakeup"></a>不安全的sleep and wakeup</h3><blockquote>
 <p>Let’s imagine a pair of calls, sleep and wakeup, that work as follows:</p>
@@ -158,13 +318,13 @@ IconifyProviders = {
 </ol>
 </blockquote>
 <p>这样一来，信号量实现就可修改为这样了：</p>
-<p><img src="/2023/01/10/xv6/image-20230120151051989.png" alt="image-20230120151051989" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230120151051989.png" alt="image-20230120151051989"></p>
 <p>但是，我们可以注意到，在212-213行这里产生了一个先检查后执行的竞态条件。</p>
 <blockquote>
 <p>如果消费者进程执行到212-213中间，此时生产者进程已经调用结束，也就是说wakeup并没有唤醒任何消费者进程。消费者进程就会一直在sleep中没人唤醒，除非生产者进程再执行一次。这样就会造成<em>lost wake-up</em> 这个问题。</p>
 </blockquote>
 <p>所以，我们可以选择把这个竞态条件也放入s-&gt;lock这个锁区域保护。</p>
-<p><img src="/2023/01/10/xv6/image-20230120151353712.png" alt="image-20230120151353712" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230120151353712.png" alt="image-20230120151353712"></p>
 <p>但是这样一来又会产生死锁问题。因而，我们可以尝试着修改sleep和wakeup的接口定义。</p>
 <h3 id="sleep-and-wakeup"><a href="#sleep-and-wakeup" class="headerlink" title="sleep and wakeup"></a>sleep and wakeup</h3><blockquote>
 <p>We’ll fix the preceding scheme by changing sleep’s interface: </p>
@@ -173,8 +333,8 @@ IconifyProviders = {
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sleep(s,&amp;s-&gt;lock)&#123;</span><br><span class="line"> <span class="comment">// do something</span></span><br><span class="line">	release(&amp;s-&gt;lock);</span><br><span class="line">	<span class="comment">//wait until wakeup</span></span><br><span class="line"> acquire(&amp;s-&gt;lock);</span><br><span class="line"> <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </blockquote>
 <p>这样一来，信号量就可以完美实现了：</p>
-<p><img src="/2023/01/10/xv6/image-20230120151807102.png" alt="image-20230120151807102" loading="lazy"></p>
-<p><img src="/2023/01/10/xv6/image-20230120151820455.png" alt="image-20230120151820455" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230120151807102.png" alt="image-20230120151807102"></p>
+<p><img src="/2023/01/10/xv6/image-20230120151820455.png" alt="image-20230120151820455"></p>
 <blockquote>
 <p>注：严格地说，<code>wakeup</code>只需跟在<code>acquire</code>之后就足够了（也就是说，可以在<code>release</code>之后调用<code>wakeup</code>）</p>
 <p>【想了一下，有一说一确实，放在release前后都不影响】</p>
@@ -304,13 +464,13 @@ IconifyProviders = {
 <p>这里完全没有想到，还是吃了基础的亏啊。</p>
 <blockquote>
 <p>如果这里将<code>t-&gt;stack</code>作为sp，那么运行时会出现非常诡异的现象（打印的是abc三个的<code>thread-&gt;state</code>）：</p>
-<p><img src="/2023/01/10/xv6/image-20230120232149776.png" alt="image-20230120232149776" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20230120232149776.png" alt="image-20230120232149776"></p>
 <p>仅有c【经测试，是仅有最后一个启动的线程】在执行，而ab的state都不是理想中的2，而是很奇怪的值。我确实有想过栈溢出问题，但是马上被我否定了。我完全没有想到是那样错的【悲】</p>
 </blockquote>
 <h5 id="关于swtch"><a href="#关于swtch" class="headerlink" title="关于swtch"></a>关于swtch</h5><p>Update，验收时学长问为什么这里的uswitch.S为什么无需保存tn这样的寄存器。答案是因为tn是caller-save的，线程这相当于仅仅是执行一个函数，所以只需保存callee-save的寄存器。</p>
 <p>内核的swtch也只保存了这些callee-save的寄存器，也是同一个道理。</p>
-<p><img src="/2023/01/10/xv6/image-20231219000100763.png" alt="image-20231219000100763" loading="lazy"></p>
-<p><img src="/2023/01/10/xv6/image-20231219000047041.png" alt="image-20231219000047041" loading="lazy"></p>
+<p><img src="/2023/01/10/xv6/image-20231219000100763.png" alt="image-20231219000100763"></p>
+<p><img src="/2023/01/10/xv6/image-20231219000047041.png" alt="image-20231219000047041"></p>
 <p>tn寄存器被保存在调用者的栈帧中。感觉也能理解为什么那题作业题说上文进程的现场是由栈保存了。</p>
 <h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><h5 id="增加context结构体定义，修改thread结构体"><a href="#增加context结构体定义，修改thread结构体" class="headerlink" title="增加context结构体定义，修改thread结构体"></a>增加context结构体定义，修改thread结构体</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">context</span> &#123;</span></span><br><span class="line">  uint64 ra;</span><br><span class="line">  uint64 sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// callee-saved</span></span><br><span class="line">  uint64 s0;</span><br><span class="line">  uint64 s1;</span><br><span class="line">  uint64 s2;</span><br><span class="line">  uint64 s3;</span><br><span class="line">  uint64 s4;</span><br><span class="line">  uint64 s5;</span><br><span class="line">  uint64 s6;</span><br><span class="line">  uint64 s7;</span><br><span class="line">  uint64 s8;</span><br><span class="line">  uint64 s9;</span><br><span class="line">  uint64 s10;</span><br><span class="line">  uint64 s11;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">thread</span> &#123;</span></span><br><span class="line">  <span class="type">char</span>       <span class="built_in">stack</span>[STACK_SIZE]; <span class="comment">/* the thread&#x27;s stack */</span></span><br><span class="line">  <span class="type">int</span>        state;             <span class="comment">/* FREE, RUNNING, RUNNABLE */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">context</span> <span class="title">context</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
@@ -329,4 +489,44 @@ IconifyProviders = {
 <p>Update</p>
 <p>关于pthread_cond的实现，也是使用了条件变量的思想，这个值得以后有时间了解一下。</p>
 </blockquote>
-</div></section><div id="reward-container"><span class="hty-icon-button button-glow" id="reward-button" title="打赏" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === &quot;none&quot;) ? &quot;block&quot; : &quot;none&quot;;"><span class="icon iconify" data-icon="ri:hand-coin-line"></span></span><div id="reward-comment">I'm so cute. Please give me money.</div></div><ul class="post-copyright"><li class="post-copyright-author"><strong>本文作者：</strong>修年</li><li class="post-copyright-link"><strong>本文链接：</strong><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap7/" title="Scheduling">https://xiunianjun.github.io/2023/01/10/xv6$chap7/</a></li><li class="post-copyright-license"><strong>版权声明：</strong>本博客所有文章除特别声明外，均默认采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="noopener" title="CC BY-NC-SA 4.0 "><span class="icon iconify" data-icon="ri:creative-commons-line"></span><span class="icon iconify" data-icon="ri:creative-commons-by-line"></span><span class="icon iconify" data-icon="ri:creative-commons-nc-line"></span><span class="icon iconify" data-icon="ri:creative-commons-sa-line"></span></a> 许可协议。</li></ul></article><div class="post-nav"><div class="post-nav-item"><a class="post-nav-prev" href="/2023/02/25/cs144/" rel="prev" title="cs144"><span class="icon iconify" data-icon="ri:arrow-left-s-line"></span><span class="post-nav-text">cs144</span></a></div><div class="post-nav-item"><a class="post-nav-next" href="/2023/01/10/xv6/" rel="next" title="xv6"><span class="post-nav-text">xv6</span><span class="icon iconify" data-icon="ri:arrow-right-s-line"></span></a></div></div></div><div class="hty-card" id="comment"></div></main><footer class="sidebar-translate" id="footer"><div class="copyright"><span>&copy; 2019 – 2024 </span><span class="with-love" id="animate"><span class="icon iconify" data-icon="ri:cloud-line"></span></span><span class="author"> 修年</span></div><div class="powered"><span>由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动 v5.4.2</span><span class="footer-separator">|</span><span>主题 - <a rel="noopener" href="https://github.com/YunYouJun/hexo-theme-yun" target="_blank"><span>Yun</span></a> v1.10.11</span></div></footer></div><a class="hty-icon-button" id="back-to-top" aria-label="back-to-top" href="#"><span class="icon iconify" data-icon="ri:arrow-up-s-line"></span><svg class="progress-circle-container" viewBox="0 0 100 100"><circle class="progress-circle" id="progressCircle" cx="50" cy="50" r="48" fill="none" stroke="#0078E7" stroke-width="2" stroke-linecap="round"></circle></svg></a></body></html>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2023/01/10/xv6$chap5/">Interrupts and device drivers</a>
+            
+            
+            <a class="next" rel="next" href="/2023/01/10/xv6$chap9/">其他的对实验未涉及的思考</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
