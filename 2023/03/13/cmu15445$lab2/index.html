@@ -255,7 +255,28 @@
 </li>
 </ol>
 </blockquote>
-<p>这个没什么好说，大概就是有一个基类结点，它有两个子类，一个表示b+树的leaf node，另一个表示b+树的internal node，每个结点都占据一个内存页。嗯写就是了。</p>
+<p>大概就是有一个基类结点，它有两个子类，一个表示b+树的leaf node，另一个表示b+树的internal node，每个结点都占据一个内存页。</p>
+<p>也就是说，一个内存页中存储着一个结点类对象。每次我们都是读取一页到内存中，然后将它类型转换为TreeNodePage*，就可以访问其里面的存储数据的数组<code>array_</code>了。体会一下这个思想。</p>
+<p>值得一提的是，<code>LeafPage</code>的成员变量中有个这样的成员：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>:</span><br><span class="line"> <span class="comment">// Flexible array member for page data.</span></span><br><span class="line"> MappingType array_[<span class="number">0</span>];</span><br></pre></td></tr></table></figure>
+
+<p>它就是柔性数组成员。</p>
+<blockquote>
+<p>在C++中，Flexible Array Member（柔性数组成员）是一种用于定义具有可变大小的结构的技术。它通常用于在结构的末尾声明一个数组，该数组的大小是动态确定的，这允许你在使用该结构时更灵活地处理变长数据。</p>
+<p>在你提供的代码片段中，<code>MappingType array_[0];</code> 是一个柔性数组成员的例子。这里 <code>array_</code> 后面有 <code>[0]</code>，这并不表示它们的大小是固定的0。相反，它们的大小是在运行时动态确定的，而 <code>[0]</code> 的写法是一种历史上的技巧，用于<strong>告诉编译器</strong>这是柔性数组成员。</p>
+<p>例如，如果有一个结构定义如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MyStruct</span> &#123;</span><br><span class="line">    <span class="comment">// 其他成员...</span></span><br><span class="line">    MappingType array_[<span class="number">0</span>];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>你可以根据需要为 <code>array_</code> 分配任意数量的内存，例如：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> arraySize = <span class="number">10</span>;  <span class="comment">// 你想要的数组大小</span></span><br><span class="line">MyStruct* myObject = <span class="built_in">static_cast</span>&lt;MyStruct*&gt;(<span class="keyword">operator</span> <span class="built_in">new</span>(<span class="built_in">sizeof</span>(MyStruct) + arraySize * <span class="built_in">sizeof</span>(MappingType)));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在这里你可以使用 myObject，并通过 myObject-&gt;array_ 访问柔性数组</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 记得在使用完毕后释放内存</span></span><br><span class="line"><span class="function"><span class="keyword">operator</span> <span class="title">delete</span><span class="params">(myObject)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，<code>array_</code> 可以用于存储可变大小的数据，而结构体 <code>MyStruct</code> 的大小将动态地调整为 <code>sizeof(MyStruct) + arraySize * sizeof(MappingType)</code>。这样的设计通常在需要处理变长数据块的场景中比较有用。请注意，在C++17之后，你也可以使用 <code>std::byte</code> 类型来定义柔性数组成员。</p>
+</blockquote>
+<p>拥有柔性数组成员的实例需要动态分配内存（或者像接下来的把一块内存空间interpret一下），柔性数组成员会占用其他成员没有占用的剩下的空间，也即：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">+--------------------------+</span><br><span class="line">| Other Members of MyClass |</span><br><span class="line">| ...                      |</span><br><span class="line">+--------------------------+</span><br><span class="line">| array_ (flexible)        |</span><br><span class="line">|                          |</span><br><span class="line">|                          |</span><br><span class="line">+--------------------------+</span><br></pre></td></tr></table></figure>
+
+
+
 <h2 id="Task2a-Insertion-and-Search-Task3-Iterator"><a href="#Task2a-Insertion-and-Search-Task3-Iterator" class="headerlink" title="Task2a   Insertion and Search + Task3 Iterator"></a>Task2a   Insertion and Search + Task3 Iterator</h2><blockquote>
 <p>The index should <strong>support only unique keys;</strong> if you try to reinsert an existing key into the index, it should not perform the insertion, and should return false. key必须unique</p>
 <p>B+Tree pages should be split (or keys should be redistributed) if an insertion would violate the B+Tree’s invariants. 插入时需要分裂</p>
@@ -428,7 +449,7 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/03/13/cmu15445$lab1/">Project1   Buffer Pool</a>
+                <a class="prev" rel="prev" href="/2023/06/17/%E5%AF%B9GRUB%E5%92%8Cinitramfs%E7%9A%84%E5%B0%8F%E6%8E%A2%E7%A9%B6/">对GRUB和initramfs的小探究</a>
             
             
             <a class="next" rel="next" href="/2023/03/13/cmu15445/">CMU15445</a>
