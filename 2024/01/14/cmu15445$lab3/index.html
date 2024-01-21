@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>Project3   Query Execution | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">Project3   Query Execution</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">一月 14, 2024&nbsp;&nbsp;22:19:00</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Project3-Query-Execution"><a href="#Project3-Query-Execution" class="headerlink" title="Project3   Query Execution"></a>Project3   Query Execution</h1><p>TODO，注意一下为什么每个executor的child executor的&amp;&amp;和&amp;的差别</p>
+<blockquote>
+<p>In this project, you will implement the components that allow BusTub to execute queries. You will create the operator executors that execute SQL queries and implement optimizer rules to transform query plans.</p>
+<p>实现SQL查询的执行，并且实现语句优化。</p>
+</blockquote>
+<blockquote>
+<p>In this project, you will add new <strong>operator executors</strong> and <strong>query optimizations</strong> to BusTub. </p>
+<p>BusTub uses the <strong>iterator</strong> (i.e., Volcano) query processing model, in which <u>every executor implements a <code>Next</code> function to get the next tuple result</u>. </p>
+<p>When the DBMS invokes an executor’s <code>Next</code> function, the executor returns either:</p>
+<p>(1) a single tuple</p>
+<p>​    In BusTub’s implementation of the iterator model, 除了元组外还会返回<strong>record identifier</strong> (<code>RID</code>)</p>
+<p>(2) an indicator that there are no more tuples. </p>
+<p>With this approach, each executor implements a loop that continues calling <code>Next</code> on its children to retrieve tuples and process them one by one.</p>
+</blockquote>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="Bustub-Framewor"><a href="#Bustub-Framewor" class="headerlink" title="Bustub Framewor"></a>Bustub Framewor</h3><p><img src="/2024/01/14/cmu15445/image-20231227153858926.png" alt="image-20231227153858926"></p>
+<h3 id="AST"><a href="#AST" class="headerlink" title="AST"></a>AST</h3><p>介绍完了bustub的框架之后，它对通过语法树进行查询优化进行了详细的样例介绍。</p>
+<p>首先温习一下什么是语法树（<em>abstract syntax tree, AST</em> ）：</p>
+<p>SQL语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Select `title`</span><br><span class="line">From Books, Borrowers, Loans</span><br><span class="line">Where Books.LC_NO = Loans.LC_NO and Borrowers.CARD_NO = Loans.CARD_NO and DATE &lt;= 1/1/78</span><br></pre></td></tr></table></figure>
+
+<p>其语法树表示+优化结果如下图所示：</p>
+<p><img src="/2024/01/14/cmu15445/image-20231227155236633.png" alt="image-20231227155236633"></p>
+<p>算法如下，其关键思路就是选择投影尽早做，能移多下去就移多下去</p>
+<p><img src="/2024/01/14/cmu15445/image-20231227155806019.png" alt="image-20231227155806019"></p>
+<p>而这里15445介绍的也是这样的语法树优化算法。</p>
+<p>首先记录一下它这几个专有名词对应的操作：</p>
+<blockquote>
+<ol>
+<li>Projection：投影</li>
+<li>Filter：选择</li>
+<li>MockScan：对一个表进行的扫描操作</li>
+<li>Aggregation：聚合函数</li>
+<li>NestedLoopJoin：嵌套循环连接</li>
+</ol>
+</blockquote>
+<p>再结合它给的几个语法树的例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM __mock_table_1;</span><br><span class="line"></span><br><span class="line">=== PLANNER ===</span><br><span class="line">Projection &#123; exprs=[#<span class="number">0.0</span>, #<span class="number">0.1</span>] &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)</span><br><span class="line">	MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)</span><br><span class="line">=== OPTIMIZER ===</span><br><span class="line">MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SELECT colA, MAX(colB) FROM</span><br><span class="line">  (SELECT * FROM __mock_table_1, __mock_table_3 WHERE colA = colE) GROUP BY colA;</span><br><span class="line"></span><br><span class="line">=== OPTIMIZER ===</span><br><span class="line">Agg &#123; types=[max], aggregates=[#<span class="number">0.1</span>], group_by=[#<span class="number">0.0</span>] &#125;</span><br><span class="line">  NestedLoopJoin &#123; type=Inner, predicate=(#<span class="number">0.0</span>=#<span class="number">1.0</span>) &#125;</span><br><span class="line">    MockScan &#123; table=__mock_table_1 &#125;</span><br><span class="line">    MockScan &#123; table=__mock_table_3 &#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/01/14/cmu15445/image-20231227160450894.png" alt="image-20231227160450894"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM __mock_table_1 WHERE colA &gt; <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">=== OPTIMIZER ===                                     </span><br><span class="line"> Filter &#123; predicate=(#<span class="number">0.0</span>&gt;<span class="number">1</span>) &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)         </span><br><span class="line">   MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER) </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">values (<span class="number">1</span>, <span class="number">2</span>, <span class="string">&#x27;a&#x27;</span>), (<span class="number">3</span>, <span class="number">4</span>, <span class="string">&#x27;b&#x27;</span>);</span><br><span class="line"></span><br><span class="line">=== PLANNER === </span><br><span class="line">Projection &#123; exprs=[#<span class="number">0.0</span>, #<span class="number">0.1</span>, #<span class="number">0.2</span>] &#125; | (__values#<span class="number">0.0</span>:INTEGER, __values#<span class="number">0.1</span>:INTEGER, __values#<span class="number">0.2</span>:VARCHAR) </span><br><span class="line">Values &#123; rows=<span class="number">2</span> &#125; | (__values#<span class="number">0.0</span>:INTEGER, __values#<span class="number">0.1</span>:INTEGER, __values#<span class="number">0.2</span>:VARCHAR)                     </span><br><span class="line">=== OPTIMIZER ===</span><br><span class="line">Values &#123; rows=<span class="number">2</span> &#125; | (__values#<span class="number">0.0</span>:INTEGER, __values#<span class="number">0.1</span>:INTEGER, __values#<span class="number">0.2</span>:VARCHAR)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，它大概是用缩进来表示了AST的父子关系。</p>
+<p>我们课上学习的语法树中每个table标志对应着一个MockScan；笛卡尔积+选择操作可以表示为一个NestedLoopJoin。</p>
+<p>对于这些输出的意义，指导书也给了详细的解释：</p>
+<p>ColumnValueExpression</p>
+<p>也即类似<code>exprs=[#0.0, #0.1]</code>，<code>#0</code>意为<strong>第一个子节点</strong>（不是第一个表的意思。。）</p>
+<h3 id="Volcano-Model"><a href="#Volcano-Model" class="headerlink" title="Volcano Model"></a>Volcano Model</h3><h4 id="introduction"><a href="#introduction" class="headerlink" title="introduction"></a>introduction</h4><blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_44766883/article/details/131353665">火山模型和优化(向量化执行、编译执行)</a> 这篇文章写得很详细，<strong>下文也摘抄自该博客</strong>。</p>
+<p><a target="_blank" rel="noopener" href="https://www.modb.pro/db/129548">数据库内核通过 code-gen 提升性能的探索</a></p>
+</blockquote>
+<p>火山模型又称 Volcano Model 或者 Pipeline Model（或者<strong>迭代器模型</strong>）。该计算模型将关系代数中每一种操作抽象为一个 Operator，将整个 SQL 构建成一个 Operator 树，从根节点到叶子结点自上而下地递归调用 next() 函数。</p>
+<p>一般Operator的next() 接口实现分为三步：</p>
+<ul>
+<li>调用子节点Operator的next() 接口获取一行数据(tuple)；</li>
+<li>对tuple进行Operator特定的处理(如filter 或project 等)；</li>
+<li>返回处理后的tuple。</li>
+</ul>
+<p>因此，查询执行时会由查询树<strong>自顶向下的调用</strong>next() 接口，数据则<strong>自底向上的被拉取</strong>处理。火山模型的这种处理方式也称为<strong>拉取执行模型</strong>(Pull Based)。</p>
+<p>大多数关系型数据库都是使用迭代模型的，如 SQLite、MongoDB、Impala、DB2、SQLServer、Greenplum、PostgreSQL、Oracle、MySQL 等。</p>
+<p>火山模型的优点是，处理逻辑清晰，简单，每个Operator 只要关心自己的处理逻辑即可，耦合性低。但是缺点也非常明显：</p>
+<ul>
+<li><p>每处理一行需要调用多次next() 函数，而next()为虚函数，开销大。</p>
+<p>编译器无法对虚函数进行inline优化，同时也带来分支预测的开销，且很容易预测失败，导致CPU流水线执行混乱。</p>
+</li>
+<li><p>数据以行为单位进行处理，不利于CPU cache 发挥作用。</p>
+</li>
+</ul>
+<h4 id="pipeline-breaker"><a href="#pipeline-breaker" class="headerlink" title="pipeline breaker"></a>pipeline breaker</h4><p>火山模型显而易见是以从上到下一个流水线形式执行的，它的最理想情况是每个流水线节点所需的这个tuple都存储在寄存器中。然而，有一些操作，如聚合函数等等，需要对整个表进行操作才能获取到当前所需tuple，而整个表显然最多只能读入到内存中，这样的操作就被称为<strong>pipeline breaker</strong>。</p>
+<p>下面的实现中的aggregation、sort、hash join的build阶段都是pipeline breaker，这些复杂的操作阶段都需要在init()函数中进行。</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>TODO，从宏观整个架构简介</p>
+<h2 id="ADDITIONAL-INFORMATION"><a href="#ADDITIONAL-INFORMATION" class="headerlink" title="ADDITIONAL INFORMATION"></a>ADDITIONAL INFORMATION</h2><h3 id="System-Catalog"><a href="#System-Catalog" class="headerlink" title="System Catalog"></a>System Catalog</h3><blockquote>
+<p>The entirety of the catalog implementation is in <code>src/include/catalog/catalog.h</code>. You should pay particular attention to the member functions <code>Catalog::GetTable()</code> and <code>Catalog::GetIndex()</code>. You will use these functions in the implementation of your executors to query the catalog for tables and indexes.</p>
+</blockquote>
+<p>它意思大概是说在实现executor时可能需要用到catelog里这两个函数。</p>
+<p><code>GetTable</code>返回一个<code>TableInfo</code>：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">TableInfo</span> &#123;</span><br><span class="line">  <span class="comment">/** The table schema */</span></span><br><span class="line">  Schema schema_;</span><br><span class="line">  <span class="comment">/** The table name */</span></span><br><span class="line">  <span class="type">const</span> std::string name_;</span><br><span class="line">  <span class="comment">/** An owning pointer to the table heap */</span></span><br><span class="line">  std::unique_ptr&lt;TableHeap&gt; table_;</span><br><span class="line">  <span class="comment">/** The table OID */</span></span><br><span class="line">  <span class="type">const</span> <span class="type">table_oid_t</span> oid_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>For the table modification executors (<code>InsertExecutor</code>, <code>UpdateExecutor</code>, and <code>DeleteExecutor</code>) you must modify all indexes for the table targeted by the operation. You may find the <code>Catalog::GetTableIndexes()</code> function useful for querying all of the indexes defined for a particular table. Once you have the <code>IndexInfo</code> instance for each of the table’s indexes, you can invoke index modification operations on the underlying index structure.</p>
+<p>In this project, we use your implementation of B+ Tree Index from Project 2 as the underlying data structure for all index operations. Therefore, successful completion of this project relies on a working implementation of the B+ Tree Index.</p>
+</blockquote>
+<p><strong>话说index是那个索引吗，就是每张表有几个建立在某个属性的索引，也即一张表可以有n棵b+树</strong></p>
+<p><code>GetIndex</code>返回一个<code>IndexInfo</code>：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">IndexInfo</span> &#123;</span><br><span class="line">  <span class="comment">/** The schema for the index key */</span></span><br><span class="line">  Schema key_schema_;</span><br><span class="line">  <span class="comment">/** The name of the index */</span></span><br><span class="line">  std::string name_;</span><br><span class="line">  <span class="comment">/** An owning pointer to the index */</span></span><br><span class="line">  std::unique_ptr&lt;Index&gt; index_;</span><br><span class="line">  <span class="comment">/** The unique OID for the index */</span></span><br><span class="line">  <span class="type">index_oid_t</span> index_oid_;</span><br><span class="line">  <span class="comment">/** The name of the table on which the index is created */</span></span><br><span class="line">  std::string table_name_;</span><br><span class="line">  <span class="comment">/** The size of the index key, in bytes */</span></span><br><span class="line">  <span class="type">const</span> <span class="type">size_t</span> key_size_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Optimizer-Rule-Implementation-Guide"><a href="#Optimizer-Rule-Implementation-Guide" class="headerlink" title="Optimizer Rule Implementation Guide"></a>Optimizer Rule Implementation Guide</h3><blockquote>
+<p>The BusTub optimizer is a <strong>rule-based optimizer</strong>. Most optimizer rules construct optimized plans in a <strong>bottom-up way</strong>(自底向上). Because the query plan has this tree structure, before applying the optimizer rules to the current plan node, you want to first recursively apply the rules to its children.</p>
+<p>At each plan node, you should determine if the source plan structure matches the one you are trying to optimize, and then check the attributes in that plan to see if it can be optimized into the target optimized plan structure.</p>
+<p><u>In the public BusTub repository, we already provide the implementation of several optimizer rules. Please take a look at them as reference.</u></p>
+</blockquote>
+<h2 id="Task1-Access-Method-Executors"><a href="#Task1-Access-Method-Executors" class="headerlink" title="Task1  Access Method Executors"></a>Task1  Access Method Executors</h2><blockquote>
+<p>In the background section above, we saw that the BusTub can already retrieve data from mock tables in <code>SELECT</code> queries. </p>
+<p>This is implemented without real tables by using a <code>MockScan</code> executor to always generate the same tuples using a predefined algorithm. </p>
+<p>This is why you cannot update these tables.</p>
+</blockquote>
+<p>也就是说意思是目前的mockscan executor不是真的查表，而是返回固定的元组。</p>
+<p>看了一遍代码，感觉大概明白了。我们可以来看一下迭代器的Next函数：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">MockScanExecutor::Next</span><span class="params">(Tuple *tuple, RID *rid)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (cursor_ == size_) &#123;</span><br><span class="line">    <span class="comment">// Scan complete</span></span><br><span class="line">    <span class="keyword">return</span> EXECUTOR_EXHAUSTED;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (shuffled_idx_.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">    *tuple = <span class="built_in">func_</span>(cursor_);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    *tuple = <span class="built_in">func_</span>(shuffled_idx_[cursor_]);</span><br><span class="line">  &#125;</span><br><span class="line">  ++cursor_;</span><br><span class="line">  *rid = <span class="built_in">MakeDummyRID</span>();</span><br><span class="line">  <span class="keyword">return</span> EXECUTOR_ACTIVE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其核心就是调用func_来获取表的元组。</p>
+<p>也就是说是这样的，每个MockScanExecutor用来执行一个plan，那么也就对应着某一个table。通过执行某一个table特定的迭代function，就可以返回元组。</p>
+<p>这个迭代function比如说对于表tas_2023是这样的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (table == <span class="string">&quot;__mock_table_tas_2023&quot;</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> [plan](<span class="type">size_t</span> cursor) &#123;</span><br><span class="line">    std::vector&lt;Value&gt; values&#123;&#125;;</span><br><span class="line">    values.<span class="built_in">push_back</span>(ValueFactory::<span class="built_in">GetVarcharValue</span>(ta_list_2023[cursor]));</span><br><span class="line">    values.<span class="built_in">push_back</span>(ValueFactory::<span class="built_in">GetVarcharValue</span>(ta_oh_2023[cursor]));</span><br><span class="line">    <span class="keyword">return</span> Tuple&#123;values, &amp;plan-&gt;<span class="built_in">OutputSchema</span>()&#125;;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也即<strong>MockScanExecutor负责对表指针的管理，function负责实际对表的物理访问</strong>。这样就成功解耦了。</p>
+<blockquote>
+<p>In this task, you will implement executors that read from and write to tables in the storage system. </p>
+<ul>
+<li><code>src/execution/seq_scan_executor.cpp</code></li>
+<li><code>src/execution/insert_executor.cpp</code></li>
+<li><code>src/execution/update_executor.cpp</code></li>
+<li><code>src/execution/delete_executor.cpp</code></li>
+<li><code>src/execution/index_scan_executor.cpp</code></li>
+</ul>
+</blockquote>
+<p>而我们本次实验就是需要实现这么一大堆的executor。看来又是个体力活了。</p>
+<h3 id="seq-scan"><a href="#seq-scan" class="headerlink" title="seq_scan"></a>seq_scan</h3><h4 id="一些想法"><a href="#一些想法" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="c-知识"><a href="#c-知识" class="headerlink" title="c++知识"></a>c++知识</h5><p><img src="/2024/01/14/cmu15445/image-20240115121419677.png" alt="image-20240115121419677"></p>
+<p>可以看到，前缀++重载的运算符方法和后缀++是不一样的。</p>
+<blockquote>
+<p>这里我理解得还是肤浅了…… 根据 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/625890227#:~:text=%E5%86%8D%E5%AE%9E%E7%8E%B0%20Update-,2.%20%2B%2Bi%20%E4%B8%8E%20i%2B%2B%20%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F,-%E5%9C%A8%E5%AE%9E%E7%8E%B0%20SeqScan">这篇文章</a>，<code>++i</code> 的内部类定义为 <code>T&amp; T:: operator++();</code>，而 <code>i++</code> 的内部类定义为 <code>T T:: operator++(int);</code>[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/625890227#ref_1">1]</a>，<strong>前置操作返回引用，后置操作返回值</strong>。后置操作的 <code>int</code> 参数是一个虚拟参数，用于区分运算符 <code>++</code> 的前置和后置。<strong>理论上，<code>i++</code> 会产生临时对象</strong>，实践中，编译器会对内置类型进行优化；而<strong>对于自定义类型</strong>（如这里的 Iterator），<code>++i</code> 的性能通常优于 <code>i++</code>。</p>
+</blockquote>
+<h5 id="MockScan"><a href="#MockScan" class="headerlink" title="MockScan"></a>MockScan</h5><p>值得一提的是它跟MockScan的关系。MockScan是一种模拟操作，所以各种表都是硬编码在它的mock_scan.h里的；而SeqScan就是真正的遍历操作了，它需要获取tuple就需要通过各种复杂的物理操作和封装一步步读取了。</p>
+<h5 id="physical-layer"><a href="#physical-layer" class="headerlink" title="physical layer"></a>physical layer</h5><p>通过实现SeqScan，我们可以初步窥探整个bustub物理层面交互的架构。</p>
+<p>跟之前project中的索引entry一样，实际的数据tuple也保存在page中，其对应类为<code>TablePage</code>。并且是堆文件组织结构：</p>
+<p><img src="/2024/01/14/cmu15445/image-20240115114448798.png" alt="image-20240115114448798"></p>
+<blockquote>
+<p><code>TablePage</code>的结构值得一提。</p>
+<p>在它的成员定义中，我们可以看到其中有两个柔性数组成员（Flexible array member）：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> page_start_[<span class="number">0</span>];</span><br><span class="line">TupleInfo tuple_info_[<span class="number">0</span>];</span><br></pre></td></tr></table></figure>
+
+<p>之前的Project2，我们只接触过一个的case，这里的两个感觉其实也同理可得，相当于<code>page_start_</code>和<code>tuple_info_</code>都指向最末尾空闲空间的开始。</p>
+<p><code>TablePage</code>的实际存储结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-&gt;  increase											   increase  &lt;-</span><br><span class="line">| ------------------------------- | ********************************* |</span><br><span class="line">↑								  ↑</span><br><span class="line">page_start &amp; tuple_info    +TUPLE_INFO_SIZE*<span class="title function_">sizeof</span><span class="params">(TupleInfo)</span></span><br></pre></td></tr></table></figure>
+
+<p>也即tuple info存储在前半部分，tuple data存储在后半部分，并且二者增长方式相反。</p>
+</blockquote>
+<p>而多页<code>TablePage</code>就构成了一个<code>TableHeap</code>，也即其物理存储空间。每次创建表时，我们就会分配对应的heap空间和相关meta data。<code>TableHeap</code>对外提供了增删改查元组的方法，也提供了一个迭代器实现<code>TableIterator</code>，用于遍历里面的元素。</p>
+<p>而由于元组tuple存储在磁盘中，所以我们需要在读取它的值的时候先进行反序列化<code>DeserializeFrom</code>，这个过程需要用到表的类型信息和offset信息之类的，所以<code>Tuple::GetValue</code>需要传入<code>schema</code>参数。</p>
+<h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><p>它基本原理也就是顺序遍历整张表，没什么好说的。</p>
+<p>在本次的sequence scan实现中，我们就需要首先获取表对应的iterator：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 巨长一串</span></span><br><span class="line">table_iterator_ = std::<span class="built_in">make_unique</span>&lt;TableIterator&gt;(exec_ctx_-&gt;<span class="built_in">GetCatalog</span>()-&gt;<span class="built_in">GetTable</span>(plan_-&gt;<span class="built_in">GetTableOid</span>())-&gt;table_-&gt;<span class="built_in">MakeIterator</span>());</span><br></pre></td></tr></table></figure>
+
+<p>然后通过这个iterator不断迭代获取元素即可。</p>
+<p>有一点要注意的，应该是对删除元组的处理，毕竟sequence scan算是是实现其他二级操作的基石了，所以我们必须在这里处理删除元组。具体逻辑如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (table_iterator_-&gt;<span class="built_in">IsEnd</span>()) &#123;</span><br><span class="line">    <span class="keyword">return</span> EXECUTOR_EXHAUSTED;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  get tuple;</span><br><span class="line">  ++ iterator;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">while</span>(tuple_meta.is_deleted_);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="insert"><a href="#insert" class="headerlink" title="insert"></a>insert</h3><h4 id="一些想法-1"><a href="#一些想法-1" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="recursive-execute"><a href="#recursive-execute" class="headerlink" title="recursive execute"></a>recursive execute</h5><p>对于SQL的嵌套子查询，bustub采用的是递归实现。具体来说，以insertion为例：</p>
+<p>外界调用情况如下所示。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Execute a query plan.</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">Execute</span><span class="params">(...)</span> -&gt; <span class="type">bool</span> </span>&#123;</span><br><span class="line">  <span class="comment">// Construct the executor for the abstract plan node</span></span><br><span class="line">  <span class="keyword">auto</span> executor = ExecutorFactory::<span class="built_in">CreateExecutor</span>(exec_ctx, plan);      </span><br><span class="line">  executor-&gt;<span class="built_in">Init</span>();</span><br><span class="line">  <span class="built_in">PollExecutor</span>(executor.<span class="built_in">get</span>(), plan, result_set);</span><br><span class="line">  <span class="built_in">PerformChecks</span>(exec_ctx);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>CreateExecutor</code>是一个递归函数，递归创建每个子查询的实例，把对应的executor返回给父查询</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">ExecutorFactory::CreateExecutor</span><span class="params">(...)</span></span></span><br><span class="line"><span class="function">    -&gt; std::unique_ptr&lt;AbstractExecutor&gt; </span>&#123;</span><br><span class="line">    </span><br><span class="line">  <span class="keyword">switch</span> (plan-&gt;<span class="built_in">GetType</span>()) &#123;</span><br><span class="line">          </span><br><span class="line">    <span class="keyword">case</span> PlanType::SeqScan: &#123;</span><br><span class="line">      <span class="keyword">return</span> std::<span class="built_in">make_unique</span>&lt;SeqScanExecutor&gt;(exec_ctx, <span class="built_in">dynamic_cast</span>&lt;<span class="type">const</span> SeqScanPlanNode *&gt;(plan.<span class="built_in">get</span>()));</span><br><span class="line">    &#125;</span><br><span class="line">          </span><br><span class="line">    <span class="keyword">case</span> PlanType::Insert: &#123;</span><br><span class="line">      <span class="keyword">auto</span> insert_plan = <span class="built_in">dynamic_cast</span>&lt;<span class="type">const</span> InsertPlanNode *&gt;(plan.<span class="built_in">get</span>());</span><br><span class="line">      <span class="comment">// 递归创建每个子查询的实例</span></span><br><span class="line">      <span class="keyword">auto</span> child_executor = ExecutorFactory::<span class="built_in">CreateExecutor</span>(exec_ctx, insert_plan-&gt;<span class="built_in">GetChildPlan</span>());</span><br><span class="line">      <span class="comment">// 把对应的executor返回给父查询</span></span><br><span class="line">      <span class="keyword">return</span> std::<span class="built_in">make_unique</span>&lt;InsertExecutor&gt;(exec_ctx, insert_plan, std::<span class="built_in">move</span>(child_executor));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后我们再在父查询的Init中调用子查询的Init和Next等方法</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">InsertExecutor::Init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  child_executor_-&gt;<span class="built_in">Init</span>();</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如此，就能递归实现嵌套子查询。</p>
+<h4 id="实现-1"><a href="#实现-1" class="headerlink" title="实现"></a>实现</h4><blockquote>
+<p>The <code>InsertExecutor</code> inserts tuples into a table and <strong>updates any affected indexes</strong>.</p>
+<p>The planner will ensure that the values have the same schema as the table. The executor will produce a single tuple of integer type as the output, indicating how many rows have been inserted into the table.</p>
+</blockquote>
+<p>这里将Insert语句插入的值视为一个匿名子表，对其初始化后使用它的迭代器进行元素访问即可。</p>
+<h3 id="update"><a href="#update" class="headerlink" title="update"></a>update</h3><h4 id="一些想法-2"><a href="#一些想法-2" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="expression"><a href="#expression" class="headerlink" title="expression"></a>expression</h5><p>bustub将一切表达式抽象为了这么几个类：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">AbstractExpression <span class="comment">// 基类</span></span><br><span class="line">ConstantValueExpression <span class="comment">// 常量值表达式</span></span><br><span class="line">ColumnValueExpression <span class="comment">// 列值表达式，访问某一列的值</span></span><br><span class="line">ArithmeticExpression <span class="comment">// 算术表达式，树递归结构，子节点是值or算术表达式</span></span><br><span class="line">ComparisonExpression <span class="comment">// 比较表达式，表示两个表达式</span></span><br><span class="line">LogicExpression <span class="comment">// 逻辑表达式</span></span><br><span class="line">StringExpression <span class="comment">// 字符串表达式，包括原字符串or upper之类的</span></span><br></pre></td></tr></table></figure>
+
+<p>而从UpdatePlanNode中，我们可以获取到update字句的所有表达式：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** The new expression at each column */</span></span><br><span class="line">std::vector&lt;AbstractExpressionRef&gt; target_expressions_;</span><br></pre></td></tr></table></figure>
+
+<p>比如此处：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">bustub&gt; explain (o,s) update test_1 <span class="built_in">set</span> colB = <span class="number">15445</span>;</span><br><span class="line">=== OPTIMIZER ===</span><br><span class="line"><span class="comment">// 可以注意这边target_exprs的值</span></span><br><span class="line">Update &#123; table_oid=<span class="number">20</span>, target_exprs=[#<span class="number">0.0</span>, <span class="number">15445</span>, #<span class="number">0.2</span>, #<span class="number">0.3</span>] &#125; | (__bustub_internal.update_rows:INTEGER)</span><br><span class="line">  SeqScan &#123; table=test_1 &#125; | (test_1.colA:INTEGER, test_1.colB:INTEGER, test_1.colC:INTEGER, test_1.colD:INTEGER)</span><br></pre></td></tr></table></figure>
+
+<p>然后我们分别计算每个expression的值，就可以获取更新之后的元组：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">// insert again</span></span><br><span class="line">   std::vector&lt;Value&gt; insert_values;</span><br><span class="line">   <span class="keyword">for</span> (<span class="keyword">auto</span> exp : plan_-&gt;target_expressions_) &#123;</span><br><span class="line">     <span class="comment">// tuple为旧值元组</span></span><br><span class="line">     insert_values.<span class="built_in">push_back</span>(exp-&gt;<span class="built_in">Evaluate</span>(&amp;tuple, table_info-&gt;schema_));</span><br><span class="line">   &#125;</span><br><span class="line"><span class="comment">// 注意table_info应为要插入的表的info，此处易写为update plan子表的info</span></span><br><span class="line">   table_heap-&gt;<span class="built_in">InsertTuple</span>(<span class="built_in">TupleMeta</span>(), <span class="built_in">Tuple</span>(insert_values, &amp;(table_info-&gt;schema_)));</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="lazy-delete"><a href="#lazy-delete" class="headerlink" title="lazy delete"></a>lazy delete</h5><p>删除元组的实现似乎只是简单地标记<code>is_delete_</code>为true就好了。但是我在实际的代码实现（<code>InsertTuple</code>）中似乎并没有看到重组删除空间or覆盖删除空间，每次插入页满只是简单地再申请新的一页，不会再回头。也许是为了简化起见暂不实现这个吧。</p>
+<p>不过改进方法也很简单，对每个表进行固定分配页（或者说提供一个数据量达到百分之几的时候扩容的机制），然后页面间组织成环形链表，这样就能充分覆盖删除空间，同时也兼顾一定性能了。</p>
+<h4 id="实现-2"><a href="#实现-2" class="headerlink" title="实现"></a>实现</h4><p>update的实现也不会很难，只需先删除原来的元组，再加个新元组即可。</p>
+<h3 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h3><p>delete的实现完全照搬update就行，没什么好说的。</p>
+<h3 id="index-scan"><a href="#index-scan" class="headerlink" title="index_scan"></a>index_scan</h3><blockquote>
+<p>The <code>IndexScanExecutor</code> iterates over an <strong>index</strong> to retrieve <code>RIDs</code> for tuples. The operator then uses these RIDs to retrieve their tuples in the corresponding table. It then emits these tuples one at a time.</p>
+<p>You can test your index scan executor by <code>SELECT FROM &lt;table&gt; ORDER BY &lt;index column&gt;</code>. We will explain why <code>ORDER BY</code> can be transformed into <code>IndexScan</code> in <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/project3/#task3">Task #3</a>.     哦吼，也就是说order-by会被翻译为index scan？那order-by的关键字如果不存在索引会怎么样，现建吗</p>
+<p>BusTub only supports indexes with a single, unique integer column. Our test cases will not contain duplicate keys. The type of the index object in the plan will <strong>always be</strong> <code>BPlusTreeIndexForTwoIntegerColumn</code> in this project. You can safely cast it and store it in the executor object:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> BPlusTreeIndexForTwoIntegerColumn = BPlusTreeIndex&lt;IntegerKeyType, IntegerValueType, IntegerComparatorType&gt;;</span><br><span class="line"></span><br><span class="line">tree_ = <span class="built_in">dynamic_cast</span>&lt;BPlusTreeIndexForTwoIntegerColumn *&gt;(index_info_-&gt;index_.<span class="built_in">get</span>())</span><br></pre></td></tr></table></figure>
+
+<p>但我看测试里怎么好像有两个键的index？</p>
+<p>You can then construct an index iterator from the index object, scan through all the keys and tuple IDs, lookup the tuple from the table heap, and emit all tuples in order. </p>
+<p>是的，project2的b+树实现确实只存了rid，然后我们通过rid就能知道实际的物理位置了</p>
+</blockquote>
+<h4 id="一些想法-3"><a href="#一些想法-3" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="索引实现"><a href="#索引实现" class="headerlink" title="索引实现"></a>索引实现</h5><p>通过b+树组织索引结构，索引结点中存的是RID，RID可以用来指示tuple的物理位置，于是我们通过RID就可以获取到tuple，从而减少了磁盘IO。RID结构如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// RID: Record Identifier</span></span><br><span class="line"><span class="comment">// 高32位是pgid，低32位是slot num</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RID</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">explicit</span> <span class="title">RID</span><span class="params">(<span class="type">int64_t</span> rid)</span> : page_id_(static_cast&lt;page_id_t&gt;(rid &gt;&gt; <span class="number">32</span>)), slot_num_(static_cast&lt;uint32_t&gt;(rid)) &#123;</span>&#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">inline</span> <span class="keyword">auto</span> <span class="title">Get</span><span class="params">()</span> <span class="type">const</span> -&gt; <span class="type">int64_t</span> </span>&#123; <span class="keyword">return</span> (<span class="built_in">static_cast</span>&lt;<span class="type">int64_t</span>&gt;(page_id_)) &lt;&lt; <span class="number">32</span> | slot_num_; &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  <span class="type">page_id_t</span> page_id_&#123;INVALID_PAGE_ID&#125;;</span><br><span class="line">  <span class="type">uint32_t</span> slot_num_&#123;<span class="number">0</span>&#125;;  <span class="comment">// logical offset from 0, 1...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>并且，bustub保证了对于有索引的表，是不会有重复元组的，故而b+树实际上应该是一个稠密索引。</p>
+<p>（毕竟这个情况似乎有点复杂……物理存储上应该是按插入顺序顺序存储的，故而重复元组可能不放在一起，而我们实现的b+树又不支持重复结点，所以就会g。如果想要支持重复元组，可能就需要从两个改变思路入手，要么是修改b+树支持重复索引结点，此时b+树依然为稠密索引；要么是修改为链式存储结构以支持重复元组放在一起，此时b+树为稀疏索引。）</p>
+<h5 id="c-知识-1"><a href="#c-知识-1" class="headerlink" title="c++知识"></a>c++知识</h5><p>非常非常崩溃，怎么保存索引尝试了很久都没做到：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这样不行……</span></span><br><span class="line">std::unique_ptr&lt;BPlusTreeIndexIteratorForTwoIntegerColumn&gt; iterator_;</span><br><span class="line">iterator_ = std::<span class="built_in">make_unique</span>&lt;BPlusTreeIndexIteratorForTwoIntegerColumn&gt;(std::<span class="built_in">move</span>(tree_-&gt;<span class="built_in">GetBeginIterator</span>()));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这样也不行……</span></span><br><span class="line">BPlusTreeIndexIteratorForTwoIntegerColumn iterator_;</span><br><span class="line">iterator_ = std::<span class="built_in">move</span>(tree_-&gt;<span class="built_in">GetBeginIterator</span>());</span><br></pre></td></tr></table></figure>
+
+<p>没办法，最终只能保存tree，iterator在next里动态获取了，我真是服了。等之后看完c++primer或者c++水平有所提升了再来解决这个问题吧。</p>
+<h4 id="实现-3"><a href="#实现-3" class="headerlink" title="实现"></a>实现</h4><p>难绷，本来以为这个index-scan应该是最简单的，毕竟只用调用现成索引接口，没想到居然写了最久，可能足足两三个小时。。。</p>
+<p>首先的一个大难点就是如何保存迭代器了。在之前的seq-scan的时候，使用的是unique ptr，然而这里却不行会报一堆奇奇怪怪的错误（具体见<code>一些想法-c++知识</code>）。最后只能换一个思路，不保存迭代器而是保存<code>next_key_</code>了。然而又由于之前b+树的实现bug问题，导致对end iterator解引用是合法的，所以会产生各种奇奇怪怪的错误。解决了这个之后，之前写的insert、update、delete的更新索引部分又出了问题，rid和insert_key弄错了，诸如此类。</p>
+<p>总之，解决了这一大堆小问题之后，才总算通过了index-scan的测试，真是令人南蚌。具体改了什么bug可以详情见<code>b8d3ba546cfdea6fc576ad8d668322c87f6386c1</code>这个commit。</p>
+<p>同时，也跟上面的sequence scan一样，都需要对标识为deleted的元组进行跳过处理。</p>
+<blockquote>
+<p>这里我也是没想太多……事实上，index scan无需实时检测is_deleted字段并做处理，因为索引是会随着修改实时更新的，被删除的tuple不会在索引中。</p>
+</blockquote>
+<h2 id="Task2-Aggregation-amp-Join-Executors"><a href="#Task2-Aggregation-amp-Join-Executors" class="headerlink" title="Task2  Aggregation &amp; Join Executors"></a>Task2  Aggregation &amp; Join Executors</h2><blockquote>
+<p>In this task you will add an <strong>aggregation executor</strong>, several <strong>join executors</strong>, and enable the optimizer to <strong>select between</strong> a nested loop join and hash join when planning a query. </p>
+<p>You will complete your implementation in the following files:</p>
+<ul>
+<li><code>src/execution/aggregation_executor.cpp</code></li>
+<li><code>src/execution/nested_loop_join_executor.cpp</code></li>
+<li><code>src/execution/hash_join_executor.cpp</code></li>
+<li><code>src/optimizer/nlj_as_hash_join.cpp</code></li>
+</ul>
+</blockquote>
+<h3 id="aggregation"><a href="#aggregation" class="headerlink" title="aggregation"></a>aggregation</h3><blockquote>
+<p>The <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/include/execution/plans/aggregation_plan.h"><code>AggregationPlanNode</code></a> is used to support queries like the following:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT colA, MIN(colB) FROM __mock_table_1 GROUP BY colA;</span><br><span class="line">EXPLAIN SELECT COUNT(colA), mi(colB) FROM __mock_table_1;</span><br><span class="line">EXPLAIN SELECT colA, MIN(colB) FROM __mock_table_1 GROUP BY colA HAVING MAX(colB) &gt; 10;</span><br><span class="line">EXPLAIN SELECT DISTINCT colA, colB FROM __mock_table_1;</span><br></pre></td></tr></table></figure>
+
+<p>也即聚合函数和DISTINCT、GROUP这种。</p>
+</blockquote>
+<p>此处注意DINSTINCT也是通过aggregation实现的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT DISTINCT colA, colB FROM __mock_table_1;</span><br><span class="line">=== OPTIMIZER ===                                                                                                   </span><br><span class="line"> Agg &#123; types=[], aggregates=[], group_by=[#<span class="number">0.0</span>, #<span class="number">0.1</span>] &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER) </span><br><span class="line">   MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)  </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>The aggregation executor computes an aggregation function for <strong>each group of input</strong>. 作用于每一组</p>
+<p>It has exactly one child. The output schema consists of the group-by columns followed by the aggregation columns.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT colA, MIN(colB) FROM __mock_table_1 GROUP BY colA;</span><br><span class="line">=== OPTIMIZER ===</span><br><span class="line"><span class="comment">// types标志聚合的种类，aggregates标识聚合的目标，group_by单独用于表示是否有group</span></span><br><span class="line">Agg &#123; types=[min], aggregates=[#<span class="number">0.1</span>], group_by=[#<span class="number">0.0</span>] &#125; | (__mock_table_1.colA:INTEGER, &lt;unnamed&gt;:INTEGER) </span><br><span class="line">MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">EXPLAIN SELECT COUNT(colA), min(colB) FROM __mock_table_1</span><br><span class="line">=== OPTIMIZER ===                                                                    <span class="comment">// 如果没有group，则其字段为空                 </span></span><br><span class="line">Agg &#123; types=[count, min], aggregates=[#<span class="number">0.0</span>, #<span class="number">0.1</span>], group_by=[] &#125; | (&lt;unnamed&gt;:INTEGER, &lt;unnamed&gt;:INTEGER) </span><br><span class="line">MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)  </span><br></pre></td></tr></table></figure>
+
+<p>As discussed in class, a common strategy for implementing aggregation is to use a <strong>hash table</strong>, with the group-by columns as the <strong>key</strong>. </p>
+<p>In this project, you may assume that the aggregation hash table <strong>fits in memory</strong>. This means that you do not need to implement a multi-stage, partition-based strategy, and the hash table does not need to be backed by buffer pool pages.</p>
+<p>  也就是说这里采取的是基于hashtable的实现而非基于归并排序的，并且为了简单起见将hash table保存在内存中，所以无需进行多趟划分扫描。</p>
+<p>We provide a <code>SimpleAggregationHashTable</code> data structure that exposes an in-memory hash table (<code>std::unordered_map</code>) but with an interface designed for computing aggregations. This class also exposes an <code>SimpleAggregationHashTable::Iterator</code> type that can be used to iterate through the hash table. You will need to complete the <code>CombineAggregateValues</code> function for this class.</p>
+</blockquote>
+<blockquote>
+<p><strong>Note</strong>: The aggregation executor itself won’t need to handle the <code>HAVING</code> predicate. The planner will plan aggregations with a <code>HAVING</code> clause as <u>an <code>AggregationPlanNode</code> followed by a <code>FilterPlanNode</code></u>.</p>
+</blockquote>
+<blockquote>
+<p><strong>Hint:</strong> In the context of a query plan, aggregations are <em>pipeline breakers</em>. This may influence the way that you use the <code>AggregationExecutor::Init()</code> and <code>AggregationExecutor::Next()</code> functions in your implementation. Carefully decide whether the build phase of the aggregation should be performed in <code>AggregationExecutor::Init()</code> or <code>AggregationExecutor::Next()</code>.</p>
+</blockquote>
+<h4 id="一些想法-4"><a href="#一些想法-4" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="countstar"><a href="#countstar" class="headerlink" title="countstar"></a>countstar</h5><p>值得注意的是，这里的实现将<code>COUNT(*)</code>和<code>COUNT(colum)</code>区分开了：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum class</span> <span class="title class_">AggregationType</span> &#123; CountStarAggregate, CountAggregate &#125;;</span><br></pre></td></tr></table></figure>
+
+<p>因为这两者似乎语义上是有区别的，大概体现为以下几点：</p>
+<ol>
+<li>当没有结果时，CountStar返回0，Count返回integer_null</li>
+<li>CountStar只记录行数，不管值是否为空；Count只记录所要求的列非空的那些行数</li>
+</ol>
+<h5 id="hash-aggregation"><a href="#hash-aggregation" class="headerlink" title="hash aggregation"></a>hash aggregation</h5><p>关于hashtable实现聚合的相关原理及相关示例，具体可见 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/52969666">这篇文章</a>。感觉这系列文章都写得挺好的，如对TiDB有兴趣可以细看。</p>
+<blockquote>
+<p>在 SQL 中，聚合操作对一组值执行计算，并返回单个值。TiDB 实现了 <u>2 种聚合算法：Hash Aggregation 和 Stream Aggregation</u>。</p>
+<p>在 Hash Aggregate 的计算过程中，我们需要维护一个 Hash 表，Hash 表的<u>键为聚合计算的 <code>Group-By</code> 列</u>，<u>值为聚合函数的中间结果 <code>sum</code> 和 <code>count</code></u>。</p>
+<p>计算过程中，只需要根据每行输入数据计算出键，在 Hash 表中找到对应值进行更新即可。输入数据输入完后，<u>扫描 Hash 表并计算，便可以得到最终结果</u>。</p>
+</blockquote>
+<p>故而思路也是很清晰了。我们在aggregation的实现中要做的，就是把child executor逐行喂给hashtable，最后再遍历hashtable得到结果即可。故而，我们重点需要实现hashtable的<code>InsertCombine</code>函数和hashtable的iterator。</p>
+<h4 id="实现-4"><a href="#实现-4" class="headerlink" title="实现"></a>实现</h4><p>理解了hash-aggregation的算法原理后，代码逻辑方面就不算难了，其余最主要的难点应该是空值的处理。</p>
+<p>总结一下，bustub对空值的处理大概有以下几个要点：</p>
+<ol>
+<li><p>聚合函数对空值处理</p>
+<p><code>COUNT(*)</code>：计入空值</p>
+<p><code>COUNT/MAX/MIN/SUM(v1)</code>：跳过空值</p>
+</li>
+<li><p>空值自身运算性质</p>
+<p>任意运算若有一个操作数为空，那么结果也为空。</p>
+<p>故而，当没有使用<code>group by</code>关键字的时候（也即hashtable的key为空），此时不能天真地传入一个空的AggregationKey，而应该给它随便塞某个值。不然的话，hashtable内部的比较函数在处理空值的时候恒返回false，会导致检索失败。</p>
+</li>
+<li><p>空表情况处理</p>
+<p>当表为空的时候，要求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select COUNT(*), MAX(v1), COUNT(v1) from table_;</span><br><span class="line"># 0 integer_null integer_null</span><br><span class="line">select COUNT(*), MAX(v1), COUNT(v1) from table_ group by v2;</span><br><span class="line"># no-output</span><br></pre></td></tr></table></figure>
+
+<p>这个操作我着实不懂为什么。。。所以我最终代码只能面向测试用例：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!has_next &amp;&amp; plan_-&gt;<span class="built_in">GetGroupBys</span>().<span class="built_in">empty</span>()) &#123;</span><br><span class="line">    <span class="comment">// 当表为空并且不使用聚合函数时，输出一个默认情况对</span></span><br><span class="line">    AggregateKey agg_key;</span><br><span class="line">    agg_key.group_bys_.<span class="built_in">push_back</span>(<span class="built_in">Value</span>(TypeId::INTEGER, <span class="number">1</span>));</span><br><span class="line">    aht_-&gt;<span class="built_in">InsertCombine</span>(agg_key, <span class="built_in">MakeAggregateValue</span>(<span class="literal">nullptr</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="NestedLoopJoin"><a href="#NestedLoopJoin" class="headerlink" title="NestedLoopJoin"></a>NestedLoopJoin</h3><blockquote>
+<p>The DBMS will use <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/include/execution/plans/nested_loop_join_plan.h"><code>NestedLoopJoinPlanNode</code></a> for all join operations, <strong>by default</strong>.</p>
+<p>You will need to implement an <strong>inner join and <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Join_(SQL)#Left_outer_join">left join</a></strong> for the <code>NestedLoopJoinExecutor</code> using the simple nested loop join algorithm from class. </p>
+<p>The output schema of this operator is all columns from the left table followed by all columns from the right table. </p>
+<p>For each tuple in the outer table, consider each tuple in the inner table and emit an output tuple if the join predicate is satisfied.</p>
+</blockquote>
+<p>也即嵌套循环实现的join，与在课上学的sort merge join一样，都是古法join实现。</p>
+<p>nested join的实现相比之前的思路确实会复杂一些。我们需要学习如何迭代地调用<code>Next</code>来实现一次嵌套循环。思路大概是这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Init():</span><br><span class="line">    Init left, right</span><br><span class="line">    Move left to get current_left_tuple_</span><br><span class="line">Next():</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>):</span><br><span class="line">        <span class="keyword">if</span> (Move(right)) :;</span><br><span class="line">    	<span class="keyword">else</span>:</span><br><span class="line">            Move left</span><br><span class="line">            Init right</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkPredict):</span><br><span class="line">            <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>然而其中有这几个细节需要进行处理：</p>
+<ol>
+<li><p>左连接的实现</p>
+<p>需要增加逻辑：当right遍历完之后，<code>current_left_tuple_</code>仍未被组装进结果过，此时需要帮其拼接上空right tuple。</p>
+</li>
+<li><p>空表情况</p>
+<p>这个分支中：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">else</span>:</span><br><span class="line">       Move left</span><br><span class="line">       Init right</span><br><span class="line">       <span class="keyword">continue</span>;</span><br></pre></td></tr></table></figure>
+
+<p>不能这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">else</span>:</span><br><span class="line">       Move left</span><br><span class="line">       Init right</span><br><span class="line">       Move right</span><br></pre></td></tr></table></figure>
+
+<p>这是为了防止空表情况，使得Move right一直返回false，导致之后checkPredict报空指针异常。</p>
+</li>
+<li><p>测试要求<code>left-&gt;Next()</code>调用次数与<code>right-&gt;Init()</code>调用次数相同。</p>
+<blockquote>
+<p>这是为了强制让NestedLoopJoin的实现不是Pipeline Break，从而导致它性能垃圾了</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="HashJoin"><a href="#HashJoin" class="headerlink" title="HashJoin"></a>HashJoin</h3><blockquote>
+<p>The DBMS can use <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/include/execution/plans/hash_join_plan.h"><code>HashJoinPlanNode</code></a> if a query contains a join with a <strong>conjunction of equi-conditions between two columns (equi-conditions are seperated by <code>AND</code>)</strong>. </p>
+<p>也就是说，当连接条件为一/多个列相等时，就可以用hash join。可以看到这是类似等值连接。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * FROM __mock_table_1, __mock_table_3 WHERE colA = colE;</span><br><span class="line">EXPLAIN SELECT * FROM __mock_table_1 INNER JOIN __mock_table_3 ON colA = colE;</span><br><span class="line">EXPLAIN SELECT * FROM __mock_table_1 LEFT OUTER JOIN __mock_table_3 ON colA = colE;</span><br><span class="line">EXPLAIN SELECT * FROM test_1 t1, test_2 t2 WHERE t1.colA = t2.colA AND t1.colB = t2.colC;</span><br><span class="line">EXPLAIN SELECT * FROM test_1 t1 INNER JOIN test_2 t2 on t1.colA = t2.colA AND t2.colC = t1.colB;</span><br><span class="line">EXPLAIN SELECT * FROM test_1 t1 LEFT OUTER JOIN test_2 t2 on t2.colA = t1.colA AND t2.colC = t1.colB;</span><br></pre></td></tr></table></figure>
+
+<p>You will need to implement the inner join and <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Join_(SQL)#Left_outer_join">left join</a> for <code>HashJoinExecutor</code> using the hash join algorithm from class. </p>
+<p>The output schema of this operator is all columns from the left table followed by all columns from the right table. </p>
+<p>As with aggregation, you may assume that the hash table used by the join fits entirely in memory.</p>
+<p><strong>Hint:</strong> Your implementation should correctly handle the case where multiple tuples have hash collisions (on either side of the join). 必须正确处理哈希冲突的情况</p>
+<p><strong>Hint:</strong> You will want to make use of the join key accessors functions <code>GetLeftJoinKey()</code> and <code>GetRightJoinKey()</code> in the <code>HashJoinPlanNode</code> to construct the join keys for the left and right sides of the join, respectively.</p>
+<p><strong>Hint:</strong> You will need a way to hash a tuple with multiple attributes in order to construct a unique key. As a starting point, take a look at how the <code>SimpleAggregationHashTable</code> in the <code>AggregationExecutor</code> implements this functionality. 可以参考 <code>SimpleAggregationHashTable</code>的实现</p>
+<p><strong>Hint:</strong> As with aggregation, the build side of a hash join is a <em>pipeline breaker</em>. You should again consider whether the <em>build</em> phase of the hash join should be performed in <code>HashJoinExecutor::Init()</code> or <code>HashJoinExecutor::Next()</code>.</p>
+</blockquote>
+<p>具体什么是hash join，可以参考 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/663637344">这篇文章</a>。</p>
+<p><img src="/2024/01/14/cmu15445/v2-bb022b4a6da1743b5f421248a0bae358_r.jpg" alt="img"></p>
+<p>其大概思路也很简单，hash table就是一个<code>map&lt;key, vector&lt;value&gt;&gt;</code>这样的数据结构，然后将两个输入的关系选举出一个小表作为Build（建立hash table），另一个作为Probe（扫描，并根据hash table-&gt;second进行迭代组合）。它其实就是一个精确了范围的nested loop join的变种，将nested里层的针对整个关系的大循环缩小为针对hash table一个bucket的小循环。</p>
+<p>具体到这里，思路可以是这样的。首先为了简单起见，我们就不进行选举小表的判断了，固定将right child作为Build，left child作为Probe。建表的话，我们就简单粗暴地遍历right table，然后以<code>right_key_expressions_</code>为key<code>Tuple</code>为value直接建表（反正也是in-memory即可。。。）。然后之后，就仿照之前思路即可。</p>
+<h3 id="Optimizing-NestedLoopJoin-to-HashJoin"><a href="#Optimizing-NestedLoopJoin-to-HashJoin" class="headerlink" title="Optimizing NestedLoopJoin to HashJoin"></a>Optimizing NestedLoopJoin to HashJoin</h3><blockquote>
+<p>Hash joins usually yield better performance than nested loop joins. You should modify the optimizer to transform a <code>NestedLoopJoinPlanNode</code> into a <code>HashJoinPlanNode</code> when it is possible to use a hash join. </p>
+<p>Specifically, the hash join algorithm can be used <u>when a join predicate is a conjunction of equi-conditions between two columns</u>. For the purpose of this project, handling a <strong>single</strong> equi-condition, and also <strong>two</strong> equi-conditions connected by <code>AND</code>, will earn full credit.</p>
+<p>Consider the following example:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bustub&gt; EXPLAIN (o) SELECT * FROM test_1 t1, test_2 t2 WHERE t1.colA = t2.colA AND t1.colB = t2.colC;</span><br></pre></td></tr></table></figure>
+
+<p>Without applying the <code>NLJAsHashJoin</code> optimizer rule, the plan may look like:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NestedLoopJoin &#123; type=Inner, predicate=((#<span class="number">0.0</span>=#<span class="number">1.0</span>)and(#<span class="number">0.1</span>=#<span class="number">1.2</span>)) &#125; </span><br><span class="line">SeqScan &#123; table=test_1 &#125;                                           </span><br><span class="line">SeqScan &#123; table=test_2 &#125;</span><br></pre></td></tr></table></figure>
+
+<p>After applying the <code>NLJAsHashJoin</code> optimizer rule, the left and right join key expressions will be extracted from the single join predicate in the <code>NestedLoopJoinPlanNode</code>. The resulting plan will look like:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HashJoin &#123; type=Inner, left_key=[#<span class="number">0.0</span>, #<span class="number">0.1</span>], right_key=[#<span class="number">0.0</span>, #<span class="number">0.2</span>] &#125; </span><br><span class="line">SeqScan &#123; table=test_1 &#125;                                             </span><br><span class="line">SeqScan &#123; table=test_2 &#125; </span><br></pre></td></tr></table></figure>
+
+<p><strong>Note:</strong> Please check the <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/project3/##optimizer-rule-implementation-guide">Optimizer Rule Implementation Guide</a> section for details on implementing an optimizer rule.</p>
+<p><strong>Hint:</strong> Make sure to check which table the column belongs to for each side of the equi-condition. It is possible that the column from outer table is on the right side of the equi-condition. You may find <code>ColumnValueExpression::GetTupleIdx</code> helpful.</p>
+<p><strong>Hint:</strong> The order to apply optimizer rules matters. For example, you want to optimize NestedLoopJoin into HashJoin after filters and NestedLoopJoin have merged. 这个感觉可能意思就是说<strong>优化规则的优先级</strong>之类的吧，这里用了个例子说hash join的优先级一般得在filter和nested loop join合并了之后。</p>
+<p><strong>Hint:</strong> At this point, you should pass <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/project3/#testing">SQLLogicTests - #14 to #15</a>.</p>
+</blockquote>
+<h4 id="一些想法-5"><a href="#一些想法-5" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="bustub-optimizer"><a href="#bustub-optimizer" class="headerlink" title="bustub optimizer"></a>bustub optimizer</h5><blockquote>
+<p>The BusTub optimizer is a <strong>rule-based optimizer</strong>. Most optimizer rules construct optimized plans in a <strong>bottom-up way</strong>(自底向上). Because the query plan has this tree structure, before applying the optimizer rules to the current plan node, you want to first recursively apply the rules to its children.    基于规则的优化器，规则都是对语法树自底向上实施。感觉跟课内学的差不多。</p>
+<p><u>In the public BusTub repository, we already provide the implementation of several optimizer rules. Please take a look at them as reference.</u></p>
+</blockquote>
+<p>在课程中学到的语法优化，应该也是基于规则的优化，具体见下图及之后列出的无穷无尽个定理：</p>
+<p><img src="/2024/01/14/cmu15445/image-20231119015111213.png" alt="image"></p>
+<p><img src="/2024/01/14/cmu15445/image-20231227155806019.png" alt="image-20231227155806019"></p>
+<p>（本图新增了一条规则：选择+嵌套笛卡尔积=嵌套连接）</p>
+<p>查看目录<code>src/optimizer/</code>，我们可以看到：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ tree ../src/optimizer/</span><br><span class="line">../src/optimizer/</span><br><span class="line">├── eliminate_true_filter.cpp	<span class="comment"># 消除恒真选择</span></span><br><span class="line">├── merge_filter_nlj.cpp		<span class="comment"># 合并选择和嵌套连接</span></span><br><span class="line">├── merge_filter_scan.cpp		<span class="comment"># 合并选择和scan</span></span><br><span class="line">├── merge_projection.cpp		<span class="comment"># 合并多个投影</span></span><br><span class="line">├── nlj_as_hash_join.cpp		<span class="comment"># 嵌套连接-&gt;hash连接</span></span><br><span class="line">├── nlj_as_index_join.cpp		<span class="comment"># 嵌套连接-&gt;index连接</span></span><br><span class="line">├── optimizer.cpp</span><br><span class="line">├── optimizer_custom_rules.cpp</span><br><span class="line">├── optimizer_internal.cpp</span><br><span class="line">├── order_by_index_scan.cpp</span><br><span class="line">└── sort_limit_as_topn.cpp		<span class="comment"># 针对 top-N queries 进行优化</span></span><br></pre></td></tr></table></figure>
+
+<p>在本小节任务中，我们需要做的，就是参照其他的规则来实现<code>nlj_as_hash_join</code>。但在此之前，我们不妨先研究一下它语法优化的总体架构。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">Optimizer::OptimizeCustom</span><span class="params">(<span class="type">const</span> AbstractPlanNodeRef &amp;plan)</span> -&gt; AbstractPlanNodeRef </span>&#123;</span><br><span class="line">  <span class="keyword">auto</span> p = plan;</span><br><span class="line">  p = <span class="built_in">OptimizeMergeProjection</span>(p); 		<span class="comment">// 首先合并影响相同的投影</span></span><br><span class="line">  p = <span class="built_in">OptimizeMergeFilterNLJ</span>(p);		<span class="comment">// 然后合并选择和嵌套连接</span></span><br><span class="line">  p = <span class="built_in">OptimizeNLJAsHashJoin</span>(p);			<span class="comment">// 然后把嵌套连接改为hash join</span></span><br><span class="line">  p = <span class="built_in">OptimizeOrderByAsIndexScan</span>(p);	<span class="comment">// 根据索引进行查找</span></span><br><span class="line">  p = <span class="built_in">OptimizeSortLimitAsTopN</span>(p);		<span class="comment">// 针对 top-N queries 进行优化</span></span><br><span class="line">  <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，它的实际原理很简单，就是按照这样的优先级顺序对语法树运用规则进行优化。</p>
+<h5 id="merge-filter-nlj"><a href="#merge-filter-nlj" class="headerlink" title="merge filter nlj"></a>merge filter nlj</h5><p>以<code>OptimizeMergeFilterNLJ</code>为例，我们可以研究一下它的整体架构：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">Optimizer::OptimizeMergeFilterNLJ</span><span class="params">(<span class="type">const</span> AbstractPlanNodeRef &amp;plan)</span> -&gt; AbstractPlanNodeRef </span>&#123;</span><br><span class="line">  <span class="comment">// 首先自底向上地对其所有子节点进行优化，采用DFS</span></span><br><span class="line">  std::vector&lt;AbstractPlanNodeRef&gt; children;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;child : plan-&gt;<span class="built_in">GetChildren</span>()) &#123;</span><br><span class="line">    children.<span class="built_in">emplace_back</span>(<span class="built_in">OptimizeMergeFilterNLJ</span>(child));</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">  <span class="keyword">auto</span> optimized_plan = plan-&gt;<span class="built_in">CloneWithChildren</span>(std::<span class="built_in">move</span>(children));</span><br><span class="line">  <span class="comment">// 仅当当前结点为filter，并且其唯一子节点为nlj时，才进行重写优化</span></span><br><span class="line">  <span class="keyword">if</span> (optimized_plan-&gt;<span class="built_in">GetType</span>() == PlanType::Filter) &#123;</span><br><span class="line">    <span class="type">const</span> <span class="keyword">auto</span> &amp;filter_plan = <span class="built_in">dynamic_cast</span>&lt;<span class="type">const</span> FilterPlanNode &amp;&gt;(*optimized_plan);</span><br><span class="line">    <span class="type">const</span> <span class="keyword">auto</span> &amp;child_plan = optimized_plan-&gt;children_[<span class="number">0</span>];  <span class="comment">// Has exactly one child</span></span><br><span class="line">    <span class="keyword">if</span> (child_plan-&gt;<span class="built_in">GetType</span>() == PlanType::NestedLoopJoin) &#123;</span><br><span class="line">      <span class="type">const</span> <span class="keyword">auto</span> &amp;nlj_plan = <span class="built_in">dynamic_cast</span>&lt;<span class="type">const</span> NestedLoopJoinPlanNode &amp;&gt;(*child_plan);</span><br><span class="line">      <span class="comment">// 这里可能简单起见，仅当nlj为纯纯的笛卡尔积时，才会进行合并</span></span><br><span class="line">      <span class="comment">// 所以看起来就无法处理多个连续的选择的情况，或许在planner阶段规避了这种情况？</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="built_in">IsPredicateTrue</span>(nlj_plan.<span class="built_in">Predicate</span>())) &#123;</span><br><span class="line">        <span class="comment">// 将该filter+nlj结点重写为一个新的连接结点</span></span><br><span class="line">        <span class="keyword">return</span> std::<span class="built_in">make_shared</span>&lt;NestedLoopJoinPlanNode&gt;(</span><br><span class="line">            filter_plan.output_schema_, nlj_plan.<span class="built_in">GetLeftPlan</span>(), nlj_plan.<span class="built_in">GetRightPlan</span>(),</span><br><span class="line">            <span class="built_in">RewriteExpressionForJoin</span>(filter_plan.<span class="built_in">GetPredicate</span>(), </span><br><span class="line">                                     nlj_plan.<span class="built_in">GetLeftPlan</span>()-&gt;<span class="built_in">OutputSchema</span>().<span class="built_in">GetColumnCount</span>(), nlj_plan.<span class="built_in">GetRightPlan</span>()-&gt;<span class="built_in">OutputSchema</span>().<span class="built_in">GetColumnCount</span>()), nlj_plan.<span class="built_in">GetJoinType</span>());</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> optimized_plan;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可见，对语法树运用该merge filter nlj规则是采用自底向上的顺序，并且仅合并那些filter-笛卡尔积的结点。那么接下来，我们可以具体关注<code>RewriteExpressionForJoin</code>的实现。</p>
+<p>首先，我们需要明确bustub中对expression的抽象。以<code>#0.0=#1.0</code>为例，expression的结构树如下所示：</p>
+<p><img src="/2024/01/14/cmu15445/image-20240120104722170.png" alt="image-20240120104722170"></p>
+<p>每个叶子结点都是一个基本的expression类型，如column value、constant value等等等，整个子树构成一个其他expression类型，如comparation expr、arithmetic expr等等等。</p>
+<p>在未优化前，我们是先做笛卡尔积，再做选择。故而，假设t1有2列，t2有2列，选择条件为<code>t1.col1 = t2.col4</code>，在未优化前，filter结点的expr将为：<code>#0.0=#0.3</code>（两表经过笛卡尔积合在一起了）。故而，在<code>RewriteExpressionForJoin</code>函数中，我们需要根据t1表和t2表分别的列数，将<code>#0.0=#0.3</code>这样的表达式转化为<code>#0.0=#1.1</code>这样的表达式（其实也就是只用处理所有类型为colum expr的叶结点即可）。而由于expression是递归结构，所以我们需要先针对其所有子节点进行处理。故而，<code>RewriteExpressionForJoin</code>的实现如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">Optimizer::RewriteExpressionForJoin</span><span class="params">(<span class="type">const</span> AbstractExpressionRef &amp;expr, <span class="type">size_t</span> left_column_cnt, <span class="type">size_t</span> right_column_cnt)</span> -&gt; AbstractExpressionRef </span>&#123;</span><br><span class="line">  <span class="comment">// 首先自底向上地对其所有子节点进行优化，采用DFS</span></span><br><span class="line">  std::vector&lt;AbstractExpressionRef&gt; children;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;child : expr-&gt;<span class="built_in">GetChildren</span>()) &#123;</span><br><span class="line">    children.<span class="built_in">emplace_back</span>(<span class="built_in">RewriteExpressionForJoin</span>(child, left_column_cnt, right_column_cnt));</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 仅对那些类型为column expr的叶子结点进行处理</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="type">const</span> <span class="keyword">auto</span> *column_value_expr = <span class="built_in">dynamic_cast</span>&lt;<span class="type">const</span> ColumnValueExpression *&gt;(expr.<span class="built_in">get</span>()); column_value_expr != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    <span class="comment">// #0.1, &quot;0&quot;为tuple_idx，&quot;1&quot;为col_idx</span></span><br><span class="line">    <span class="comment">// 此时tuple_idx一定是0，因为filter结点只有一个子节点</span></span><br><span class="line">    <span class="built_in">BUSTUB_ENSURE</span>(column_value_expr-&gt;<span class="built_in">GetTupleIdx</span>() == <span class="number">0</span>, <span class="string">&quot;tuple_idx cannot be value other than 0 before this stage.&quot;</span>)</span><br><span class="line">    <span class="keyword">auto</span> col_idx = column_value_expr-&gt;<span class="built_in">GetColIdx</span>();</span><br><span class="line">    <span class="keyword">if</span> (col_idx &lt; left_column_cnt) &#123;	</span><br><span class="line">      <span class="keyword">return</span> std::<span class="built_in">make_shared</span>&lt;ColumnValueExpression&gt;(<span class="number">0</span>, col_idx, column_value_expr-&gt;<span class="built_in">GetReturnType</span>());	<span class="comment">// 替换为#0.X</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (col_idx &gt;= left_column_cnt &amp;&amp; col_idx &lt; left_column_cnt + right_column_cnt) &#123;</span><br><span class="line">      <span class="keyword">return</span> std::<span class="built_in">make_shared</span>&lt;ColumnValueExpression&gt;(<span class="number">1</span>, col_idx - left_column_cnt, column_value_expr-&gt;<span class="built_in">GetReturnType</span>());	<span class="comment">// 替换为#1.X</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> bustub::<span class="built_in">Exception</span>(<span class="string">&quot;col_idx not in range&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// xiunian: do nothing if the filter contains no column value expression</span></span><br><span class="line">  <span class="keyword">return</span> expr-&gt;<span class="built_in">CloneWithChildren</span>(children);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="实现-5"><a href="#实现-5" class="headerlink" title="实现"></a>实现</h4><blockquote>
+<p>Specifically, the hash join algorithm can be used <u>when a join predicate is a conjunction of equi-conditions between two columns</u>. For the purpose of this project, handling a <strong>single</strong> equi-condition, and also <strong>two</strong> equi-conditions connected by <code>AND</code>, will earn full credit.</p>
+</blockquote>
+<p>看完了merge filter nlj的实现之后，本次任务的实现就变得不那么困难了。</p>
+<p>当一个nlj的predicate条件是一堆使用AND连接的“=”expr，我们就可以将该nlj转化为hash join。而<code>OptimizeNLJAsHashJoin</code>作用于<code>OptimizeMergeFilterNLJ</code>之后，故而，我们可以直接对所有的nlj结点进行判定重写。</p>
+<p>具体来说，我们可以首先实现一个函数<code>CheckIfEquiConjunction</code>，给定expr结构树输入，判断其是否只由AND、”=”、”column expr”构成。这个过程还需要做一件事，就是分离出hash join所需要的key expression，如nlj的连接条件为<code>#0.1=#1.2 AND #1.1=#0.2</code>，则最后形成的hash join为<code>left_key_expr=[#0.1, #0.2], right_key_expr=[#1.2, #1.1]</code>。</p>
+<p>然后，在<code>OptimizeNLJAsHashJoin</code>函数主体中，我们只需遍历语法树的所有结点，然后对其进行判定，符合条件则将其转化为hash join即可。</p>
+<h2 id="Task-3-Sort-Limit-Executors-and-Top-N-Optimization"><a href="#Task-3-Sort-Limit-Executors-and-Top-N-Optimization" class="headerlink" title="Task #3 - Sort + Limit Executors and Top-N Optimization"></a>Task #3 - Sort + Limit Executors and Top-N Optimization</h2><blockquote>
+<p>You will finally implement a few more common executors, completing your implementation in the following files:</p>
+<ul>
+<li><code>src/execution/sort_executor.cpp</code></li>
+<li><code>src/execution/limit_executor.cpp</code></li>
+<li><code>src/execution/topn_executor.cpp</code></li>
+<li><code>src/optimizer/sort_limit_as_topn.cpp</code></li>
+</ul>
+<p>You must implement the <code>IndexScanExecutor</code> in <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/project3/#task1">Task #1</a> before starting this task. <u>If there is an index over a table, the query processing layer will automatically pick it for sorting</u>. In other cases, you will need <strong>a special sort executor</strong> to do this.</p>
+<p>For all order by clauses, we assume every sort key will only appear once. You do not need to worry about ties in sorting.</p>
+</blockquote>
+<h3 id="Sort"><a href="#Sort" class="headerlink" title="Sort"></a>Sort</h3><blockquote>
+<p>If a query’s <code>ORDER BY</code> attributes <u>don’t match the keys of an index</u>, BusTub will produce a <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/include/execution/plans/sort_plan.h"><code>SortPlanNode</code></a> for queries such as:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * FROM __mock_table_1 ORDER BY colA ASC, colB DESC;</span><br></pre></td></tr></table></figure>
+
+<p>如果要求排序的key不是index key，就会用到这个sort executor。</p>
+<p>This plan node has the same output scheme as its input schema. You can extract sort keys from <code>order_bys</code>, and then use <code>std::sort</code> with a custom comparator to sort the child node’s tuples. You may assume that all entries in a table will fit entirely in memory.</p>
+<p>If the query does not include a sort direction (i.e., <code>ASC</code>, <code>DESC</code>), then the sort mode will be <code>default</code> (which is <code>ASC</code>).</p>
+</blockquote>
+<h4 id="一些想法-6"><a href="#一些想法-6" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="comparator实现"><a href="#comparator实现" class="headerlink" title="comparator实现"></a>comparator实现</h5><blockquote>
+<p>我有一个类Tuple，另一个类Executor。我想实现一个Tuple的比较函数，但需要用到类Executor的成员变量，那么我该怎么写一个可以用于std::sort的cmp函数</p>
+</blockquote>
+<p>最终给出的提示是这样的，实现一个<strong>函数对象</strong>。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">CompareTuplesByOrder</span> &#123;</span><br><span class="line">  Schema schema_;</span><br><span class="line">  <span class="comment">// add any new member</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">CompareTuplesByOrder</span>(Schema schema, <span class="type">const</span> std::vector&lt;std::pair&lt;OrderByType, AbstractExpressionRef&gt;&gt;&amp; order_by) : <span class="built_in">schema_</span>(schema) &#123; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// override the &quot;()&quot; operator</span></span><br><span class="line">  <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> Tuple &amp;t1, <span class="type">const</span> Tuple &amp;t2)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="comment">// do any logic</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// use in sort</span></span><br><span class="line">std::<span class="built_in">sort</span>(tuples_.<span class="built_in">begin</span>(), tuples_.<span class="built_in">end</span>(), <span class="built_in">CompareTuplesByOrder</span>(<span class="built_in">GetOutputSchema</span>(), plan_-&gt;<span class="built_in">GetOrderBy</span>()));</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，其本质是通过重载”()”运算符来实现的，感觉是一个很有意思的trick。</p>
+<h4 id="实现-6"><a href="#实现-6" class="headerlink" title="实现"></a>实现</h4><p>它提示的实现思路很简单，就是大概从sort plan node获取所有key，然后用<code>std:sort</code>即可，默认升序，并且所有entry都是in-memory的。</p>
+<p>有一点值得注意的是，在sql语言中，排序是可以指定多个关键词+不同顺序（关键词出现顺序表明排序优先级）的，如<code>order by col1 ASC, col3 DESC</code>。所以我们需要在comparator实现中按照优先级（也即<code>order_by_</code>数组顺序）一步步比较。</p>
+<p>比较难的地方大概还是c++知识，也即如何为<code>std:sort</code>实现一个较为复杂的comparator。具体操作可见<code>一些想法-comparator实现</code>。</p>
+<h3 id="Limit"><a href="#Limit" class="headerlink" title="Limit"></a>Limit</h3><blockquote>
+<p>The <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/include/execution/plans/limit_plan.h"><code>LimitPlanNode</code></a> specifies the number of tuples that query will generate. Consider the following example:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * FROM __mock_table_1 LIMIT 10;</span><br></pre></td></tr></table></figure>
+
+<p>The <code>LimitExecutor</code> <strong>constrains the number of output tuples from its child executor</strong>. If the number of tuples produced by its child executor is less than the limit specified in the plan node, this executor has no effect and yields all of the tuples that it receives.</p>
+<p>This plan node has the same output scheme as its input schema. You do not need to support offsets.</p>
+</blockquote>
+<p>挺简单的，就是限制输出的数量，没什么好说的。</p>
+<h3 id="Top-N-Optimization-Rule"><a href="#Top-N-Optimization-Rule" class="headerlink" title="Top-N Optimization Rule"></a>Top-N Optimization Rule</h3><blockquote>
+<p>Finally, you should modify BusTub’s optimizer to efficiently support top-N queries. (These were called top-K queries in class.) Consider the following:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * FROM __mock_table_1 ORDER BY colA LIMIT 10;</span><br></pre></td></tr></table></figure>
+
+<p>By default, BusTub will plan this query as a <code>SortPlanNode</code> followed by a <code>LimitPlanNode</code>. This is inefficient because a heap can be used to keep track of the smallest 10 elements far more efficiently than sorting the entire table.</p>
+<p>Implement the <code>TopNExecutor</code> and modify the optimizer to use it for queries containing <code>ORDER BY</code> and <code>LIMIT</code> clauses.</p>
+<p>An example of the optimized plan of this query:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TopN &#123; n=10, order_bys=[(Default, #0.0)]&#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)</span><br><span class="line">MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)</span><br></pre></td></tr></table></figure>
+
+<p><strong>Hint:</strong> See <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/optimizer/sort_limit_as_topn.cpp"><code>OptimizeSortLimitAsTopN</code></a> for more information, and check the <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/project3/##optimizer-rule-implementation-guide">Optimizer Rule Implementation Guide</a> for details on implementing an optimizer rule.</p>
+<p><strong>Note:</strong> At this point, your implementation should pass <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/project3/#testing">SQLLogicTests #16 to #19</a>. Integration-test-2 requires you to use release mode to run.</p>
+</blockquote>
+<p>感觉标准做法应该是使用快速排序的partion思想。但是这里的话，我打算使用另一个实现更简单的思路，也即维护一个元素个数为<code>limit_</code>的有序set，每次插入元素同其最小值比较即可，这样的时间复杂度为<code>O(nlogk)</code>。当k不会太大的时候，我觉得这样应该还是会比快排要快些的。</p>
+<h3 id="小插曲"><a href="#小插曲" class="headerlink" title="小插曲"></a>小插曲</h3><p>本来写到这准备开开心心提交了，突然发现自己的版本似乎跟仓库最新不大一样。rebase了感觉一下午（最后甚至还找了个以前写的小bug……），最后才终于提交完获得了full score……</p>
+<p><img src="/2024/01/14/cmu15445/image-20240121200829707.png" alt="image-20240121200829707"></p>
+<p>bustub仓库中的每个课程版本都是有这样的小tag了，一开始没发现直接大力出奇迹rebase最新，结果整了半天人麻了。。。</p>
+<p><img src="/2024/01/14/cmu15445/image-20240121200726718.png" alt="image-20240121200726718"></p>
+<h2 id="Leaderboard-Task"><a href="#Leaderboard-Task" class="headerlink" title="Leaderboard Task"></a>Leaderboard Task</h2><p>TODO</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/01/04/arch/">计算机体系结构</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
