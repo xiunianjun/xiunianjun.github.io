@@ -4692,7 +4692,12 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
   <entry>
     <title>Project3   Query Execution</title>
     <url>/2023/03/13/cmu15445$lab3/</url>
-    <content><![CDATA[<h1 id="Project3-Query-Execution"><a href="#Project3-Query-Execution" class="headerlink" title="Project3   Query Execution"></a>Project3   Query Execution</h1><p>TODO，注意一下为什么每个executor的child executor的&amp;&amp;和&amp;的差别</p>
+    <content><![CDATA[<h1 id="Project3-Query-Execution"><a href="#Project3-Query-Execution" class="headerlink" title="Project3   Query Execution"></a>Project3   Query Execution</h1><p>实现了：</p>
+<ol>
+<li>使用迭代器模型实现各种sql操作的底层执行（增删改查、聚合、连接、排序）</li>
+<li>针对语法树实现部分查询优化规则（nlj-&gt;hash-join、谓词下推、列剪裁、公共表达式消除、恒假条件剪枝、支持索引范围查找）</li>
+</ol>
+<p>大概花了我十天左右的时间。不过总体体验感觉比b+树好一些，因为这里主要还是代码量多，并且不用考虑并发控制，不像b+树那样复杂。</p>
 <blockquote>
 <p>In this project, you will implement the components that allow BusTub to execute queries. You will create the operator executors that execute SQL queries and implement optimizer rules to transform query plans.</p>
 <p>实现SQL查询的执行，并且实现语句优化。</p>
@@ -4765,7 +4770,6 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 </ul>
 <h4 id="pipeline-breaker"><a href="#pipeline-breaker" class="headerlink" title="pipeline breaker"></a>pipeline breaker</h4><p>火山模型显而易见是以从上到下一个流水线形式执行的，它的最理想情况是每个流水线节点所需的这个tuple都存储在寄存器中。然而，有一些操作，如聚合函数等等，需要对整个表进行操作才能获取到当前所需tuple，而整个表显然最多只能读入到内存中，这样的操作就被称为<strong>pipeline breaker</strong>。</p>
 <p>下面的实现中的aggregation、sort、hash join的build阶段都是pipeline breaker，这些复杂的操作阶段都需要在init()函数中进行。</p>
-<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>TODO，从宏观整个架构简介</p>
 <h2 id="ADDITIONAL-INFORMATION"><a href="#ADDITIONAL-INFORMATION" class="headerlink" title="ADDITIONAL INFORMATION"></a>ADDITIONAL INFORMATION</h2><h3 id="System-Catalog"><a href="#System-Catalog" class="headerlink" title="System Catalog"></a>System Catalog</h3><blockquote>
 <p>The entirety of the catalog implementation is in <code>src/include/catalog/catalog.h</code>. You should pay particular attention to the member functions <code>Catalog::GetTable()</code> and <code>Catalog::GetIndex()</code>. You will use these functions in the implementation of your executors to query the catalog for tables and indexes.</p>
 </blockquote>
@@ -5133,7 +5137,10 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <p><img src="/2023/03/13/cmu15445/image-20240121200829707.png" alt="image-20240121200829707"></p>
 <p>bustub仓库中的每个课程版本都是有这样的小tag了，一开始没发现直接大力出奇迹rebase最新，结果整了半天人麻了。。。</p>
 <p><img src="/2023/03/13/cmu15445/image-20240121200726718.png" alt="image-20240121200726718"></p>
-<h2 id="Leaderboard-Task"><a href="#Leaderboard-Task" class="headerlink" title="Leaderboard Task"></a>Leaderboard Task</h2><h3 id="Query-1-Where’s-the-Index"><a href="#Query-1-Where’s-the-Index" class="headerlink" title="Query 1: Where’s the Index?"></a>Query 1: Where’s the Index?</h3><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><blockquote>
+<h2 id="Leaderboard-Task"><a href="#Leaderboard-Task" class="headerlink" title="Leaderboard Task"></a>Leaderboard Task</h2><p>最终优化结果：</p>
+<img src="/2023/03/13/cmu15445/image-20240202182014046.png" alt="image-20240202182014046" style="zoom:50%;">
+
+<h3 id="Query-1-Where’s-the-Index"><a href="#Query-1-Where’s-the-Index" class="headerlink" title="Query 1: Where’s the Index?"></a>Query 1: Where’s the Index?</h3><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><blockquote>
 <p>Consider the following sample database:</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE t1(x INT, y INT, z INT);</span><br><span class="line">CREATE INDEX t1xy ON t1(x, y);</span><br></pre></td></tr></table></figure>
 
@@ -5159,9 +5166,8 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <p>故而，我们需要在index executor中新增两个字段，<code>current_iterator_</code>和<code>end_iterator_</code>，前者的初值和后者分别表示区间的左右端点。</p>
 </li>
 </ol>
-<p>写了整整一天，最终获得了大概这样的成绩：</p>
-<p><img src="/2023/03/13/cmu15445/image-20240122195417610.png" alt="image-20240122195417610"></p>
-<h4 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h4><h5 id="optimizer-rule"><a href="#optimizer-rule" class="headerlink" title="optimizer rule"></a>optimizer rule</h5><p>我首先一步就是启用了未启用的<code>OptimizeMergeFilterScan</code>，也即合并filter和sequence scan。因此，需要修改seqscan executor的部分代码，在循环中加入对predicate条件的判定。因为我感觉确实合起来好处感觉比坏处多。</p>
+<p>写了整整一天</p>
+<h4 id="实现-7"><a href="#实现-7" class="headerlink" title="实现"></a>实现</h4><h5 id="optimizer-rule"><a href="#optimizer-rule" class="headerlink" title="optimizer rule"></a>optimizer rule</h5><p>我首先一步就是启用了未启用的<code>OptimizeMergeFilterScan</code>，也即合并filter和sequence scan。因此，需要修改seqscan executor的部分代码，在循环中加入对predicate条件的判定。因为我感觉确实合起来好处感觉比坏处多。</p>
 <p>再然后，我们需要增加自定义规则。这里，我将该规则的优先级置于<code>OptimizeMergeFilterScan</code>，故而在判定时只需检测所有sequence scan结点即可。</p>
 <p><code>OptimizeMergeFilterScan</code>我采取了与nlj-&gt;hash join差不多的写法（不如说其实整个架构是参照的<code>OptimizeOrderByAsIndexScan</code>），也即先检测出这个是个sequence scan结点，再对其filter expression进行合法性判断，合法则转化为index scan。不过，这里的实现会复杂许多，具体来说有如下几个问题需要注意：</p>
 <ol>
@@ -5212,6 +5218,114 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <p>当有比如说<code>v1 = XX AND v2 &gt; XX AND v3 &lt; 10</code>的条件，并且只有在v1和v2的索引时，我的实现是不会将其转化为index scan的，因为我那边index的查找是做了全匹配。要实现真正的那个啥，就可能需要有最长公共子串匹配之类的算法了。</p>
 </li>
 </ol>
+<h3 id="Query-2-Too-Many-Joins"><a href="#Query-2-Too-Many-Joins" class="headerlink" title="Query 2: Too Many Joins!"></a>Query 2: Too Many Joins!</h3><h4 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h4><blockquote>
+<p>Consider the following sample database:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE t4(x int, y int);</span><br><span class="line">CREATE TABLE t5(x int, y int);</span><br><span class="line">CREATE TABLE t6(x int, y int);</span><br></pre></td></tr></table></figure>
+
+<p>The user is not from CMU and they are writing terrible SQL. They forgot how write queries with joins so they puts all predicates in the <code>WHERE</code> clause.</p>
+<p>草，有一说一这简直就是我。。。所以可见平时写sql的时候还是尽量多写join</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM t4, t5, t6</span><br><span class="line">  WHERE (t4.x = t5.x) AND (t5.y = t6.y) AND (t4.y &gt;= 1000000)</span><br><span class="line">    AND (t4.y &lt; 1500000) AND (t6.x &gt;= 100000) AND (t6.x &lt; 150000);</span><br></pre></td></tr></table></figure>
+
+<p><strong>Recommended Optimizations:</strong> Decompose the filter condition to extract hash join keys, and push down the remaining filter conditions to be below the hash join.</p>
+</blockquote>
+<p>这个就是我们在课上也学过的“尽早做选择”了，更学术一点的叫法是“<strong>谓词下推</strong>”。以leaderboard中的例子为例，它最终是要取得这样的效果：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">explain (o) select count(*), max(__mock_t4_1m.x), max(__mock_t4_1m.y), max(__mock_t5_1m.x), max(__mock_t5_1m.y), max(__mock_t6_1m.x), max(__mock_t6_1m.y)</span><br><span class="line">    from __mock_t4_1m, __mock_t5_1m, __mock_t6_1m</span><br><span class="line">        where (__mock_t4_1m.x = __mock_t5_1m.x)</span><br><span class="line">            and (__mock_t6_1m.y = __mock_t5_1m.y)</span><br><span class="line">            and (__mock_t4_1m.y &gt;= 1000000)</span><br><span class="line">            and (__mock_t4_1m.y &lt; 1500000)</span><br><span class="line">            and (__mock_t6_1m.x &lt; 150000)</span><br><span class="line">            and (__mock_t6_1m.x &gt;= 100000);</span><br><span class="line">==============================================================</span><br><span class="line">Agg &#123; types=[count_star, max, max, max, max, max, max], aggregates=[1, #0.0, #0.1, #0.2, #0.3, #0.4, #0.5], group_by=[] &#125;</span><br><span class="line">  HashJoin &#123; type=Inner, left_key=[#0.3], right_key=[#1.1] &#125;</span><br><span class="line">    HashJoin &#123; type=Inner, left_key=[#0.0], right_key=[#1.0] &#125;</span><br><span class="line">      Filter &#123; predicate=((#0.1&gt;=1000000)and(#0.1&lt;1500000)) &#125;</span><br><span class="line">        MockScan &#123; table=__mock_t4_1m &#125;</span><br><span class="line">      MockScan &#123; table=__mock_t5_1m &#125;</span><br><span class="line">    Filter &#123; predicate=((#0.0&lt;150000)and(#0.0&gt;=100000)) &#125;</span><br><span class="line">      MockScan &#123; table=__mock_t6_1m &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个图画得就很清楚：（<a href="https://zhuanlan.zhihu.com/p/629349099">from</a>）</p>
+<p><img src="/2023/03/13/cmu15445/v2-e6f25de30bca4fd6f96a0cd85fc7dbc4_1440w.png" alt="img"></p>
+<h4 id="实现-8"><a href="#实现-8" class="headerlink" title="实现"></a>实现</h4><h5 id="predicate-push-down"><a href="#predicate-push-down" class="headerlink" title="predicate push down"></a>predicate push down</h5><p>体感上，这个任务的思维难度和规则实现复杂度是远高于q1的，但由于q1涉及范围太广，所以最终两者耗时还是不相上下，写了我大概6、7个小时。</p>
+<p>我的大体思路是，整一个这样的递归主体：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">Optimizer::PredicatePushdown</span><span class="params">(<span class="type">const</span> AbstractPlanNodeRef &amp;plan, AbstractExpressionRef &amp;expr)</span> -&gt; AbstractPlanNodeRef</span></span><br></pre></td></tr></table></figure>
+
+<p>它接收一个plan对象和一个expr表达式，plan为当前处理的结点，expr表达式为其祖辈结点下推下来的选择谓词。</p>
+<p>由于我将<code>OptimizePredicatePushdown</code>的处理放在了<code>OptimizeMergeFilterNLJ</code>和<code>OptimizeMergeFilterScan</code>之后，故而只需特别处理nlj结点、seq scan结点以及filter结点（小概率）。</p>
+<ol>
+<li><p>nlj结点</p>
+<p>首先将祖辈下推的expr和自身的predicate通过AND连接，然后通过一个自定义的工具函数<code>SplitExpression</code>，将表达式分成三类：仅含左孩子的表达式（如<code>#0.0 = #0.3</code>、<code>#0.0 &gt; 100</code>）、仅含右孩子的表达式，以及左右孩子都包含的表达式（如<code>#0.1 &gt; #1.2</code>）。</p>
+<p>然后，前两类表达式作为对左右孩子进行递归处理的参数，递归处理左右孩子；最后一类由于涉及左右孩子，故而留下作为当前nlj结点的predicate。</p>
+</li>
+<li><p>seq scan结点</p>
+<p>只需遍历其孩子结点，递归调用谓词下推，然后将expr同它自身原本的predicate连接即可。</p>
+</li>
+<li><p>filter结点</p>
+<p>经过了<code>OptimizeMergeFilterNLJ</code>和<code>OptimizeMergeFilterScan</code>前两步合并还幸存的filter结点，大概也算是个小概率的硬茬了，所以我这里对它的处理同seq scan相同。</p>
+</li>
+</ol>
+<p>这样一来，就完成了谓词下推的总体处理逻辑。接下来，便是比较繁琐的<code>SplitExpression</code>的实现了。它其实逻辑上也没什么好说的，就是各种指针对象创建来创建去容易头晕。。。比如这一坨：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">(*child_expressions)[left_tuple_idx] = std::<span class="built_in">make_shared</span>&lt;ComparisonExpression&gt;(std::<span class="built_in">make_shared</span>&lt;ColumnValueExpression&gt;(<span class="number">0</span>, left_column_value_expr-&gt;<span class="built_in">GetColIdx</span>(), left_column_value_expr-&gt;<span class="built_in">GetReturnType</span>()), comparison_expr-&gt;<span class="built_in">GetChildAt</span>(<span class="number">1</span>), comparison_expr-&gt;comp_type_);</span><br></pre></td></tr></table></figure>
+
+<p>然后还有一点要注意的是，<code>SplitExpression</code>还需要记得处理我们上面那三种情况都不满足条件的式子（比如别的测试用例中的<code>v1 + 5 = c1</code>），在上面那三种方法都匹配失败的时候，把它整进middle（也即第三类情况）即可：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (!(*middle)) &#123;</span><br><span class="line">	*middle = expr;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	*middle = std::<span class="built_in">make_shared</span>&lt;LogicExpression&gt;(*middle, expr, LogicType::And);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="其他小问题-1"><a href="#其他小问题-1" class="headerlink" title="其他小问题"></a>其他小问题</h5><ol>
+<li><p>关于<code>MockScan</code></p>
+<p>一点很让人难绷的是，好像似乎没法对这东西进行merge filter，因为mock scan相关类我们都是不能修改的。故而，我的实现只能在遇到mockscan结点的时候，手动给它加一个filter爸爸了。</p>
+</li>
+<li><p><code>OptimizePredicatePushdown</code>的处理时机</p>
+<p>与 <a href="https://zhuanlan.zhihu.com/p/629349099">这位博主</a>一样，我也纠结了许久<code>OptimizePredicatePushdown</code>的优先级：</p>
+<blockquote>
+<p>在处理谓词下推规则时，进行的时机让我纠结了一阵：</p>
+<ul>
+<li>如果在 <code>OptimizeMergeFilterNLJ</code> 规则之前，那么还需要进行 Filter 下标的重分配</li>
+<li>如果在 <code>OptimizeMergeFilterNLJ</code> 规则之后，则下推后，又产生了没有被 Merge 的 Filter 节点</li>
+</ul>
+<p>最后考虑到实现尽可能简单，我在 <code>OptimizeMergeFilterNLJ</code> 规则之后进行谓词下推，并在递归处理子节点的谓词下推之前，对新产生的子节点再次调用 <code>OptimizeMergeFilterNLJ</code> 规则，完成了偷懒。</p>
+</blockquote>
+<p>我也采取了跟它类似的做法，不过是调用了该规则的helper函数<code>RewriteExpressionForJoin</code>，来处理上面传下来的这个未merge的filter expression：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (nlj_plan.<span class="built_in">Predicate</span>() != <span class="literal">nullptr</span> &amp;&amp; nlj_plan.<span class="built_in">Predicate</span>()-&gt;<span class="built_in">ToString</span>() != <span class="string">&quot;true&quot;</span>) &#123;</span><br><span class="line">  <span class="built_in">SplitExpression</span>(nlj_plan.<span class="built_in">Predicate</span>(), &amp;child_expressions, &amp;middle, left_size, right_size);</span><br><span class="line">&#125;</span><br><span class="line">   </span><br><span class="line"><span class="keyword">if</span> (expr != <span class="literal">nullptr</span> &amp;&amp; expr-&gt;<span class="built_in">ToString</span>() != <span class="string">&quot;true&quot;</span>) &#123;</span><br><span class="line">  <span class="comment">// preprocess before split</span></span><br><span class="line">  expr = <span class="built_in">RewriteExpressionForJoin</span>(expr, left_size, right_size);</span><br><span class="line">  <span class="built_in">SplitExpression</span>(expr, &amp;child_expressions, &amp;middle, left_size, right_size);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="Query-3-The-Mad-Data-Scientist"><a href="#Query-3-The-Mad-Data-Scientist" class="headerlink" title="Query 3: The Mad Data Scientist"></a>Query 3: The Mad Data Scientist</h3><h4 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h4><blockquote>
+<p>Consider the following example:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT v, d1, d2 FROM (</span><br><span class="line">  SELECT v,</span><br><span class="line">         MAX(v1) AS d1, MIN(v1), MAX(v2), MIN(v2),</span><br><span class="line">         MAX(v1) + MIN(v1), MAX(v2) + MIN(v2),</span><br><span class="line">         MAX(v1) + MAX(v1) + MAX(v2) AS d2</span><br><span class="line">    FROM t7 LEFT JOIN (SELECT v4 FROM t8 WHERE 1 == 2) ON v &lt; v4</span><br><span class="line">    GROUP BY v</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>(This is not the same as the actual leaderboard query; refer to the test file.)</p>
+<p><strong>Recommended Optimizations:</strong> </p>
+<ol>
+<li>Column pruning – you only need to compute v, d1, d2 from the left table in aggregation, </li>
+<li>common expression elimination【公共子表达式消除】, </li>
+<li>transform always false filter to dummy scan (values plan node of zero rows)</li>
+</ol>
+<p><strong>Hint:</strong> You do not need to implement a complete rule for optimizing these queries. (1) a complete predicate pushdown requires you to handle all plan nodes – limit, order by, etc. But to optimize for Q2, you only need to implement push down predicates over hash join / nested loop joins. (2) a complete join reordering requires you to handle predicates correctly (and maybe absorb filters in-between back to the join predicate), and you do not need to do that. Just make your optimizer work with those queries is enough.</p>
+</blockquote>
+<p>也就是说，本次实验要做的就是恒假选择剪枝、列剪裁这两件事。具体来说，我们可以分为三个步骤实现：</p>
+<ol>
+<li><p>消除恒假条件</p>
+</li>
+<li><p>消除无用的投影</p>
+</li>
+<li><p>消除公共表达式</p>
+</li>
+</ol>
+<h4 id="实现-9"><a href="#实现-9" class="headerlink" title="实现"></a>实现</h4><h5 id="eliminate-always-false-filter"><a href="#eliminate-always-false-filter" class="headerlink" title="eliminate always false filter"></a>eliminate always false filter</h5><p>该优化必须要在<code>OptimizeMergeFilterScan</code>之前进行。</p>
+<p>自顶向下遍历语法树，当检测到filter结点的条件恒假时，就将其子树替换为一个空白的value结点。</p>
+<p>其中，检测条件恒假时，我只对用AND或者OR连接的、只涉及常量比较的表达式进行检测。当为AND，两个子表达式有一个恒假即可；当为OR，需要两个表达式都为恒假。</p>
+<h5 id="column-pruning"><a href="#column-pruning" class="headerlink" title="column pruning"></a>column pruning</h5><p>在bustub实现中，实现完全的投影的下推感觉会比谓词下推稍显复杂一些。实现谓词下推需处理filter、scan、join这几种有谓词情况的结点，并且对predicate进行裁剪/连接即可。而投影下推也许需要记住当前投影所需列，然后遍历所有结点进行剪裁，感觉很是复杂。故而，这里为了简单起见，只处理多个连续projection结点情况及projection-aggregation结点情况。</p>
+<p>我在<code>OptimizeMergeProjection</code>之后、其余合并谓词之前进行了该优化。</p>
+<p>为了简单起见（面向测试用例……），我这里只处理了至少两个连续projection、并且父projection的选择列只有column value（也即没有d1+d2这样的表达式）的情况，就不考虑像谓词下推那样处理每个结点了。也即将这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select d1, d2 from</span><br><span class="line">	select v1 as d1, v1 + v2 as d2, v3 as d3 from t1;</span><br></pre></td></tr></table></figure>
+
+<p>优化成这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select v1, v1 + v2 from t1;</span><br></pre></td></tr></table></figure>
+
+<p>故而，我们需要遍历父投影结点，仅留下其需要的列，从而创建一个新的子节点，并且再次递归处理它自身。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="built_in">OptimizeColumnPruning</span>(std::<span class="built_in">make_shared</span>&lt;ProjectionPlanNode&gt;(std::<span class="built_in">make_shared</span>&lt;Schema&gt;(parent_projection_plan.<span class="built_in">OutputSchema</span>()), expressions, child_plan.<span class="built_in">GetChildAt</span>(<span class="number">0</span>)));</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，就能将所有符合条件的连续投影合并为一个投影结点。</p>
+<h5 id="common-expression-elimination"><a href="#common-expression-elimination" class="headerlink" title="common expression elimination"></a>common expression elimination</h5><p>也即做一个这样的优化：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">========== before ==========</span><br><span class="line">select `#0.0`, `#0.1`, `((#0.2+#0.3)+#0.4)`</span><br><span class="line">	Agg &#123; types=[max, max, max, max], aggregates=[#0.1, #0.1, #0.1, #0.2], group_by=[#0.0] &#125; </span><br><span class="line"></span><br><span class="line">========== after ==========</span><br><span class="line">select `#0.0`, `#0.1`, `((#0.1+#0.1)+#0.2)`</span><br><span class="line">    Agg &#123; types=[max, max], aggregates=[#0.1, #0.2], group_by=[#0.0] &#125; </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：aggregation的schema为group-by，aggregates。故而，#0.0为group-by列，#0.1开始才为aggregates列。</p>
+</blockquote>
+<p>我这里的处理思路是，在做完column pruning之后，再针对projection-aggregation这样的局部结点（面向测试用例）进行特殊处理。为了达到这样的效果，就需要做两件事：</p>
+<ol>
+<li>精简化aggregation的aggregates和types</li>
+<li>改写projection的列名</li>
+</ol>
+<p>为了实现这两点，我引入了一个position map，对于每一个column value，key为原position，value为精简后的position。比如说，上例的position map应为：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// for group-by value #0.0, we assume that the group by columns are always in front after processing.</span></span><br><span class="line">[<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">[<span class="number">1</span>, <span class="number">1</span>], [<span class="number">2</span>, <span class="number">1</span>], [<span class="number">3</span>, <span class="number">1</span>], [<span class="number">4</span>, <span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+
+<p>position map在精简化aggregation的aggregates和types时被填充，在改写projection的列名时被使用。这样一来，就成功完成了公共子表达式消除。</p>
 ]]></content>
   </entry>
   <entry>
