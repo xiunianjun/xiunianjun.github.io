@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>操作系统 | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">操作系统</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十二月 26, 2023&nbsp;&nbsp;15:05:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="01-导论"><a href="#01-导论" class="headerlink" title="01 导论"></a>01 导论</h1><p><img src="/2023/12/26/operating-system/image-20231208013539565.png" alt="image-20231208013539565"></p>
+<h2 id="特征"><a href="#特征" class="headerlink" title="特征"></a>特征</h2><p><img src="/2023/12/26/operating-system/image-20231208013715763.png" alt="image-20231208013715763"></p>
+<p><img src="/2023/12/26/operating-system/image-20231208013737300.png" alt="image-20231208013737300"></p>
+<p><img src="/2023/12/26/operating-system/image-20231208013757954.png" alt="image-20231208013757954"></p>
+<p><img src="/2023/12/26/operating-system/image-20231208013815023.png" alt="image-20231208013815023"></p>
+<p><img src="/2023/12/26/operating-system/image-20231208013827301.png" alt="image-20231208013827301"></p>
+<h2 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h2><p><img src="/2023/12/26/operating-system/image-20231208013903287.png" alt="image-20231208013903287"></p>
+<p><img src="/2023/12/26/operating-system/image-20231208013913442.png" alt="image-20231208013913442"></p>
+<p><img src="/2023/12/26/operating-system/image-20231208013924319.png" alt="image-20231208013924319"></p>
+<h2 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h2><p><img src="/2023/12/26/operating-system/image-20231208013947693.png" alt="image-20231208013947693"></p>
+<p><img src="/2023/12/26/operating-system/image-20231208014005633.png" alt="image-20231208014005633"></p>
+<h1 id="02-进程与线程"><a href="#02-进程与线程" class="headerlink" title="02 进程与线程"></a>02 进程与线程</h1><h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p><img src="/2023/12/26/operating-system/image-20231209010239071.png" alt="image-20231209010239071"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209010726351.png" alt="image-20231209010726351"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209010741922.png" alt="image-20231209010741922"></p>
+<p>感觉这种可能考什么简答题</p>
+<p><img src="/2023/12/26/operating-system/image-20231209010943529.png" alt="image-20231209010943529"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209011002360.png" alt="image-20231209011002360"></p>
+<h3 id="状态"><a href="#状态" class="headerlink" title="状态"></a>状态</h3><h4 id="状态-1"><a href="#状态-1" class="headerlink" title="状态"></a>状态</h4><p><img src="/2023/12/26/operating-system/image-20231209011058162.png" alt="image-20231209011058162"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209011113625.png" alt="image-20231209011113625"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209011134789.png" alt="image-20231209011134789"></p>
+<h4 id="控制"><a href="#控制" class="headerlink" title="控制"></a>控制</h4><p><img src="/2023/12/26/operating-system/image-20231209012617457.png" alt="image-20231209012617457"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209012650789.png" alt="image-20231209012650789"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209012721932.png" alt="image-20231209012721932"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209012905281.png" alt="image-20231209012905281"></p>
+<h4 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h4><h5 id="wait"><a href="#wait" class="headerlink" title="wait"></a>wait</h5><p><img src="/2023/12/26/operating-system/image-20231209013054072.png" alt="image-20231209013054072"></p>
+<p>感觉这个也会出题</p>
+<p><img src="/2023/12/26/operating-system/image-20231209013407611.png" alt="image-20231209013407611"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209013440724.png" alt="image-20231209013440724"></p>
+<p>这些参数可能得再细致研究一下</p>
+<p><img src="/2023/12/26/operating-system/image-20231209013955750.png" alt="image-20231209013955750"></p>
+<h5 id="sleep"><a href="#sleep" class="headerlink" title="sleep"></a>sleep</h5><p><img src="/2023/12/26/operating-system/image-20231209014023122.png" alt="image-20231209014023122"></p>
+<h5 id="execve"><a href="#execve" class="headerlink" title="execve"></a>execve</h5><h6 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h6><p><img src="/2023/12/26/operating-system/image-20231209014137651.png" alt="image-20231209014137651"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209014610180.png" alt="image-20231209014610180"></p>
+<h6 id="为什么与fork分离"><a href="#为什么与fork分离" class="headerlink" title="为什么与fork分离"></a>为什么与fork分离</h6><p><img src="/2023/12/26/operating-system/image-20231209015425362.png" alt="image-20231209015425362"></p>
+<h4 id="进程图"><a href="#进程图" class="headerlink" title="进程图"></a>进程图</h4><p>感觉这个也可能考，之后看看王道</p>
+<p><img src="/2023/12/26/operating-system/image-20231209015527112.png" alt="image-20231209015527112"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209015548581.png" alt="image-20231209015548581"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209015559784.png" alt="image-20231209015559784"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209015611171.png" alt="image-20231209015611171"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209015621086.png" alt="image-20231209015621086"></p>
+<h3 id="异常控制流"><a href="#异常控制流" class="headerlink" title="异常控制流"></a>异常控制流</h3><h4 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h4><h5 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h5><p><img src="/2023/12/26/operating-system/image-20231209015652150.png" alt="image-20231209015652150"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209015947811.png" alt="image-20231209015947811"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209020021078.png" alt="image-20231209020021078"></p>
+<h4 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h4><p>这些需要注意下概念题，比如xxx属于哪种类型的异常</p>
+<h5 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h5><p><img src="/2023/12/26/operating-system/image-20231209020045288.png" alt="image-20231209020045288"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209020117856.png" alt="image-20231209020117856"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209020133342.png" alt="image-20231209020133342"></p>
+<h5 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h5><p><img src="/2023/12/26/operating-system/image-20231209020224680.png" alt="image-20231209020224680"></p>
+<h5 id="陷阱"><a href="#陷阱" class="headerlink" title="陷阱"></a>陷阱</h5><p><img src="/2023/12/26/operating-system/image-20231209020249008.png" alt="image-20231209020249008"></p>
+<h5 id="故障"><a href="#故障" class="headerlink" title="故障"></a>故障</h5><p><img src="/2023/12/26/operating-system/image-20231209020312623.png" alt="image-20231209020312623"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209020335344.png" alt="image-20231209020335344"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209020415992.png" alt="image-20231209020415992"></p>
+<h5 id="终止"><a href="#终止" class="headerlink" title="终止"></a>终止</h5><p><img src="/2023/12/26/operating-system/image-20231209020435616.png" alt="image-20231209020435616"></p>
+<h3 id="进程间通信"><a href="#进程间通信" class="headerlink" title="进程间通信"></a>进程间通信</h3><p><img src="/2023/12/26/operating-system/image-20231209020644945.png" alt="image-20231209020644945"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209021224093.png" alt="image-20231209021224093"></p>
+<h4 id="共享内存"><a href="#共享内存" class="headerlink" title="共享内存"></a>共享内存</h4><p><img src="/2023/12/26/operating-system/image-20231209020724418.png" alt="image-20231209020724418"></p>
+<h4 id="消息传递系统"><a href="#消息传递系统" class="headerlink" title="消息传递系统"></a>消息传递系统</h4><p><img src="/2023/12/26/operating-system/image-20231209020811007.png" alt="image-20231209020811007"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209020825726.png" alt="image-20231209020825726"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209020851150.png" alt="image-20231209020851150"></p>
+<p>TODO，区分一下信箱和消息队列，看起来好像。我记得以前知道的，可惜现在忘了。</p>
+<h4 id="管道"><a href="#管道" class="headerlink" title="管道"></a>管道</h4><p><img src="/2023/12/26/operating-system/image-20231209020949608.png" alt="image-20231209020949608"></p>
+<p><img src="/2023/12/26/operating-system/image-20231209021142595.png" alt="image-20231209021142595"></p>
+<h2 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h2><h3 id="概述-3"><a href="#概述-3" class="headerlink" title="概述"></a>概述</h3><h4 id="线程-1"><a href="#线程-1" class="headerlink" title="线程"></a>线程</h4><p><img src="/2023/12/26/operating-system/image-20231210002314658.png" alt="image-20231210002314658"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210002329164.png" alt="image-20231210002329164"></p>
+<h4 id="多线程进程"><a href="#多线程进程" class="headerlink" title="多线程进程"></a>多线程进程</h4><p><img src="/2023/12/26/operating-system/image-20231210002413435.png" alt="image-20231210002413435"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210002450302.png" alt="image-20231210002450302"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210002607740.png" alt="image-20231210002607740"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210002529932.png" alt="image-20231210002529932"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210002644253.png" alt="image-20231210002644253"></p>
+<h4 id="并发线程"><a href="#并发线程" class="headerlink" title="并发线程"></a>并发线程</h4><p>可以注意一下这个例题：</p>
+<p><img src="/2023/12/26/operating-system/image-20231210002718214.png" alt="image-20231210002718214"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210002737122.png" alt="image-20231210002737122"></p>
+<h4 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h4><p><img src="/2023/12/26/operating-system/image-20231210002826322.png" alt="image-20231210002826322"></p>
+<h3 id="多线程模型"><a href="#多线程模型" class="headerlink" title="多线程模型"></a>多线程模型</h3><p><img src="/2023/12/26/operating-system/image-20231210002905246.png" alt="image-20231210002905246"></p>
+<h4 id="多对一"><a href="#多对一" class="headerlink" title="多对一"></a>多对一</h4><p><img src="/2023/12/26/operating-system/image-20231210002952917.png" alt="image-20231210002952917"></p>
+<h4 id="一对一"><a href="#一对一" class="headerlink" title="一对一"></a>一对一</h4><p><img src="/2023/12/26/operating-system/image-20231210003025064.png" alt="image-20231210003025064"></p>
+<h4 id="多对多"><a href="#多对多" class="headerlink" title="多对多"></a>多对多</h4><p>果然一切问题都得中庸</p>
+<p><img src="/2023/12/26/operating-system/image-20231210003106279.png" alt="image-20231210003106279"></p>
+<p>就是加了个允许一对一绑定</p>
+<p><img src="/2023/12/26/operating-system/image-20231210003130511.png" alt="image-20231210003130511"></p>
+<h3 id="Posix线程"><a href="#Posix线程" class="headerlink" title="Posix线程"></a>Posix线程</h3><p><img src="/2023/12/26/operating-system/image-20231210003209912.png" alt="image-20231210003209912"></p>
+<h4 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h4><p>感受一下C语言的面向对象</p>
+<p><img src="/2023/12/26/operating-system/image-20231210003252567.png" alt="image-20231210003252567"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210003449745.png" alt="image-20231210003449745"></p>
+<h4 id="终止-1"><a href="#终止-1" class="headerlink" title="终止"></a>终止</h4><p><img src="/2023/12/26/operating-system/image-20231210003629044.png" alt="image-20231210003629044"></p>
+<p>好像第一个一般传的NULL。第二个应该相当于是线程A让某个线程终止（可以是自己也可以是别的），然后被终止线程应该会有代码检查是否被cancel，是的话再滚蛋。</p>
+<h4 id="Join-Detach"><a href="#Join-Detach" class="headerlink" title="Join Detach"></a>Join Detach</h4><p><img src="/2023/12/26/operating-system/image-20231210003848702.png" alt="image-20231210003848702"></p>
+<p>这个意义感觉还是有点模糊，到时候再看看网上的说法</p>
+<p><img src="/2023/12/26/operating-system/image-20231210003938919.png" alt="image-20231210003938919"></p>
+<p>这玩意我看着要吐了，以后有精力看看吧</p>
+<p><img src="/2023/12/26/operating-system/image-20231210004048593.png" alt="image-20231210004048593"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210004035672.png" alt="image-20231210004035672"></p>
+<h1 id="03-并发与同步"><a href="#03-并发与同步" class="headerlink" title="03 并发与同步"></a>03 并发与同步</h1><h2 id="信号"><a href="#信号" class="headerlink" title="信号"></a>信号</h2><p>感觉这节很有意思，以前也没学过，值得仔细看看</p>
+<p>用户程序通过系统调用针对某个信号注册了一个处理函数handler。然后另一个进程通过kill发送了该信号给这个用户程序。对这个信号的检测会推迟到用户程序陷入内核，并准备从内核返回的时候。这时候内核检查信号列表，发现了该待pending的函数，就直接强制性跳转到了用户自定义的处理函数handler（也就是说需要暂时返回用户态），执行完handler之后再回到中断上下文（回到内核态），然后返回到用户程序。</p>
+<h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p><img src="/2023/12/26/operating-system/image-20231210004347370.png" alt="image-20231210004347370"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210004433931.png" alt="image-20231210004433931"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210004636914.png" alt="image-20231210004636914"></p>
+<h3 id="收发"><a href="#收发" class="headerlink" title="收发"></a>收发</h3><h4 id="发送"><a href="#发送" class="headerlink" title="发送"></a>发送</h4><p><img src="/2023/12/26/operating-system/image-20231210004730315.png" alt="image-20231210004730315"></p>
+<p>用kill -信号ID来发送一个信号。</p>
+<p><img src="/2023/12/26/operating-system/image-20231210005800376.png" alt="image-20231210005800376"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210005830196.png" alt="image-20231210005830196"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210005937309.png" alt="image-20231210005937309"></p>
+<p>下面这个区别没看懂</p>
+<h4 id="接收"><a href="#接收" class="headerlink" title="接收"></a>接收</h4><p><img src="/2023/12/26/operating-system/image-20231210004944106.png" alt="image-20231210004944106"></p>
+<p>这里再仔细看看，信号的处理流程和时机</p>
+<p><img src="/2023/12/26/operating-system/image-20231210005723795.png" alt="image-20231210005723795"></p>
+<h4 id="pending-amp-block"><a href="#pending-amp-block" class="headerlink" title="pending&amp;block"></a>pending&amp;block</h4><p><img src="/2023/12/26/operating-system/image-20231210005037997.png" alt="image-20231210005037997"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210005154327.png" alt="image-20231210005154327"></p>
+<p>阻塞位决定的是能否被接收，也就是说有可能出现阻塞位和挂起位都为1的情况。</p>
+<p><img src="/2023/12/26/operating-system/image-20231210005520958.png" alt="image-20231210005520958"></p>
+<h4 id="阻塞"><a href="#阻塞" class="headerlink" title="阻塞"></a>阻塞</h4><p><img src="/2023/12/26/operating-system/image-20231210005603404.png" alt="image-20231210005603404"></p>
+<h3 id="信号处理"><a href="#信号处理" class="headerlink" title="信号处理"></a>信号处理</h3><h4 id="处理函数"><a href="#处理函数" class="headerlink" title="处理函数"></a>处理函数</h4><p><img src="/2023/12/26/operating-system/image-20231210010227173.png" alt="image-20231210010227173"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210010319529.png" alt="image-20231210010319529"></p>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p><img src="/2023/12/26/operating-system/image-20231210010338912.png" alt="image-20231210010338912"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210010402331.png" alt="image-20231210010402331"></p>
+<h4 id="安全性"><a href="#安全性" class="headerlink" title="安全性"></a>安全性</h4><p><img src="/2023/12/26/operating-system/image-20231210010905230.png" alt="image-20231210010905230"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210011007778.png" alt="image-20231210011007778"></p>
+<p>printf不安全我想大概是因为用了变长参数之类的？？？这个值得深挖。或者说是因为它内里对数据处理非原子，所以可能导致输出混乱？</p>
+<p><img src="/2023/12/26/operating-system/image-20231210011150268.png" alt="image-20231210011150268"></p>
+<p>G3类似关中断</p>
+<p><img src="/2023/12/26/operating-system/image-20231210011308433.png" alt="image-20231210011308433"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210011358066.png" alt="image-20231210011358066"></p>
+<h4 id="正确性"><a href="#正确性" class="headerlink" title="正确性"></a>正确性</h4><p><img src="/2023/12/26/operating-system/image-20231210011540286.png" alt="image-20231210011540286"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210011600664.png" alt="image-20231210011600664"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210011613127.png" alt="image-20231210011613127"></p>
+<h3 id="嵌套"><a href="#嵌套" class="headerlink" title="嵌套"></a>嵌套</h3><p><img src="/2023/12/26/operating-system/image-20231210010459883.png" alt="image-20231210010459883"></p>
+<h3 id="处理流程"><a href="#处理流程" class="headerlink" title="处理流程"></a>处理流程</h3><p><img src="/2023/12/26/operating-system/image-20231210010626733.png" alt="image-20231210010626733"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210010715447.png" alt="image-20231210010715447"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210010752485.png" alt="image-20231210010752485"></p>
+<p>哦吼！到这里才意识到，原来我们xv6的<strong>sigalarm是实现了一次特殊的信号</strong>！（实在后知后觉……这个到时候再仔细看看）</p>
+<h3 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h3><p><img src="/2023/12/26/operating-system/image-20231210011647336.png" alt="image-20231210011647336"></p>
+<h2 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h2><h3 id="进度图与临界区"><a href="#进度图与临界区" class="headerlink" title="进度图与临界区"></a>进度图与临界区</h3><p><img src="/2023/12/26/operating-system/image-20231210011820666.png" alt="image-20231210011820666"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210011848469.png" alt="image-20231210011848469"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210011955821.png" alt="image-20231210011955821"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210012012163.png" alt="image-20231210012012163"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210012037664.png" alt="image-20231210012037664"></p>
+<p>之后学习一下条件变量是什么。。。</p>
+<h3 id="信号量-1"><a href="#信号量-1" class="headerlink" title="信号量"></a>信号量</h3><p><img src="/2023/12/26/operating-system/image-20231210012157990.png" alt="image-20231210012157990"></p>
+<p>这：</p>
+<p><img src="/2023/12/26/operating-system/image-20231210012227966.png" alt="image-20231210012227966"></p>
+<h3 id="信号量实现互斥"><a href="#信号量实现互斥" class="headerlink" title="信号量实现互斥"></a>信号量实现互斥</h3><p>P操作相当于减少信号量值，V操作相当于增加信号量值</p>
+<p><img src="/2023/12/26/operating-system/image-20231210012337043.png" alt="image-20231210012337043"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210012347773.png" alt="image-20231210012347773"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210012403542.png" alt="image-20231210012403542"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210012418902.png" alt="image-20231210012418902"></p>
+<h3 id="进程同步"><a href="#进程同步" class="headerlink" title="进程同步"></a>进程同步</h3><h4 id="制约关系"><a href="#制约关系" class="headerlink" title="制约关系"></a>制约关系</h4><p>也即竞争和同步的概念</p>
+<p><img src="/2023/12/26/operating-system/image-20231210012501686.png" alt="image-20231210012501686"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210012517047.png" alt="image-20231210012517047"></p>
+<h4 id="同步"><a href="#同步" class="headerlink" title="同步"></a>同步</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><p>这个概念区分值得注意</p>
+<p><img src="/2023/12/26/operating-system/image-20231210012627508.png" alt="image-20231210012627508"></p>
+<p><img src="/2023/12/26/operating-system/image-20231210012705431.png" alt="image-20231210012705431"></p>
+<h5 id="信号量实现"><a href="#信号量实现" class="headerlink" title="信号量实现"></a>信号量实现</h5><p><img src="/2023/12/26/operating-system/image-20231210012737130.png" alt="image-20231210012737130"></p>
+<h3 id="王道补充"><a href="#王道补充" class="headerlink" title="王道补充"></a>王道补充</h3><h4 id="整型信号量"><a href="#整型信号量" class="headerlink" title="整型信号量"></a>整型信号量</h4><p><img src="/2023/12/26/operating-system/879A7D7E6DB3EE47025F8B34DC6C645A.jpg" alt="879A7D7E6DB3EE47025F8B34DC6C645A"></p>
+<h4 id="记录型信号量"><a href="#记录型信号量" class="headerlink" title="记录型信号量"></a>记录型信号量</h4><p><img src="/2023/12/26/operating-system/639D7A03B329AE3772E430448DEB70ED.jpg" alt="639D7A03B329AE3772E430448DEB70ED"></p>
+<p><img src="/2023/12/26/operating-system/33C2BB54CC9C1193E416F1B192ED52EA.jpg" alt="33C2BB54CC9C1193E416F1B192ED52EA"></p>
+<h4 id="信号量实现互斥-1"><a href="#信号量实现互斥-1" class="headerlink" title="信号量实现互斥"></a>信号量实现互斥</h4><p>初始值为1</p>
+<h4 id="信号量实现同步"><a href="#信号量实现同步" class="headerlink" title="信号量实现同步"></a>信号量实现同步</h4><p>这个可以保证456一定在12后面被执行，可以理解为生产者消费者模型</p>
+<p><img src="/2023/12/26/operating-system/DEF5CECC416778202A533D6DCE34F7B0.jpg" alt="DEF5CECC416778202A533D6DCE34F7B0"></p>
+<p><img src="/2023/12/26/operating-system/2F7BABD60FBA8CC4AE0D512E1E408BA5.jpg" alt="2F7BABD60FBA8CC4AE0D512E1E408BA5"></p>
+<h4 id="生产者消费者"><a href="#生产者消费者" class="headerlink" title="生产者消费者"></a>生产者消费者</h4><p><img src="/2023/12/26/operating-system/1255B500C318AFDB4654057289DF1F6D.jpg" alt="1255B500C318AFDB4654057289DF1F6D"></p>
+<p>除了这两个同步信号量，还需要多来一个互斥信号量表示对缓冲区的互斥访问</p>
+<p><img src="/2023/12/26/operating-system/C457F3A07AC4899E741DDE5E03EA5EB8.jpg" alt="C457F3A07AC4899E741DDE5E03EA5EB8"></p>
+<p>注意这里同步信号量和互斥信号量的顺序，如果交换了应该会死锁。p操作不能，因为它会阻塞。v就无所谓，因为不会阻塞</p>
+<h4 id="多生产者消费者"><a href="#多生产者消费者" class="headerlink" title="多生产者消费者"></a>多生产者消费者</h4><p><img src="/2023/12/26/operating-system/F20FFFDC705D62E04919D4140A9CCF70.jpg" alt="F20FFFDC705D62E04919D4140A9CCF70"></p>
+<p><img src="/2023/12/26/operating-system/93AF80AF95A40E97C2BEAE7AB9477BBF.jpg" alt="93AF80AF95A40E97C2BEAE7AB9477BBF"></p>
+<p><img src="/2023/12/26/operating-system/7D8068890D7E5B300C7BF0F3960C882D.jpg" alt="7D8068890D7E5B300C7BF0F3960C882D"></p>
+<h1 id="04-CPU调度与优化"><a href="#04-CPU调度与优化" class="headerlink" title="04 CPU调度与优化"></a>04 CPU调度与优化</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="处理器调度"><a href="#处理器调度" class="headerlink" title="处理器调度"></a>处理器调度</h3><p><img src="/2023/12/26/operating-system/image-20231211010846215.png" alt="image-20231211010846215"></p>
+<h3 id="过程和开销"><a href="#过程和开销" class="headerlink" title="过程和开销"></a>过程和开销</h3><p><img src="/2023/12/26/operating-system/image-20231211011007471.png" alt="image-20231211011007471"></p>
+<h3 id="抢占与非抢占"><a href="#抢占与非抢占" class="headerlink" title="抢占与非抢占"></a>抢占与非抢占</h3><p><img src="/2023/12/26/operating-system/image-20231211011040742.png" alt="image-20231211011040742"></p>
+<h3 id="计算-IO密集"><a href="#计算-IO密集" class="headerlink" title="计算/IO密集"></a>计算/IO密集</h3><p><img src="/2023/12/26/operating-system/image-20231211011117679.png" alt="image-20231211011117679"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211011143165.png" alt="image-20231211011143165"></p>
+<h3 id="指标"><a href="#指标" class="headerlink" title="指标"></a>指标</h3><p><img src="/2023/12/26/operating-system/image-20231211011311853.png" alt="image-20231211011311853"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211011407132.png" alt="image-20231211011407132"></p>
+<h2 id="调度算法"><a href="#调度算法" class="headerlink" title="调度算法"></a>调度算法</h2><p>这部分也需要注意考题，应该会考调度序列和各种指标计算。</p>
+<h3 id="预测CPU区间"><a href="#预测CPU区间" class="headerlink" title="预测CPU区间"></a>预测CPU区间</h3><p><img src="/2023/12/26/operating-system/image-20231211011847840.png" alt="image-20231211011847840"></p>
+<h3 id="FCFS"><a href="#FCFS" class="headerlink" title="FCFS"></a>FCFS</h3><p><img src="/2023/12/26/operating-system/image-20231211011441271.png" alt="image-20231211011441271"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211011458102.png" alt="image-20231211011458102"></p>
+<h3 id="SJF"><a href="#SJF" class="headerlink" title="SJF"></a>SJF</h3><p><img src="/2023/12/26/operating-system/image-20231211011542488.png" alt="image-20231211011542488"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211011555029.png" alt="image-20231211011555029"></p>
+<p>所以需要最小平均等待时间的话，用sjf是最好的</p>
+<p><img src="/2023/12/26/operating-system/image-20231211011623845.png" alt="image-20231211011623845"></p>
+<h3 id="SRJF"><a href="#SRJF" class="headerlink" title="SRJF"></a>SRJF</h3><p>相当于是SJF在任务到达时间有先后的情况下的一种拓展</p>
+<p><img src="/2023/12/26/operating-system/image-20231211011755855.png" alt="image-20231211011755855"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211011806684.png" alt="image-20231211011806684"></p>
+<h3 id="RR"><a href="#RR" class="headerlink" title="RR"></a>RR</h3><p><img src="/2023/12/26/operating-system/image-20231211012909442.png" alt="image-20231211012909442"></p>
+<p>这个一下整了好多例子，感觉考查重点</p>
+<p><img src="/2023/12/26/operating-system/image-20231211012050916.png" alt="image-20231211012050916"></p>
+<p>每次pick应该是按照特定的轮转顺序？看图例大概是tid之类的</p>
+<p><img src="/2023/12/26/operating-system/image-20231211012130780.png" alt="image-20231211012130780"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211012327726.png" alt="image-20231211012327726"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211012341491.png" alt="image-20231211012341491"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211012414371.png" alt="image-20231211012414371"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211012426377.png" alt="image-20231211012426377"></p>
+<h3 id="MLFQ"><a href="#MLFQ" class="headerlink" title="MLFQ"></a>MLFQ</h3><p><img src="/2023/12/26/operating-system/image-20231211011942018.png" alt="image-20231211011942018"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211012500643.png" alt="image-20231211012500643"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211012553738.png" alt="image-20231211012553738"></p>
+<p>确实，它很好的一点就是每个队列可以用不同的调度算法。感觉这种分层级的思想或许也可以用于idea</p>
+<h3 id="彩票-Lottery"><a href="#彩票-Lottery" class="headerlink" title="彩票(Lottery)"></a>彩票(Lottery)</h3><p><img src="/2023/12/26/operating-system/image-20231211012742472.png" alt="image-20231211012742472"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211012818751.png" alt="image-20231211012818751"></p>
+<h1 id="05-死锁"><a href="#05-死锁" class="headerlink" title="05 死锁"></a>05 死锁</h1><p><img src="/2023/12/26/operating-system/image-20231211225541316.png" alt="image-20231211225541316"></p>
+<h2 id="Intro"><a href="#Intro" class="headerlink" title="Intro"></a>Intro</h2><p><img src="/2023/12/26/operating-system/image-20231211013154638.png" alt="image-20231211013154638"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211013226115.png" alt="image-20231211013226115"></p>
+<h2 id="四个产生条件"><a href="#四个产生条件" class="headerlink" title="四个产生条件"></a>四个产生条件</h2><h3 id="资源互斥访问"><a href="#资源互斥访问" class="headerlink" title="资源互斥访问"></a>资源互斥访问</h3><h4 id="概念-1"><a href="#概念-1" class="headerlink" title="概念"></a>概念</h4><p><img src="/2023/12/26/operating-system/image-20231211013309044.png" alt="image-20231211013309044"></p>
+<h3 id="四个条件"><a href="#四个条件" class="headerlink" title="四个条件"></a>四个条件</h3><p><img src="/2023/12/26/operating-system/image-20231211013557063.png" alt="image-20231211013557063"></p>
+<p><img src="/2023/12/26/operating-system/image-20231214234613849.png" alt="image-20231214234613849"></p>
+<h2 id="处理方法"><a href="#处理方法" class="headerlink" title="处理方法"></a>处理方法</h2><p><img src="/2023/12/26/operating-system/image-20231214235157825.png" alt="image-20231214235157825"></p>
+<h3 id="死锁预防"><a href="#死锁预防" class="headerlink" title="死锁预防"></a>死锁预防</h3><p><img src="/2023/12/26/operating-system/image-20231211013810051.png" alt="image-20231211013810051"></p>
+<p><img src="/2023/12/26/operating-system/image-20231214234936241.png" alt="image-20231214234936241"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211013833463.png" alt="image-20231211013833463"></p>
+<p>静态分配，可能导致某些进程饥饿</p>
+<p><img src="/2023/12/26/operating-system/image-20231211013905973.png" alt="image-20231211013905973"></p>
+<p>我怎么感觉按序申请挺常见的（</p>
+<h3 id="死锁避免"><a href="#死锁避免" class="headerlink" title="死锁避免"></a>死锁避免</h3><h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p><img src="/2023/12/26/operating-system/image-20231211014121368.png" alt="image-20231211014121368"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211014140758.png" alt="image-20231211014140758"></p>
+<p><img src="/2023/12/26/operating-system/image-20231214235559994.png" alt="image-20231214235559994"></p>
+<h4 id="银行家算法"><a href="#银行家算法" class="headerlink" title="银行家算法"></a>银行家算法</h4><p><img src="/2023/12/26/operating-system/image-20231211014227897.png" alt="image-20231211014227897"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211014239708.png" alt="image-20231211014239708"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211014252447.png" alt="image-20231211014252447"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211014307622.png" alt="image-20231211014307622"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211225325604.png" alt="image-20231211225325604"></p>
+<h4 id="资源请求算法"><a href="#资源请求算法" class="headerlink" title="资源请求算法"></a>资源请求算法</h4><p><img src="/2023/12/26/operating-system/image-20231211225106052.png" alt="image-20231211225106052"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211225149084.png" alt="image-20231211225149084"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211225200012.png" alt="image-20231211225200012"></p>
+<h3 id="死锁检测"><a href="#死锁检测" class="headerlink" title="死锁检测"></a>死锁检测</h3><h4 id="资源分配图"><a href="#资源分配图" class="headerlink" title="资源分配图"></a>资源分配图</h4><p>资源分配图化简算法是死锁检测，注意与资源请求算法的差别</p>
+<p><img src="/2023/12/26/operating-system/image-20231211013347070.png" alt="image-20231211013347070"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215001204690.png" alt="image-20231215001204690"></p>
+<p>也相当于找到了一个安全序列</p>
+<p><img src="/2023/12/26/operating-system/image-20231215001425205.png" alt="image-20231215001425205"></p>
+<p><img src="/2023/12/26/operating-system/image-20231211013429818.png" alt="image-20231211013429818"></p>
+<p>下面那个感觉是因为P4和P2还是有可能释放资源</p>
+<p><img src="/2023/12/26/operating-system/image-20231211013530873.png" alt="image-20231211013530873"></p>
+<h4 id="不知道什么玩意"><a href="#不知道什么玩意" class="headerlink" title="不知道什么玩意"></a>不知道什么玩意</h4><p><img src="/2023/12/26/operating-system/image-20231211225403513.png" alt="image-20231211225403513"></p>
+<h3 id="死锁恢复"><a href="#死锁恢复" class="headerlink" title="死锁恢复"></a>死锁恢复</h3><p><img src="/2023/12/26/operating-system/image-20231215001557317.png" alt="image-20231215001557317"></p>
+<h3 id="死锁忽略"><a href="#死锁忽略" class="headerlink" title="死锁忽略"></a>死锁忽略</h3><p><img src="/2023/12/26/operating-system/image-20231211225506882.png" alt="image-20231211225506882"></p>
+<h1 id="06-内存管理"><a href="#06-内存管理" class="headerlink" title="06  内存管理"></a>06  内存管理</h1><p><img src="/2023/12/26/operating-system/image-20231212011156242.png" alt="image-20231212011156242"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011214519.png" alt="image-20231212011214519"></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="重定位"><a href="#重定位" class="headerlink" title="重定位"></a>重定位</h3><p>重定位三个时机：</p>
+<ol>
+<li><p>编译链接</p>
+<p>绝对代码</p>
+<p><img src="/2023/12/26/operating-system/image-20231215010046935.png" alt="image-20231215010046935"></p>
+</li>
+<li><p>装载时</p>
+<p><img src="/2023/12/26/operating-system/image-20231215010115205.png" alt="image-20231215010115205"></p>
+</li>
+<li><p>运行时</p>
+<p><img src="/2023/12/26/operating-system/image-20231215010159649.png" alt="image-20231215010159649"></p>
+</li>
+</ol>
+<p><img src="/2023/12/26/operating-system/image-20231212003926160.png" alt="image-20231212003926160"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004003798.png" alt="image-20231212004003798"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004031562.png" alt="image-20231212004031562"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004053832.png" alt="image-20231212004053832"></p>
+<h3 id="概念-2"><a href="#概念-2" class="headerlink" title="概念"></a>概念</h3><h4 id="地址"><a href="#地址" class="headerlink" title="地址"></a>地址</h4><p><img src="/2023/12/26/operating-system/image-20231212004152913.png" alt="image-20231212004152913"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004358388.png" alt="image-20231212004358388"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004335621.png" alt="image-20231212004335621"></p>
+<h4 id="地址空间"><a href="#地址空间" class="headerlink" title="地址空间"></a>地址空间</h4><p><img src="/2023/12/26/operating-system/image-20231212004240886.png" alt="image-20231212004240886"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004251661.png" alt="image-20231212004251661"></p>
+<p>没看懂后面两个的差别。。。</p>
+<h2 id="连续内存分配"><a href="#连续内存分配" class="headerlink" title="连续内存分配"></a>连续内存分配</h2><h3 id="固定分区"><a href="#固定分区" class="headerlink" title="固定分区"></a>固定分区</h3><h4 id="等长"><a href="#等长" class="headerlink" title="等长"></a>等长</h4><p><img src="/2023/12/26/operating-system/image-20231212004659024.png" alt="image-20231212004659024"></p>
+<h4 id="变长"><a href="#变长" class="headerlink" title="变长"></a>变长</h4><p><img src="/2023/12/26/operating-system/image-20231212004738309.png" alt="image-20231212004738309"></p>
+<h3 id="可变分区"><a href="#可变分区" class="headerlink" title="可变分区"></a>可变分区</h3><p><img src="/2023/12/26/operating-system/image-20231212004810488.png" alt="image-20231212004810488"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004824143.png" alt="image-20231212004824143"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004840749.png" alt="image-20231212004840749"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212004851418.png" alt="image-20231212004851418"></p>
+<h3 id="分区分配算法"><a href="#分区分配算法" class="headerlink" title="分区分配算法"></a>分区分配算法</h3><p><img src="/2023/12/26/operating-system/image-20231212004926946.png" alt="image-20231212004926946"></p>
+<h3 id="碎片问题"><a href="#碎片问题" class="headerlink" title="碎片问题"></a>碎片问题</h3><p><img src="/2023/12/26/operating-system/image-20231212005024806.png" alt="image-20231212005024806"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212005050253.png" alt="image-20231212005050253"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212005117560.png" alt="image-20231212005117560"></p>
+<h2 id="分段内存管理"><a href="#分段内存管理" class="headerlink" title="分段内存管理"></a>分段内存管理</h2><h3 id="概述-4"><a href="#概述-4" class="headerlink" title="概述"></a>概述</h3><p><img src="/2023/12/26/operating-system/image-20231212005157789.png" alt="image-20231212005157789"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212005249614.png" alt="image-20231212005249614"></p>
+<h3 id="地址翻译"><a href="#地址翻译" class="headerlink" title="地址翻译"></a>地址翻译</h3><p><img src="/2023/12/26/operating-system/image-20231212005303487.png" alt="image-20231212005303487"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212005322548.png" alt="image-20231212005322548"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212005335864.png" alt="image-20231212005335864"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><img src="/2023/12/26/operating-system/image-20231212005424317.png" alt="image-20231212005424317"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212005606894.png" alt="image-20231212005606894"></p>
+<h2 id="分页内存管理"><a href="#分页内存管理" class="headerlink" title="分页内存管理"></a>分页内存管理</h2><h3 id="地址翻译-1"><a href="#地址翻译-1" class="headerlink" title="地址翻译"></a>地址翻译</h3><p><img src="/2023/12/26/operating-system/image-20231212005717769.png" alt="image-20231212005717769"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212005731167.png" alt="image-20231212005731167"></p>
+<h3 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h3><p><img src="/2023/12/26/operating-system/image-20231212005808958.png" alt="image-20231212005808958"></p>
+<h4 id="页表项"><a href="#页表项" class="headerlink" title="页表项"></a>页表项</h4><p><img src="/2023/12/26/operating-system/image-20231212005843981.png" alt="image-20231212005843981"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010032980.png" alt="image-20231212010032980"></p>
+<h4 id="地址空间-1"><a href="#地址空间-1" class="headerlink" title="地址空间"></a>地址空间</h4><p><img src="/2023/12/26/operating-system/image-20231212005928818.png" alt="image-20231212005928818"></p>
+<h4 id="多级页表"><a href="#多级页表" class="headerlink" title="多级页表"></a>多级页表</h4><h5 id="概述-5"><a href="#概述-5" class="headerlink" title="概述"></a>概述</h5><p><img src="/2023/12/26/operating-system/image-20231212005946694.png" alt="image-20231212005946694"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212005959917.png" alt="image-20231212005959917"></p>
+<h5 id="地址翻译-2"><a href="#地址翻译-2" class="headerlink" title="地址翻译"></a>地址翻译</h5><p><img src="/2023/12/26/operating-system/image-20231212010013770.png" alt="image-20231212010013770"></p>
+<h5 id="效率-TLB"><a href="#效率-TLB" class="headerlink" title="效率-TLB"></a>效率-TLB</h5><p><img src="/2023/12/26/operating-system/image-20231212010112445.png" alt="image-20231212010112445"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010146984.png" alt="image-20231212010146984"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010158362.png" alt="image-20231212010158362"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010219801.png" alt="image-20231212010219801"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010238146.png" alt="image-20231212010238146"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010316825.png" alt="image-20231212010316825"></p>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p><img src="/2023/12/26/operating-system/image-20231212010401612.png" alt="image-20231212010401612"></p>
+<h2 id="段页结合"><a href="#段页结合" class="headerlink" title="段页结合"></a>段页结合</h2><p><img src="/2023/12/26/operating-system/image-20231212010525294.png" alt="image-20231212010525294"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010537503.png" alt="image-20231212010537503"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010626075.png" alt="image-20231212010626075"></p>
+<h2 id="ELF文件"><a href="#ELF文件" class="headerlink" title="ELF文件"></a>ELF文件</h2><p><img src="/2023/12/26/operating-system/image-20231212010657820.png" alt="image-20231212010657820"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010727619.png" alt="image-20231212010727619"></p>
+<h2 id="X86内存"><a href="#X86内存" class="headerlink" title="X86内存"></a>X86内存</h2><p><img src="/2023/12/26/operating-system/image-20231212010805410.png" alt="image-20231212010805410"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010824997.png" alt="image-20231212010824997"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010847424.png" alt="image-20231212010847424"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010901211.png" alt="image-20231212010901211"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010926834.png" alt="image-20231212010926834"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010942507.png" alt="image-20231212010942507"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212010955766.png" alt="image-20231212010955766"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011012546.png" alt="image-20231212011012546"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011025331.png" alt="image-20231212011025331"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011054626.png" alt="image-20231212011054626"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011116031.png" alt="image-20231212011116031"></p>
+<p>值得注意的是，以前只了解开启虚拟地址映射的时候会开启LDT，就是不大清楚这其中的具体含义，经同学启发，以及“每个进程都有一个LDTR”的表述，才意识到它能保证多个进程虚拟地址空间的管理。</p>
+<p>具体来说这个地址映射的转化是这样的，实模式使用物理地址，即程序直接访问物理内存地址，没有分段或分页机制故而它有4MB的直接寻址空间。而它切到保护模式的时候会先切换为一个使用段表的新GDT表，开启对LDT表的使用，从而开启了段页结合的虚拟映射。</p>
+<h2 id="王道"><a href="#王道" class="headerlink" title="王道"></a>王道</h2><p><img src="/2023/12/26/operating-system/E21B1EA221B6BC5E2B8CD601473622F5.jpg" alt="E21B1EA221B6BC5E2B8CD601473622F5"></p>
+<p><img src="/2023/12/26/operating-system/3304F578DBB8ADB87A6708C7B7850602.jpg" alt="3304F578DBB8ADB87A6708C7B7850602"></p>
+<h3 id="连续内存分配-1"><a href="#连续内存分配-1" class="headerlink" title="连续内存分配"></a>连续内存分配</h3><h4 id="覆盖和交换"><a href="#覆盖和交换" class="headerlink" title="覆盖和交换"></a>覆盖和交换</h4><p><img src="/2023/12/26/operating-system/E465171409C9E5B31D0A1BC1266EDF9B.jpg" alt="E465171409C9E5B31D0A1BC1266EDF9B"></p>
+<p><img src="/2023/12/26/operating-system/8FCF9143359D0C6839BF15993CEE01A0.jpg" alt="8FCF9143359D0C6839BF15993CEE01A0"></p>
+<p><img src="/2023/12/26/operating-system/D00AC845CC6F7F8D8772BF4A8E294A5F.jpg" alt="D00AC845CC6F7F8D8772BF4A8E294A5F"></p>
+<p><img src="/2023/12/26/operating-system/322B105AE23A98DED86EE23879AED00C.jpg" alt="322B105AE23A98DED86EE23879AED00C"></p>
+<p>这个也就类似于swap，只不过swap换入换出单位为页，这个单位为整个进程</p>
+<h4 id="动态分区分配"><a href="#动态分区分配" class="headerlink" title="动态分区分配"></a>动态分区分配</h4><p><img src="/2023/12/26/operating-system/image-20231215154743853.png" alt="image-20231215154743853"></p>
+<p>这几个优缺点得背，比如说最主要的是最佳适配的内存碎片、开销问题，最坏适配的大分区用完问题，以及首次适配的性能最好。</p>
+<h3 id="非连续内存分配"><a href="#非连续内存分配" class="headerlink" title="非连续内存分配"></a>非连续内存分配</h3><p>上面这些包括什么动态分区分配算法（最先适配最佳适配等等）都是连续分配管理方式，接下来我们要学的分段分页属于非连续内存管理方式。他们逻辑空间连续，但是物理空间不一定连续</p>
+<h3 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h3><p><img src="/2023/12/26/operating-system/67A2E236FA5E7B52285DE55A3B2921EF.jpg" alt="67A2E236FA5E7B52285DE55A3B2921EF"></p>
+<h4 id="页表项-1"><a href="#页表项-1" class="headerlink" title="页表项"></a>页表项</h4><p><img src="/2023/12/26/operating-system/EB5186D39F413C46BDF12CC3488BB66A.jpg" alt="EB5186D39F413C46BDF12CC3488BB66A"></p>
+<p>可以发现如果只是单纯的分页，还是不用什么逻辑地址那么复杂的，只用有页号块号的映射表即可</p>
+<p><img src="/2023/12/26/operating-system/5B66F668315918779E53BF5842927C79.jpg" alt="5B66F668315918779E53BF5842927C79"></p>
+<p>这个意思是一个页表跨了多个页框存储，第一个页的最大为1364，所以1365也即下一个页框的起始地址需要做点小操作</p>
+<h4 id="地址转换"><a href="#地址转换" class="headerlink" title="地址转换"></a>地址转换</h4><p><img src="/2023/12/26/operating-system/F89F19F4ED9BE27BD5154655479DE96D.jpg" alt="F89F19F4ED9BE27BD5154655479DE96D"></p>
+<p><img src="/2023/12/26/operating-system/0328340E0EBCDF736DDD68A68DDF8EBF.jpg" alt="0328340E0EBCDF736DDD68A68DDF8EBF"></p>
+<p><img src="/2023/12/26/operating-system/4F1A9F92B0AF3EB8E52235DBBBA94363.jpg" alt="4F1A9F92B0AF3EB8E52235DBBBA94363"></p>
+<p><img src="/2023/12/26/operating-system/D90676403D33299FD252F8370352B141.jpg" alt="D90676403D33299FD252F8370352B141"></p>
+<h4 id="硬件流程"><a href="#硬件流程" class="headerlink" title="硬件流程"></a>硬件流程</h4><h5 id="基本"><a href="#基本" class="headerlink" title="基本"></a>基本</h5><p><img src="/2023/12/26/operating-system/image-20231215142236222.png" alt="image-20231215142236222"></p>
+<p><img src="/2023/12/26/operating-system/34A4F9BFA2F7CED592F901CE10135E27.jpg" alt="34A4F9BFA2F7CED592F901CE10135E27"></p>
+<h5 id="TLB"><a href="#TLB" class="headerlink" title="TLB"></a>TLB</h5><p><img src="/2023/12/26/operating-system/image-20231215142440943.png" alt="image-20231215142440943"></p>
+<p>tlb是存的页表项，可以不防存而访高速cache来得到物理地址</p>
+<p><img src="/2023/12/26/operating-system/image-20231215142910720.png" alt="image-20231215142910720"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215142630009.png" alt="image-20231215142630009"></p>
+<h5 id="计算题"><a href="#计算题" class="headerlink" title="计算题"></a>计算题</h5><p><img src="/2023/12/26/operating-system/image-20231215142734258.png" alt="image-20231215142734258"></p>
+<p>注意这个同时查找！</p>
+<h4 id="多级页表-1"><a href="#多级页表-1" class="headerlink" title="多级页表"></a>多级页表</h4><p><img src="/2023/12/26/operating-system/image-20231215143206451.png" alt="image-20231215143206451"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215143358611.png" alt="image-20231215143358611"></p>
+<p>值得注意的是，页表只能存在一个页里，不能多个，这个可以用来做题</p>
+<p><img src="/2023/12/26/operating-system/image-20231215143443355.png" alt="image-20231215143443355"></p>
+<p>又一个时间空间矛盾</p>
+<p><img src="/2023/12/26/operating-system/image-20231215143544186.png" alt="image-20231215143544186"></p>
+<h3 id="分段"><a href="#分段" class="headerlink" title="分段"></a>分段</h3><p><img src="/2023/12/26/operating-system/image-20231215143656067.png" alt="image-20231215143656067"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215143921558.png" alt="image-20231215143921558"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215144028571.png" alt="image-20231215144028571"></p>
+<h3 id="对比-1"><a href="#对比-1" class="headerlink" title="对比"></a>对比</h3><p><img src="/2023/12/26/operating-system/image-20231215144114622.png" alt="image-20231215144114622"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215144157329.png" alt="image-20231215144157329"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215144206370.png" alt="image-20231215144206370"></p>
+<h3 id="段页结合-1"><a href="#段页结合-1" class="headerlink" title="段页结合"></a>段页结合</h3><p><img src="/2023/12/26/operating-system/image-20231215144547127.png" alt="image-20231215144547127"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215144630997.png" alt="image-20231215144630997"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215144834947.png" alt="image-20231215144834947"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215144846471.png" alt="image-20231215144846471"></p>
+<p>现在整了个二维TLB</p>
+<h1 id="07-虚拟内存"><a href="#07-虚拟内存" class="headerlink" title="07 虚拟内存"></a>07 虚拟内存</h1><h2 id="王道-虚拟内存"><a href="#王道-虚拟内存" class="headerlink" title="王道-虚拟内存"></a>王道-虚拟内存</h2><h3 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h3><p>6666，它这里说虚拟内存其实也就类似交换和覆盖技术。这个思想很牛逼</p>
+<p><img src="/2023/12/26/operating-system/image-20231215145314234.png" alt="image-20231215145314234"></p>
+<p>传统方式的一次性、驻留性</p>
+<p><img src="/2023/12/26/operating-system/image-20231215145435260.png" alt="image-20231215145435260"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215145521243.png" alt="image-20231215145521243"></p>
+<h3 id="请求分页"><a href="#请求分页" class="headerlink" title="请求分页"></a>请求分页</h3><p><img src="/2023/12/26/operating-system/image-20231215145551580.png" alt="image-20231215145551580"></p>
+<h4 id="页表机制"><a href="#页表机制" class="headerlink" title="页表机制"></a>页表机制</h4><p><img src="/2023/12/26/operating-system/image-20231215150057099.png" alt="image-20231215150057099"></p>
+<h4 id="缺页中断"><a href="#缺页中断" class="headerlink" title="缺页中断"></a>缺页中断</h4><p><img src="/2023/12/26/operating-system/image-20231215150128303.png" alt="image-20231215150128303"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215150154401.png" alt="image-20231215150154401"></p>
+<h4 id="地址变换"><a href="#地址变换" class="headerlink" title="地址变换"></a>地址变换</h4><p><img src="/2023/12/26/operating-system/image-20231215150339974.png" alt="image-20231215150339974"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215150438265.png" alt="image-20231215150438265"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215150457627.png" alt="image-20231215150457627"></p>
+<p>之后就是直接查快表不是慢表了</p>
+<h4 id="页面置换算法"><a href="#页面置换算法" class="headerlink" title="页面置换算法"></a>页面置换算法</h4><p><img src="/2023/12/26/operating-system/image-20231215151517166.png" alt="image-20231215151517166"></p>
+<h5 id="OPT"><a href="#OPT" class="headerlink" title="OPT"></a>OPT</h5><p><img src="/2023/12/26/operating-system/image-20231215150635517.png" alt="image-20231215150635517"></p>
+<h5 id="FIFO"><a href="#FIFO" class="headerlink" title="FIFO"></a>FIFO</h5><p><img src="/2023/12/26/operating-system/image-20231215150719347.png" alt="image-20231215150719347"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215150732801.png" alt="image-20231215150732801"></p>
+<h5 id="LRU"><a href="#LRU" class="headerlink" title="LRU"></a>LRU</h5><p><img src="/2023/12/26/operating-system/image-20231215150839652.png" alt="image-20231215150839652"></p>
+<h5 id="简单CLOCK"><a href="#简单CLOCK" class="headerlink" title="简单CLOCK"></a>简单CLOCK</h5><ol>
+<li>初始时每个都为1，扫描指针指向第一个元素</li>
+<li>如果所需页面存在，把对应的置为1（不用改扫描指针）</li>
+<li>如果不存在，移动扫描指针（过程中把1改为0）直到遇到第一个0，把它t出去，换成新的进来置为1，然后扫描指针指向下一位</li>
+</ol>
+<h5 id="改进CLOCK"><a href="#改进CLOCK" class="headerlink" title="改进CLOCK"></a>改进CLOCK</h5><p>优先淘汰没写过的页面</p>
+<p><img src="/2023/12/26/operating-system/image-20231215151450300.png" alt="image-20231215151450300"></p>
+<h4 id="页面分配"><a href="#页面分配" class="headerlink" title="页面分配"></a>页面分配</h4><p><img src="/2023/12/26/operating-system/image-20231215151547874.png" alt="image-20231215151547874"></p>
+<h5 id="驻留集"><a href="#驻留集" class="headerlink" title="驻留集"></a>驻留集</h5><p><img src="/2023/12/26/operating-system/image-20231215151648557.png" alt="image-20231215151648557"></p>
+<h5 id="策略"><a href="#策略" class="headerlink" title="策略"></a>策略</h5><p><img src="/2023/12/26/operating-system/image-20231215151822291.png" alt="image-20231215151822291"></p>
+<ol>
+<li><p>固定分配局部置换</p>
+<p>一开始分配固定数量，然后进程内部选页换入换出，页面数量始终固定</p>
+</li>
+<li><p>可变分配全局置换</p>
+<p>缺页从全局空闲块队列取，无空闲块则随便选个进程的某个页调出分配给缺页进程</p>
+</li>
+<li><p>可变分配局部置换</p>
+<p>一开始分配一定数量，缺页时只在自己内部换入换出。</p>
+<p>监测缺页率，太高就给它多几个物理块</p>
+</li>
+</ol>
+<p><img src="/2023/12/26/operating-system/image-20231215152108930.png" alt="image-20231215152108930"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215152227853.png" alt="image-20231215152227853"></p>
+<h5 id="颠簸"><a href="#颠簸" class="headerlink" title="颠簸"></a>颠簸</h5><p><img src="/2023/12/26/operating-system/image-20231215152304390.png" alt="image-20231215152304390"></p>
+<h5 id="工作集"><a href="#工作集" class="headerlink" title="工作集"></a>工作集</h5><p><img src="/2023/12/26/operating-system/image-20231215152430810.png" alt="image-20231215152430810"></p>
+<p>用来确定驻留集</p>
+<h3 id="内存映射文件"><a href="#内存映射文件" class="headerlink" title="内存映射文件"></a>内存映射文件</h3><p><img src="/2023/12/26/operating-system/image-20231215152526627.png" alt="image-20231215152526627"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215152557043.png" alt="image-20231215152557043"></p>
+<h2 id="概述-6"><a href="#概述-6" class="headerlink" title="概述"></a>概述</h2><p><img src="/2023/12/26/operating-system/image-20231212011359313.png" alt="image-20231212011359313"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011434037.png" alt="image-20231212011434037"></p>
+<h2 id="按需调页"><a href="#按需调页" class="headerlink" title="按需调页"></a>按需调页</h2><p><img src="/2023/12/26/operating-system/image-20231212011659317.png" alt="image-20231212011659317"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011805609.png" alt="image-20231212011805609"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011828132.png" alt="image-20231212011828132"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011854713.png" alt="image-20231212011854713"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212011928865.png" alt="image-20231212011928865"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212012025865.png" alt="image-20231212012025865"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212012301161.png" alt="image-20231212012301161"></p>
+<h2 id="页面置换算法-1"><a href="#页面置换算法-1" class="headerlink" title="页面置换算法"></a>页面置换算法</h2><h3 id="FIFO-1"><a href="#FIFO-1" class="headerlink" title="FIFO"></a>FIFO</h3><p><img src="/2023/12/26/operating-system/image-20231212012400097.png" alt="image-20231212012400097"></p>
+<h3 id="OPT-1"><a href="#OPT-1" class="headerlink" title="OPT"></a>OPT</h3><p><img src="/2023/12/26/operating-system/image-20231212012411923.png" alt="image-20231212012411923"></p>
+<h3 id="LRU-1"><a href="#LRU-1" class="headerlink" title="LRU"></a>LRU</h3><p><img src="/2023/12/26/operating-system/image-20231212012423419.png" alt="image-20231212012423419"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212012635018.png" alt="image-20231212012635018"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212012656691.png" alt="image-20231212012656691"></p>
+<h3 id="CLOCK"><a href="#CLOCK" class="headerlink" title="CLOCK"></a>CLOCK</h3><p><img src="/2023/12/26/operating-system/image-20231212012719074.png" alt="image-20231212012719074"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212012737172.png" alt="image-20231212012737172"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212153415550.png" alt="image-20231212153415550"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212153439485.png" alt="image-20231212153439485"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212153513472.png" alt="image-20231212153513472"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212153529194.png" alt="image-20231212153529194"></p>
+<h2 id="其它-1"><a href="#其它-1" class="headerlink" title="其它"></a>其它</h2><h3 id="COW"><a href="#COW" class="headerlink" title="COW"></a>COW</h3><p><img src="/2023/12/26/operating-system/image-20231212153714275.png" alt="image-20231212153714275"></p>
+<h3 id="swap与工作集"><a href="#swap与工作集" class="headerlink" title="swap与工作集"></a>swap与工作集</h3><h4 id="swap"><a href="#swap" class="headerlink" title="swap"></a>swap</h4><p><img src="/2023/12/26/operating-system/image-20231212153744449.png" alt="image-20231212153744449"></p>
+<h4 id="工作集-1"><a href="#工作集-1" class="headerlink" title="工作集"></a>工作集</h4><p><img src="/2023/12/26/operating-system/image-20231212153907111.png" alt="image-20231212153907111"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212153941822.png" alt="image-20231212153941822"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212154046046.png" alt="image-20231212154046046"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212154145323.png" alt="image-20231212154145323"></p>
+<h3 id="页面置换"><a href="#页面置换" class="headerlink" title="页面置换"></a>页面置换</h3><h4 id="置换策略"><a href="#置换策略" class="headerlink" title="置换策略"></a>置换策略</h4><p><img src="/2023/12/26/operating-system/image-20231212154231964.png" alt="image-20231212154231964"></p>
+<h4 id="颠簸-1"><a href="#颠簸-1" class="headerlink" title="颠簸"></a>颠簸</h4><p><img src="/2023/12/26/operating-system/image-20231212154317496.png" alt="image-20231212154317496"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212154341605.png" alt="image-20231212154341605"></p>
+<h4 id="页错误率PFF"><a href="#页错误率PFF" class="headerlink" title="页错误率PFF"></a>页错误率PFF</h4><p><img src="/2023/12/26/operating-system/image-20231212154438562.png" alt="image-20231212154438562"></p>
+<h4 id="Belady异常"><a href="#Belady异常" class="headerlink" title="Belady异常"></a>Belady异常</h4><p><img src="/2023/12/26/operating-system/image-20231212154514364.png" alt="image-20231212154514364"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212154537649.png" alt="image-20231212154537649"></p>
+<h3 id="程序优化"><a href="#程序优化" class="headerlink" title="程序优化"></a>程序优化</h3><p><img src="/2023/12/26/operating-system/image-20231212154617798.png" alt="image-20231212154617798"></p>
+<h2 id="CSAPP"><a href="#CSAPP" class="headerlink" title="CSAPP"></a>CSAPP</h2><h3 id="地址翻译-3"><a href="#地址翻译-3" class="headerlink" title="地址翻译"></a>地址翻译</h3><p><img src="/2023/12/26/operating-system/image-20231212155000025.png" alt="image-20231212155000025"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155013781.png" alt="image-20231212155013781"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155034290.png" alt="image-20231212155034290"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155058132.png" alt="image-20231212155058132"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155119927.png" alt="image-20231212155119927"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155525186.png" alt="image-20231212155525186"></p>
+<h3 id="映射方法"><a href="#映射方法" class="headerlink" title="映射方法"></a>映射方法</h3><p><img src="/2023/12/26/operating-system/image-20231212155650534.png" alt="image-20231212155650534"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212160116087.png" alt="image-20231212160116087"></p>
+<h4 id="全相联"><a href="#全相联" class="headerlink" title="全相联"></a>全相联</h4><p><img src="/2023/12/26/operating-system/image-20231212155712254.png" alt="image-20231212155712254"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155721629.png" alt="image-20231212155721629"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155744351.png" alt="image-20231212155744351"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155752305.png" alt="image-20231212155752305"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155814168.png" alt="image-20231212155814168"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212160050969.png" alt="image-20231212160050969"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212160101240.png" alt="image-20231212160101240"></p>
+<h4 id="直接映射"><a href="#直接映射" class="headerlink" title="直接映射"></a>直接映射</h4><p><img src="/2023/12/26/operating-system/image-20231212155826867.png" alt="image-20231212155826867"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155900547.png" alt="image-20231212155900547"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155911124.png" alt="image-20231212155911124"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155925592.png" alt="image-20231212155925592"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212155937312.png" alt="image-20231212155937312"></p>
+<h4 id="组相联"><a href="#组相联" class="headerlink" title="组相联"></a>组相联</h4><p><img src="/2023/12/26/operating-system/image-20231212155953882.png" alt="image-20231212155953882"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212160001192.png" alt="image-20231212160001192"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212160016055.png" alt="image-20231212160016055"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212160027767.png" alt="image-20231212160027767"></p>
+<h3 id="内存映射"><a href="#内存映射" class="headerlink" title="内存映射"></a>内存映射</h3><p>它这里引入了一个很有意思的概念，将一般的内存映射与mmap结合在了一起。</p>
+<p>对于进程来说，<strong>其代码段和数据段相当于映射到了某个磁盘上的普通文件，栈和.bss段相当于映射到了某个匿名文件</strong>。体会一下这种思想。</p>
+<p><img src="/2023/12/26/operating-system/image-20231212160159859.png" alt="image-20231212160159859"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161217005.png" alt="image-20231212161217005"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161256867.png" alt="image-20231212161256867"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161309986.png" alt="image-20231212161309986"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161350185.png" alt="image-20231212161350185"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161357613.png" alt="image-20231212161357613"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161412480.png" alt="image-20231212161412480"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161421030.png" alt="image-20231212161421030"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161504972.png" alt="image-20231212161504972"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212161539376.png" alt="image-20231212161539376"></p>
+<h1 id="08-I-O与存储"><a href="#08-I-O与存储" class="headerlink" title="08 I/O与存储"></a>08 I/O与存储</h1><h2 id="设备管理概述"><a href="#设备管理概述" class="headerlink" title="设备管理概述"></a>设备管理概述</h2><p><img src="/2023/12/26/operating-system/image-20231212163654446.png" alt="image-20231212163654446"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212163724400.png" alt="image-20231212163724400"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212163743544.png" alt="image-20231212163743544"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212163804302.png" alt="image-20231212163804302"></p>
+<h2 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h2><h3 id="组成"><a href="#组成" class="headerlink" title="组成"></a>组成</h3><p><img src="/2023/12/26/operating-system/image-20231212163833632.png" alt="image-20231212163833632"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212163922352.png" alt="image-20231212163922352"></p>
+<p>我记得ghost把enclave等等抽象为了设备文件，也只能说确实牛逼</p>
+<h3 id="命令发送"><a href="#命令发送" class="headerlink" title="命令发送"></a>命令发送</h3><p><img src="/2023/12/26/operating-system/image-20231212163957156.png" alt="image-20231212163957156"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164007841.png" alt="image-20231212164007841"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164037542.png" alt="image-20231212164037542"></p>
+<h2 id="IO控制方式"><a href="#IO控制方式" class="headerlink" title="IO控制方式"></a>IO控制方式</h2><p><img src="/2023/12/26/operating-system/image-20231212164058789.png" alt="image-20231212164058789"></p>
+<h3 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h3><p><img src="/2023/12/26/operating-system/image-20231212164117105.png" alt="image-20231212164117105"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164138780.png" alt="image-20231212164138780"></p>
+<h3 id="中断-1"><a href="#中断-1" class="headerlink" title="中断"></a>中断</h3><p><img src="/2023/12/26/operating-system/image-20231212164151766.png" alt="image-20231212164151766"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164242204.png" alt="image-20231212164242204"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164259618.png" alt="image-20231212164259618"></p>
+<h3 id="DMA"><a href="#DMA" class="headerlink" title="DMA"></a>DMA</h3><p><img src="/2023/12/26/operating-system/image-20231212164321729.png" alt="image-20231212164321729"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164337688.png" alt="image-20231212164337688"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164347403.png" alt="image-20231212164347403"></p>
+<h3 id="通道"><a href="#通道" class="headerlink" title="通道"></a>通道</h3><p><img src="/2023/12/26/operating-system/image-20231212164410855.png" alt="image-20231212164410855"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164457302.png" alt="image-20231212164457302"></p>
+<h2 id="缓冲技术"><a href="#缓冲技术" class="headerlink" title="缓冲技术"></a>缓冲技术</h2><p><img src="/2023/12/26/operating-system/image-20231212164537505.png" alt="image-20231212164537505"></p>
+<h3 id="软件缓冲"><a href="#软件缓冲" class="headerlink" title="软件缓冲"></a>软件缓冲</h3><p><img src="/2023/12/26/operating-system/image-20231212164610223.png" alt="image-20231212164610223"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164631135.png" alt="image-20231212164631135"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164648842.png" alt="image-20231212164648842"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164752160.png" alt="image-20231212164752160"></p>
+<h3 id="SPOOLING"><a href="#SPOOLING" class="headerlink" title="SPOOLING"></a>SPOOLING</h3><p>可以破坏死锁条件的互斥条件，预防死锁</p>
+<p><img src="/2023/12/26/operating-system/image-20231212164847126.png" alt="image-20231212164847126"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212164909326.png" alt="image-20231212164909326"></p>
+<h2 id="磁盘设备"><a href="#磁盘设备" class="headerlink" title="磁盘设备"></a>磁盘设备</h2><h3 id="概述-7"><a href="#概述-7" class="headerlink" title="概述"></a>概述</h3><p><img src="/2023/12/26/operating-system/image-20231212165343775.png" alt="image-20231212165343775"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212165430863.png" alt="image-20231212165430863"></p>
+<h3 id="磁盘调度算法"><a href="#磁盘调度算法" class="headerlink" title="磁盘调度算法"></a>磁盘调度算法</h3><p><img src="/2023/12/26/operating-system/image-20231212165647224.png" alt="image-20231212165647224"></p>
+<h4 id="FCFS-1"><a href="#FCFS-1" class="headerlink" title="FCFS"></a>FCFS</h4><p><img src="/2023/12/26/operating-system/image-20231212165523469.png" alt="image-20231212165523469"></p>
+<h4 id="SSTF"><a href="#SSTF" class="headerlink" title="SSTF"></a>SSTF</h4><p><img src="/2023/12/26/operating-system/image-20231212165539404.png" alt="image-20231212165539404"></p>
+<h4 id="SCAN"><a href="#SCAN" class="headerlink" title="SCAN"></a>SCAN</h4><p><img src="/2023/12/26/operating-system/image-20231212165557146.png" alt="image-20231212165557146"></p>
+<h4 id="C-SCAN"><a href="#C-SCAN" class="headerlink" title="C-SCAN"></a>C-SCAN</h4><p><img src="/2023/12/26/operating-system/image-20231212165614089.png" alt="image-20231212165614089"></p>
+<h4 id="C-LOOK"><a href="#C-LOOK" class="headerlink" title="C-LOOK"></a>C-LOOK</h4><p><img src="/2023/12/26/operating-system/image-20231212165634326.png" alt="image-20231212165634326"></p>
+<h3 id="磁盘编址"><a href="#磁盘编址" class="headerlink" title="磁盘编址"></a>磁盘编址</h3><p><img src="/2023/12/26/operating-system/image-20231212165826701.png" alt="image-20231212165826701"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212165900840.png" alt="image-20231212165900840"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212170110557.png" alt="image-20231212170110557"></p>
+<h4 id="CHS"><a href="#CHS" class="headerlink" title="CHS"></a>CHS</h4><p><img src="/2023/12/26/operating-system/image-20231212170000950.png" alt="image-20231212170000950"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212170012161.png" alt="image-20231212170012161"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212170028859.png" alt="image-20231212170028859"></p>
+<h4 id="扇区编号LBA"><a href="#扇区编号LBA" class="headerlink" title="扇区编号LBA"></a>扇区编号LBA</h4><p><img src="/2023/12/26/operating-system/image-20231212165922199.png" alt="image-20231212165922199"></p>
+<h3 id="进程IO"><a href="#进程IO" class="headerlink" title="进程IO"></a>进程IO</h3><p><img src="/2023/12/26/operating-system/image-20231212170149231.png" alt="image-20231212170149231"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212170218489.png" alt="image-20231212170218489"></p>
+<h3 id="硬盘布局"><a href="#硬盘布局" class="headerlink" title="硬盘布局"></a>硬盘布局</h3><p><img src="/2023/12/26/operating-system/image-20231212170259413.png" alt="image-20231212170259413"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212171825365.png" alt="image-20231212171825365"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212171840860.png" alt="image-20231212171840860"></p>
+<p>确实诶，分区完就变成/dev/sda3这种了，然后依然可以对sda3进行fdisk</p>
+<h3 id="页面置换-1"><a href="#页面置换-1" class="headerlink" title="页面置换"></a>页面置换</h3><p><img src="/2023/12/26/operating-system/image-20231212172227683.png" alt="image-20231212172227683"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212172301828.png" alt="image-20231212172301828"></p>
+<h3 id="固态硬盘SSD"><a href="#固态硬盘SSD" class="headerlink" title="固态硬盘SSD"></a>固态硬盘SSD</h3><h4 id="概述-8"><a href="#概述-8" class="headerlink" title="概述"></a>概述</h4><p><img src="/2023/12/26/operating-system/image-20231212172413618.png" alt="image-20231212172413618"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212172444005.png" alt="image-20231212172444005"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212172504383.png" alt="image-20231212172504383"></p>
+<h4 id="FTL"><a href="#FTL" class="headerlink" title="FTL"></a>FTL</h4><p><img src="/2023/12/26/operating-system/image-20231212172556762.png" alt="image-20231212172556762"></p>
+<h5 id="组成-1"><a href="#组成-1" class="headerlink" title="组成"></a>组成</h5><p><img src="/2023/12/26/operating-system/image-20231212172609192.png" alt="image-20231212172609192"></p>
+<h6 id="地址映射"><a href="#地址映射" class="headerlink" title="地址映射"></a>地址映射</h6><p><img src="/2023/12/26/operating-system/image-20231212172655147.png" alt="image-20231212172655147"></p>
+<h6 id="磨损平衡"><a href="#磨损平衡" class="headerlink" title="磨损平衡"></a>磨损平衡</h6><p><img src="/2023/12/26/operating-system/image-20231212173022907.png" alt="image-20231212173022907"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212173047619.png" alt="image-20231212173047619"></p>
+<h6 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h6><p><img src="/2023/12/26/operating-system/image-20231212173119529.png" alt="image-20231212173119529"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212173154055.png" alt="image-20231212173154055"></p>
+<h1 id="09-文件系统"><a href="#09-文件系统" class="headerlink" title="09 文件系统"></a>09 文件系统</h1><h2 id="王道-1"><a href="#王道-1" class="headerlink" title="王道"></a>王道</h2><h3 id="文件逻辑结构"><a href="#文件逻辑结构" class="headerlink" title="文件逻辑结构"></a>文件逻辑结构</h3><p><img src="/2023/12/26/operating-system/image-20231215161403084.png" alt="image-20231215161403084"></p>
+<h4 id="顺序文件"><a href="#顺序文件" class="headerlink" title="顺序文件"></a>顺序文件</h4><p><img src="/2023/12/26/operating-system/image-20231215161505464.png" alt="image-20231215161505464"></p>
+<p>注意这个顺序文件可以顺序存储或者链式存储</p>
+<p><img src="/2023/12/26/operating-system/image-20231215161704676.png" alt="image-20231215161704676"></p>
+<p>串结构就是没有按关键字排序</p>
+<p>随机存储和检索记录还是两个概念</p>
+<p><img src="/2023/12/26/operating-system/image-20231215161800012.png" alt="image-20231215161800012"></p>
+<h4 id="索引文件"><a href="#索引文件" class="headerlink" title="索引文件"></a>索引文件</h4><p><img src="/2023/12/26/operating-system/image-20231215161847039.png" alt="image-20231215161847039"></p>
+<h4 id="索引顺序文件"><a href="#索引顺序文件" class="headerlink" title="索引顺序文件"></a>索引顺序文件</h4><p><img src="/2023/12/26/operating-system/image-20231215161945122.png" alt="image-20231215161945122"></p>
+<p>相当于离散索引了呗</p>
+<p><img src="/2023/12/26/operating-system/image-20231215162026397.png" alt="image-20231215162026397"></p>
+<h3 id="文件目录"><a href="#文件目录" class="headerlink" title="文件目录"></a>文件目录</h3><p><img src="/2023/12/26/operating-system/image-20231215162251546.png" alt="image-20231215162251546"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215162352069.png" alt="image-20231215162352069"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215162443206.png" alt="image-20231215162443206"></p>
+<p>由于减少了目录大小，所以减少了磁盘块占用大小，所以增大了索引效率</p>
+<p>也就是说FCB实际上就是dentry+inode吗</p>
+<p><img src="/2023/12/26/operating-system/image-20231215163118434.png" alt="image-20231215163118434"></p>
+<h3 id="文件物理结构"><a href="#文件物理结构" class="headerlink" title="文件物理结构"></a>文件物理结构</h3><h4 id="连续分配"><a href="#连续分配" class="headerlink" title="连续分配"></a>连续分配</h4><p><img src="/2023/12/26/operating-system/image-20231215162813027.png" alt="image-20231215162813027"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215162859868.png" alt="image-20231215162859868"></p>
+<h4 id="链式分配"><a href="#链式分配" class="headerlink" title="链式分配"></a>链式分配</h4><p><img src="/2023/12/26/operating-system/image-20231215162915964.png" alt="image-20231215162915964"></p>
+<h5 id="隐式"><a href="#隐式" class="headerlink" title="隐式"></a>隐式</h5><p>默认指隐式链接</p>
+<p><img src="/2023/12/26/operating-system/image-20231215163138411.png" alt="image-20231215163138411"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215163203185.png" alt="image-20231215163203185"></p>
+<h5 id="显式"><a href="#显式" class="headerlink" title="显式"></a>显式</h5><p><img src="/2023/12/26/operating-system/image-20231215163238338.png" alt="image-20231215163238338"></p>
+<p>每次查FAT就够了</p>
+<p><img src="/2023/12/26/operating-system/image-20231215163328135.png" alt="image-20231215163328135"></p>
+<p>FAT不会读磁盘</p>
+<h4 id="索引分配"><a href="#索引分配" class="headerlink" title="索引分配"></a>索引分配</h4><p><img src="/2023/12/26/operating-system/image-20231215164020933.png" alt="image-20231215164020933"></p>
+<h5 id="概述-9"><a href="#概述-9" class="headerlink" title="概述"></a>概述</h5><p>感受一下跟FAT的差异</p>
+<p><img src="/2023/12/26/operating-system/image-20231215163520515.png" alt="image-20231215163520515"></p>
+<p>当一个磁盘块装不完全部索引，就需要采取以下几种方案：</p>
+<h5 id="链接方案"><a href="#链接方案" class="headerlink" title="链接方案"></a>链接方案</h5><p><img src="/2023/12/26/operating-system/image-20231215163651254.png" alt="image-20231215163651254"></p>
+<p>这个也就是咱的隐式链接了</p>
+<h5 id="多层索引"><a href="#多层索引" class="headerlink" title="多层索引"></a>多层索引</h5><p><img src="/2023/12/26/operating-system/image-20231215163836049.png" alt="image-20231215163836049"></p>
+<p>注意文件大小和IO次数的计算</p>
+<h5 id="混合索引"><a href="#混合索引" class="headerlink" title="混合索引"></a>混合索引</h5><p><img src="/2023/12/26/operating-system/image-20231215163930480.png" alt="image-20231215163930480"></p>
+<h3 id="空闲空间管理"><a href="#空闲空间管理" class="headerlink" title="空闲空间管理"></a>空闲空间管理</h3><h4 id="空闲表"><a href="#空闲表" class="headerlink" title="空闲表"></a>空闲表</h4><p><img src="/2023/12/26/operating-system/image-20231215165316909.png" alt="image-20231215165316909"></p>
+<h4 id="空闲链表"><a href="#空闲链表" class="headerlink" title="空闲链表"></a>空闲链表</h4><p><img src="/2023/12/26/operating-system/image-20231215165353195.png" alt="image-20231215165353195"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215165411195.png" alt="image-20231215165411195"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215165432482.png" alt="image-20231215165432482"></p>
+<h4 id="位图"><a href="#位图" class="headerlink" title="位图"></a>位图</h4><p><img src="/2023/12/26/operating-system/image-20231215165503214.png" alt="image-20231215165503214"></p>
+<p>注意与盘块号的转换</p>
+<h4 id="成组链接"><a href="#成组链接" class="headerlink" title="成组链接"></a>成组链接</h4><p>unix分成块组，这下看懂了</p>
+<p><img src="/2023/12/26/operating-system/image-20231215165629119.png" alt="image-20231215165629119"></p>
+<p>并且注意，每个块组第一块也是可以分配出去的，这时候就需要合并了</p>
+<p>同理可得回收也要加层，感觉有点b+树那味了：</p>
+<p><img src="/2023/12/26/operating-system/image-20231215165845285.png" alt="image-20231215165845285"></p>
+<h3 id="文件基本操作"><a href="#文件基本操作" class="headerlink" title="文件基本操作"></a>文件基本操作</h3><h4 id="创建-1"><a href="#创建-1" class="headerlink" title="创建"></a>创建</h4><p><img src="/2023/12/26/operating-system/image-20231215165935092.png" alt="image-20231215165935092"></p>
+<h4 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h4><p><img src="/2023/12/26/operating-system/image-20231215170004395.png" alt="image-20231215170004395"></p>
+<h4 id="打开"><a href="#打开" class="headerlink" title="打开"></a>打开</h4><p><img src="/2023/12/26/operating-system/image-20231215170030414.png" alt="image-20231215170030414"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215170059442.png" alt="image-20231215170059442"></p>
+<p><img src="/2023/12/26/operating-system/image-20231215170227295.png" alt="image-20231215170227295"></p>
+<h4 id="关闭"><a href="#关闭" class="headerlink" title="关闭"></a>关闭</h4><p><img src="/2023/12/26/operating-system/image-20231215170131455.png" alt="image-20231215170131455"></p>
+<h4 id="读写"><a href="#读写" class="headerlink" title="读写"></a>读写</h4><p>read、write系统调用</p>
+<h3 id="文件共享与保护"><a href="#文件共享与保护" class="headerlink" title="文件共享与保护"></a>文件共享与保护</h3><h4 id="共享"><a href="#共享" class="headerlink" title="共享"></a>共享</h4><p><img src="/2023/12/26/operating-system/image-20231215170302694.png" alt="image-20231215170302694"></p>
+<p>硬链接与软链接</p>
+<h5 id="硬链接"><a href="#硬链接" class="headerlink" title="硬链接"></a>硬链接</h5><p>这也就是inode了</p>
+<p><img src="/2023/12/26/operating-system/image-20231215170344704.png" alt="image-20231215170344704"></p>
+<h5 id="软链接"><a href="#软链接" class="headerlink" title="软链接"></a>软链接</h5><p><img src="/2023/12/26/operating-system/image-20231215170415878.png" alt="image-20231215170415878"></p>
+<p>xv6就实现过，具体在open中switch-case</p>
+<p><img src="/2023/12/26/operating-system/image-20231215170513759.png" alt="image-20231215170513759"></p>
+<h4 id="保护"><a href="#保护" class="headerlink" title="保护"></a>保护</h4><h5 id="口令"><a href="#口令" class="headerlink" title="口令"></a>口令</h5><p><img src="/2023/12/26/operating-system/image-20231215170549602.png" alt="image-20231215170549602"></p>
+<h5 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h5><p><img src="/2023/12/26/operating-system/image-20231215170611765.png" alt="image-20231215170611765"></p>
+<h5 id="访问控制"><a href="#访问控制" class="headerlink" title="访问控制"></a>访问控制</h5><p><img src="/2023/12/26/operating-system/image-20231215170642512.png" alt="image-20231215170642512"></p>
+<h3 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h3><h4 id="层次结构"><a href="#层次结构" class="headerlink" title="层次结构"></a>层次结构</h4><p><img src="/2023/12/26/operating-system/image-20231215170752365.png" alt="image-20231215170752365"></p>
+<p>用户接口：文件基本操作</p>
+<p>文件目录：文件目录</p>
+<p>存取控制：文件保护</p>
+<p>逻辑文件与缓冲区：逻辑结构</p>
+<p>物理文件系统：物理结构</p>
+<p>辅助分配：空间管理</p>
+<p>设备管理：磁盘管理</p>
+<p><img src="/2023/12/26/operating-system/image-20231215170927318.png" alt="image-20231215170927318"></p>
+<h4 id="全局结构"><a href="#全局结构" class="headerlink" title="全局结构"></a>全局结构</h4><ol>
+<li><p>物理格式化</p>
+<p><img src="/2023/12/26/operating-system/image-20231215171001190.png" alt="image-20231215171001190"></p>
+</li>
+<li><p>逻辑格式化</p>
+<p><img src="/2023/12/26/operating-system/image-20231215171019963.png" alt="image-20231215171019963"></p>
+</li>
+<li><p>内存结构</p>
+<p><img src="/2023/12/26/operating-system/image-20231215171257687.png" alt="image-20231215171257687"></p>
+</li>
+</ol>
+<h3 id="虚拟文件系统"><a href="#虚拟文件系统" class="headerlink" title="虚拟文件系统"></a>虚拟文件系统</h3><p><img src="/2023/12/26/operating-system/image-20231215171453724.png" alt="image-20231215171453724"></p>
+<p>很帅很帅的VFS</p>
+<p><img src="/2023/12/26/operating-system/image-20231215171623873.png" alt="image-20231215171623873"></p>
+<h3 id="挂载与装载"><a href="#挂载与装载" class="headerlink" title="挂载与装载"></a>挂载与装载</h3><p><img src="/2023/12/26/operating-system/image-20231215171704841.png" alt="image-20231215171704841"></p>
+<p>咱在fuse也做了这件事。文件系统除了这些之外还得对自己内部结构进行初始化</p>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p><img src="/2023/12/26/operating-system/image-20231212174138039.png" alt="image-20231212174138039"></p>
+<h3 id="物理结构"><a href="#物理结构" class="headerlink" title="物理结构"></a>物理结构</h3><p><img src="/2023/12/26/operating-system/image-20231212174418362.png" alt="image-20231212174418362"></p>
+<h4 id="连续存储"><a href="#连续存储" class="headerlink" title="连续存储"></a>连续存储</h4><p><img src="/2023/12/26/operating-system/image-20231212174200133.png" alt="image-20231212174200133"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212174227174.png" alt="image-20231212174227174"></p>
+<h4 id="链式存储"><a href="#链式存储" class="headerlink" title="链式存储"></a>链式存储</h4><p><img src="/2023/12/26/operating-system/image-20231212174248991.png" alt="image-20231212174248991"></p>
+<h4 id="索引存储"><a href="#索引存储" class="headerlink" title="索引存储"></a>索引存储</h4><p><img src="/2023/12/26/operating-system/image-20231212174302650.png" alt="image-20231212174302650"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212174324702.png" alt="image-20231212174324702"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212174358830.png" alt="image-20231212174358830"></p>
+<h3 id="逻辑结构"><a href="#逻辑结构" class="headerlink" title="逻辑结构"></a>逻辑结构</h3><h4 id="树状目录"><a href="#树状目录" class="headerlink" title="树状目录"></a>树状目录</h4><p><img src="/2023/12/26/operating-system/image-20231212174507288.png" alt="image-20231212174507288"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212174522719.png" alt="image-20231212174522719"></p>
+<h4 id="目录实现"><a href="#目录实现" class="headerlink" title="目录实现"></a>目录实现</h4><h5 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h5><p><img src="/2023/12/26/operating-system/image-20231212174540569.png" alt="image-20231212174540569"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212174645166.png" alt="image-20231212174645166"></p>
+<h5 id="路径解析"><a href="#路径解析" class="headerlink" title="路径解析"></a>路径解析</h5><p><img src="/2023/12/26/operating-system/image-20231212174612782.png" alt="image-20231212174612782"></p>
+<h2 id="文件系统的实现"><a href="#文件系统的实现" class="headerlink" title="文件系统的实现"></a>文件系统的实现</h2><p><img src="/2023/12/26/operating-system/image-20231212174730193.png" alt="image-20231212174730193"></p>
+<h3 id="分区"><a href="#分区" class="headerlink" title="分区"></a>分区</h3><p><img src="/2023/12/26/operating-system/image-20231212174753764.png" alt="image-20231212174753764"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212174818843.png" alt="image-20231212174818843"></p>
+<h3 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h3><h4 id="提高性能"><a href="#提高性能" class="headerlink" title="提高性能"></a>提高性能</h4><p><img src="/2023/12/26/operating-system/image-20231212174836078.png" alt="image-20231212174836078"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212174911963.png" alt="image-20231212174911963"></p>
+<h4 id="权限控制"><a href="#权限控制" class="headerlink" title="权限控制"></a>权限控制</h4><p><img src="/2023/12/26/operating-system/image-20231212175029943.png" alt="image-20231212175029943"></p>
+<h4 id="容错"><a href="#容错" class="headerlink" title="容错"></a>容错</h4><p><img src="/2023/12/26/operating-system/image-20231212175106433.png" alt="image-20231212175106433"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212175121235.png" alt="image-20231212175121235"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212175135322.png" alt="image-20231212175135322"></p>
+<h2 id="EXT2文件系统"><a href="#EXT2文件系统" class="headerlink" title="EXT2文件系统"></a>EXT2文件系统</h2><p><img src="/2023/12/26/operating-system/image-20231212175240614.png" alt="image-20231212175240614"></p>
+<h3 id="磁盘组织"><a href="#磁盘组织" class="headerlink" title="磁盘组织"></a>磁盘组织</h3><p><img src="/2023/12/26/operating-system/image-20231212175335746.png" alt="image-20231212175335746"></p>
+<h4 id="超级块"><a href="#超级块" class="headerlink" title="超级块"></a>超级块</h4><p><img src="/2023/12/26/operating-system/image-20231212175444720.png" alt="image-20231212175444720"></p>
+<h4 id="块组描述符"><a href="#块组描述符" class="headerlink" title="块组描述符"></a>块组描述符</h4><p><img src="/2023/12/26/operating-system/image-20231212180037436.png" alt="image-20231212180037436"></p>
+<h4 id="位图-1"><a href="#位图-1" class="headerlink" title="位图"></a>位图</h4><p><img src="/2023/12/26/operating-system/image-20231212180104608.png" alt="image-20231212180104608"></p>
+<h4 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h4><p><img src="/2023/12/26/operating-system/image-20231212180125155.png" alt="image-20231212180125155"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212180144842.png" alt="image-20231212180144842"></p>
+<h2 id="Windows-FAT"><a href="#Windows-FAT" class="headerlink" title="Windows FAT"></a>Windows FAT</h2><p><img src="/2023/12/26/operating-system/image-20231212180343276.png" alt="image-20231212180343276"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212180649707.png" alt="image-20231212180649707"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212180722817.png" alt="image-20231212180722817"></p>
+<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><h3 id="基本交互"><a href="#基本交互" class="headerlink" title="基本交互"></a>基本交互</h3><p><img src="/2023/12/26/operating-system/image-20231212180909163.png" alt="image-20231212180909163"></p>
+<h3 id="故障恢复"><a href="#故障恢复" class="headerlink" title="故障恢复"></a>故障恢复</h3><h4 id="Redo"><a href="#Redo" class="headerlink" title="Redo"></a>Redo</h4><p><img src="/2023/12/26/operating-system/image-20231212180931530.png" alt="image-20231212180931530"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212180958804.png" alt="image-20231212180958804"></p>
+<h3 id="应用文件系统"><a href="#应用文件系统" class="headerlink" title="应用文件系统"></a>应用文件系统</h3><h4 id="EXT4"><a href="#EXT4" class="headerlink" title="EXT4"></a>EXT4</h4><p><img src="/2023/12/26/operating-system/image-20231212181056088.png" alt="image-20231212181056088"></p>
+<h4 id="LFS"><a href="#LFS" class="headerlink" title="LFS"></a>LFS</h4><h5 id="概述-10"><a href="#概述-10" class="headerlink" title="概述"></a>概述</h5><p>感觉这些存储领域的东西很多还是共通的。可以思考下与deduplication system的相关性。</p>
+<p><img src="/2023/12/26/operating-system/image-20231212181144520.png" alt="image-20231212181144520"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212181158081.png" alt="image-20231212181158081"></p>
+<p><img src="/2023/12/26/operating-system/image-20231212181213771.png" alt="image-20231212181213771"></p>
+<h5 id="F2FS"><a href="#F2FS" class="headerlink" title="F2FS"></a>F2FS</h5><p><img src="/2023/12/26/operating-system/image-20231212181308571.png" alt="image-20231212181308571"></p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2024/01/04/arch/">计算机体系结构</a>
+            
+            
+            <a class="next" rel="next" href="/2023/11/26/cryptography/">密码学基础</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

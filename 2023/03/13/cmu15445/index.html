@@ -229,7 +229,89 @@
 <p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/">实验官网</a></p>
 <p><a target="_blank" rel="noopener" href="https://github.com/xiunianjun/cmu15445">代码</a></p>
 </blockquote>
-<h3 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a><a href="/2023/03/13/cmu15445$lab0">Project0   C++ Primer</a></h3><h3 id="Project1-Buffer-Pool"><a href="#Project1-Buffer-Pool" class="headerlink" title="Project1   Buffer Pool"></a><a href="/2023/03/13/cmu15445$lab1">Project1   Buffer Pool</a></h3><h3 id="Project2-B-Tree-Index"><a href="#Project2-B-Tree-Index" class="headerlink" title="Project2   B+Tree Index"></a><a href="/2023/03/13/cmu15445$lab2">Project2   B+Tree Index</a></h3><h3 id="Project3-Query-Execution"><a href="#Project3-Query-Execution" class="headerlink" title="Project3   Query Execution"></a><a href="/2023/03/13/cmu15445$lab3">Project3   Query Execution</a></h3>
+<h3 id="Project0-C-Primer"><a href="#Project0-C-Primer" class="headerlink" title="Project0   C++ Primer"></a><a href="/2023/03/13/cmu15445$lab0">Project0   C++ Primer</a></h3><h3 id="Project1-Buffer-Pool"><a href="#Project1-Buffer-Pool" class="headerlink" title="Project1   Buffer Pool"></a><a href="/2023/03/13/cmu15445$lab1">Project1   Buffer Pool</a></h3><h3 id="Project2-B-Tree-Index"><a href="#Project2-B-Tree-Index" class="headerlink" title="Project2   B+Tree Index"></a><a href="/2023/03/13/cmu15445$lab2">Project2   B+Tree Index</a></h3><h3 id="Project3-Query-Execution"><a href="#Project3-Query-Execution" class="headerlink" title="Project3   Query Execution"></a><a href="/2023/03/13/cmu15445$lab3">Project3   Query Execution</a></h3><h1 id="Project4-Concurrency"><a href="#Project4-Concurrency" class="headerlink" title="Project4   Concurrency"></a>Project4   Concurrency</h1><p>在上面的project中，我们实现了负责管理内存页缓冲与磁盘的、用于一切数据和索引页管理的buffer pool，然后实现了一个b+树索引，最后实现了增删改查等操作的底层执行器以及部分查询优化规则。这一小节，我们将完成数据库的并发控制，我想大概是要实现事务机制。</p>
+<p>如果要实现事务机制，那么我们就需要关注如何实现事务的ACID。也即，我们是如何保障事务的原子性、隔离性、一致性、持久性的。这就需要关注事务的原子性的实现和事务的调度，关注事务并行执行时的正确性。</p>
+<blockquote>
+<p>In this project, you will add support for <strong>transactions</strong> in BusTub by adding a lock manager and then using it for concurrent query execution. </p>
+<p>The lock manager will support <strong>table locks</strong> and <strong>tuple locks</strong> in <strong>five</strong> lock modes: intention-shared, intention-exclusive, shared-intention-exclusive, shared, and exclusive. </p>
+<p>The lock manager will <u>process lock requests from transactions</u>, grant locks to transactions, and check if locks are released appropriately based on the <strong>transaction’s isolation level</strong>.</p>
+</blockquote>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="transactions"><a href="#transactions" class="headerlink" title="transactions"></a>transactions</h3><h4 id="事务特性"><a href="#事务特性" class="headerlink" title="事务特性"></a>事务特性</h4><p><img src="/2023/03/13/cmu15445/image-20231119160134524.png" alt="image"></p>
+<h4 id="事务调度"><a href="#事务调度" class="headerlink" title="事务调度"></a>事务调度</h4><p><img src="/2023/03/13/cmu15445/image-20231119160217938.png" alt="image"></p>
+<p><img src="/2023/03/13/cmu15445/image-20231119160636318.png" alt="image"></p>
+<h4 id="两段封锁协议2pl"><a href="#两段封锁协议2pl" class="headerlink" title="两段封锁协议2pl"></a>两段封锁协议2pl</h4><p><img src="/2023/03/13/cmu15445/image-20231119183734987.png" alt="image"></p>
+<p>在DBMS中，lock manager模块负责管理系统中的锁。每当事务需要加锁或者升级锁的时候，都需要向它发出请求。lock manager 内部维护着一个表，上面记录着当前所有锁的分配信息，用于跟踪哪些事务持有哪些锁，以及哪些事务正在等待获得哪些锁。由于我们想获得可串行化的调度序列，因此我们需要利用lock manager来实施加锁策略，以保证事务操作的正确性和并发度。</p>
+<p>两阶段锁的实现由两阶段组成。</p>
+<ul>
+<li>growing 阶段：事务可以按需获取某条数据的锁，lock manager 决定同意或者拒绝</li>
+<li>shringking 阶段：事务只能释放之前获取的锁，不能获得新锁，即一旦开始释放锁，之后就只能释放锁。</li>
+</ul>
+<p>通过2PL获得的调度策略是冲突可串行化的。</p>
+<p>但是该方法有着致命的弱点：可能会导致<strong>级联中止</strong> (cascading aborts)。如下图所示的 “脏读”现象。为了保证整个调度是可串行化的，DBMS 需要在 T1 中止后将一些对T1有依赖的事务也中止，这些事务曾经读取过 T1 写入的数据。而这些中止可能进而使得其它正在进行的事务级联地中止。</p>
+<p>为了解决这个问题，可以使用2PL的增强版变种。该方法要求<strong>事务持有的锁一直到其提交或者中止时才释放</strong>，从而使得每个事务在结束之前，其写过的数据不能被其它事务读取或者重写。</p>
+<p><img src="/2023/03/13/cmu15445/v2-78b6f9cdb1b36484c3e0217f27730650_1440w.webp" alt="img"></p>
+<h3 id="lock"><a href="#lock" class="headerlink" title="lock"></a>lock</h3><blockquote>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/78897428">聊一聊数据库中的锁 - 老刘的文章 - 知乎</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/51676675">一文了解db2的锁 - somenzz的文章 - 知乎</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/3aa634b0567c">CMU 15445 14.二阶段锁定 + homework 4</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/488482354">【15-445】8.事务(3)串行化 - 只爱睡觉的文章 - 知乎</a>  这篇文章写得很棒</p>
+</blockquote>
+<h4 id="多级粒度锁机制"><a href="#多级粒度锁机制" class="headerlink" title="多级粒度锁机制"></a>多级粒度锁机制</h4><p>假设存在如下需求：事务T需要访问一个有1亿个元组的数据库。</p>
+<p>我们希望T只发出单个请求就能封锁整个数据库，因此这里需要引入允许系统定义<strong>多级粒度</strong>(granularity)锁的机制，并允许定义各种大小的数据项和数据粒度的层次结构。这种层次结构可以图形化地表示为树。</p>
+<p><img src="/2023/03/13/cmu15445/v2-6a8363d4fada6e578c03b3d8d87c4813_1440w.webp" alt="img"></p>
+<p>树中每个结点都可以单独加锁。当一个事务对一个结点加锁时，该事务也以同样类型的锁<strong>隐式地封锁这个结点的全部子结点</strong>。</p>
+<p>但这样处理存在一个问题：事务T希望封锁整个子树，因此它只需给子树的根结点加锁。但是如果T在子树的某部分持有锁，那么T给该根结点加锁就会失败。<strong>如何判定根结点是否可以加锁呢</strong>？一种可能的方法是搜索整棵树。然而，这个方法破坏了多粒度封锁机制的初衷。另一种方法是引入一种新的锁类型，即<strong>意向锁类型</strong>( intentionlock mode)。</p>
+<p>如果一个结点加上了意向锁，则意味着将要在树的较低层进行显式加锁(也就是说，以更小的粒度加锁)。这里有三种意向锁：</p>
+<ul>
+<li>**Intention-Shared (IS)**：说明在较低级别会使用共享锁（S）来显式上锁。</li>
+<li>**Intention-Exclusive (IX)**：说明在较低级会使用互斥锁（X）来显式上锁</li>
+<li><strong>Shared+Intention-Exclusive (SIX)<strong>：以该节点为根的子树</strong>已经显式得到了共享锁</strong>，并且<strong>将要</strong>在树的更低层次显示加上互斥锁。</li>
+</ul>
+<p>对某个结点进行加锁之前，需要获取它到根节点路径上的所有相关意向锁，具体规则如下图所示：</p>
+<p><img src="/2023/03/13/cmu15445/webp-1706931395906-19.webp" alt="img"></p>
+<p>引入该机制后，在一个结点显式加锁之前，该结点的全部祖先均需要加上意向锁。当我们希望给某个结点加锁时，事务必须遍历从根到该节点的路径，判断路径上的节点是否被加了意向锁：如果已加，则该显示加锁过程不能成功；如果未加，<strong>则给该路径上的节点加上意向锁</strong>。</p>
+<h4 id="实际实现"><a href="#实际实现" class="headerlink" title="实际实现"></a>实际实现</h4><p>如上节所示，锁定层次结构有多种粒度：</p>
+<p><img src="/2023/03/13/cmu15445/v2-34a703b4147e594149bc2a8d37110327_1440w.webp" alt="img"></p>
+<p>而在实际的DBMS中，讨论锁的并发控制，我们通常只考虑table和tuple粒度，也即<strong>表锁与行锁</strong>。</p>
+<p>如果加表锁，则表中所有的行都受到同等程度的影响；如果加行锁，则加锁的范围针对的是表及下属的行。有时对表加锁后，还要在相应的数据行上加锁。</p>
+<p>针对表锁和行锁，我们可以使用上一小节提到的多级粒度锁机制。具体来说，表锁包括意图锁和传统的XS锁，行锁只包括XS锁。在具体上锁操作中，首先获取意图锁表明自己对表中的某些行有读写的需求，等到真正要读写了才会真正获取行锁。也即，它支持多个事务同时对表的不同行进行读写，故而相比传统锁住整个表的XS锁会更高效一些。</p>
+<p>常见的表锁及其含义如下表所示：</p>
+<p><img src="/2023/03/13/cmu15445/v2-0f3d06461969e38d22795ec8b33b3270_1440w.webp" alt="img"></p>
+<p>其互斥矩阵如下图所示：</p>
+<p><img src="/2023/03/13/cmu15445/webp.webp" alt="img"></p>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>与此同时这里还有几个使用锁的例子：</p>
+<p><img src="/2023/03/13/cmu15445/image-20240203113752672.png" alt="image-20240203113752672"></p>
+<p><img src="/2023/03/13/cmu15445/image-20240203113803390.png" alt="image-20240203113803390"></p>
+<blockquote>
+<p><strong>对意图锁的理解</strong>【TODO，这里我不大认可，怎么感觉它说的是LM的活】</p>
+<p>意图锁是一种<strong>表锁</strong>，也即影响一个表中的所有元组。</p>
+<p>对于 IX、IS 和 SIX 这些意图锁，我们可以这样理解：严格来说他们并不是一种锁，而是<strong>存放表中行锁的信息</strong>。</p>
+<p>举个通俗的例子，我们去住一个酒店。可以把整个酒店比喻成一张表，每个房间是一个行。当我们预定一个房间时，就对该行（房间）添加 X 锁，但是同时会在酒店的前台对该行（房间）做一个信息登记（旅客姓名、住多长时间等）。大家可以把意图锁当成这个酒店前台，它并不是真正意义上的锁，它维护表中每行的加锁信息，是共用的。后续的旅客通过酒店前台来看哪个房间是可用的，那么，如果没有意图锁，会出现什么情况呢，假设我要住房间，那么我每次都要到每一个房间看看这个房间有没有住人，显然这样做的效率是很低下的。其实，最早的 DB2 版本是没有意图锁的，但这对并发影响很大，后来就增加了意图锁。所有的数据库（Oracle、Infomix 和 Sybase）都有意图锁的实现机制。</p>
+</blockquote>
+<h2 id="Project"><a href="#Project" class="headerlink" title="Project"></a>Project</h2><h3 id="Task-1-Lock-Manager"><a href="#Task-1-Lock-Manager" class="headerlink" title="Task #1 - Lock Manager"></a>Task #1 - Lock Manager</h3><blockquote>
+<p>To ensure correct interleaving of transactions’ operations, the DBMS uses a <strong>lock manager (LM)</strong> to control when transactions are allowed to access data items. The basic idea of a LM is that it maintains an internal data structure about the locks currently held by active transactions. Transactions issue lock requests to the LM before they access data items, and the LM will either grant the lock, block the transaction until the lock is available, or abort the transaction.</p>
+<p>为了保证并发控制，DBMS通常会有一个lock manager(LM)，它记录了每个锁都被哪些事务正在持有着。每个事务要访问数据前都需要获取特定的锁，LM的作用就是检查这个锁是否可用，是的话就让该事务获取锁然后执行，否则的话就阻塞该事务，或者直接中止该事务。</p>
+<p>In your implementation, there will be a <strong>global LM</strong> for the BusTub system. The <code>TableHeap</code> and <code>Executor</code> classes will use your LM to acquire locks on tuple records (by record id <code>RID</code>) when a transaction attempts to access or modify a tuple.</p>
+<p>Your LM must implement hierarchical <strong>table-level and tuple-level intention locks</strong> (described above) and three isolation levels: <code>READ_UNCOMMITED</code>, <code>READ_COMMITTED</code>, and <code>REPEATABLE_READ</code>. The LM should grant or release locks according to a transaction’s isolation level.</p>
+<p>需要支持多级粒度锁和三个隔离级别。</p>
+<p>We provide a <code>Transaction</code> context handle (<code>include/concurrency/transaction.h</code>) with an isolation level attribute (i.e., <code>READ_UNCOMMITED</code>, <code>READ_COMMITTED</code>, and <code>REPEATABLE_READ</code>) and information about its acquired locks. </p>
+<p> <code>Transaction</code> context记录了很多有用的信息，如隔离级别、所需锁等。</p>
+<p>The LM will need to check the isolation level of transaction and expose correct behavior on lock/unlock requests. Any invalid lock operation should lead to an ABORTED transaction state (implicit abort) and throw an exception. A failed lock attempt (such as for a <strong>deadlock</strong>) does not result in an exception, but the LM should return false for the lock request.</p>
+<p>当锁操作不合法需要将事务abort并且抛出异常；失败的锁操作（如可能导致死锁）则不会导致异常，而只是简单地返回false。【也就是说，我们可能还需要有死锁检测机制？】</p>
+</blockquote>
+<blockquote>
+<p>The only file you need to modify for this task is the <code>LockManager</code> class (<code>concurrency/lock_manager.cpp</code> and <code>include/concurrency/lock_manager.h</code>). You must implement the following functions:</p>
+<ul>
+<li><code>LockTable(Transaction, LockMode, TableOID)</code></li>
+<li><code>UnlockTable(Transction, TableOID)</code></li>
+<li><code>LockRow(Transaction, LockMode, TableOID, RID)</code></li>
+<li><code>UnlockRow(Transaction, TableOID, RID, force)</code></li>
+</ul>
+<p>The LM’s specific locking mechanism depends on the transaction isolation level, whether it is a table-level or tuple-level lock, and the type of lock involved. Make sure you are familiar with the <code>Transaction</code> class’s API and member variables, defined in <code>transaction.h</code> and <code>lock_manager.h</code> Then, carefully read through <code>[LOCK_NOTE]</code>, <code>[UNLOCK_NOTE]</code>, and the LM’s functions’ specifications (in <code>lock_manager.h</code>).</p>
+<p>The <code>UnlockRow</code> has a <code>force</code> parameter because executor implementations might need to determine whether a tuple is accessible before deciding whether to include it. If <code>force</code> is set to true, the operation bypasses all 2PL checks as if the tuple is not locked.</p>
+<p>For <code>UnlockRow</code>, we have a <code>force</code> parameter, because in the executor implementation, we might need to <em>peek</em> whether a tuple is accessible by a transaction before deciding whether to scan this tuple to parent executors. If <code>force</code> is set to true, this operation bypasses all 2PL checks as if the tuple is never locked by the transaction.</p>
+</blockquote>
+
         </div>
 
         
