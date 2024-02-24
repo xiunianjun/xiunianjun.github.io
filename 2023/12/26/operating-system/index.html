@@ -456,6 +456,13 @@
 <p><img src="/2023/12/26/operating-system/image-20231211013429818.png" alt="image-20231211013429818"></p>
 <p>下面那个感觉是因为P4和P2还是有可能释放资源</p>
 <p><img src="/2023/12/26/operating-system/image-20231211013530873.png" alt="image-20231211013530873"></p>
+<p>然后还有<strong>环路和死锁的关系</strong>：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/654942846">【操作系统】死锁（详细）</a></p>
+<p>① 如果进程-资源分配图中无环路</p>
+<p>——&gt;则此时系统没有发生死锁</p>
+<p>② 如果进程-资源分配图中有环路，且每个资源类中仅有一个资源</p>
+<p>——&gt;则系统中发生了死锁，此时，环路是系统发生死锁的<strong>充要条件</strong>，环路中的进程便为死锁进程</p>
+<p>③ 如果进程-资源分配图中有环路，且涉及的资源类中有多个资源</p>
+<p>——&gt;则环的存在只是产生死锁的<strong>必要条件而不是充分条件</strong></p>
 <h4 id="不知道什么玩意"><a href="#不知道什么玩意" class="headerlink" title="不知道什么玩意"></a>不知道什么玩意</h4><p><img src="/2023/12/26/operating-system/image-20231211225403513.png" alt="image-20231211225403513"></p>
 <h3 id="死锁恢复"><a href="#死锁恢复" class="headerlink" title="死锁恢复"></a>死锁恢复</h3><p><img src="/2023/12/26/operating-system/image-20231215001557317.png" alt="image-20231215001557317"></p>
 <h3 id="死锁忽略"><a href="#死锁忽略" class="headerlink" title="死锁忽略"></a>死锁忽略</h3><p><img src="/2023/12/26/operating-system/image-20231211225506882.png" alt="image-20231211225506882"></p>

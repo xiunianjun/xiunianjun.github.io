@@ -236,36 +236,7 @@
 <p>The lock manager will support <strong>table locks</strong> and <strong>tuple locks</strong> in <strong>five</strong> lock modes: intention-shared, intention-exclusive, shared-intention-exclusive, shared, and exclusive. </p>
 <p>The lock manager will <u>process lock requests from transactions</u>, grant locks to transactions, and check if locks are released appropriately based on the <strong>transaction’s isolation level</strong>.</p>
 </blockquote>
-<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="transactions"><a href="#transactions" class="headerlink" title="transactions"></a>transactions</h3><h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p><img src="/2023/03/13/cmu15445/image-20231119160134524.png" alt="image"></p>
-<h4 id="并发控制"><a href="#并发控制" class="headerlink" title="并发控制"></a>并发控制</h4><p>要了解事务的并发控制，首先了解什么是调度、串行化。</p>
-<p><img src="/2023/03/13/cmu15445/image-20231119160217938.png" alt="image"></p>
-<p><img src="/2023/03/13/cmu15445/image-20231119160636318.png" alt="image"></p>
-<p>事务并发控制大概有以下这几种方法：</p>
-<ol>
-<li><p>基于封锁的并发控制</p>
-<p>使用<strong>两段封锁协议2pl</strong>来控制资源互斥的事务串行化执行，形成一个合理的串行调度；</p>
-<p>同时，通过<strong>死锁检测</strong>方法来去除隐患的死锁。</p>
-</li>
-<li><p>基于时间戳的并发控制</p>
-</li>
-<li><p>基于有效性确认的并发控制</p>
-</li>
-</ol>
-<p>在本次实验中，我们就是采用<strong>基于封锁的并发控制</strong>。</p>
-<h5 id="两段封锁协议"><a href="#两段封锁协议" class="headerlink" title="两段封锁协议"></a>两段封锁协议</h5><p><img src="/2023/03/13/cmu15445/image-20231119183734987.png" alt="image"></p>
-<p>在DBMS中，lock manager模块负责管理系统中的锁。每当事务需要加锁或者升级锁的时候，都需要向它发出请求。lock manager 内部维护着一个表，上面记录着当前所有锁的分配信息，用于跟踪哪些事务持有哪些锁，以及哪些事务正在等待获得哪些锁。由于我们想获得可串行化的调度序列，因此我们需要利用lock manager来实施加锁策略，以保证事务操作的正确性和并发度。</p>
-<p>两阶段锁的实现由两阶段组成。</p>
-<ul>
-<li>growing 阶段：事务可以按需获取某条数据的锁，lock manager 决定同意或者拒绝</li>
-<li>shringking 阶段：事务只能释放之前获取的锁，不能获得新锁，即一旦开始释放锁，之后就只能释放锁。</li>
-</ul>
-<p>通过2PL获得的调度策略是冲突可串行化的。</p>
-<p>但是该方法有着致命的弱点：可能会导致<strong>级联中止</strong> (cascading aborts)。如下图所示的 “脏读”现象。为了保证整个调度是可串行化的，DBMS 需要在 T1 中止后将一些对T1有依赖的事务也中止，这些事务曾经读取过 T1 写入的数据。而这些中止可能进而使得其它正在进行的事务级联地中止。</p>
-<p>为了解决这个问题，可以使用2PL的增强版变种。该方法要求<strong>事务持有的锁一直到其提交或者中止时才释放</strong>，从而使得每个事务在结束之前，其写过的数据不能被其它事务读取或者重写。</p>
-<p><img src="/2023/03/13/cmu15445/v2-78b6f9cdb1b36484c3e0217f27730650_1440w.webp" alt="img"></p>
-<h5 id="隔离等级"><a href="#隔离等级" class="headerlink" title="隔离等级"></a>隔离等级</h5><p><img src="/2023/03/13/cmu15445/image-20231119183354649.png" alt="image"></p>
-<h5 id="死锁检测"><a href="#死锁检测" class="headerlink" title="死锁检测"></a>死锁检测</h5><p>基于封锁的并发控制通过<strong>死锁检测</strong>方法来去除隐患的死锁。</p>
-<h3 id="lock"><a href="#lock" class="headerlink" title="lock"></a>lock</h3><blockquote>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="lock"><a href="#lock" class="headerlink" title="lock"></a>lock</h3><blockquote>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/78897428">聊一聊数据库中的锁 - 老刘的文章 - 知乎</a></p>
 <p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/51676675">一文了解db2的锁 - somenzz的文章 - 知乎</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/3aa634b0567c">CMU 15445 14.二阶段锁定 + homework 4</a></p>
@@ -303,6 +274,81 @@
 <p>对于 IX、IS 和 SIX 这些意图锁，我们可以这样理解：严格来说他们并不是一种锁，而是<strong>存放表中行锁的信息</strong>。</p>
 <p>举个通俗的例子，我们去住一个酒店。可以把整个酒店比喻成一张表，每个房间是一个行。当我们预定一个房间时，就对该行（房间）添加 X 锁，但是同时会在酒店的前台对该行（房间）做一个信息登记（旅客姓名、住多长时间等）。大家可以把意图锁当成这个酒店前台，它并不是真正意义上的锁，它维护表中每行的加锁信息，是共用的。后续的旅客通过酒店前台来看哪个房间是可用的，那么，如果没有意图锁，会出现什么情况呢，假设我要住房间，那么我每次都要到每一个房间看看这个房间有没有住人，显然这样做的效率是很低下的。其实，最早的 DB2 版本是没有意图锁的，但这对并发影响很大，后来就增加了意图锁。所有的数据库（Oracle、Infomix 和 Sybase）都有意图锁的实现机制。</p>
 </blockquote>
+<h3 id="transactions"><a href="#transactions" class="headerlink" title="transactions"></a>transactions</h3><h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p><img src="/2023/03/13/cmu15445/image-20231119160134524.png" alt="image"></p>
+<h4 id="并发控制"><a href="#并发控制" class="headerlink" title="并发控制"></a>并发控制</h4><p>要了解事务的并发控制，首先了解什么是调度、串行化。</p>
+<p><img src="/2023/03/13/cmu15445/image-20231119160217938.png" alt="image"></p>
+<p><img src="/2023/03/13/cmu15445/image-20231119160636318.png" alt="image"></p>
+<p>事务并发控制大概有以下这几种方法：</p>
+<ol>
+<li><p>基于封锁的并发控制</p>
+<p>使用<strong>两段封锁协议2pl</strong>来控制资源互斥的事务串行化执行，形成一个合理的串行调度；</p>
+<p>同时，通过<strong>死锁检测</strong>方法来去除隐患的死锁。</p>
+</li>
+<li><p>基于时间戳的并发控制</p>
+</li>
+<li><p>基于有效性确认的并发控制</p>
+</li>
+</ol>
+<p>在本次实验中，我们就是采用<strong>基于封锁的并发控制</strong>。</p>
+<h5 id="两段封锁协议"><a href="#两段封锁协议" class="headerlink" title="两段封锁协议"></a>两段封锁协议</h5><p><img src="/2023/03/13/cmu15445/image-20231119183734987.png" alt="image"></p>
+<p>在DBMS中，lock manager模块负责管理系统中的锁。每当事务需要加锁或者升级锁的时候，都需要向它发出请求。lock manager 内部维护着一个表，上面记录着当前所有锁的分配信息，用于跟踪哪些事务持有哪些锁，以及哪些事务正在等待获得哪些锁。由于我们想获得可串行化的调度序列，因此我们需要利用lock manager来实施加锁策略，以保证事务操作的正确性和并发度。</p>
+<p>两阶段锁的实现由两阶段组成。</p>
+<ul>
+<li>growing 阶段：事务可以按需获取某条数据的锁，lock manager 决定同意或者拒绝</li>
+<li>shringking 阶段：事务只能释放之前获取的锁，不能获得新锁，即一旦开始释放锁，之后就只能释放锁。</li>
+</ul>
+<p>通过2PL获得的调度策略是冲突可串行化的。</p>
+<p>但是该方法有着致命的弱点：可能会导致<strong>级联中止</strong> (cascading aborts)。如下图所示的 “脏读”现象。为了保证整个调度是可串行化的，DBMS 需要在 T1 中止后将一些对T1有依赖的事务也中止，这些事务曾经读取过 T1 写入的数据。而这些中止可能进而使得其它正在进行的事务级联地中止。</p>
+<p>为了解决这个问题，可以使用2PL的增强版变种。该方法要求<strong>事务持有的锁一直到其提交或者中止时才释放</strong>，从而使得每个事务在结束之前，其写过的数据不能被其它事务读取或者重写。</p>
+<p><img src="/2023/03/13/cmu15445/v2-78b6f9cdb1b36484c3e0217f27730650_1440w.webp" alt="img"></p>
+<h5 id="隔离等级"><a href="#隔离等级" class="headerlink" title="隔离等级"></a>隔离等级</h5><p><img src="/2023/03/13/cmu15445/image-20231119183354649.png" alt="image"></p>
+<ol>
+<li><p>支持锁类型</p>
+<p><code>READ_UNCOMMITTED</code>级别不支持IS/S/SIX锁</p>
+</li>
+<li><p>读写操作</p>
+<ul>
+<li><p>A transaction should hold X locks for all write operations until it commit or aborts, regardless of its isolation level.  不论是什么隔离级别，写都需要获取X锁。</p>
+</li>
+<li><p>For <code>REPEATABLE_READ</code>, a transaction should take and hold S locks for all read operations until it commits or aborts.  重复读，所有读操作都需要获取S锁，直到事务commit or abort才释放。</p>
+</li>
+<li><p>For <code>READ_COMMITTED</code>, a transaction should take S locks for all read operations, but can release them immediately.  读已提交，所有读操作都需要获取S锁，读完立刻释放。</p>
+</li>
+<li><p>For <code>READ_UNCOMMITTED</code>, a transaction does not need to take any S locks for read operations.  读未提交，所有读操作都不用获取S锁。</p>
+</li>
+</ul>
+</li>
+<li><p>与2PL结合——Shrinking阶段允许解锁情况</p>
+<ul>
+<li><p>REPEATABLE_READ:</p>
+<p>GROWINHG阶段可以加任何锁；</p>
+<p>SHRINKING阶段不能加任何锁。【也即S、IS也必须像X一样等到事务提交/终止时才能解锁】</p>
+</li>
+<li><p>READ_COMMITTED:</p>
+<p>GROWINHG阶段可以加任何锁；</p>
+<p>SHRINKING阶段只能加IS/S锁。【也即S、IS可以用完即解锁】</p>
+</li>
+<li><p>READ_UNCOMMITTED:</p>
+<p>GROWINHG阶段可以加IX/X锁；【不支持共享锁】</p>
+<p>SHRINKING阶段不能加任何锁。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h5 id="死锁检测"><a href="#死锁检测" class="headerlink" title="死锁检测"></a>死锁检测</h5><p>基于封锁的并发控制通过<strong>死锁检测</strong>方法来去除隐患的死锁。</p>
+<p>在os课上，我们学过的死锁检测算法是通过构建资源分配图实现的：</p>
+<p><img src="/2023/03/13/cmu15445/image-20240221174955281.png" alt="image-20240221174955281"></p>
+<p><img src="/2023/03/13/cmu15445/image-20240221175201124.png" alt="image-20240221175201124"></p>
+<p><img src="/2023/03/13/cmu15445/image-20240221175444948.png" alt="image-20240221175444948"></p>
+<p><img src="/2023/03/13/cmu15445/image-20240221175123917.png" alt="image-20240221175123917"></p>
+<p><img src="/2023/03/13/cmu15445/image-20240221175212083.png" alt="image-20240221175212083"></p>
+<p>然后还有<strong>环路和死锁的关系</strong>：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/654942846">【操作系统】死锁（详细）</a></p>
+<p>① 如果进程-资源分配图中无环路</p>
+<p>——&gt;则此时系统没有发生死锁</p>
+<p>② 如果进程-资源分配图中有环路，且每个资源类中仅有一个资源</p>
+<p>——&gt;则系统中发生了死锁，此时，环路是系统发生死锁的<strong>充要条件</strong>，环路中的进程便为死锁进程</p>
+<p>③ 如果进程-资源分配图中有环路，且涉及的资源类中有多个资源</p>
+<p>——&gt;则环的存在只是产生死锁的<strong>必要条件而不是充分条件</strong></p>
 <h2 id="Project"><a href="#Project" class="headerlink" title="Project"></a>Project</h2><blockquote>
 <p>To ensure correct interleaving of transactions’ operations, the DBMS uses a <strong>lock manager (LM)</strong> to control when transactions are allowed to access data items. The basic idea of a LM is that it maintains an internal data structure about the locks currently held by active transactions. Transactions issue lock requests to the LM before they access data items, and the LM will either grant the lock, block the transaction until the lock is available, or abort the transaction.</p>
 <p>为了保证并发控制，DBMS通常会有一个lock manager(LM)，它记录了每个锁都被哪些事务正在持有着。每个事务要访问数据前都需要获取特定的锁，LM的作用就是检查这个锁是否可用，是的话就让该事务获取锁然后执行，否则的话就阻塞该事务，或者直接中止该事务。</p>
@@ -396,12 +442,14 @@
 <h4 id="合法性检测"><a href="#合法性检测" class="headerlink" title="合法性检测"></a>合法性检测</h4><p>我将合法性检验放在了整个函数的最前面。具体来说，需要考虑以下几个因素：</p>
 <ol>
 <li><p>隔离级别</p>
-<p>隔离级别是否支持这种类型的锁？</p>
-<p>比如说<code>READ_UNCOMMITTED</code>级别就不支持IS/S/SIX锁，抛出<code>LOCK_SHARED_ON_READ_UNCOMMITTED</code>异常</p>
+<ol>
+<li><p>隔离级别是否支持这种类型的锁？</p>
+<p>比如说<code>READ_UNCOMMITTED</code>级别就不支持IS/S/SIX锁，抛出<code>LOCK_SHARED_ON_READ_UNCOMMITTED</code>异常；</p>
+<p>对于不同的隔离级别，在SHRINKING阶段允许加的锁的类型也不同。</p>
+<p>具体可以看background部分关于隔离级别的介绍。</p>
 </li>
-<li><p>封锁协议</p>
-<p>对于不同的隔离级别，在SHRINKING阶段允许加的锁的类型也不同</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">*    REPEATABLE_READ:</span><br><span class="line">*        The transaction is required to take all locks.</span><br><span class="line">*        All locks are allowed in the GROWING state</span><br><span class="line">*        No locks are allowed in the SHRINKING state</span><br><span class="line">*</span><br><span class="line">*    READ_COMMITTED:</span><br><span class="line">*        The transaction is required to take all locks.</span><br><span class="line">*        All locks are allowed in the GROWING state</span><br><span class="line">*        Only IS, S locks are allowed in the SHRINKING state</span><br><span class="line">*</span><br><span class="line">*    READ_UNCOMMITTED:</span><br><span class="line">*        The transaction is required to take only IX, X locks.</span><br><span class="line">*        X, IX locks are allowed in the GROWING state.</span><br><span class="line">*        S, IS, SIX locks are never allowed</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
 <li><p>其它</p>
 <p>比如说对于行锁，它需要检测是否已经获取了对应的表锁。这里测试似乎遵循事务与线程一一对应的原则，所以我们应该只用在行锁的前面检测是否获取表锁就行，不用担心执行着执行着表锁没了的情况。我在此采用了通过txn的set判断的方法从而避免了对资源锁的争夺：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> holding_table_lock = <span class="literal">false</span>;</span><br><span class="line"><span class="keyword">if</span> (lock_mode == LockMode::SHARED) &#123;</span><br><span class="line">  <span class="keyword">if</span> ((txn-&gt;<span class="built_in">GetSharedTableLockSet</span>()-&gt;<span class="built_in">find</span>(oid) != txn-&gt;<span class="built_in">GetSharedTableLockSet</span>()-&gt;<span class="built_in">end</span>()) ||</span><br><span class="line">      (txn-&gt;<span class="built_in">GetIntentionSharedTableLockSet</span>()-&gt;<span class="built_in">find</span>(oid) != txn-&gt;<span class="built_in">GetIntentionSharedTableLockSet</span>()-&gt;<span class="built_in">end</span>()) ||</span><br><span class="line">      (txn-&gt;<span class="built_in">GetExclusiveTableLockSet</span>()-&gt;<span class="built_in">find</span>(oid) != txn-&gt;<span class="built_in">GetExclusiveTableLockSet</span>()-&gt;<span class="built_in">end</span>()) ||</span><br><span class="line">      (txn-&gt;<span class="built_in">GetIntentionExclusiveTableLockSet</span>()-&gt;<span class="built_in">find</span>(oid) != txn-&gt;<span class="built_in">GetIntentionExclusiveTableLockSet</span>()-&gt;<span class="built_in">end</span>()) ||</span><br><span class="line">      (txn-&gt;<span class="built_in">GetSharedIntentionExclusiveTableLockSet</span>()-&gt;<span class="built_in">find</span>(oid) !=</span><br><span class="line">       txn-&gt;<span class="built_in">GetSharedIntentionExclusiveTableLockSet</span>()-&gt;<span class="built_in">end</span>())) &#123;</span><br><span class="line">    holding_table_lock = <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> ((txn-&gt;<span class="built_in">GetExclusiveTableLockSet</span>()-&gt;<span class="built_in">find</span>(oid) != txn-&gt;<span class="built_in">GetExclusiveTableLockSet</span>()-&gt;<span class="built_in">end</span>()) ||</span><br><span class="line">      (txn-&gt;<span class="built_in">GetIntentionExclusiveTableLockSet</span>()-&gt;<span class="built_in">find</span>(oid) != txn-&gt;<span class="built_in">GetIntentionExclusiveTableLockSet</span>()-&gt;<span class="built_in">end</span>()) ||</span><br><span class="line">      (txn-&gt;<span class="built_in">GetSharedIntentionExclusiveTableLockSet</span>()-&gt;<span class="built_in">find</span>(oid) !=</span><br><span class="line">       txn-&gt;<span class="built_in">GetSharedIntentionExclusiveTableLockSet</span>()-&gt;<span class="built_in">end</span>())) &#123;</span><br><span class="line">    holding_table_lock = <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
@@ -451,9 +499,9 @@
 <p>那么可能就要问了，我们能不能修改一下沉睡的条件，也即将更新事务从一个拓展为一个数组，然后限制多个同时获取更新锁的情况下一个真获取其他等待呢？那么我们也很容易从结果看出，这种情况下不也跟同一时刻只能有一个事务更新锁是一个道理。。。所以不如简单粗暴地限制这个条件。</p>
 <p>而再至于为什么多个事务同时更新锁是不合法的（也即会抛出异常而非简单返回false），我想这就是事务调度问题了。同一时刻两个事务都在更新某个资源，显而易见是调度出错了，所以理所当然应该抛出异常。</p>
 <h3 id="Task-2-Deadlock-Detection"><a href="#Task-2-Deadlock-Detection" class="headerlink" title="Task #2 - Deadlock Detection"></a>Task #2 - Deadlock Detection</h3><blockquote>
-<p>Your lock manager should run deadlock detection in a background thread, periodically building a waits-for graph and abort transactions as needed to eliminate deadlocks.</p>
+<p>Your lock manager should run deadlock detection in a background thread, periodically building a <strong>waits-for graph</strong> and abort transactions as needed to eliminate deadlocks.</p>
 <p><strong>REQUIREMENTS</strong></p>
-<p>You must implement and use the following graph API for cycle detection:</p>
+<p>You must implement and use the following graph API for <strong>cycle detection</strong>:</p>
 <ul>
 <li><code>AddEdge(txn_id_t t1, txn_id_t t2)</code>: Adds an edge in your graph from <code>t1</code> to <code>t2</code>, representing that <code>t1</code> is waiting for <code>t2</code>. If the edge already exists, you don’t have to do anything.</li>
 <li><code>RemoveEdge(txn_id_t t1, txn_id_t t2)</code>: Removes edge <code>t1</code> to <code>t2</code> from your graph. If no such edge exists, you don’t have to do anything.</li>
@@ -463,20 +511,146 @@
 </ul>
 <p>You may implement the graph however you want, as long as you support the above API. We will use that API to test your implementation.</p>
 <p>You may need to access the status of a transaction from the member variable <code>txn_manager_</code>. If <code>txn_manager_</code> is set to <code>nullptr</code>, <code>StartDeadlockDetection</code> will not be called, and you do not need to detect deadlocks.</p>
-<h5 id="NOTES"><a href="#NOTES" class="headerlink" title="NOTES"></a>NOTES</h5><ul>
-<li>Your background thread should build the waits-for graph every time it wakes up. You should not maintain the waits-for graph over time; it should be built and destroyed every time the deadlock detection thread wakes up.</li>
-<li>Your cycle detection algorithm must be deterministic. To achieve this, you should always explore the lowest transaction id first, by starting the depth-first search from the node with lowest transaction id and exploring neighbors in order (by transaction id) when searching from a node.</li>
-<li>When you find a cycle, abort the <strong>youngest</strong> transaction to break the cycle by setting that transaction’s state to ABORTED.</li>
-<li>When your detection thread wakes up, it must break all cycles that exist. If you follow the above requirements, you will always find the cycles in a deterministic order. This also means that, when you are building your graph, you should not add nodes for aborted transactions or draw edges to aborted transactions.</li>
-<li>Your background cycle detection algorithm may need to get a pointer to a transaction using a <code>txn_id</code>. There is a member variable <code>txn_manager_</code> in lock manager, and <code>Transaction* GetTransaction(txn_id_t txn_id)</code> enables you do that.</li>
-</ul>
-<h5 id="HINTS"><a href="#HINTS" class="headerlink" title="HINTS"></a>HINTS</h5><ul>
-<li>Remember that the waits-for graph is a directed graph, with an edge for each transaction waiting for another transaction. Because multiple transactions may share a lock on the same object, a single transaction may be waiting for multiple transactions.</li>
-<li>When a transaction is aborted, set the transaction’s state to <code>ABORTED</code>. The transaction manager should then take care of the explicit abort and rollback changes.</li>
-<li>A transaction waiting for a lock may be aborted by the background cycle detection thread. You must have a way to notify waiting transactions that they’ve been aborted.</li>
-<li>You can use <code>std::this_thread::sleep_for</code> to help write test cases, to cause threads to wake up in a pre-defined order. You can also tweak <code>CYCLE_DETECTION_INTERVAL</code> in <code>common/config.h</code> in your test cases.</li>
+<p><strong>HINTS</strong></p>
+<ul>
+<li><p>Your background cycle detection algorithm may need to get a pointer to a transaction using a <code>txn_id</code>. There is a member variable <code>txn_manager_</code> in lock manager, and <code>Transaction* GetTransaction(txn_id_t txn_id)</code> enables you do that.</p>
+</li>
+<li><p>You can also tweak <code>CYCLE_DETECTION_INTERVAL</code> in <code>common/config.h</code> in your test cases.</p>
+</li>
 </ul>
 </blockquote>
+<h4 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h4><p>这里相当于是对上文background部分提到的死锁检测算法的一个简化。我们视锁为一个资源，故而每个资源类中仅有一个资源（互斥锁），所以当存在环路时，我们就可以直接判断存在死锁。而由于只有一个资源，所以资源结点其实是没什么必要的，所以我们就简化为了简单的每个顶点都为一个事务、边表示事务等待关系的图形式（waits-for graph），将问题转化为<strong>找出该图的环</strong>，如果环存在，则说明产生了死锁。</p>
+<p>本次任务在此基础上的额外要求是：</p>
+<ol>
+<li><p>一个事务可能有多条指向其他事务的边</p>
+<blockquote>
+<p>Remember that the waits-for graph is a directed graph, with an edge for each transaction waiting for another transaction. Because multiple transactions may share a lock on the same object, a single transaction may be waiting for multiple transactions.</p>
+</blockquote>
+<p>比如说<code>SSSX</code>，此时队列中的X对应事务就会有三条边。</p>
+</li>
+<li><p>图不能动态维护，必须在bg进程中实时创建/销毁</p>
+<blockquote>
+<p>Your background thread should build the waits-for graph every time it wakes up. <strong>You should not maintain the waits-for graph over time</strong>; it should be built and destroyed every time the deadlock detection thread wakes up.</p>
+</blockquote>
+<p>不能动态维护waits-for图，它是由死锁检测进程一次性创建的。也即，我们需要在<code>RunCycleDetection</code>函数中获取table_map锁和row_map锁，来进行waits-for表时的构建。</p>
+<blockquote>
+<p>已产生死锁情况下，死锁检测进程再获取这两个锁会不会死上加死？</p>
+<p>其实不会。仔细结合下我们的实现，在死锁的情况下，两个死锁进程都是在wait()条件变量中沉睡的，此时是释放了表锁和行锁状态，所以我们的死锁检测进程这时候获取锁是安全的，不会死上加死。</p>
+</blockquote>
+</li>
+<li><p>环的检测结果需要是确定性的</p>
+<blockquote>
+<p>Your cycle detection algorithm must be <strong>deterministic</strong>. To achieve this, you should always explore the lowest transaction id first, by starting the depth-first search from the node with lowest transaction id and exploring neighbors in order (by transaction id) when searching from a node.</p>
+</blockquote>
+<p>也即如果图中包含多个环，需要以固定的次序返回这些环。为此，我们需要按照<code>txn_id</code>的顺序来遍历整个图。</p>
+</li>
+<li><p>当检测到环时，需要对环中最年轻（youngest）的事务进行abort来破除死锁</p>
+<blockquote>
+<p>When you find a cycle, abort the <strong>youngest</strong> transaction to break the cycle by setting that transaction’s state to ABORTED.</p>
+</blockquote>
+<p>并且这时候，需要进行一次notify，防止这个正在处于abort状态的进程一直沉睡，导致无法真正abort。</p>
+<blockquote>
+<p>A transaction waiting for a lock may be aborted by the background cycle detection thread. You must have a way to notify waiting transactions that they’ve been aborted.</p>
+</blockquote>
+</li>
+</ol>
+<h4 id="具体实现-2"><a href="#具体实现-2" class="headerlink" title="具体实现"></a>具体实现</h4><p>图的数据结构为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">std::map&lt;<span class="type">txn_id_t</span>, std::set&lt;<span class="type">txn_id_t</span>&gt;&gt; waits_for_;</span><br></pre></td></tr></table></figure>
+
+<p>由于要求通过保证DFS遍历顺序来确保结果的确定性，并且两个事务间只会有一条边，故而使用了有序的map和set。</p>
+<p>实现图中找环的DFS算法也是比较简单的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> LockManager::FindCycle &#123;</span><br><span class="line">  <span class="keyword">if</span> (visited.<span class="built_in">find</span>(source_txn) != visited.<span class="built_in">end</span>()) &#123;  <span class="comment">// has cycle</span></span><br><span class="line">    <span class="comment">// delete no-circle prefix</span></span><br><span class="line">    <span class="comment">// 注意需要删除path中[path.begin(), path.find(source_txn))</span></span><br><span class="line">    <span class="comment">// 这个区间内的元素，因为我们只需要环的路径</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  visited.<span class="built_in">insert</span>(source_txn);</span><br><span class="line">  path.<span class="built_in">push_back</span>(source_txn);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;edge : waits_for_[source_txn]) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">FindCycle</span>(edge, path, visited)) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  visited.<span class="built_in">erase</span>(visited.<span class="built_in">find</span>(source_txn));</span><br><span class="line">  path.<span class="built_in">pop_back</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> LockManager::HasCycle&#123;</span><br><span class="line">  <span class="keyword">if</span> (waits_for_.<span class="built_in">size</span>() &lt; <span class="number">2</span>) &#123;	<span class="comment">// 剪枝</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;wait_pair : waits_for_) &#123;	<span class="comment">// 此处需要一个for循环，因为不一定是连通图</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">FindCycle</span>(wait_pair.first, path, visited)) &#123; <span class="keyword">return</span> <span class="literal">true</span>; &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后整个检测的逻辑也是比较简单的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">LockManager::RunCycleDetection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">while</span> (enable_cycle_detection_) &#123;</span><br><span class="line">    std::this_thread::<span class="built_in">sleep_for</span>(cycle_detection_interval);</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">// 1. build wait-for graph</span></span><br><span class="line">      <span class="comment">// 遍历table lock map和row lock map，填写wait-for graph</span></span><br><span class="line">      <span class="comment">// 我只对这种情况进行处理：txn1-&gt;txn2，其中txn1-&gt;granted==false,txn2-&gt;granted==true</span></span><br><span class="line">      <span class="comment">// 毕竟感觉这样才是比较显式的死锁……</span></span><br><span class="line">      ...</span><br><span class="line">      <span class="comment">// 2. detect cycle and abort txn</span></span><br><span class="line">      <span class="type">txn_id_t</span> abort_txn;</span><br><span class="line">      <span class="keyword">while</span> (<span class="built_in">HasCycle</span>(&amp;abort_txn)) &#123;</span><br><span class="line">        <span class="comment">// 2.1. do an abort</span></span><br><span class="line">        txn-&gt;<span class="built_in">SetState</span>(TransactionState::ABORTED);</span><br><span class="line">          </span><br><span class="line">        <span class="comment">// 2.2. notify related txns</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;lock_req : sleep_for[abort_txn]) &#123;</span><br><span class="line">          <span class="comment">// 上面维护了sleep_for，表明该事务正在等待哪些资源</span></span><br><span class="line">          lock_req-&gt;cv_.<span class="built_in">notify_all</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        sleep_for.<span class="built_in">erase</span>(sleep_for.<span class="built_in">find</span>(abort_txn));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2.3. delete all related edges of wait-for graph</span></span><br><span class="line">        ...</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 3. destory waot-for graph</span></span><br><span class="line">      waits_for_.<span class="built_in">clear</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总的来说比较简单，没什么好说的。</p>
+<h3 id="Task-3-Concurrent-Query-Execution"><a href="#Task-3-Concurrent-Query-Execution" class="headerlink" title="Task #3 - Concurrent Query Execution"></a>Task #3 - Concurrent Query Execution</h3><blockquote>
+<p>To support concurrent query execution, executors must lock and unlock tables and tuples as needed to achieve the isolation level specified in the transaction. To simplify this task, you can <u>ignore concurrent index execution and just focus on data stored in heap files</u>.</p>
+<p>忽略索引，只关注涉及数据修改的地方</p>
+<p>You must update the <code>Next()</code> methods of some executors (sequential scan, insert, and delete) implemented in Project 3. Note that <u>transactions should abort when lock/unlock fails</u>. If a transaction aborts, you will <u>need to undo</u> its previous write operations【需要实现UNDO撤销事务】; to achieve this, you will need to <strong>maintain the write set</strong> in each transaction, which is used by the <code>Abort()</code> method of the transaction manager. If the executor fails to acquire a lock, you should throw an <code>ExecutionException</code> so that the execution engine will tell the user that the query failed.【这里其实没懂，什么情况是fail to acquire lock。。。】</p>
+<p>You should not assume that a transaction only consists of just one query. Specifically, this means a tuple might be accessed by different queries more than once in a transaction. Think about how you should handle this under different isolation levels.</p>
+<p>一个事务可能包括多个查询，也即一个tuple可能会在事务中被访问多次。需要结合隔离级别来思考这个问题的处理方式。</p>
+<p>To complete this task, you must add support for concurrent query execution in the following executors and the transaction manager:</p>
+<ul>
+<li><code>src/execution/seq_scan_executor.cpp</code></li>
+<li><code>src/execution/insert_executor.cpp</code></li>
+<li><code>src/execution/delete_executor.cpp</code></li>
+<li><code>src/concurrency/transaction_manager.cpp</code></li>
+</ul>
+<p>You must pass all tests and produce correct results for the Terrier Benchmark (see below) without segfaults and deadlocks. You do not need to handle concurrency for indexes or the update executor, except for the leaderboard tests.</p>
+</blockquote>
+<p>大概明白了，首先明确需要保证并发的有哪些executor。答案是那些针对中间表进行处理的executor不用【因为中间产物不可能会被并发访问……】，那些涉及索引操作的也不用【简化实现】，只有那些一元的executor需要考虑并发，也即seq scan、insert、delete。【update也不用】</p>
+<p>所以，我们最终实现：</p>
+<ol>
+<li><p>对于表锁，会在每个executor的Init函数中加表锁，应该是从上往下加锁，所以应该在child executor之前加锁，最后在Abort或者Commit函数中解锁。</p>
+</li>
+<li><p>对于行锁，依据隔离级别和锁的类型而定。</p>
+<ol>
+<li><p>X锁</p>
+<p>则只在next中加锁，之后commit or abort会自动解锁</p>
+</li>
+<li><p>S锁</p>
+<p>如果是<code>REPEATABLE_READ</code>，也不能解锁；其他，可以解锁。</p>
+</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p><strong>SeqScan Executor</strong></p>
+<ul>
+<li>In <code>Init</code>, take a table lock. Get an iterator by using <code>MakeEagerIterator</code> instead of <code>MakeIterator</code>. (<code>MakeIterator</code> is introduced to avoid the <strong>Halloween problem</strong>【下文详细说明】 in Project 3’s UpdateExecutor, but you do not need it now.)</li>
+<li>In <code>Next</code><ol>
+<li>Get the current position of the table iterator.</li>
+<li>Lock the tuple as needed for the isolation level.</li>
+<li>Fetch the tuple. Check tuple meta, and if you have implemented filter pushdown to scan, check the predicate.</li>
+<li>If the tuple should not be read by this transaction, <strong>force unlock</strong> the row. Otherwise, unlock the row as needed for the isolation level.</li>
+<li>If the current operation is delete (by checking executor context <code>IsDelete()</code>, which will be set to true for <code>DELETE</code> and <code>UPDATE</code>), you should assume all tuples scanned will be deleted, and you should take X locks on the table and tuple as necessary <em>in step 2</em>.</li>
+</ol>
+</li>
+</ul>
+<p><strong>Insert Executor</strong></p>
+<ul>
+<li>In <code>Init</code>, take a table lock.</li>
+<li>In <code>Next</code>, pass the lock manager, transaction object, and table id to <code>InsertTuple</code> so as to insert and lock a tuple atomically. Be sure that you maintain the write set as needed.</li>
+</ul>
+<p><strong>Delete Executor</strong></p>
+<ul>
+<li>If you have implemented <code>SeqScanExecutor</code> correctly based on <code>IsDelete()</code> in executor context, you do not need to take any any locks in this executor.</li>
+<li>Be sure that you maintain the write set in <code>Next</code>.</li>
+</ul>
+<p><strong>Transaction Manager</strong></p>
+<ul>
+<li>In <code>Commit</code>, you generally do not need to do anything except release all the locks.</li>
+<li>In <code>Abort</code>, you should revert all changes of this transaction based on its write set.</li>
+</ul>
+</blockquote>
+<h4 id="附：Halloween-Protection"><a href="#附：Halloween-Protection" class="headerlink" title="附：Halloween Protection"></a>附：Halloween Protection</h4><blockquote>
+<p><strong>SeqScan Executor</strong></p>
+<ul>
+<li>In <code>Init</code>, take a table lock. Get an iterator by using <code>MakeEagerIterator</code> instead of <code>MakeIterator</code>. (<code>MakeIterator</code> is introduced to avoid the <strong>Halloween problem</strong> in Project 3’s UpdateExecutor, but you do not need it now.)</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_34351321/article/details/90164892">什么是Halloween Problem</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/LvanHades/p/4481497.html">sql server的处理方法</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/36758138">SQL 中的 Halloween Problem</a></p>
+</blockquote>
+<p>大概是说，update操作的实现方法为先delete再insert，并且一般优化它下面可能会连接一个index scan，就会导致在配合底层迭代器使用时，一个元组被更新多次，从而产生死循环、更新错误等问题。Sql Server为了防止该问题，采取了spool（一个用于缓存或存储中间结果的临时存储区域）来暂存原本的索引，遍历过程中也会转而遍历spool、写入真正的物理存储，从而防止索引乱套带来的问题。</p>
+<p>而在Project#4中提到的“<code>MakeIterator</code> is introduced to avoid the Halloween problem in Project 3’s UpdateExecutor”又该怎么理解呢？</p>
+<p>首先，我们需要明确，<strong>在Project#3【不使用并发控制】情况下的bustub中</strong>，会发生什么样的Halloween Problem。</p>
+<p>由于bustub的删除不是真删除，而是采用标记+尾插法的方式，故而应该不会出现反复访问某个元组多次的现象（因为不会发生物理现象的位移）。真正需要防范的，是多个进程同时进行迭代和更新的现象。</p>
+<p>比如说，进程A进行insert操作，进程B进行update操作。我们的原意是先update再insert，故而就算insert插入的新元组符合条件，我们也不应该将其进行update。但是，在不进行并发保护的情况下（也即project#3的情况），如果按照标准迭代器实现（也即遍历到表格末尾才停止），我们很有可能会连insert进来的新元组也遍历到，从而一起更新。</p>
+<p>也即，update了多余的元组，这会是bustub中真正发生的Halloween Problem。防范方式相信也很直观了，就是<u>限制update中遍历的表范围为update时的表范围，不囊括之后插入的元组</u>。【注意仍然是在Project#3不使用锁进行并发控制的情况下】</p>
+<p>我们可以看看Project#3中具体的防范实现。看下<code>TableIterator</code>的构造函数：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">TableIterator</span>(TableHeap *table_heap, RID rid, RID stop_at_rid);</span><br></pre></td></tr></table></figure>
+
+<p>可知它这实际上是一个区间结构，迭代范围为[rid, stop_at_rid)。当遇到<code>stop_at_rid</code>，迭代器就会使<code>IsEnd()</code>为真。</p>
+<p>对比<code>MakeIterator</code>和<code>MakeEagerIterator</code>的实现：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// MakeIterator</span></span><br><span class="line"><span class="keyword">return</span> &#123;<span class="keyword">this</span>, &#123;first_page_id_, <span class="number">0</span>&#125;, &#123;last_page_id, page-&gt;<span class="built_in">GetNumTuples</span>()&#125;&#125;;</span><br><span class="line"><span class="comment">// MakeEagerIterator</span></span><br><span class="line"><span class="keyword">return</span> &#123;<span class="keyword">this</span>, &#123;first_page_id_, <span class="number">0</span>&#125;, &#123;INVALID_PAGE_ID, <span class="number">0</span>&#125;&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>前者是以<code>last_page_id</code>为界，而后者以<code>INVALID_PAGE_ID</code>为界。其中，<code>last_page_id</code>表示当前表的最后一页物理页，会在insert之中被修改。这样一来，<code>MakeIterator</code>就能限制遍历的范围为当前创建的所有元组了。</p>
+<p><u>而在Project#4中</u>，我们会进行并发控制，故而不可能有原意是先update再insert，实际上却是insert先执行的情况发生，所以<strong>无需防范这个Halloween Problem的发生</strong>，故而无需使用<code>MakeIterator</code>，只使用<code>MakeEagerIterator</code>即可。</p>
 
         </div>
 
