@@ -264,7 +264,7 @@
 <p>弱符号大概是说该变量可以被定义多次，最终链接时再进行决议；弱引用大概是说该变量（函数）可以不被定义。</p>
 </blockquote>
 <h1 id="静态链接"><a href="#静态链接" class="headerlink" title="静态链接"></a>静态链接</h1><p>静态链接库（.a文件）本质上是一堆.o文件的集合。静态链接的基本过程：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">test.c ——(compile)——&gt;test.o——(link)——&gt;test(ELF exe)</span><br><span class="line">				  	   			↑</span><br><span class="line">                  			  lib.a</span><br></pre></td></tr></table></figure>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">test<span class="selector-class">.c</span> ——(compile)——&gt;test<span class="selector-class">.o</span>——(link)——&gt;<span class="built_in">test</span>(ELF exe)</span><br><span class="line">				  	   			↑</span><br><span class="line">                  			  lib<span class="selector-class">.a</span></span><br></pre></td></tr></table></figure>
 
 <p>静态链接其实也就是分为两大步骤：</p>
 <ol>
@@ -287,7 +287,7 @@
 <p>静态链接的缺陷是，由于重定向在link过程完成，故而同一份共享库在物理内存中会有多份copy，极大占用物理内存和磁盘空间。优点是速度快。</p>
 <h1 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h1><p>（下文注意区分两个概念：可执行文件和动态链接库）</p>
 <p>动态链接库（.so）不同于静态链接库。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">test.c ——(compile)——&gt;test.o——(link)——&gt;test(ELF exe)</span><br><span class="line">				  	   			↑</span><br><span class="line">                  			  lib.so</span><br></pre></td></tr></table></figure>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">test<span class="selector-class">.c</span> ——(compile)——&gt;test<span class="selector-class">.o</span>——(link)——&gt;<span class="built_in">test</span>(ELF exe)</span><br><span class="line">				  	   			↑</span><br><span class="line">                  			  lib<span class="selector-class">.so</span></span><br></pre></td></tr></table></figure>
 
 <p>在link中，仅会读入动态链接库的符号表，对于动态链接库的符号仅会将其标记为动态符号，而不会对其进行重定向。</p>
 <p>可执行文件<code>test</code>会通过系统调用<code>exevec</code>被装载进物理内存（lazy allocation），分段映射到进程的虚拟地址空间。</p>

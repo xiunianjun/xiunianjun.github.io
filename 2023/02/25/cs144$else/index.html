@@ -336,7 +336,7 @@
 <li><p>作为订阅事件的IO流</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_eventloop.<span class="built_in">add_rule</span>(_datagram_adapter,</span><br><span class="line">                        Direction::In,</span><br><span class="line">                        [&amp;] &#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br></pre></td></tr></table></figure></li>
 <li><p>TCP层通过对其读写来获取TCP segment</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">auto seg = _datagram_adapter.read();</span><br><span class="line">_datagram_adapter.write(_tcp-&gt;segments_out().front());</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">auto seg <span class="operator">=</span> _datagram_adapter.read()<span class="comment">;</span></span><br><span class="line">_datagram_adapter.write(_tcp-&gt;segments_out().front())<span class="comment">;</span></span><br></pre></td></tr></table></figure></li>
 <li><p>记录各类参数</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">datagram_adapter.<span class="built_in">config</span>().destination.<span class="built_in">to_string</span>()</span><br></pre></td></tr></table></figure></li>
 </ol>
@@ -369,7 +369,7 @@
                 <a class="prev" rel="prev" href="/2023/03/10/%E5%AF%B9moore%E5%9E%8B%E5%92%8Cmealy%E5%9E%8B%E7%8A%B6%E6%80%81%E6%9C%BA%E7%9A%84%E7%90%86%E8%A7%A3/">状态机</a>
             
             
-            <a class="next" rel="next" href="/2023/02/25/cs144$lab0/">Lab0</a>
+            <a class="next" rel="next" href="/2023/02/25/cs144$lab1/">Lab1  StreamReassembler</a>
             
         </section>
 

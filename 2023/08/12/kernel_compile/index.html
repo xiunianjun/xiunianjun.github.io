@@ -281,18 +281,18 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">uname</span> -r</span><br><span class="line">6.4.0+</span><br></pre></td></tr></table></figure>
 
 <h3 id="依赖安装"><a href="#依赖安装" class="headerlink" title="依赖安装"></a>依赖安装</h3><h4 id="apt包"><a href="#apt包" class="headerlink" title="apt包"></a>apt包</h4><p>安装编译用户态需要的包：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install cmake python2 python3 libtbb-dev libsnappy-dev zlib1g-dev libgflags-dev libbz2-dev liblz4-dev libzstd-dev</span><br></pre></td></tr></table></figure>
+<figure class="highlight q"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-<span class="built_in">get</span> install cmake python2 python3 libtbb-<span class="built_in">dev</span> libsnappy-<span class="built_in">dev</span> zlib1g-<span class="built_in">dev</span> libgflags-<span class="built_in">dev</span> libbz2-<span class="built_in">dev</span> liblz4-<span class="built_in">dev</span> libzstd-<span class="built_in">dev</span></span><br></pre></td></tr></table></figure>
 
 
 
 <h4 id="RocksDB"><a href="#RocksDB" class="headerlink" title="RocksDB"></a>RocksDB</h4><p>获取RocksDB 6.15.5版本release：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/facebook/rocksdb/archive/refs/tags/v6.15.5.tar.gz</span><br><span class="line">tar -xvf v6.15.5.tar.gz</span><br><span class="line">cd rocksdb-6.15.5/</span><br></pre></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https:<span class="regexp">//gi</span>thub.com<span class="regexp">/facebook/</span>rocksdb<span class="regexp">/archive/</span>refs<span class="regexp">/tags/</span>v6.<span class="number">15.5</span>.tar.gz</span><br><span class="line">tar -xvf v6.<span class="number">15.5</span>.tar.gz</span><br><span class="line">cd rocksdb-<span class="number">6.15</span>.<span class="number">5</span>/</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>注：测试得发现本RocksDB负载同最新版本RocksDB不兼容，故而建议使用上述命令对应版本，也即v6.15.5。</p>
 </blockquote>
 <p>修改CMakeLists：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim CMakeLists.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">vim</span> CMakeLists.txt</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li><p>搜索<code>WITH_TBB</code>，将这一项改为ON:</p>

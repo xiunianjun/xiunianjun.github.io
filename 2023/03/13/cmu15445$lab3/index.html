@@ -627,7 +627,7 @@
 </blockquote>
 <h3 id="Sort"><a href="#Sort" class="headerlink" title="Sort"></a>Sort</h3><blockquote>
 <p>If a query’s <code>ORDER BY</code> attributes <u>don’t match the keys of an index</u>, BusTub will produce a <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/include/execution/plans/sort_plan.h"><code>SortPlanNode</code></a> for queries such as:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * FROM __mock_table_1 ORDER BY colA ASC, colB DESC;</span><br></pre></td></tr></table></figure>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> __mock_table_1 <span class="keyword">ORDER</span> <span class="keyword">BY</span> colA <span class="keyword">ASC</span>, colB <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
 
 <p>如果要求排序的key不是index key，就会用到这个sort executor。</p>
 <p>This plan node has the same output scheme as its input schema. You can extract sort keys from <code>order_bys</code>, and then use <code>std::sort</code> with a custom comparator to sort the child node’s tuples. You may assume that all entries in a table will fit entirely in memory.</p>
@@ -645,7 +645,7 @@
 <p>比较难的地方大概还是c++知识，也即如何为<code>std:sort</code>实现一个较为复杂的comparator。具体操作可见<code>一些想法-comparator实现</code>。</p>
 <h3 id="Limit"><a href="#Limit" class="headerlink" title="Limit"></a>Limit</h3><blockquote>
 <p>The <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/include/execution/plans/limit_plan.h"><code>LimitPlanNode</code></a> specifies the number of tuples that query will generate. Consider the following example:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * FROM __mock_table_1 LIMIT 10;</span><br></pre></td></tr></table></figure>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> __mock_table_1 <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
 
 <p>The <code>LimitExecutor</code> <strong>constrains the number of output tuples from its child executor</strong>. If the number of tuples produced by its child executor is less than the limit specified in the plan node, this executor has no effect and yields all of the tuples that it receives.</p>
 <p>This plan node has the same output scheme as its input schema. You do not need to support offsets.</p>
@@ -653,12 +653,12 @@
 <p>挺简单的，就是限制输出的数量，没什么好说的。</p>
 <h3 id="Top-N-Optimization-Rule"><a href="#Top-N-Optimization-Rule" class="headerlink" title="Top-N Optimization Rule"></a>Top-N Optimization Rule</h3><blockquote>
 <p>Finally, you should modify BusTub’s optimizer to efficiently support top-N queries. (These were called top-K queries in class.) Consider the following:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EXPLAIN SELECT * FROM __mock_table_1 ORDER BY colA LIMIT 10;</span><br></pre></td></tr></table></figure>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">EXPLAIN</span> <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> __mock_table_1 <span class="keyword">ORDER</span> <span class="keyword">BY</span> colA <span class="keyword">LIMIT</span> <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
 
 <p>By default, BusTub will plan this query as a <code>SortPlanNode</code> followed by a <code>LimitPlanNode</code>. This is inefficient because a heap can be used to keep track of the smallest 10 elements far more efficiently than sorting the entire table.</p>
 <p>Implement the <code>TopNExecutor</code> and modify the optimizer to use it for queries containing <code>ORDER BY</code> and <code>LIMIT</code> clauses.</p>
 <p>An example of the optimized plan of this query:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TopN &#123; n=10, order_bys=[(Default, #0.0)]&#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)</span><br><span class="line">MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)</span><br></pre></td></tr></table></figure>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TopN &#123; n=<span class="number">10</span>, order_bys=[(<span class="keyword">Default</span>, #<span class="number">0.0</span>)]&#125; | (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>)</span><br><span class="line">MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:<span class="type">INTEGER</span>, __mock_table_1.colB:<span class="type">INTEGER</span>)</span><br></pre></td></tr></table></figure>
 
 <p><strong>Hint:</strong> See <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/optimizer/sort_limit_as_topn.cpp"><code>OptimizeSortLimitAsTopN</code></a> for more information, and check the <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/project3/##optimizer-rule-implementation-guide">Optimizer Rule Implementation Guide</a> for details on implementing an optimizer rule.</p>
 <p><strong>Note:</strong> At this point, your implementation should pass <a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/project3/#testing">SQLLogicTests #16 to #19</a>. Integration-test-2 requires you to use release mode to run.</p>
@@ -673,10 +673,10 @@
 
 <h3 id="Query-1-Where’s-the-Index"><a href="#Query-1-Where’s-the-Index" class="headerlink" title="Query 1: Where’s the Index?"></a>Query 1: Where’s the Index?</h3><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><blockquote>
 <p>Consider the following sample database:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE t1(x INT, y INT, z INT);</span><br><span class="line">CREATE INDEX t1xy ON t1(x, y);</span><br></pre></td></tr></table></figure>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1(x <span class="type">INT</span>, y <span class="type">INT</span>, z <span class="type">INT</span>);</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">INDEX</span> t1xy <span class="keyword">ON</span> t1(x, y);</span><br></pre></td></tr></table></figure>
 
 <p>Now a user comes along and executes the following query.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM t1 WHERE x &gt;= 90 AND y = 10</span><br></pre></td></tr></table></figure>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> t1 <span class="keyword">WHERE</span> x &gt;= <span class="number">90</span> <span class="keyword">AND</span> y = <span class="number">10</span></span><br></pre></td></tr></table></figure>
 
 <p>Even though there is an index on <code>t1.x</code> and <code>t1.y</code>, BusTub does not pick it for the scan!</p>
 <p><strong>Recommended Optimizations:</strong> Use index scan for this query. Create a clustered index to store the value within the index (you may want to change the value type of index being created). Furthermore, add functionality to the B+ tree iterator to quickly skip keys. You may add your optimizer rule to <a target="_blank" rel="noopener" href="https://github.com/cmu-db/bustub/blob/master/src/optimizer/optimizer_custom_rules.cpp"><code>optimizer_custom_rules.cpp</code></a>. You may also want to modify the index scan plan to save the predicate.</p>
@@ -876,10 +876,10 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/03/13/cmu15445/">CMU15445</a>
+                <a class="prev" rel="prev" href="/2023/03/13/cmu15445$lab0/">Project0   C++ Primer</a>
             
             
-            <a class="next" rel="next" href="/2023/03/10/%E5%AF%B9moore%E5%9E%8B%E5%92%8Cmealy%E5%9E%8B%E7%8A%B6%E6%80%81%E6%9C%BA%E7%9A%84%E7%90%86%E8%A7%A3/">状态机</a>
+            <a class="next" rel="next" href="/2023/03/13/cmu15445$lab1/">Project1   Buffer Pool</a>
             
         </section>
 
