@@ -233,7 +233,7 @@
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本实验总体思维和代码上的难度还是不难的（至少比xv6简单），我认为其难点主要集中在TCP协议本身就很复杂很多的细节问题，以及需要我们有一种面向测试用例编程、直面自己往日写过的屎山的勇气（。</p>
 <p>下面，我将对本实验的完成情况即心得进行一个总结，也算是本篇博客/本次实验的一个<strong>导读</strong>。</p>
 <blockquote>
-<p><strong>类似于这样的块引用中的部分是我自认为的精华部分哦</strong>。</p>
+<p><strong>类似于这样的块引用中的部分是我自认为的精华部分</strong>。</p>
 </blockquote>
 <p>本实验对TCP-IP-ETH协议栈的实验是自顶向下的，其中对TCP协议的实现是由内而外的。</p>
 <p>后者很容易导致，在对TCP协议的实现中，当你写完了lab0-3，你还是不知道自己到底写了个啥，以及TCP又究竟怎么通过你写的那几个类run起来。直到lab4结束，你完成了对TCP状态机的组织，并且出于debug目的钻研过部分socket的代码、熟悉了（其实差不多已经背下来了）TCP的三握手四挥手的过程，至此你才会对TCP的实现有较为清晰的理解。这个过程很痛苦，但是也真的非常爽。</p>
@@ -256,7 +256,7 @@
 <p>至于ETH帧进入TAN之后的过程？在xv6的网卡驱动那一节我们事实上已经实现过了！</p>
 </blockquote>
 <p><code>CS144TCPSocket</code>和<code>FullStackTCPSokect</code>都继承自<code>TCPSpongeSocket</code>。<code>TCPSpongeSocket</code>通过一个包装了操作系统提供的socket的包装类<code>_thread_data</code>来与上层app进行交互，通过adapter<code>_datagram_adapter</code>来与协议栈进行交互（adapter本质上也是调用了操作系统的TUN/TAN接口）。</p>
-<p>由于<code>_thread_data</code>和<code>_datagram_adapter</code>本质上都是文件描述符【牛逼吧】，因而，<code>TCPSpongeSocket</code>需要跟上下层进行交互的需求，就可以通过操作系统提供的POLL机制来实现，也即，app←→TCP、TCP←→协议栈的这四种数据交互情况，都用<strong>事件监听</strong>来实现！这样就能做到“及时”“高效”了。</p>
+<p>由于<code>_thread_data</code>和<code>_datagram_adapter</code>本质上都是文件描述符【牛逼吧】，因而，<code>TCPSpongeSocket</code>需要跟上下层进行交互的需求，就可以通过操作系统提供的<strong>POLL机制</strong>来实现，也即，app←→TCP、TCP←→协议栈的这四种数据交互情况，都用<strong>事件监听</strong>来实现！当有datagram需要传入的时候会在事件处理体之中调用我们实现的tcp协议的segment_receive，同样在tcp的segement_out非空时将其发送。这样就能做到“及时”“高效”了。</p>
 <blockquote>
 <p>关于此处<code>TCPSpongeSocket</code>的事件监听机制以及其它实现细节，详见<a href="https://xiunianjun.github.io/2023/02/25/cs144$else/#:~:text=*-,TCPSpongeSocket,-%E4%B8%8A%E9%9D%A2%E9%82%A3%E4%BF%A9">其它的对…——Socket实现——TCPSpongeSocket</a></p>
 </blockquote>
@@ -284,10 +284,10 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/02/25/cs144$lab5/">Lab5   NetworkInterface</a>
+                <a class="prev" rel="prev" href="/2023/02/25/cs144$lab6/">Lab6   Router</a>
             
             
-            <a class="next" rel="next" href="/2023/02/25/cs144$lab6/">Lab6   Router</a>
+            <a class="next" rel="next" href="/2023/01/10/xv6$chap1/">Operating system interface</a>
             
         </section>
 

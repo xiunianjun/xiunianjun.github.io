@@ -13,7 +13,7 @@
 
 
 
-<title>归档: 2024 | 修年</title>
+<title>light-dedup | 修年</title>
 
 
 
@@ -135,85 +135,72 @@
     }
 </script>
             <div class="main">
-                <div class="post-wrap archive">
+                <div class="container">
     
     
-        
 
-        
-            <h3>2024</h3>
-        
-
-		
-		
-		
-		
-			<article class="archive-item">
-				<a class="archive-item-link" href="/2024/04/10/unsolved_problems/">尚未解决的问题</a>
-				<span class="archive-item-date">四月 10, 2024</span>
-			</article>
-		
     
-        
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">light-dedup</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">三月 25, 2024&nbsp;&nbsp;19:53:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>在看文章前，心中可以有一个大概的预期。这篇文章大概是在讲deduplication在nvm fs中的应用。在前面的综述中我们知道，延长nvm寿命的举措之一就是减少读写次数，有一个方法就是在写入数据之前首先使用去重系统来减少数据量。而结合我们之前去重系统的知识可知，deduplication system起作用大概有这几步：spliting、chunking、hashing、indexing（deduplicate）以及最后的logic file和物理数据的写入。我想这个的创新点可能就是deduplication system的引入？</p>
+<p>大概也确实是这么个原理。本文章的创新点在于两个方面：</p>
+<ol>
+<li><p>通过预读提升性能</p>
+<p>由于面向nvm的dedup是inline的，再加上nvm读写比DRAM快得多导致性能瓶颈反倒在CPU上了，故而我们不能简单地照搬过往的去重系统。在这里，为了避免复杂的fp计算，我们采取的是非加密的哈希算法（计算快但容易解码、可能碰撞）+byte-by-byte的比较（fp相同之后比较）。而由于NVM随机读取也是有点费劲，故而后者这个comparison开销也较大，所以本文章就采取了一个<strong>预读</strong>的方式，根据信息来预读进CPU的高速缓存中，从而提升性能。</p>
+</li>
+<li><p>分region存储meta data从而防止碎片化</p>
+<p>由于nvm是粗粒度IO，而meta data（比如什么什么表）的条目可能只有几B大小，所以会导致读放大问题。另一方面，以前的方法都是给整个NVM做一个meta data存放区，所以可能导致相邻条目地址不连续，造成碎片化问题。故而，LD采取了分区域存储meta data方式，也即把NVM分成4KB大小的一个region，region中只连续存储本区域涉及到的meta data。</p>
+</li>
+</ol>
+<p>具体的design还没看完（因为好像看不大懂），但感觉目前粗粗了解这些差不多了。</p>
+
+        </div>
 
         
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2024/04/10/unsolved_problems/">尚未解决的问题</a>
+            
+            
+            <a class="next" rel="next" href="/2024/03/24/articles/nvm/">nvm</a>
+            
+        </section>
 
-		
-		
-			
-		
-		
-		
-    
-        
 
-        
-
-		
-		
-			
-		
-		
-		
-    
-        
-
-        
-
-		
-		
-		
-		
-			<article class="archive-item">
-				<a class="archive-item-link" href="/2024/03/23/webserver/">Web Server</a>
-				<span class="archive-item-date">三月 23, 2024</span>
-			</article>
-		
-    
-        
-
-        
-
-		
-		
-			
-		
-		
-		
-    
-        
-
-        
-
-		
-		
-			
-		
-		
-		
-    
-    
+    </article>
 </div>
+
             </div>
             <footer id="footer" class="footer">
     <div class="copyright">

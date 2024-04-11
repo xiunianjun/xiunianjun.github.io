@@ -13,7 +13,7 @@
 
 
 
-<title>xv6 | 修年</title>
+<title>尚未解决的问题 | 修年</title>
 
 
 
@@ -207,7 +207,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">xv6</h1>
+            <h1 class="post-title">尚未解决的问题</h1>
             
                 <div class="post-meta">
                     
@@ -216,7 +216,7 @@
 
                     
                         <span class="post-time">
-                        Date: <a href="#">一月 10, 2023&nbsp;&nbsp;20:25:29</a>
+                        Date: <a href="#">四月 10, 2024&nbsp;&nbsp;19:09:29</a>
                         </span>
                     
                     
@@ -226,15 +226,14 @@
 
         <div class="post-content">
             <blockquote>
-<p>总耗时：120h  约27天</p>
-<p>部分地方的翻译和表格来源参考：<a target="_blank" rel="noopener" href="http://xv6.dgs.zone/">xv6指导书翻译</a></p>
-<p>部分文本来自：<a target="_blank" rel="noopener" href="https://hitsz-cslab.gitee.io/os-labs/">操作系统实验指导书 - 2023秋季 | 哈工大（深圳）</a></p>
-<p>实验官网：<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/tools.html">6.S081</a></p>
-<p>代码以<a target="_blank" rel="noopener" href="https://github.com/xiunianjun/oslab">github</a>为准，此处记录的有些小瑕疵</p>
-<p>笔记的结构【以第一章Operating system interface为例】：</p>
-<p><img src="/2023/01/10/xv6/image-20230124235649128.png" alt="image-20230124235649128"></p>
+<p>记录一些编码过程中尚不清楚为什么的问题（比如C++语言and so on），欢迎看到的热心大佬敲敲我告诉我为什么……</p>
 </blockquote>
-<h3 id="Operating-system-interface"><a href="#Operating-system-interface" class="headerlink" title="Operating system interface"></a><a href="/2023/01/10/xv6$chap1">Operating system interface</a></h3><h3 id="Operating-system-oganization"><a href="#Operating-system-oganization" class="headerlink" title="Operating system oganization"></a><a href="/2023/01/10/xv6$chap2">Operating system oganization</a></h3><h3 id="Page-tables"><a href="#Page-tables" class="headerlink" title="Page tables"></a><a href="/2023/01/10/xv6$chap3">Page tables</a></h3><h3 id="Traps-and-system-calls"><a href="#Traps-and-system-calls" class="headerlink" title="Traps and system calls"></a><a href="/2023/01/10/xv6$chap4">Traps and system calls</a></h3><h3 id="Interrupts-and-device-drivers"><a href="#Interrupts-and-device-drivers" class="headerlink" title="Interrupts and device drivers"></a><a href="/2023/01/10/xv6$chap5">Interrupts and device drivers</a></h3><h3 id="Locking"><a href="#Locking" class="headerlink" title="Locking"></a><a href="/2023/01/10/xv6$chap6">Locking</a></h3><h3 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a><a href="/2023/01/10/xv6$chap7">Scheduling</a></h3><h3 id="File-system"><a href="#File-system" class="headerlink" title="File system"></a><a href="/2023/01/10/xv6$chap8">File system</a></h3><h3 id="其他的对实验未涉及的思考"><a href="#其他的对实验未涉及的思考" class="headerlink" title="其他的对实验未涉及的思考"></a><a href="/2023/01/10/xv6$chap9">其他的对实验未涉及的思考</a></h3>
+<h1 id="bad-alloc-amp-amp-数组越界"><a href="#bad-alloc-amp-amp-数组越界" class="headerlink" title="bad_alloc &amp;&amp; 数组越界"></a>bad_alloc &amp;&amp; 数组越界</h1><p>今天在开发某个项目的时候遇到std::bad_alloc导致terminate，然而印象中这个似乎是内存耗尽才会报的错所以百思不得其解，直到之后发现修改了数组越界（C-style array）之后该问题得以解决。然而，按我的经验似乎数组越界并不会报出该错误，于是上网搜索发现了该文章：<a target="_blank" rel="noopener" href="https://blog.csdn.net/lovelyloulou/article/details/6457991">数组越界造成的std::bad_alloc中断</a></p>
+<p>我的项目确实在数组越界之后调用了ofstream，感觉这个真相了。然而，我又按着它和我的思路怎么复现都没复现出来很难崩……而且也不大清楚它的原理是什么</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function">std::ofstream <span class="title">ofile</span><span class="params">(<span class="string">&quot;test.txt&quot;</span>)</span></span>;</span><br><span class="line">    std::string p[<span class="number">5</span>];</span><br><span class="line">    std::string tmp;</span><br><span class="line">    tmp  = p[<span class="number">10</span>];</span><br><span class="line">    ofile &lt;&lt; <span class="string">&quot;haha&quot;</span> &lt;&lt; tmp;</span><br><span class="line">    ofile.<span class="built_in">close</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总之，暂时是一个悬而未决的问题……</p>
+
         </div>
 
         
@@ -243,10 +242,6 @@
                 <span>Tag(s):</span>
                 <span class="tag">
                     
-                    
-                        <a href="/tags/labs/"># labs</a>
-                    
-                        
                 </span>
             </div>
             <div>
@@ -257,10 +252,8 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/01/10/xv6$chap5/">Interrupts and device drivers</a>
             
-            
-            <a class="next" rel="next" href="/2023/01/10/xv6$chap7/">Scheduling</a>
+            <a class="next" rel="next" href="/2024/03/25/articles/light-dedup;deduplication4nvmfs/">light-dedup</a>
             
         </section>
 

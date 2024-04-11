@@ -252,12 +252,10 @@
 <p>额好像怪我没认真看指导书的图。</p>
 <p><img src="/2023/02/25/cs144/image-20230225232723083-1677339210527-2.png" alt="image-20230225232723083-1677339210527-2"></p>
 <p>我理解的capacity：绿色部分和红色部分的净含量</p>
-<p>似乎是真正的capacity：绿色部分+红色部分+空部分？？也就是说capacity只是一个跟index差不多的索引下标？？…………</p>
+<p>似乎是真正的capacity：绿色部分+红色部分+空部分，也就是说capacity只是一个跟index差不多的索引下标…………</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// out of bound</span></span><br><span class="line"><span class="keyword">if</span> (start &gt;= hope_to_rec + _capacity - _output.<span class="built_in">buffer_size</span>()) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>也就是说我能过测试是因为偶然吗？？</p>
-<p>我其实感觉正确理解的capacity意义好怪啊，这怎么就能节省内存了呢？我觉得我理解的反而比较有道理（倔强）</p>
-<p>笑一笑算了家人们。总之先这么写吧，以后的实验寄掉了再回来改。</p>
+<p>其实这也是很合理的，很符合其语义。我这样错误理解的话，相当于是内存开销增大了，丢包减少了。不过暂时等之后寄掉了再回来改吧。</p>
 <blockquote>
 <p>UPDATE: 确实寄掉了，并且已经改过来了，也不复杂，只需要添加对<code>right</code>边界的处理就行。【指去掉超出<code>start+capacity</code>的部分。】</p>
 </blockquote>
@@ -401,7 +399,7 @@
                 <a class="prev" rel="prev" href="/2023/02/25/cs144$else/">其他的对实验未涉及的思考</a>
             
             
-            <a class="next" rel="next" href="/2023/02/25/cs144$lab0/">Lab0</a>
+            <a class="next" rel="next" href="/2023/02/25/cs144$lab3/">Lab3   TCPSender</a>
             
         </section>
 
