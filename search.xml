@@ -16516,4 +16516,87 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
         <tag>Java</tag>
       </tags>
   </entry>
+  <entry>
+    <title>对Linux研究汇总</title>
+    <url>/2024/04/10/read_linux/</url>
+    <content><![CDATA[<blockquote>
+<p>记录一些开发过程中对Linux kernel的阅读&amp;研究，一些认知性的东西真的很容易忘……</p>
+<p>注意，全都是个人猜想，很多我还自己不大明白，所以都是阶段性结论，也欢迎指正</p>
+</blockquote>
+<h1 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a>Scheduling</h1><h2 id="ghOSt"><a href="#ghOSt" class="headerlink" title="ghOSt"></a>ghOSt</h2><p>这几天一直在阅读<a href="https://github.com/google/ghost-kernel">ghOSt</a>的论文及其源码实现，站在目前的知识水平上来看相比于以前有了不少收获，在这里简单记录一下。</p>
+<h3 id="24-4-11"><a href="#24-4-11" class="headerlink" title="24.4.11"></a>24.4.11</h3><h4 id="per-CPU和Centralized思考"><a href="#per-CPU和Centralized思考" class="headerlink" title="per-CPU和Centralized思考"></a>per-CPU和Centralized思考</h4><p>仔细想了一下发现还真是<strong>linux原生就是per-CPU model</strong>……<br>原生就是有一个专门的schedule的idle线程，调度了则执行对应线程，否则执行调度逻辑，以此类推，这不就是典型的per-CPU，当时怎奈没意识到。。。<br><strong>而我们在用户态实际上也是模拟的这个逻辑实现的per-CPU</strong>，感觉这点非常可贵！！</p>
+<p>也因此，linux原生都是per-CPU的，虽然centralized被证明很多时候更高效，但确实是很难实现，估计得修改个大架构，而且改完了说不定就不一定还能支持per-CPU了。好在，有了ghost，我们就把繁琐的逻辑从内核实现移到了用户实现，这就能同时简单地支持per-CPU和centralized了，不得不说确实真的是很伟大的发明</p>
+<h3 id="24-4-12"><a href="#24-4-12" class="headerlink" title="24.4.12"></a>24.4.12</h3><h4 id="Linux内核抢占调度机制"><a href="#Linux内核抢占调度机制" class="headerlink" title="Linux内核抢占调度机制"></a>Linux内核抢占调度机制</h4><p>在Linux内核上实现抢占式调度具体是个什么样的运作方法呢？我们可以分情况讨论：</p>
+<ol>
+<li><p>在单CPU情况下</p>
+<p>一开始，CPU位于idle线程，os启动时切换上下文到Bash中。创建线程时，将线程加入该CPU调度队列中。多进程情况下，线程运行时会发生时钟中断，在时钟中断中检测计算时间片，发生上下文切换回idle进程继续reschedule。</p>
+</li>
+<li><p>在多处理器情况下</p>
+<p>也是差不多的，一个CPU上运行的线程A创建了另一个线程B，这时候有两种情况：</p>
+<ol>
+<li><p>线程B优先级更高</p>
+<p>kernel会直接把B抢占了A</p>
+</li>
+<li><p>线程B优先级比A低</p>
+<p>kernel会把B推开去抢占别的CPU，除非B只能在当前CPU运行</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>其中，第二种情况稍显复杂，我们可以详细来说说。【下以deadline为例，因为别的比如说RR是非抢占式调度】</p>
+<p>首先，全局只有一个调度类对象（不考虑什么多个调度策略，或者说一个线程组只有一个调度类对象，差不多这个意思）。</p>
+<p>当一个CPU上运行的线程A创建了另一个线程B，并且假设目前其他CPU跑满了任务，线程B的优先级很高。创建线程的相关syscall最终会调用<code>activate_task</code>【这点暂时存疑】，然后<code>activate_task</code>会调用调度类中的<code>enqueue_task</code>事件，将线程B压入到deadline调度类的红黑树中。<code>activate_task</code>结束返回之后，紧随其后一般会接一个<code>resched_curr</code>，也即将当前CPU reschedule。</p>
+<p>这里，就需要分情况讨论了。</p>
+<ol>
+<li><p>当线程B优先级&gt;线程A优先级</p>
+<p>当前CPU进入到<code>__schedule</code>函数中，就会调用调度类的<code>pick_next_task</code>进而调用<code>set_next_task</code>，从而使得线程B抢占线程A，线程A重新入队，over。</p>
+</li>
+<li><p>当线程B优先级&lt;=线程A优先级</p>
+<p>每个CPU进入到<code>__schedule</code>函数中，都会调用调度类的<code>pick_next_task</code>进而调用<code>set_next_task</code>，从而调用该函数：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> <span class="title function_">deadline_queue_push_tasks</span><span class="params">(<span class="keyword">struct</span> rq *rq)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (!has_pushable_dl_tasks(rq))</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	queue_balance_callback(rq, &amp;per_cpu(dl_push_head, rq-&gt;cpu), push_dl_tasks);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该函数以回调形式实现。之后，由于线程B优先级&lt;=线程A优先级，最终会在<code>__schedule</code>中进入该分支：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (likely(prev != next)) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    __balance_callbacks(rq);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从而调用<code>__balance_callbacks</code>来执行当前CPU上的所有balance callback，从而执行<code>push_dl_tasks</code>。该函数会将自身队列中未运行的线程，发送到那些合适的CPU上进行适当抢占：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * See if the non running -deadline tasks on this rq</span></span><br><span class="line"><span class="comment"> * can be sent to some other CPU where they can preempt</span></span><br><span class="line"><span class="comment"> * and start executing.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">push_dl_task</span><span class="params">(<span class="keyword">struct</span> rq *rq)</span></span><br><span class="line">&#123;</span><br><span class="line">	next_task = pick_next_pushable_dl_task(rq);</span><br><span class="line">	<span class="comment">// 找到一个合适的CPU（包括pick算法，以及查看next_task是否能抢占它的curr）</span></span><br><span class="line">	later_rq = find_lock_later_rq(next_task, rq);</span><br><span class="line">	<span class="comment">// 将next_task迁移到target CPU上</span></span><br><span class="line">	deactivate_task(rq, next_task, <span class="number">0</span>);</span><br><span class="line">	set_task_cpu(next_task, later_rq-&gt;cpu);</span><br><span class="line">	activate_task(later_rq, next_task, <span class="number">0</span>);</span><br><span class="line">	<span class="comment">// 通过发生IPI使其reschedule</span></span><br><span class="line">	resched_curr(later_rq);</span><br><span class="line">	<span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>故而，此时线程B就可以抢占别的CPU了。</p>
+</li>
+</ol>
+<p>综上所述，如此串联一下，我们可以归纳总结一下当CPU上运行的线程A创建了一个新的线程B时的执行链路：</p>
+<ol>
+<li><p>B优先级更大：</p>
+<p>原CPU：创建线程syscall→<code>fork()</code>→<code>wake_up_new_task</code>→<code>sched_class-&gt;task_woken</code>→执行<code>check_preempt_curr</code>→执行<code>__schedule</code>→pick出B，抢占A，over</p>
+</li>
+<li><p>B优先级更小：</p>
+<p>原CPU：创建线程syscall→<code>fork()</code>→<code>wake_up_new_task</code>→<code>sched_class-&gt;task_woken</code></p>
+<p>此时：</p>
+<ol>
+<li><p>如果该CPU无需reschedule：→执行<code>push_dl_task</code>，迁移该线程，发送IPI→返回用户态</p>
+</li>
+<li><p>如果该CPU需要reschedule：<code>task_woken</code>无事发生，返回→执行<code>__schedule</code>→无事发生，B依然在原CPU的数据结构中→执行<code>__balance_callbacks</code>→执行<code>push_dl_task</code>，迁移该线程，发送IPI→返回用户态</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>其实这整个过程的链路是很好追踪的，为什么我花了很久呢：</p>
+<p><img src="/2024/04/10/read_linux/ecad9f39d64acccafd9bca9958dfafce.jpg" alt="ecad9f39d64acccafd9bca9958dfafce"></p>
+<p>因为我想找<code>push_dl_task</code>结果一直在看<code>pull_dl_task</code>也即最终push和pull逻辑是反的，故而我匪夷所思想了半天都没懂hhh……</p>
+<p>不过这也让我些许看懂了balance的架构。每个CPU都有一个balance callback的队列，互相之间可以通过这种适时的、异步的调用pull或者push的callback来实现运行队列的负载均衡。我目前水平也不大明白这种架构的好处emmm总之先这么了解一下放在这里吧。</p>
+<h4 id="per-CPU和Centralized思考-1"><a href="#per-CPU和Centralized思考-1" class="headerlink" title="per-CPU和Centralized思考"></a>per-CPU和Centralized思考</h4><ol>
+<li>在单CPU情况下，一开始，CPU位于idle线程，os启动时切换上下文到Bash中。创建线程时，将线程加入该CPU调度队列中。多进程情况下，线程运行时会发生时钟中断，在时钟中断中检测计算时间片，发生上下文切换回idle进程继续reschedule。</li>
+<li>在多处理器情况下也是差不多的，一个CPU上运行的线程A创建了另一个线程B，并且线程B优先级更高，那么此时kernel就会可能综合考虑什么负载均衡之类的算法随机挑选出target CPU，将线程B入其队列，然后通过IPI让target CPU进行重新调度。</li>
+</ol>
+<p>可以很震惊地发现，其实在Linux原生环境中，对于多处理器情况，单纯的per-CPU model为了做到负载均衡，其实已经逐步向centralized model靠拢了，相当于所有CPU都是一个暂时的c位。只不过，这种情况的劣势也很显然，也即我们不得不让工作线程暂停去工作，转而进行这一系列的send IPI（虽然这是异步的），这过程中的各种执行开销，然后估计还要什么获得锁之类的保证同步，感觉开销很大。</p>
+<blockquote>
+<p>比如说，如果使用ghost，其调用链路只会是：</p>
+<p>创建线程syscall→<code>fork()</code>→<code>wake_up_new_task</code>→<code>sched_class-&gt;task_woken</code>→执行<code>check_preempt_curr</code>→执行<code>__schedule</code>→pick出B，抢占A，over</p>
+<p>变成</p>
+<p>创建线程syscall→<code>fork()</code>→over</p>
+</blockquote>
+<p>故而，直接将这些c位工作集中在某个CPU上体现，相当于从原来的均摊开销变为集中开销，可以使得worker CPU更专注于手头的工作，创建线程只需加入agent调度类的调度队列然后返回即可，无需进行更多操作，也是精简了许多开销。</p>
+<p>也因此，我们可以很清楚了解到per-CPU在data center场景下的劣势。DC的CPU那么多，你每个CPU都需要一点额外开销，虽然也是均摊了，单估计加起来的开销会大于集中调度，因为后者省去了多线程访问调度数据结构（比如CFS红黑树）之类的并发控制开销。故而，在这种data canter的场景下运行ghost的优势，是显而易见的。</p>
+]]></content>
+  </entry>
 </search>
