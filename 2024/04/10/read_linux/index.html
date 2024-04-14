@@ -250,7 +250,7 @@
 </li>
 </ol>
 <p>其中，第二种情况稍显复杂，我们可以详细来说说。【下以deadline为例，因为别的比如说RR是非抢占式调度】</p>
-<p>首先，全局只有一个调度类对象（不考虑什么多个调度策略，或者说一个线程组只有一个调度类对象，差不多这个意思）。</p>
+<p>首先，全局只有一个调度类对象（不考虑什么多个调度策略，或者说一个线程组只有一个调度类对象，差不多这个意思）。也就是说，创建线程会进入该调度类对象中，然后挑选线程也是从该调度类对象中pick。</p>
 <p>当一个CPU上运行的线程A创建了另一个线程B，并且假设目前其他CPU跑满了任务，线程B的优先级很高。创建线程的相关syscall最终会调用<code>activate_task</code>【这点暂时存疑】，然后<code>activate_task</code>会调用调度类中的<code>enqueue_task</code>事件，将线程B压入到deadline调度类的红黑树中。<code>activate_task</code>结束返回之后，紧随其后一般会接一个<code>resched_curr</code>，也即将当前CPU reschedule。</p>
 <p>这里，就需要分情况讨论了。</p>
 <ol>
@@ -288,16 +288,16 @@
 </ol>
 <p>其实这整个过程的链路是很好追踪的，为什么我花了很久呢：</p>
 <p><img src="/2024/04/10/read_linux/ecad9f39d64acccafd9bca9958dfafce.jpg" alt="ecad9f39d64acccafd9bca9958dfafce"></p>
-<p>因为我想找<code>push_dl_task</code>结果一直在看<code>pull_dl_task</code>也即最终push和pull逻辑是反的，故而我匪夷所思想了半天都没懂hhh……</p>
-<p>不过这也让我些许看懂了balance的架构。每个CPU都有一个balance callback的队列，互相之间可以通过这种适时的、异步的调用pull或者push的callback来实现运行队列的负载均衡。我目前水平也不大明白这种架构的好处emmm总之先这么了解一下放在这里吧。</p>
+<p>因为我想找<code>push_dl_task</code>结果一直在看<code>pull_dl_task</code>（如图所示……这位置实在很星际啊hhh）也即最终push和pull逻辑是反的，故而我匪夷所思想了半天都没懂hhh……</p>
+<p>不过这也让我些许看懂了balance的架构。每个CPU都有一个balance callback的队列，互相之间可以通过这种适时的、异步的调用pull或者push的callback来实现任务窃取，从而实现运行队列的负载均衡。</p>
 <h4 id="per-CPU和Centralized思考-1"><a href="#per-CPU和Centralized思考-1" class="headerlink" title="per-CPU和Centralized思考"></a>per-CPU和Centralized思考</h4><ol>
 <li>在单CPU情况下，一开始，CPU位于idle线程，os启动时切换上下文到Bash中。创建线程时，将线程加入该CPU调度队列中。多进程情况下，线程运行时会发生时钟中断，在时钟中断中检测计算时间片，发生上下文切换回idle进程继续reschedule。</li>
-<li>在多处理器情况下也是差不多的，一个CPU上运行的线程A创建了另一个线程B，并且线程B优先级更高，那么此时kernel就会可能综合考虑什么负载均衡之类的算法随机挑选出target CPU，将线程B入其队列，然后通过IPI让target CPU进行重新调度。</li>
+<li>在多处理器情况下也是差不多的，一个CPU上运行的线程A创建了另一个线程B，并且线程B优先级更高，那么此时kernel就会可能综合考虑什么负载均衡之类的算法挑选出target CPU，将线程B入其队列，然后通过IPI让target CPU进行重新调度。</li>
 </ol>
 <p>可以很震惊地发现，其实在Linux原生环境中，对于多处理器情况，单纯的per-CPU model为了做到负载均衡，其实已经逐步向centralized model靠拢了，相当于所有CPU都是一个暂时的c位。只不过，这种情况的劣势也很显然，也即我们不得不让工作线程暂停去工作，转而进行这一系列的send IPI（虽然这是异步的），这过程中的各种执行开销，然后估计还要什么获得锁之类的保证同步，感觉开销很大。</p>
 <blockquote>
-<p>比如说，如果使用ghost，其调用链路只会是：</p>
-<p>创建线程syscall→<code>fork()</code>→<code>wake_up_new_task</code>→<code>sched_class-&gt;task_woken</code>→执行<code>check_preempt_curr</code>→执行<code>__schedule</code>→pick出B，抢占A，over</p>
+<p>比如说，如果使用ghost，其调用链路会从最坏情况：</p>
+<p>创建线程syscall→<code>fork()</code>→<code>wake_up_new_task</code>→<code>sched_class-&gt;task_woken</code>，<code>task_woken</code>无事发生，返回→执行<code>__schedule</code>→无事发生，B依然在原CPU的数据结构中→执行<code>__balance_callbacks</code>→执行<code>push_dl_task</code>，迁移该线程，发送IPI→返回用户态</p>
 <p>变成</p>
 <p>创建线程syscall→<code>fork()</code>→over</p>
 </blockquote>
