@@ -230,8 +230,8 @@
 <p>注意，全都是个人猜想，很多我还自己不大明白，所以都是阶段性结论，也欢迎指正</p>
 </blockquote>
 <h1 id="Scheduling"><a href="#Scheduling" class="headerlink" title="Scheduling"></a>Scheduling</h1><h2 id="ghOSt"><a href="#ghOSt" class="headerlink" title="ghOSt"></a>ghOSt</h2><p>这几天一直在阅读<a target="_blank" rel="noopener" href="https://github.com/google/ghost-kernel">ghOSt</a>的论文及其源码实现，站在目前的知识水平上来看相比于以前有了不少收获，在这里简单记录一下。</p>
-<h3 id="24-4-11"><a href="#24-4-11" class="headerlink" title="24.4.11"></a>24.4.11</h3><h4 id="per-CPU和Centralized思考"><a href="#per-CPU和Centralized思考" class="headerlink" title="per-CPU和Centralized思考"></a>per-CPU和Centralized思考</h4><p>仔细想了一下发现还真是<strong>linux原生就是per-CPU model</strong>……<br>原生就是有一个专门的schedule的idle线程，调度了则执行对应线程，否则执行调度逻辑，以此类推，这不就是典型的per-CPU，当时怎奈没意识到。。。<br><strong>而我们在用户态实际上也是模拟的这个逻辑实现的per-CPU</strong>，感觉这点非常可贵！！</p>
-<p>也因此，linux原生都是per-CPU的，虽然centralized被证明很多时候更高效，但确实是很难实现，估计得修改个大架构，而且改完了说不定就不一定还能支持per-CPU了。好在，有了ghost，我们就把繁琐的逻辑从内核实现移到了用户实现，这就能同时简单地支持per-CPU和centralized了，不得不说确实真的是很伟大的发明</p>
+<h3 id="24-4-11"><a href="#24-4-11" class="headerlink" title="24.4.11"></a>24.4.11</h3><h4 id="per-CPU和Centralized思考"><a href="#per-CPU和Centralized思考" class="headerlink" title="per-CPU和Centralized思考"></a>per-CPU和Centralized思考</h4><p><u>Linux的原生实现逻辑就是典型的per-CPU model：</u><br>    有一个专门的schedule的idle上下文（或者说idle调度类），当有线程时执行调度逻辑pick target thread，然后switch to；当线程被抢占or完成时再次切回idle上下文进行下一轮pick。调度了则执行对应线程，否则执行调度逻辑，以此类推，这就是典型的per-CPU。</p>
+<p>也因此，虽然centralized model被证明很多时候更高效（比如说<a target="_blank" rel="noopener" href="https://www.usenix.org/conference/nsdi19/presentation/kaffes">Shinjuku os</a>），但确实是很难实现，估计得修改个大架构。好在，有了ghOSt，我们就把繁琐的逻辑从内核实现移到了用户实现，这就能同时简单地支持per-CPU和centralized了，不得不说确实真的是很伟大的发明。</p>
 <h3 id="24-4-12"><a href="#24-4-12" class="headerlink" title="24.4.12"></a>24.4.12</h3><h4 id="Linux内核抢占调度机制"><a href="#Linux内核抢占调度机制" class="headerlink" title="Linux内核抢占调度机制"></a>Linux内核抢占调度机制</h4><p>在Linux内核上实现抢占式调度具体是个什么样的运作方法呢？我们可以分情况讨论：</p>
 <ol>
 <li><p>在单CPU情况下</p>
