@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>COS: A User-space Scheduling Framework | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">COS: A User-space Scheduling Framework</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 21, 2024&nbsp;&nbsp;21:09:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
+<p>Reference: </p>
+<p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/tree/main/">项目总仓库</a></p>
+<p><a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/doc/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">项目文档</a></p>
+<p><a target="_blank" rel="noopener" href="https://dl.acm.org/doi/abs/10.1145/3477132.3483542">ghOSt论文</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/shootfirst/cos_kernel">COS-Kernel</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/shootfirst/cos_userspace">COS-Userspace</a></p>
+</blockquote>
+<p>在准备面试的过程中，以目前的水平重新审视半年前的这个项目，温故而知新，感觉又有了许多新的感悟。加之<a href="/2023/08/27/2023-os-comp">以前</a>仅记录了参赛的感受和个人贡献，而没有记录对这整个项目的一个全面介绍，故而，今天我就稍微趁热打铁一下，结合<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/doc/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">项目文档</a>、<a target="_blank" rel="noopener" href="https://dl.acm.org/doi/abs/10.1145/3477132.3483542">ghOSt论文</a>、<a target="_blank" rel="noopener" href="https://github.com/shootfirst/cos_kernel">COS框架代码</a>，来进行一个综合的介绍。</p>
+<p>注：本文章的写作目的主要还是为了我自己整合一下知识，所以可能存在部分词不达意（？）、省略跳过的地方，并且全文组织逻辑也不是一篇完整的文章。如果有人对某部分有疑惑，欢迎联系我进行讨论。</p>
+<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>COS是对<a target="_blank" rel="noopener" href="https://dl.acm.org/doi/abs/10.1145/3477132.3483542">ghOSt</a>的一个从零开始的小型复现，支持了其基本功能，并且可以基于它实现多种多样较为复杂的调度算法。同时针对ghOSt在部分情景下的不足做了一些小优化，使得具有一定抗干扰性，同时能够支持简单的cgroup功能。</p>
+<p>我们修改了Linux内核，增加了大约1500LoC。并且，我们还搭建了COS用户态，提供了比较全面实用的接口，还有许多调度算法实现实例（FIFO（开源）、Shinjuku（开源，一个多级队列时间片抢占的简要实现形式）、SJF、MFQ和DDL等）。</p>
+<h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p>在本部分中，我将结合ghOSt论文中的表述，以及实际开发过程中的感悟，对背景部分进行介绍。下面的内容这页PPT足以概括：</p>
+<p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421212636821.png" alt="image-20240421212636821"></p>
+<p>具体来说:</p>
+<h2 id="业界情况"><a href="#业界情况" class="headerlink" title="业界情况"></a>业界情况</h2><ol>
+<li><p>Linux调度类机制</p>
+<p>面向对象设计：调度类接口+多个具体实现类（CFS，FIFO，RR，DDL……）</p>
+</li>
+<li><p>优化对象：data center</p>
+</li>
+<li><p>面临挑战：</p>
+<ol>
+<li><p>逐渐牛掰的硬件（如CPU增多），还有新特性（如SMT、NUMA）；</p>
+</li>
+<li><p>安全性要求（需要隔离部分线程到部分CPU运行）；</p>
+</li>
+<li><p>Linux调度类具有通用性不具专用性；</p>
+</li>
+<li><p>Linux原生<strong>per-CPU模型</strong>不足以支持。</p>
+<blockquote>
+<p>注意，此处其实门道还是蛮多，详情可见本人<a href="https://xiunianjun.github.io/2024/04/10/read_linux/#ghOSt:~:text=24.4.11-,per%2DCPU%E5%92%8CCentralized%E6%80%9D%E8%80%83,-%E4%BB%94%E7%BB%86%E6%83%B3%E4%BA%86%E4%B8%80%E4%B8%8B">这边写的</a>和<a href="https://xiunianjun.github.io/2024/04/10/read_linux/#ghOSt:~:text=%E7%9A%84%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E3%80%82-,per%2DCPU%E5%92%8CCentralized%E6%80%9D%E8%80%83,-%E5%9C%A8%E5%8D%95CPU">这边写的</a>。</p>
+</blockquote>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="传统方法"><a href="#传统方法" class="headerlink" title="传统方法"></a>传统方法</h2><ol>
+<li><p>新增Linux调度类，从而新增新的调度算法</p>
+<p>编码困难，部署开销大，而且很难随着linux内核维护</p>
+</li>
+<li><p>研发针对特定场景优化的专用OS（Shinjuku、Shenango）</p>
+<p>很难随着linux内核维护，需要对内核和应用程序都做修改</p>
+</li>
+<li><p>仅适用用户态线程是不够的</p>
+<p>用户级线程的基本思路是，将M个用户级线程多路复用到N个内核线程上。</p>
+<p>缺点：<strong>不可预测</strong></p>
+<p>​    首先你不知道它会被调度到哪个CPU上，也不知道它会什么时候停止，万一停的时候拿着锁就g了……</p>
+</li>
+</ol>
+<h2 id="用户态调度框架"><a href="#用户态调度框架" class="headerlink" title="用户态调度框架"></a>用户态调度框架</h2><p>用户态编写自定义调度策略，调度Linux线程</p>
+<ol>
+<li><strong>Decouple</strong>：解耦了 内核调度类机制 (<u>不变</u>) 和 用户态调度策略 (<u>变</u>)（这点说得很本质）</li>
+<li><strong>Convenient</strong>：无需改变现有应用程序；提供很多供开发使用的接口；支持热更新</li>
+<li><strong>Flexible</strong>：可自定义实现多种调度策略 (如SJF、MFQ……)；支持快速调度；可以与别的调度策略共存</li>
+</ol>
+<p>用户态调度框架分为内核实现和用户实现：内核通过为用户态提供接口（系统调用，eBPF钩子），将策略决策委托给用户空间；用户则通过内核提供的接口在用户态搭建部署自己的调度策略。</p>
+<h1 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h1><h2 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h2><ol>
+<li><p>线程本质上是一种状态机</p>
+<p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421215521267.png" alt="image-20240421215521267"></p>
+</li>
+<li><p>所以线程调度算法最关键需要做到这两点：</p>
+<p>①当线程状态发生变化，do something；（e.g. FIFO入队当线程变为runnable）</p>
+<p>②通过某些规则从runqueue挑选线程调度。（e.g. FIFO pick next依据FCFS rule）</p>
+</li>
+<li><p>故而实现用户态调度框架最本质的两个关键（<strong>下以序号来指代</strong>）：</p>
+<p>①感知线程状态变化；（信息流向：Kernel→Userspace）</p>
+<p>②告知调度决策；（信息流向：Userspace→Kernel）</p>
+</li>
+</ol>
+<h2 id="Linux调度类机制"><a href="#Linux调度类机制" class="headerlink" title="Linux调度类机制"></a>Linux调度类机制</h2><ol>
+<li><p>面向对象设计：调度类接口+多个具体实现类（CFS，FIFO，RR，DDL……）。</p>
+</li>
+<li><p>每次调度（<code>__schedule</code>）时，依照调度类优先级从高到低，一次调用对应调度类的钩子函数<code>pick_next_task</code>。</p>
+</li>
+<li><p>每个CPU对应一个rq结构体，代表其任务队列。</p>
+</li>
+<li><p>线程调度分为两种：</p>
+<ol>
+<li><p>本地调度（Per-CPU Model）</p>
+<p>target线程的target CPU和发出调度指令的线程所在CPU是同一个，此时，会暂时让出自己的CPU给此target线程运行；</p>
+</li>
+<li><p>远程调度（Centrallized Model）</p>
+<p>target线程的target CPU和发出调度指令的线程所在CPU不是同一个，此时则需要硬件的支持，通过IPI（Inter-Processor Interrupt）来发送中断给对应的CPU，让其进行reschedule。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="现有方法"><a href="#现有方法" class="headerlink" title="现有方法"></a>现有方法</h2><ol>
+<li><p>eBPF效率不高（<a target="_blank" rel="noopener" href="https://github.com/sched-ext/sched_ext">EXT</a>）</p>
+<p>①②两点通过eBPF实现</p>
+<ol>
+<li><p>编码不便捷，受可表达性限制</p>
+</li>
+<li><p>bpf程序一般都是<strong>同步</strong>的</p>
+<p>也即，当线程状态发生变化，cpu必须block，直到bpf那边把事件处理完了（比如进行调度决策等），cpu才能继续润。</p>
+<blockquote>
+<p>不像ghOSt是异步，cpu只需要发个消息，然后继续润，等待ghost打断就行。不得不说，这也是一个非常完美的<strong>中断思想</strong>的体现！！！</p>
+</blockquote>
+</li>
+<li><p>被动调度</p>
+<p>bpf的用户态调度框架思路是无任务可跑了才触发，并且受CFS线程优先级限制，不像ghost和cos一样主动打上去就行</p>
+</li>
+</ol>
+<blockquote>
+<p>EXT的整体实现也是很有意思的，内核中许多地方的修改处理都很牛逼，我也是跟着它学习了不少eBPF的写法。EXT的内核实现不是这里的重点，具体可以看项目文档中关于EXT内核介绍的部分。</p>
+</blockquote>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/google/ghost-kernel">ghOSt</a></p>
+<p>①共享内存；②系统调用。复现目标。</p>
+<ol>
+<li>不抗干扰</li>
+<li>不支持CGroup</li>
+</ol>
+</li>
+</ol>
+<p>故而，基于上述全部，我们决定开发COS：对ghOSt的简化复现，并给出了对它现存问题的解决思路。</p>
+<h1 id="Design"><a href="#Design" class="headerlink" title="Design"></a>Design</h1><h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><h3 id="总体框架"><a href="#总体框架" class="headerlink" title="总体框架"></a>总体框架</h3><p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421220237028.png" alt="image-20240421220237028"></p>
+<ol>
+<li><p>内核态：COS调度类</p>
+</li>
+<li><p>用户态：Lord线程</p>
+</li>
+<li><p>用户态至内核态通信：系统调用</p>
+</li>
+<li><p>内核态至用户态通信：消息队列</p>
+</li>
+<li><p>Cgroup简单支持</p>
+<p>为了契合题意（赛题要求支持cgroup），COS支持cgroup对CPU使用率的限制。COS额外提供了四个系统调用。</p>
+<p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421220908827.png" alt="image-20240421220908827"></p>
+<p>COS负载线程可以随意将自己添加入一个cgroup，或者删除。同时也可以调整cgroup的CPU使用率，如80%，意味着当前cgroup中的所有线程对CPU的使用率最大值为80%，例如在1ms内最多只能获取0.8ms的运行时间。这意味着COS能够支持云原生场景中的容器。</p>
+</li>
+</ol>
+<h3 id="用户态示范"><a href="#用户态示范" class="headerlink" title="用户态示范"></a>用户态示范</h3><h2 id="Kernel-COS调度类"><a href="#Kernel-COS调度类" class="headerlink" title="Kernel: COS调度类"></a>Kernel: COS调度类</h2><p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421220446311.png" alt="image-20240421220446311"></p>
+<p>COS在内核中新增一个调度类，类似常用的CFS调度类。这个调度类向用户态提供一组系统调用来供用户态定义任意调度策略，同时负责执行用户态传入的调度策略。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">DEFINE_SCHED_CLASS(<span class="built_in">cos</span>) = &#123;</span><br><span class="line">	.enqueue_task		= enqueue_task_cos,</span><br><span class="line">	.dequeue_task		= dequeue_task_cos,</span><br><span class="line">	.check_preempt_curr	= check_preempt_curr_cos,</span><br><span class="line">	.pick_next_task		= pick_next_task_cos,</span><br><span class="line">	.task_dead = task_dead_cos,</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_SMP</span></span><br><span class="line">	.select_task_rq		= select_task_rq_cos,</span><br><span class="line">	.task_woken     = task_woken_cos,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_UCLAMP_TASK</span></span><br><span class="line">	.uclamp_enabled		= <span class="number">0</span>,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>COS调度类优先级位于CFS之下，目的是不影响CFS的稳定运行，若在CFS之上，可能会造成CFS线程饿死，值得注意的是负责维持着内核的稳定性内核线程都是CFS调度类，如果这些线程得不到及时运行，会导致内核崩溃。</p>
+<p>Lord线程调度类优先级则高于CFS等调度类，仅次于STOP调度类，这确保它能够一直运行在它绑定的CPU上，实时做出调度决策，避免因为被其他线程抢占而导致暂时得不到运行而导致调度时延。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DEFINE_SCHED_CLASS(cos_lord) = &#123;</span><br><span class="line">	.pick_next_task		= pick_next_task_cos_lord,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="User-Lord线程"><a href="#User-Lord线程" class="headerlink" title="User: Lord线程"></a>User: Lord线程</h2><h3 id="基本实现"><a href="#基本实现" class="headerlink" title="基本实现"></a>基本实现</h3><p>Lord线程位于用户态，负责部署调度算法传入内核。用户程序可以通过set_lord()系统调用将自己绑定在指定CPU上，开启内核COS调度，成为Lord线程。只有Lord线程才有调度其他COS调度类线程（下称COS线程）的特权。同一个主机上只能有一个Lord线程，若已经有其他线程设置自己为Lord线程，则该系统调用会返回错误。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">cos_do_set_lord</span><span class="params">(<span class="type">int</span> cpu_id)</span> </span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> *<span class="title">p</span> =</span> current;</span><br><span class="line">	<span class="comment">// 1. 设置cpu mask，并且将lord迁移到cpu_id对应CPU上</span></span><br><span class="line">	<span class="comment">// xiunian: 其原理是简单的调用set cpu allow相关内核函数，我猜测里面应该会有一个出队入队的情况</span></span><br><span class="line">	cos_move2target_rq(cpu_id);</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// xiunian: COS作为简化实现，只允许一个主机同时只存在一个lord线程</span></span><br><span class="line">	<span class="keyword">if</span> (cos_on) </span><br><span class="line">		<span class="keyword">return</span> -EINVAL;</span><br><span class="line">	spin_lock_irqsave(&amp;cos_global_lock, flags);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 设置为COS调度类</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sched_param</span> <span class="title">param</span> =</span> &#123;</span><br><span class="line">		.sched_priority = <span class="number">0</span>,</span><br><span class="line">	&#125;;</span><br><span class="line">	sched_setscheduler(p, SCHED_COS, &amp;param);</span><br><span class="line">	<span class="comment">// 3. 修改状态信息</span></span><br><span class="line">	rq = cpu_rq(cpu_id);</span><br><span class="line">	open_cos(rq, p, cpu_id); <span class="comment">// rq-&gt;cos.lord、lord_on_rq、lord_cpu、cos_on、lord、cg_init</span></span><br><span class="line"></span><br><span class="line">	spin_unlock_irqrestore(&amp;cos_global_lock, flags);</span><br><span class="line">	<span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而为了保证用户态调度算法调度决策的及时进行，我们需要将Lord线程绑定在它运行核上，并且设置它的优先级为最高，使得它无法被其他CFS线程抢占。</p>
+<p>这个<strong>优先级最高</strong>以及<strong>绑核</strong>是怎么实现的呢？具体来说，我们在内核中增设了一个COS Lord调度类，其优先级差不多处于所有调度类的巅峰：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DEFINE_SCHED_CLASS(cos_lord) = &#123;</span><br><span class="line">	.pick_next_task		= pick_next_task_cos_lord,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>我们在其pnt钩子函数中，如果它是lord所在CPU，则不断返回lord：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> task_struct *<span class="title function_">pick_next_task_cos_lord</span><span class="params">(<span class="keyword">struct</span> rq *rq)</span> &#123;</span><br><span class="line">    <span class="comment">// 仅有lord所在CPU设置了rq-&gt;cos.lord（在open_cos中），其余CPU皆为NULL</span></span><br><span class="line">	<span class="keyword">if</span> (rq-&gt;<span class="built_in">cos</span>.lord != <span class="literal">NULL</span> &amp;&amp; task_is_running(rq-&gt;<span class="built_in">cos</span>.lord) &amp;&amp; lord_on_rq) &#123;</span><br><span class="line">		<span class="keyword">return</span> rq-&gt;<span class="built_in">cos</span>.lord;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，就做到了Lord线程的<strong>高优先级</strong>以及<strong>绑核</strong>效果。</p>
+<h3 id="Discussion"><a href="#Discussion" class="headerlink" title="Discussion"></a>Discussion</h3><p>ghOSt为了保证系统的稳定性，实现了Agent（类似于COS的Lord） thread的Migration，也即当有重要的内核CFS线程要运行在Agent所在CPU时，Agent会默默退让当前CPU，迁移到其他CPU上。为了简单起见，COS没有实现该功能，并且设定将Lord thread绑定在CPU id较大的CPU上（因为重要的内核线程一般都运行在0-2号CPU），从而缓解该矛盾。而后续的Evaluation部分也暂未因该问题产生较大影响，故而暂且不作考虑。</p>
+<h2 id="感知线程状态变化"><a href="#感知线程状态变化" class="headerlink" title="感知线程状态变化"></a>感知线程状态变化</h2><h3 id="消息队列的结构"><a href="#消息队列的结构" class="headerlink" title="消息队列的结构"></a>消息队列的结构</h3><p>内核会将线程状态的变化信息通过共享内存实现的消息队列传递到Lord线程。</p>
+<p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421222621082.png" alt="image-20240421222621082"></p>
+<p>由于COS实现假定全局只有一个Lord，故而仅需设置一个global的消息队列即可：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cos_message_queue</span> *<span class="title">global_mq</span>;</span></span><br></pre></td></tr></table></figure>
+
+<p>Lord线程在调用<code>set_lord</code>后，会紧接着调用<code>create_msg_queue</code>来创建消息队列：（此处共享内存的<code>queue_fops</code>未做了解（其实是了解过然后忘了hhh），写法感觉还是比较套路，不做赘述）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">cos_create_queue</span><span class="params">(<span class="type">void</span>)</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 1. 申请共享内存</span></span><br><span class="line">	global_mq = vmalloc_user(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> cos_message_queue));</span><br><span class="line">	<span class="comment">// 2. 以fd形式（匿名inode）使用</span></span><br><span class="line">	<span class="type">int</span> fd = anon_inode_getfd(<span class="string">&quot;[cos_queue]&quot;</span>, &amp;queue_fops, global_mq,</span><br><span class="line">			      O_RDWR | O_CLOEXEC);</span><br><span class="line">	<span class="keyword">return</span> fd;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该段内存以环形队列形式组织。然后，内核这端就会在不同事件发生的时候，向共享内存写入消息，等待User的Lord线程从共享内存中取出消息，做出对应的调度决策，即可。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">produce_task_runnable_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_RUNNABLE, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_blocked_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_BLOCKED, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_new_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_NEW, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_dead_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_DEAD, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_preempt_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_PREEMPT, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_new_blocked_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_NEW_BLOCKED, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_cos_preempt_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_COS_PREEMPT, p);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="消息发送的时机"><a href="#消息发送的时机" class="headerlink" title="消息发送的时机"></a>消息发送的时机</h3><p>这里其实还是稍显复杂的，建议去看看<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/doc/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">文档</a>（3.2.3部分）吧，欣赏一下我这部分完美的图。印象中是task preempt卡了我们不久，我研究了很久才发现了它是需要一个排除法机制，还挺有意思的。</p>
+<p>看完了文档之后，这里对具体涉及到的代码进行一个小注释。</p>
+<p>首先是这里的<code>cos_prepare_task_switch</code>了。它负责发送task new、task preempt消息，可谓是重点之一了。顾名思义，它会在调度上下文切换之前被调用。</p>
+<p>其中有一点需要注意，对于task new的情况，COS调度类不支持调度类遗传，即一个线程新建时候它的调度类不可能是COS。线程只能调用<code>sched_setscheduler</code>系统调用将自己调度类设置为COS，在这个过程中，线程需要先下CPU。而之所以在这里才发送task new消息，不是在<code>sched_setscheduler</code>时就发送消息，是为了防止这样一种竞态情况：<code>sched_setscheduler</code>发送消息→用户态接收消息并马上调度到某个CPU，但此时该线程还没有从原来的CPU上下来，这时就会导致一个线程同时在两个CPU上运行，从而g。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">cos_prepare_task_switch</span><span class="params">(<span class="keyword">struct</span> rq *rq, <span class="keyword">struct</span> task_struct *prev, <span class="keyword">struct</span> task_struct *next)</span> </span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (cos_policy(prev-&gt;policy) &amp;&amp; prev-&gt;<span class="built_in">cos</span>.is_new) &#123;</span><br><span class="line">		<span class="keyword">if</span> (task_on_rq_queued(prev)) &#123;</span><br><span class="line">			produce_task_new_msg(prev);	<span class="comment">// 此时新任务可运行</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			produce_task_new_blocked_msg(prev);	<span class="comment">// 此时新任务不可运行</span></span><br><span class="line">		&#125;</span><br><span class="line">		prev-&gt;<span class="built_in">cos</span>.is_new = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">return</span>;	<span class="comment">// 排除法1：不是task new</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (prev-&gt;<span class="built_in">cos</span>.is_blocked) <span class="comment">// 排除法2：不是task block</span></span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 排除结束，那就是task preempt了</span></span><br><span class="line">	<span class="keyword">if</span> (cos_policy(next-&gt;policy)) </span><br><span class="line">		produce_task_cos_preempt_msg(prev);</span><br><span class="line">	<span class="keyword">else</span> </span><br><span class="line">		produce_task_preempt_msg(prev);</span><br><span class="line">		</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，其它几个消息的发送时间不甚特殊，在此不做赘述。</p>
+<h3 id="用户与内核同步"><a href="#用户与内核同步" class="headerlink" title="用户与内核同步"></a>用户与内核同步</h3><p>内核必须保证用户态Lord线程消费消息的<strong>实时性</strong>。每条消息都有一个seqnum，来检测Lord每次做出调度策略的时候，是否已经消费完最新的消息。内核通过维护下一个要分配的seq num：a，与Lord每次做出调度决策时传入的已消费消息的最大seq num：b对比，若b不等于a + 1，意味着Lord还有消息没有消费，内核会拒绝本次调度决策。</p>
+<h2 id="告知调度决策"><a href="#告知调度决策" class="headerlink" title="告知调度决策"></a>告知调度决策</h2><h3 id="基本实现-1"><a href="#基本实现-1" class="headerlink" title="基本实现"></a>基本实现</h3><p>shoot系统负责将用户态的调度策略传递到内核态。在COS的实现中，我们也是实现了<strong>组提交</strong>以增加效率。</p>
+<p>我们使用共享内存shoot area负责存储一次部署中用户态调度策略传入内核的参数，例如target TID、target CPU、seq num等，并且可以反馈本次调度是否成功；我们使用shoot_task()系统调用将一组调度策略传入内核。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">cos_do_shoot_task</span><span class="params">(<span class="type">cpumask_var_t</span> shoot_mask)</span> </span><br><span class="line">&#123;</span><br><span class="line">	preempt_disable();</span><br><span class="line">	for_each_cpu(cpu_id, shoot_mask) &#123;	<span class="comment">// 进行一个global的check</span></span><br><span class="line">        <span class="comment">// 获取对应shoot area上本次要调度的线程</span></span><br><span class="line">		pid = task_shoot_area-&gt;area[cpu_id].pid;</span><br><span class="line">		p = find_process_by_pid(pid);</span><br><span class="line">		<span class="keyword">if</span> (!p) <span class="keyword">continue</span>;</span><br><span class="line">		get_task_struct(p);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 几个调度失败场景，出现可能是因为用户态调度策略写错了</span></span><br><span class="line">		<span class="keyword">if</span> (unlikely(p-&gt;<span class="built_in">cos</span>.is_dying)) &#123;	<span class="comment">// target thread已经寄了</span></span><br><span class="line">			task_shoot_area-&gt;area[cpu_id].info = _SA_ERROR;</span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (unlikely(!task_is_running(p))) &#123;	<span class="comment">// target thread已经在跑了</span></span><br><span class="line">			task_shoot_area-&gt;area[cpu_id].info = _SA_ERROR;</span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 准备开始shoot</span></span><br><span class="line">		rq = cpu_rq(cpu_id);</span><br><span class="line">		<span class="comment">// xiunian: 多次对同一CPU的shoot视为抢占，所以只需一个变量记录next schedule即可</span></span><br><span class="line"> 		rq-&gt;<span class="built_in">cos</span>.next_to_sched = p; </span><br><span class="line">		rq-&gt;<span class="built_in">cos</span>.is_shoot_first = <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">		<span class="keyword">if</span> (cpu_id == lord_cpu) &#123;</span><br><span class="line">			need_local_shoot = <span class="literal">true</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			__cpumask_set_cpu(cpu_id, ipimask);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 发送远程IPI</span></span><br><span class="line">	cos_remote_shoot(ipimask);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (need_local_shoot) &#123;	<span class="comment">// 本地调度</span></span><br><span class="line">		lord_on_rq = <span class="number">0</span>;</span><br><span class="line">		cos_local_shoot();</span><br><span class="line">		lord_on_rq = <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	preempt_enable_no_resched();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">cos_remote_shoot</span><span class="params">(<span class="keyword">struct</span> cpumask *ipi_mask)</span> &#123;</span><br><span class="line">	<span class="type">int</span> cpu;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rq_flags</span> <span class="title">rf</span>;</span></span><br><span class="line">    </span><br><span class="line">    rq_lock_irqsave(rq, &amp;rf);</span><br><span class="line">    !test_tsk_need_resched(rq-&gt;curr) &amp;&amp; set_nr_and_not_polling(rq-&gt;curr);</span><br><span class="line">    rq_unlock_irqrestore(rq, &amp;rf);</span><br><span class="line">    </span><br><span class="line">	VM_BUG_ON(this_rq()-&gt;<span class="built_in">cos</span>.lord != current);</span><br><span class="line">	<span class="keyword">if</span> (!cpumask_empty(ipi_mask)) &#123;</span><br><span class="line">		apic-&gt;send_IPI_mask(ipi_mask, RESCHEDULE_VECTOR);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的一点是，COS对于per-CPU model和centrallized model的支持。对于centrallized model的支持还是显而易见的，值得注意的是对per-CPU model的支持。</p>
+<p>当线程需要shoot到lord所在CPU，如果不做任何操作，它是会被优先级更高的Lord class拦截的。故而，引入<code>lord_on_rq</code>这个全局变量。在reschedule之前，将<code>lord_on_rq</code>（全局变量）置为false。这样一来，在<code>pick_next_lord</code>中就会返回NULL，也即跳过Lord class，去Cos class，调度target thread了，然后reschedule完再把<code>lord_on_rq</code>调为true。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (rq-&gt;<span class="built_in">cos</span>.lord != <span class="literal">NULL</span> &amp;&amp; task_is_running(rq-&gt;<span class="built_in">cos</span>.lord) &amp;&amp; lord_on_rq) &#123;</span><br><span class="line">	<span class="keyword">return</span> rq-&gt;<span class="built_in">cos</span>.lord;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">NULL</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，相当于简单屏蔽了一会儿这个Lord class了，从而达到per-CPU的效果。如果要实现严格的per-CPU，我们可以在sendmsg的时候才把这个<code>lord_on_rq</code>置为true，从而有一种唤醒的效果。这样一来就需要对这个<code>lord_on_rq</code>进行并发保护了。</p>
+<h3 id="动态优先级提升"><a href="#动态优先级提升" class="headerlink" title="动态优先级提升"></a>动态优先级提升</h3><p>在一些场景（比如说使用于burst的情况，也即一开始没有很多请求，所以跑了多个负载，然后突然爆发很多请求，这种情况下需要快速抢占CFS线程），需要快速对COS线程进行调度，无视干扰线程。然而，为了确保系统稳定，COS调度类优先级低于CFS调度类。故而，我们采取了一种<strong>动态优先级提升</strong>的方法来解决这个问题。在一个COS线程被调度到目标CPU上时候，此时我们将其优先级短暂地提升到最高，之后当目标CPU调用schedule函数挑选其上CPU执行的时候，在将其优先级下降到CFS之下，这样就兼顾了性能与系统稳定性。</p>
+<p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421230748956.png" alt="image-20240421230748956"></p>
+<p>然而，优先级在Linux初始化时便确定下来，按存储的物理地址从高到低确定，是定死的。故而，我们<strong>借助Lord class的高优先级</strong>，来实现这一动态优先级提升。</p>
+<p>具体来说，我们存储一个per-CPU的变量<code>is_shoot_first</code>。在目标线程刚刚被Lord部署到目标CPU上时，拉高电平<code>is_shoot_first</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">	rq-&gt;<span class="built_in">cos</span>.next_to_sched = p; </span><br><span class="line">rq-&gt;<span class="built_in">cos</span>.is_shoot_first = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>在Lord class之中，当<code>is_shoot_first</code>被拉高，就说明有COS线程刚刚需要被部署，我们返回即可：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> task_struct *<span class="title function_">pick_next_task_cos_lord</span><span class="params">(<span class="keyword">struct</span> rq *rq)</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (rq-&gt;<span class="built_in">cos</span>.next_to_sched != <span class="literal">NULL</span> &amp;&amp; task_is_running(rq-&gt;<span class="built_in">cos</span>.next_to_sched) &amp;&amp; rq-&gt;<span class="built_in">cos</span>.is_shoot_first) &#123;</span><br><span class="line">		rq-&gt;<span class="built_in">cos</span>.is_shoot_first = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">return</span> rq-&gt;<span class="built_in">cos</span>.next_to_sched;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就成功借助了Lord class的高优先级来实现优先调度。</p>
+<h3 id="Discussion-1"><a href="#Discussion-1" class="headerlink" title="Discussion"></a>Discussion</h3><p>值得注意的是，ghOSt这边是将这个shoot采取了一个<strong>事务机制</strong>，感觉这个起名真是说到本质了。二者都同样是对某个执行过程的记录，负责统筹全局，并且也同样具有原子性，感觉真的非常合适。COS为了简单起见，没有实现这个。</p>
+<h2 id="简单的Cgroup实现"><a href="#简单的Cgroup实现" class="headerlink" title="简单的Cgroup实现"></a>简单的Cgroup实现</h2><p>这里可能稍微偷了个懒，没有去兼容Linux原生Cgroup，而是实现了一个限制CPU使用率的小功能（因为时间不够了2333）。</p>
+<p>这部分还是比较简单的，其实可以去看这个<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/record/Dev-Docs/final-stage/develop/cgroup%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%A1%88.md">开发思路文档</a>，思路写得更详细更具体，在此就只说说基本思路了。实现cgroup的基本逻辑：</p>
+<p>多个cgroup通过链表形式链接，都有一个cg id。然后，每个task可以通过cg_ctl来把自己加入某个cgroup或者从某个中删除，每次调用task_tick都会检查一下salary是否耗尽，耗尽则reschedule，并且设置pnt那边salary&lt;=0就不return。同时，在context switch之前也会update on cpu和off cpu，纪录更精确的CPU时。</p>
+<h1 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a>Evaluation</h1><p>这部分确实没什么好说的（虽然也很挣扎……）具体看项目文档吧。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/04/10/unsolved_problems/">尚未解决的问题</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
