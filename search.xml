@@ -16606,12 +16606,12 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
     <content><![CDATA[<blockquote>
 <p>Reference: </p>
 <p><a href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/tree/main/">项目总仓库</a></p>
-<p><a href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/doc/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">项目文档</a></p>
+<p><a href="https://github.com/xiunianjun/xiunianjun.github.io/blob/master/2024/04/21/userspace_scheduling_framework/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">项目文档</a></p>
 <p><a href="https://dl.acm.org/doi/abs/10.1145/3477132.3483542">ghOSt论文</a></p>
 <p><a href="https://github.com/shootfirst/cos_kernel">COS-Kernel</a></p>
 <p><a href="https://github.com/shootfirst/cos_userspace">COS-Userspace</a></p>
 </blockquote>
-<p>在准备面试的过程中，以目前的水平重新审视半年前的这个项目，温故而知新，感觉又有了许多新的感悟。加之<a href="/2023/08/27/2023-os-comp">以前</a>仅记录了参赛的感受和个人贡献，而没有记录对这整个项目的一个全面介绍，故而，今天我就稍微趁热打铁一下，结合<a href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/doc/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">项目文档</a>、<a href="https://dl.acm.org/doi/abs/10.1145/3477132.3483542">ghOSt论文</a>、<a href="https://github.com/shootfirst/cos_kernel">COS框架代码</a>，来进行一个综合的介绍。</p>
+<p>在准备面试的过程中，以目前的水平重新审视半年前的这个项目，温故而知新，感觉又有了许多新的感悟。加之<a href="/2023/08/27/2023-os-comp">以前</a>仅记录了参赛的感受和个人贡献，而没有记录对这整个项目的一个全面介绍，故而，今天我就稍微趁热打铁一下，结合<a href="https://github.com/xiunianjun/xiunianjun.github.io/blob/master/2024/04/21/userspace_scheduling_framework/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">项目文档</a>、<a href="https://dl.acm.org/doi/abs/10.1145/3477132.3483542">ghOSt论文</a>、<a href="https://github.com/shootfirst/cos_kernel">COS框架代码</a>，来进行一个综合的介绍。</p>
 <p>注：本文章的写作目的主要还是为了我自己整合一下知识，所以可能存在部分词不达意（？）、省略跳过的地方，并且全文组织逻辑也不是一篇完整的文章。如果有人对某部分有疑惑，欢迎联系我进行讨论。</p>
 <h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>COS是对<a href="https://dl.acm.org/doi/abs/10.1145/3477132.3483542">ghOSt</a>的一个从零开始的小型复现，支持了其基本功能，并且可以基于它实现多种多样较为复杂的调度算法。同时针对ghOSt在部分情景下的不足做了一些小优化，使得具有一定抗干扰性，同时能够支持简单的cgroup功能。</p>
 <p>我们修改了Linux内核，增加了大约1500LoC。并且，我们还搭建了COS用户态，提供了比较全面实用的接口，还有许多调度算法实现实例（FIFO（开源）、Shinjuku（开源，一个多级队列时间片抢占的简要实现形式）、SJF、MFQ和DDL等）。</p>
@@ -16731,12 +16731,10 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <li><p>内核态至用户态通信：消息队列</p>
 </li>
 <li><p>Cgroup简单支持</p>
-<p>为了契合题意（赛题要求支持cgroup），COS支持cgroup对CPU使用率的限制。COS额外提供了四个系统调用。</p>
-<p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421220908827.png" alt="image-20240421220908827"></p>
-<p>COS负载线程可以随意将自己添加入一个cgroup，或者删除。同时也可以调整cgroup的CPU使用率，如80%，意味着当前cgroup中的所有线程对CPU的使用率最大值为80%，例如在1ms内最多只能获取0.8ms的运行时间。这意味着COS能够支持云原生场景中的容器。</p>
 </li>
 </ol>
-<h3 id="用户态示范"><a href="#用户态示范" class="headerlink" title="用户态示范"></a>用户态示范</h3><h2 id="Kernel-COS调度类"><a href="#Kernel-COS调度类" class="headerlink" title="Kernel: COS调度类"></a>Kernel: COS调度类</h2><p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421220446311.png" alt="image-20240421220446311"></p>
+<h3 id="用户态示范"><a href="#用户态示范" class="headerlink" title="用户态示范"></a>用户态示范</h3><p><a href="https://github.com/shootfirst/cos_userspace/blob/main/scheduler/fifo/fifo_lord.h">FIFO Scheduler</a></p>
+<h2 id="Kernel-COS调度类"><a href="#Kernel-COS调度类" class="headerlink" title="Kernel: COS调度类"></a>Kernel: COS调度类</h2><p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421220446311.png" alt="image-20240421220446311"></p>
 <p>COS在内核中新增一个调度类，类似常用的CFS调度类。这个调度类向用户态提供一组系统调用来供用户态定义任意调度策略，同时负责执行用户态传入的调度策略。</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line">DEFINE_SCHED_CLASS(<span class="built_in">cos</span>) = &#123;</span><br><span class="line">	.enqueue_task		= enqueue_task_cos,</span><br><span class="line">	.dequeue_task		= dequeue_task_cos,</span><br><span class="line">	.check_preempt_curr	= check_preempt_curr_cos,</span><br><span class="line">	.pick_next_task		= pick_next_task_cos,</span><br><span class="line">	.task_dead = task_dead_cos,</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_SMP</span></span><br><span class="line">	.select_task_rq		= select_task_rq_cos,</span><br><span class="line">	.task_woken     = task_woken_cos,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_UCLAMP_TASK</span></span><br><span class="line">	.uclamp_enabled		= <span class="number">0</span>,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
@@ -16767,7 +16765,7 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 <p>该段内存以环形队列形式组织。然后，内核这端就会在不同事件发生的时候，向共享内存写入消息，等待User的Lord线程从共享内存中取出消息，做出对应的调度决策，即可。</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">produce_task_runnable_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_RUNNABLE, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_blocked_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_BLOCKED, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_new_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_NEW, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_dead_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_DEAD, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_preempt_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_PREEMPT, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_new_blocked_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_NEW_BLOCKED, p);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">produce_task_cos_preempt_msg</span><span class="params">(<span class="keyword">struct</span> task_struct *p)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> produce_task_message(MSG_TASK_COS_PREEMPT, p);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="消息发送的时机"><a href="#消息发送的时机" class="headerlink" title="消息发送的时机"></a>消息发送的时机</h3><p>这里其实还是稍显复杂的，建议去看看<a href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/doc/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">文档</a>（3.2.3部分）吧，欣赏一下我这部分完美的图。印象中是task preempt卡了我们不久，我研究了很久才发现了它是需要一个排除法机制，还挺有意思的。</p>
+<h3 id="消息发送的时机"><a href="#消息发送的时机" class="headerlink" title="消息发送的时机"></a>消息发送的时机</h3><p>这里其实还是稍显复杂的，建议去看看<a href="https://github.com/xiunianjun/xiunianjun.github.io/blob/master/2024/04/21/userspace_scheduling_framework/%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf">文档</a>（3.2.3部分）吧，欣赏一下我这部分完美的图。印象中是task preempt卡了我们不久，我研究了很久才发现了它是需要一个排除法机制，还挺有意思的。</p>
 <p>看完了文档之后，这里对具体涉及到的代码进行一个小注释。</p>
 <p>首先是这里的<code>cos_prepare_task_switch</code>了。它负责发送task new、task preempt消息，可谓是重点之一了。顾名思义，它会在调度上下文切换之前被调用。</p>
 <p>其中有一点需要注意，对于task new的情况，COS调度类不支持调度类遗传，即一个线程新建时候它的调度类不可能是COS。线程只能调用<code>sched_setscheduler</code>系统调用将自己调度类设置为COS，在这个过程中，线程需要先下CPU。而之所以在这里才发送task new消息，不是在<code>sched_setscheduler</code>时就发送消息，是为了防止这样一种竞态情况：<code>sched_setscheduler</code>发送消息→用户态接收消息并马上调度到某个CPU，但此时该线程还没有从原来的CPU上下来，这时就会导致一个线程同时在两个CPU上运行，从而g。</p>
@@ -16795,7 +16793,12 @@ url访问填写<code>http://localhost/webdemo4_war/*.do</code>。</li>
 
 <p>这样就成功借助了Lord class的高优先级来实现优先调度。</p>
 <h3 id="Discussion-1"><a href="#Discussion-1" class="headerlink" title="Discussion"></a>Discussion</h3><p>值得注意的是，ghOSt这边是将这个shoot采取了一个<strong>事务机制</strong>，感觉这个起名真是说到本质了。二者都同样是对某个执行过程的记录，负责统筹全局，并且也同样具有原子性，感觉真的非常合适。COS为了简单起见，没有实现这个。</p>
-<h2 id="简单的Cgroup实现"><a href="#简单的Cgroup实现" class="headerlink" title="简单的Cgroup实现"></a>简单的Cgroup实现</h2><p>这里可能稍微偷了个懒，没有去兼容Linux原生Cgroup，而是实现了一个限制CPU使用率的小功能（因为时间不够了2333）。</p>
+<h2 id="简单的Cgroup实现"><a href="#简单的Cgroup实现" class="headerlink" title="简单的Cgroup实现"></a>简单的Cgroup实现</h2><blockquote>
+<p>为了契合题意（赛题要求支持cgroup），COS支持cgroup对CPU使用率的限制。COS额外提供了四个系统调用。</p>
+<p><img src="/2024/04/21/userspace_scheduling_framework/image-20240421220908827.png" alt="image-20240421220908827"></p>
+<p>COS负载线程可以随意将自己添加入一个cgroup，或者删除。同时也可以调整cgroup的CPU使用率，如80%，意味着当前cgroup中的所有线程对CPU的使用率最大值为80%，例如在1ms内最多只能获取0.8ms的运行时间。这意味着COS能够支持云原生场景中的容器。</p>
+</blockquote>
+<p>这里可能稍微偷了个懒，没有去兼容Linux原生Cgroup，而是实现了一个限制CPU使用率的小功能（因为时间不够了2333）。</p>
 <p>这部分还是比较简单的，其实可以去看这个<a href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/record/Dev-Docs/final-stage/develop/cgroup%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%A1%88.md">开发思路文档</a>，思路写得更详细更具体，在此就只说说基本思路了。实现cgroup的基本逻辑：</p>
 <p>多个cgroup通过链表形式链接，都有一个cg id。然后，每个task可以通过cg_ctl来把自己加入某个cgroup或者从某个中删除，每次调用task_tick都会检查一下salary是否耗尽，耗尽则reschedule，并且设置pnt那边salary&lt;=0就不return。同时，在context switch之前也会update on cpu和off cpu，纪录更精确的CPU时。</p>
 <h1 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a>Evaluation</h1><p>这部分确实没什么好说的（虽然也很挣扎……）具体看项目文档吧。</p>
