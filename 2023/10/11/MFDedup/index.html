@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>MFDedup | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">MFDedup</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十月 11, 2023&nbsp;&nbsp;20:25:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h1><p>**The Dilemma between Deduplication and Locality: Can Both be Achieved? ** 重复数据删除和数据局部性之间的困境：两者都能实现吗？</p>
+<p><strong>重复数据删除</strong>：deduplication，是一种用于压缩去重的常见方法，经常采用虚拟指针法。</p>
+<p>一个硬盘中的文件往往会随着时间推移拥有多个备份，去重就是针对这些备份之间的概念。我们采用对每个chunk（通过<strong>fingerprint</strong>标识）进行引用的方法进行去重（<strong>虚拟指针法</strong>），但这会导致严重的<strong>碎片化</strong>（也即<strong>丧失数据局部性</strong>）和<strong>GC性能</strong>的问题。</p>
+<p><strong>数据局部性</strong>：</p>
+<ol>
+<li>程序访问数据有局部性，因而备份数据之间也有局部性。</li>
+<li>如果在restore时采用<strong>顺序访问</strong>，那么相邻两个数据块之间就产生了数据局部性。</li>
+</ol>
+<p>本文聚焦于<strong>对硬盘</strong>进行备份过程中的去重压缩（<code> deduplication on hard drive systems</code>），提出了基于<code>Neighbor-Duplicate-Focus indexing(NDF) and Across-Version-Aware Reorganization scheme(AVAR)</code>两项技术、兼得数据去重和保持数据局部性两个优点的去重压缩框架<code>MFDedup</code>。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><h2 id="background"><a href="#background" class="headerlink" title="background"></a>background</h2><ol>
+<li><p>container</p>
+<p>在存储领域中，针对磁盘备份的压缩去重，传统是使用基于容器的数据布局。</p>
+<p>许多基于重复数据删除的存储系统通常与压缩技术相结合，<strong>所有的块都作为压缩的基本单元存储在容器中</strong>。【也即，一个“容器”事实上是一个压缩的基本单元，这个划分是为压缩服务的。】因此，存储I/O<u>通常是以<strong>顺序存储</strong>的容器为粒度的</u>。容器通常具有固定大小。</p>
+<p><u>一个备份相当于由多个指针构成，每个指针都指向某个container的某个chunk。</u></p>
+</li>
+<li><p>碎片化</p>
+<p><strong>碎片化与基于容器的I/O和hdd的查找延迟有关</strong>。随着备份层数增多，相邻数据所指向的version就很有可能会不一样，chunk粒度减小，碎片化问题严重程度会增大，从而导致相邻的数据存储的磁盘位置相差甚远，不利于应用程序的性能。</p>
+</li>
+<li><p>deduplication技术</p>
+<ol>
+<li><p> Content-Defined Chunking  基于内容分块</p>
+</li>
+<li><p>Fingerprint Index</p>
+</li>
+<li><p>Restore Optimization</p>
+<p>‘<em>rewriting</em>’ and ‘<em>cache</em>’.</p>
+</li>
+</ol>
+</li>
+<li><p>GC</p>
+<ol>
+<li><p>传统的Mark Sweep</p>
+<p>遍历需要释放的备份，解引用备份中用到的chunks。当chunks引用计数为0释放。并且还要做container合并工作。</p>
+</li>
+<li><p>Container-Marker Algorithm</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="problems"><a href="#problems" class="headerlink" title="problems"></a>problems</h2><p><strong>数据局部性</strong>：</p>
+<ol>
+<li><p>程序对磁盘的修改往往具有局部性特点。因而，相邻两个备份之间的被修改的差异可能遵循数据局部性特点，集中在某块区域。这就会导致<strong>碎片化问题</strong>，也即最经常被访问的那块磁盘区域会在备份间被划分为多个小块，并且指针情况错综复杂。</p>
+</li>
+<li><p>从而，对于局部访问频繁的那部分数据，同一个备份中的相邻两个chunks的局部性也会被破坏，因为它们<u>虽然逻辑连续，但是物理存储却不一定连续</u>。</p>
+</li>
+<li><p>restore和gc性能垃圾</p>
+<p><strong>对于restore</strong>，过多的deduplication就会导致一个备份中相邻数据块实际存储的容器不同，导致：</p>
+<ol>
+<li><u>读放大问题</u>：每次读取一个数据块就得读取其所在的整个容器（因为是IO粒度），导致<em>read amplification</em>很垃圾。</li>
+<li><u>查找问题</u>：需要多次读取不同容器，因而需要多次随机IO到不同容器位置，这与hdd（Hard Disk Drive）的设计相违背（HDD连续读取快，随机寻址慢），从而导致性能垃圾。</li>
+</ol>
+<p><strong>对于GC</strong>，需要unreference的chunks会分布在各个不同容器中，影响GC性能。</p>
+</li>
+</ol>
+<h2 id="solutions"><a href="#solutions" class="headerlink" title="solutions"></a>solutions</h2><p>在container和backup中新加一层category分类，分类方式：</p>
+<ol>
+<li>根据reference relationship对chunks进行分类</li>
+<li>类别只考虑那些版本号连续 or 独立版本号的类别，如B1B2B3，B3B4，B1这种（也很容易知道，这样分类比较有意义），这样一来类别数目就可以从2^n降到<em>n</em>(<em>n</em> + 1)*/*2 for <em>n</em> backup versions。</li>
+</ol>
+<p><strong>这样一来，我们可以显著提高restore和gc：</strong></p>
+<ol>
+<li><p>restore</p>
+<p>比如说要restore版本Bj，我们就需要恢复所有包含Bj这个版本指针的category，并且每个category中的多个chunks做的IO操作都是一样的（比如一个category的指针序列为B2B3B4，那么IO操作的回溯次序是一模一样的），这样就能极大减少随机IO。</p>
+</li>
+<li><p>gc</p>
+<p>gc时，比如说要删除版本Bi，我们只需要删除所有category中的这个版本指针，并且在一个category没有版本指针后释放category及其对应chunk就行。</p>
+</li>
+</ol>
+<p>传统的方法将数据块保存在固定大小的容器中，也即相当于通过顺序划分数据块，随着备份层级增大，chunks碎片化问题严重，相邻的数据块可能存储在不同磁盘位置，导致局部性垃圾，读放大高，restore和gc开销大。于是MFDedup通过修改数据布局，通过备份版本号来对数据块进行分类。类似九九乘法表的volume布局。</p>
+<ol>
+<li><p>备份</p>
+<p>inline：fingerprint（NDF）   offline：arrange（AVAR）</p>
+<p>arrange：通过NDF。如果上一个版本的数据块没出现在新版本，就归档；否则就迁移到新版本备份对应卷组上。</p>
+</li>
+<li><p>restore</p>
+<p>恢复所有包含了备份版本号的category。</p>
+</li>
+<li><p>gc</p>
+<p>只需删除其unique 块。</p>
+</li>
+</ol>
+<h1 id="abstract-introduction"><a href="#abstract-introduction" class="headerlink" title="abstract/introduction"></a>abstract/introduction</h1><ol>
+<li><p>deduplication被广泛用于减小backup，但会带来碎片化问题（影响restore和gc）和poor locality。</p>
+<p>一个硬盘中的文件往往会随着时间推移拥有多个备份，去重就是针对这些备份之间的概念。我们采用对每个chunk（通过fingerprint标识）进行引用的方法进行去重，但这会导致严重的<strong>碎片化</strong>（也即<strong>丧失数据局部性</strong>）和<strong>GC性能</strong>的问题。</p>
+<blockquote>
+<p><strong>碎片化</strong>：</p>
+<p>随着备份层数增多，相邻数据所指向的version就很有可能会不一样，chunk粒度减小，碎片化问题严重程度会增大，从而导致相邻的数据存储的磁盘位置相差甚远，不利于应用程序的性能。详情见下例子：</p>
+<blockquote>
+<p>As an example, consider backup <em>version</em> 1 that has few or no duplicates, so its chunks are stored sequentially in containers. </p>
+<p>Then,  <em>version</em> 2 may be highly re dundant with the first with small modifications throughout the backup, so its recipe has references to many chunks of the first version intermixed with references to newly written chunks. </p>
+<p>Later, <em>version N</em> tends to have even worse locality as it refers to chunks written by many previous backup versions, so <u>restoring a backup version involves <strong>random seeks back and forth</strong> across the disks, and <strong>read amplification is high</strong> since an accessed container may have needed and unneeded chunks</u>.</p>
+</blockquote>
+<p>为了解决这个问题，以往的策略是针对那些被频繁访问的数据或者碎片化程度（<code>fragmentation degree</code>）到达一定的阈值之后就进行<code>rewrite</code>，或者使用SSD来cache那些被频繁reference的chunk。但这依然无法根治碎片化问题。</p>
+</blockquote>
+</li>
+<li><p>我们提出了 MFDedup ，保持了备份的数据局部性，通过 data classification 生成了优化的 data layout。关键技术为Neighbor-Duplicate-Focus indexing(NDF) and Across-Version-Aware Reorganization scheme(AVAR)。</p>
+</li>
+<li><p>基于容器的数据布局</p>
+<p>在存储领域中，针对磁盘备份的压缩去重，传统是使用基于容器的数据布局。</p>
+<p>基于容器的数据布局相当于是对数据块进行分类，有几类就有几个容器。分类的依据可以是简单的顺序分类，也可以是哈希值分类等。</p>
+</li>
+<li><p>在我们对重复数据删除备份的观察中，我们发现备份版本Bi+1中几乎所有的重复块都来自于它之前的版本Bi</p>
+</li>
+</ol>
+<h2 id="MFDedup基本思路"><a href="#MFDedup基本思路" class="headerlink" title="MFDedup基本思路"></a>MFDedup基本思路</h2><p>传统方法的容器按顺序分类，重点在于简化新建备份时的<strong>写路径</strong>，但碎片化问题严重；我们提出的数据布局方法按照reference relationship分类，重点在于简化<strong>restore</strong>备份，写入可能复杂点，但是恢复和gc很快。</p>
+<ol>
+<li><p>根据reference relationship对chunks进行分类</p>
+</li>
+<li><p>类别只考虑那些版本号连续 or 独立版本号的类别，如B1B2B3，B3B4，B1这种（也很容易知道，这样分类比较有意义），这样一来类别数目就可以从2^n降到<em>n</em>(<em>n</em> + 1)*/*2 for <em>n</em> backup versions。</p>
+<p>这样的话，就只会重复删除internal、adjust块，而不会删除skip块，也即如下图右所示：</p>
+<p><img src="/2023/10/11/MFDedup/image-20231010095534708.png" alt="image-20231010095534708"></p>
+</li>
+</ol>
+<p><strong>这样一来，我们可以显著提高restore和gc：</strong></p>
+<ol>
+<li><p>restore</p>
+<p>比如说要restore版本Bj，我们就需要恢复所有包含Bj这个版本指针的category，并且每个category中的多个chunks做的IO操作都是一样的（比如一个category的指针序列为B2B3B4，那么IO操作的回溯次序是一模一样的），这样就能极大减少随机IO。</p>
+</li>
+<li><p>gc</p>
+<p>gc时，比如说要删除版本Bi，我们只需要删除所有category中的这个版本指针，并且在一个category没有版本指针后释放category及其对应chunk就行。</p>
+</li>
+</ol>
+<p>不得不说，真是很巧妙。</p>
+<h1 id="background-1"><a href="#background-1" class="headerlink" title="background"></a>background</h1><ol>
+<li><p>containers</p>
+<p>解释了一下为什么会有containers，以及其作用。</p>
+<p>许多基于重复数据删除的存储系统通常与压缩技术相结合，<strong>所有的块都作为压缩的基本单元存储在容器中</strong>。【也即，一个“容器”事实上是一个压缩的基本单元，这个划分是为压缩服务的。】因此，存储I/O<u>通常是以<strong>顺序存储</strong>的容器为粒度的</u>。</p>
+<p>容器通常具有固定大小。</p>
+</li>
+<li><p>碎片化</p>
+<p><strong>碎片化与基于容器的I/O和hdd的查找延迟有关</strong>。</p>
+</li>
+<li><p>inline and offline deduplication</p>
+<blockquote>
+<ol>
+<li><strong>Inline Deduplication（内联去重）：</strong> 在内联去重中，<u>数据去重的过程发生在数据写入备份存储之前</u>，即在备份数据被存储到磁盘或其他媒体之前。</li>
+<li><strong>Offline Deduplication（离线去重）：</strong> 在离线去重中，<u>备份数据首先被写入备份存储，然后在后续的离线过程中进行去重</u>。</li>
+</ol>
+</blockquote>
+<p>deduplication广泛运用于primary storage和secondary storage。其中，Primary storage prioritizes <strong>low latency</strong>, whereas secondary storage works prioritize <strong>high throughput</strong>.</p>
+<blockquote>
+<p>这里还提到了一个很巧妙的RevDedup：</p>
+<p>RevDedup shifts fragmentation to older backups by adjusting their references to newer backups to retain the locality of newer backups that are more likely to be restored. As a result, restoring older backups will be slower with this approach.</p>
+<p>也就是说，原来是新备份指向原来的旧备份，从而导致新备份碎片化；现在是旧备份指向新备份，碎片化的变成了旧备份！同时，它只将创建新备份操作inline，调整旧备份指向新备份的操作offline，也降低了性能损耗。牛的。这个方法的缺点就是恢复旧备份会很慢。</p>
+</blockquote>
+</li>
+</ol>
+<h1 id="Observation-and-Motivation"><a href="#Observation-and-Motivation" class="headerlink" title="Observation and Motivation"></a>Observation and Motivation</h1><p><img src="/2023/10/11/MFDedup/image-20231009115234691.png" alt="image-20231009115234691"></p>
+<h1 id="After"><a href="#After" class="headerlink" title="After"></a>After</h1><p>不过我以前还以为去重就是简单的在不同备份版本中建立二维指针，看来我还是想得太天真了。</p>
+<p>下图是最理想的去重方法，保留了deduplication和locality：</p>
+<p><img src="/2023/10/11/MFDedup/image-20231010090932440.png" alt="image-20231010090932440"></p>
+<p>但意思好像是说这东西不实用，所以我们最终只能退而求其次，用二维指针法组织多个备份，但这就很难兼容locality。</p>
+<p>而且这样就引出了一个很巧妙的角度：<u>数据去重data layout的高维结构&amp;&amp;存储设备顺序存储</u>，这两者之间的矛盾。</p>
+<blockquote>
+<p>Directly considering how to <u>flatten the hyper-structure of deduplicated data</u> is <strong>difficult</strong>, and in this article, we consider how to <u>maintain locality in the flattened structure</u> and discuss that from both the micro and macro perspectives.</p>
+</blockquote>
+<p>还有值得注意的是，这边也提出了好几种去重针对的文件类型：<code>backup files, database snapshots, virtual machine images</code>，并且提到了一点就是去重事实上是根据它们的fingerprint去重的。</p>
+<p>并且它还提出了deduplication中和文件系统中碎片化问题的不同。</p>
+<p>并且值得注意的是，除了我上面说的读取一个类目的容器有助于解决读放大，它这边还说明了另一个很重要的点，也即是如何在restore时保证磁盘顺序读取的。</p>
+<p>当我们restore备份时，每次都是得读取所有包括它这个版本号的category，也即所有Cat( i, n ) ( 1 &lt; i &lt;= k )。所以，我们可以将Cat( i, n ) ( 1 &lt; i &lt;= k )在物理设备上连续存储，从而方便磁盘顺序读取：</p>
+<p><img src="/2023/10/11/MFDedup/image-20231010123108075.png" alt="image-20231010123108075"></p>
+<p>并且，每次产生新的备份版本时也无需更新所有的category，只需更新那些延续到latest的就行，其它的都已经算是archive状态只需备份无需更新。</p>
+<p><strong>所以，看到现在整理一下总体思路：</strong></p>
+<p>将chunk以连续备份版本号分类，总共分成<code>n(n+1)/2</code>个category（这样做无视了对skip data的deduplication。skip data：如一个数据块在版本1和3出现）。一个category中存放的是指针信息，指向了类似页表一样的hash table（recipe）。hash table中真正记录了数据块的物理地址。</p>
+<ol>
+<li><p>对于restore</p>
+<p>当我们restore备份时，每次都是得读取所有包括它这个版本号的category：</p>
+<p><img src="/2023/10/11/MFDedup/image-20231010153418595.png" alt="image-20231010153418595"></p>
+<p>也即比如n=4，我们想恢复version 2，就需要Cat 1,2  2,2  1,3  2,3  1,4  2,4</p>
+<p>所以，我们可以将Cat( i, n ) ( 1 &lt; i &lt;= k )在物理设备上连续存储，从而方便磁盘顺序读取：</p>
+<p>​    <img src="/2023/10/11/MFDedup/image-20231010135001047.png" alt="image-20231010135001047"></p>
+<p><img src="/2023/10/11/MFDedup/image-20231010153717371.png" alt="image-20231010153717371"></p>
+</li>
+<li><p>对于update</p>
+<p>每次产生新的备份版本时也无需更新所有的category，只需更新那些延续到latest的就行，其它的都已经算是archive状态只需备份无需更新。</p>
+<p><img src="/2023/10/11/MFDedup/image-20231010135124053.png" alt="image-20231010135124053"></p>
+</li>
+<li><p>对于gc</p>
+<p>删除某个版本时，只删除那个版本特有块，也即Cat n,n ，也就是说比如备份2被删了，那么Cat 1,3 依然整体存在而不会被拆分为Cat 1,1 + Cat 3,3。然后好像同时也会维护，如果一个数据块最后一个引用也没了，就直接踢了。</p>
+</li>
+<li><p>空间管理</p>
+<ol>
+<li><p>通过卷的大小预估下次备份所占用的空间</p>
+<p>因为<strong>卷相当于当前版本与上一个版本之间的差异</strong>，所以可以用来预估</p>
+</li>
+<li><p>通过在volum和category开头统计信息来获取剩余空间</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>可以看到，大大减少了GC和restore的开销，update开销也可以近似没有。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2023/10/12/%E5%90%84%E7%A7%8D%E9%85%8D%E7%8E%AF%E5%A2%83%E4%B8%AD%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/">各种配环境中遇到的问题</a>
+            
+            
+            <a class="next" rel="next" href="/2023/10/07/git/">git使用记录</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

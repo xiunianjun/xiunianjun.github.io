@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title"></h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 22, 2024&nbsp;&nbsp;14:01:48</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Data-Reduction"><a href="#Data-Reduction" class="headerlink" title="Data Reduction"></a>Data Reduction</h1><p>一开始主要是一步步讲述了Data Deduplication这个概念提出的历程。</p>
+<h2 id="Compression"><a href="#Compression" class="headerlink" title="Compression"></a>Compression</h2><p>最一开始，都是用的压缩<strong>Compression</strong>。compression分为lossy和lossless（有损压缩和无损压缩），前者是通过去除一些不必要的信息来不可逆地减少数据大小（如JPEG图片压缩），后者是通过编码或者算术等方法可逆地减少数据大小（如GZIP、LZW等）。由于大规模存储系统（large-scale storage system）主要聚焦于无损压缩，因而下文也主要介绍这个。（<u>deduplication也可以视为无损压缩的一种方法</u>）</p>
+<h3 id="entropy-encoding"><a href="#entropy-encoding" class="headerlink" title="entropy encoding"></a>entropy encoding</h3><h4 id="信息熵"><a href="#信息熵" class="headerlink" title="信息熵"></a>信息熵</h4><p>提到压缩，就不得不提到信息熵。一个变量X的信息熵可以如下计算：</p>
+<p><img src="/2024/04/22/articles/%E7%BB%BC%E8%BF%B0/read/image-20231210221755122.png" alt="image-20231210221755122"></p>
+<p>比如说通过字符串abaaacabba，我们可以计算其所构成字母的信息熵：</p>
+<p><img src="/2024/04/22/articles/%E7%BB%BC%E8%BF%B0/read/image-20231210221846621.png" alt="image-20231210221846621"></p>
+<p>其实际含义是，对于“abaaacabba”这个上下文，<code>&#123;a, b, c&#125;</code>集合的<strong>每个字母至少需要1.295个bit来表示</strong>，也即<strong>字符串“abaaacabba”至少由12.95个bits来表示</strong>。也即，信息熵实际上是算出了<strong>压缩的极限</strong>。</p>
+<h4 id="哈夫曼树"><a href="#哈夫曼树" class="headerlink" title="哈夫曼树"></a>哈夫曼树</h4><p>早期的压缩理论就是根据信息熵来的，这种我们称为“entropy encoding”或者“statistical-model-based coding”，因为它需要基于某个上下文（statistics）来计算信息熵。最常见的就是哈夫曼树，它用一个frequency-sorted binary tree来生成前缀编码，从而对信息进行压缩。</p>
+<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><p>然而，显而易见的是这种entropy encoding你首先就得有合适的statistics，这是不scalable的。所以它一般也不适用于现代的storage system的压缩要求。</p>
+<h3 id="dictionary-model-based-coding"><a href="#dictionary-model-based-coding" class="headerlink" title="dictionary-model-based coding"></a>dictionary-model-based coding</h3><p>因而，“dictionary-model-based coding”就此浮出水面。它从<strong>string-level</strong>来识别重复数据，从而简化和加速了压缩。它的主要思想是通过滑动窗口识别重复字符串，并用位置和长度来替代这些重复的。（相当于是unique string只存储一次）代表性的是LZ压缩。</p>
+<p>然而，它由于是string-level，所以需要对整个系统的所有string进行扫描，需要在compression ratio和speed之间trade off。</p>
+<h3 id="delta-compression"><a href="#delta-compression" class="headerlink" title="delta compression"></a>delta compression</h3><p>它的提出是针对于小文件/相似chunk的。它的思想感觉有点类似密码学，大概是这样：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">given file <span class="selector-tag">A</span>,<span class="selector-tag">B</span></span><br><span class="line">calc △ab，</span><br><span class="line">我们就可以通过△ab和<span class="selector-tag">B</span>来恢复出一个<span class="selector-tag">A</span>。</span><br></pre></td></tr></table></figure>
+
+<p>目前正在尝试把它纳入到deduplication system中。</p>
+<h3 id="Deduplication"><a href="#Deduplication" class="headerlink" title="Deduplication"></a>Deduplication</h3><p>总之，在compression byte-by-byte识别redundant data这样粒度太小的劣势下，通过计算“cryptographically secure hash-based fingerprints”来识别redundant data的chunk-level的deduplication优势就来了！</p>
+<h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2024/04/22/articles/%E7%BB%BC%E8%BF%B0/read/image-20231210223322234.png" alt="image-20231210223322234"></p>
+<p>这里也是给了一张很棒的图来总结了上文。</p>
+<h2 id="Key-Features"><a href="#Key-Features" class="headerlink" title="Key Features"></a>Key Features</h2><p>这个部分大概是说<strong>key features有两个，一个是chunking，另一个是fingerprinting</strong>。</p>
+<p>chunking有两种方法，fixed-size和variable-size，前者会出现boundary-shift问题，后者更加泛用。</p>
+<p>fingerprinting的主流方法还是基于SHA1（现在也用SHA256了）【Cryptographically Secure Hash-Based Fingerprinting】，主要是讨论了它哈希碰撞的可能性很小所以使用安全，还有就是讨论了fingerprint的特性：</p>
+<ol>
+<li><p>很难找到两个不同msg指纹相同</p>
+</li>
+<li><p>很难从fp倒推出一个msg</p>
+</li>
+</ol>
+<h2 id="Basic-Workflow"><a href="#Basic-Workflow" class="headerlink" title="Basic Workflow"></a>Basic Workflow</h2><blockquote>
+<p>A typical data deduplication system follows the workflow of:</p>
+<ol>
+<li>chunking</li>
+<li>fingerprinting</li>
+<li>indexing</li>
+<li>further compression</li>
+<li>storage management<ol>
+<li>data restore</li>
+<li>garbage collection</li>
+<li>fragment elimination</li>
+<li>reliability</li>
+<li>security</li>
+</ol>
+</li>
+</ol>
+</blockquote>
+<h1 id="Deduplication-1"><a href="#Deduplication-1" class="headerlink" title="Deduplication"></a>Deduplication</h1><blockquote>
+<p>In this section, we examine the state-of-the-art works on data deduplication in sufficient depth to understand their key and distinguishing features.</p>
+</blockquote>
+<p>本节终于要开始对deduplication的关键技术做详尽的介绍和讨论了。</p>
+<h2 id="A-Chunking"><a href="#A-Chunking" class="headerlink" title="A.Chunking"></a>A.Chunking</h2><p>这部分确实如他所言主要介绍了chunking。它先是介绍了主流的CDC算法Rabin（具体在FastCDC那篇文章介绍过这部分了，这里就不再赘述），然后讲述了Rabin算法的三个主要缺点：chunk size方差大、计算量大、去重检测还不够精确。</p>
+<p>针对这三个缺点，分别有各种文献提出了这几类关键技术（顺序与缺点一一对应）：</p>
+<ol>
+<li><p>Reducing Chunk Size Variance by <strong>Imposing Limits on MAX/MIN Chunk Sizes</strong> for CDC</p>
+<p>当chunk size过大，虽然会加速后续的indexing等步骤，减少space消耗，但是会影响去重率；chunk size过小，虽然会增加去重率，但是会增大后续indexing等步骤的工作量。这又是一个trade-off。</p>
+<p>这里主要介绍了各个主流方法都是怎么限制chunk size的，比如说LBFS简单粗暴，还有别的什么依据极值、非对称滑动窗口等做法。感觉还是FastCDC那个做法更加灵活聪明。</p>
+</li>
+<li><p>Reducing Computation to Accelerate the Chunking Process</p>
+<p>也是有比如说Gear等等算法或者硬件层面上的改进。</p>
+</li>
+<li><p>Improving Duplicate-Detection Accuracy by <strong>Rechunking Nonduplicate Chunks</strong></p>
+<p>这个问题也是比较普遍，比如如图所示的C2和C5之间就可以再做进一步去重：</p>
+<p><img src="/2024/04/22/articles/%E7%BB%BC%E8%BF%B0/read/image-20231210235904637.png" alt="image-20231210235904637"></p>
+<p>具体方法有比如说频率分析法选定某些频繁访问的chunk进行rechunking、把几个小的nonduplicate chunk给merge为一个大的然后rechunking等等。</p>
+<p>这个可能对网络场景也有适用，毕竟网络传输也就主要是通过一个个很小的network package数据包。</p>
+</li>
+<li><p>Impact of Interspersed Metadata</p>
+<p>主要是说如果数据集内meta data和主要数据混在一起可能干扰去重，比如说block header、还有tar打包后产生的文件的包含时间戳等信息的file header等等。</p>
+<p>解决方法大概就是预处理之类的。</p>
+</li>
+</ol>
+<h2 id="B-Accelerate-Computational-Tasks"><a href="#B-Accelerate-Computational-Tasks" class="headerlink" title="B. Accelerate Computational Tasks"></a>B. Accelerate Computational Tasks</h2><p>这个部分大概就是提出了两种方法，一个是通过将deduplication system给pipeline了（就是Odess那个做法），然后再结合multithreading来对它进行多线程加速；另一个就是通过开发GPU相关库来对deduplication做支持，从而使用GPGPU架构来进行硬件加速。</p>
+<p><img src="/2024/04/22/articles/%E7%BB%BC%E8%BF%B0/read/image-20231211141021880.png" alt="image-20231211141021880"></p>
+<h2 id="C-Indexing"><a href="#C-Indexing" class="headerlink" title="C. Indexing"></a>C. Indexing</h2><p><img src="/2024/04/22/articles/%E7%BB%BC%E8%BF%B0/read/image-20231211141035597.png" alt="image-20231211141035597"></p>
+<p>不知道这个indexing是不是就是我们pipeline中的dedup阶段，感觉是的。</p>
+<p>这个阶段面临的问题就是，数据量太大，导致指纹量也很大装不进内存，也就是说可能得根据磁盘中的指纹进行快速的索引。</p>
+<p>indexing大致有两种思路，一个是精准的indexing，另一个就是命中率较低但内存占用也低的indexing。感觉capping有可能也有点后者的感觉（）</p>
+<p>然后目前流行的也是有四类方法：locality-based, similarity-based, flash-assisted, and cluster deduplication approaches。</p>
+<ol>
+<li><p>locality-based</p>
+<p>大概意思就是说利用数据的局部性，每次要某个指纹不是只读它一个，而是顺带把磁盘中这个指纹后面几个也读进内存，磁盘中的也是按照数据局部性存储的。</p>
+<p>除此之外，DDFS结合Bloom filter使用来精准检测重复。</p>
+<blockquote>
+<p> A Bloom filter [22] is a space-efficient data structure that uses a bit array with several independent hash functions to represent membership of a set of items (e.g., fingerprints).</p>
+</blockquote>
+<p>而Sparse indexing则采取“抽样”的方式。</p>
+<p>这个一般用于提高performance。</p>
+</li>
+<li><p>similarity-based</p>
+<p>最常见的方法是用一个fp set的最大值or最小值来表示一个file，然后对这个建立一个主索引。如果两个文件的代表fp相同，那么这两个文件很有可能重复读极高。</p>
+<p>它这里提到了一个比较值得思考的观点：locality-based是利用了physical-locality，similarity-based是利用了logical-locality。前者还是比较容易理解的，因为它要求磁盘中的指纹按局部性存储，后者我是真没明白。。。之后有兴趣再看看相关论文了解一下吧。</p>
+<p>这个一般用于reduce RAM overhead。</p>
+</li>
+<li><p>flash-assisted</p>
+<p>感觉这个没啥特别的，相当于换了个闪存介质而不是磁盘来存储index。</p>
+</li>
+<li><p>Cluster Deduplication</p>
+<p>这个相当于加了层分布式，将输入的数据流分成几个种类（比如说按前缀分）然后送到多个结点上并行地进行去重处理，然后每个结点内部又可以用别的算法了之类的。这就需要涉及到负载均衡、路由算法等等了。</p>
+<p>缺点是可能降低deduplication ratio（可能是因为一些路由算法实现？）。</p>
+</li>
+</ol>
+<h2 id="D-Post-Deduplication-Compression"><a href="#D-Post-Deduplication-Compression" class="headerlink" title="D. Post-Deduplication Compression"></a>D. Post-Deduplication Compression</h2><p><img src="/2024/04/22/articles/%E7%BB%BC%E8%BF%B0/read/image-20231212224322111.png" alt="image-20231212224322111"></p>
+<p>不过即便如此，一个chunk内可能还是有一些小地方是dunplicate的（internal redundancy），这时候压缩就大有用处了。并且多个chunk一起压缩，比单个单个压缩的压缩率更高。</p>
+<p>这个还适用于上面说到的一种情况，也即那个用到rechunk的地方，完全可以用delta compression来代替，而且感觉后者可能还更通用（）感觉被薄纱。</p>
+<p>主要面临的挑战来自于这几个方面：resemblance detection, reading base chunks, and delta encoding。</p>
+<ol>
+<li><p>resemblance detection</p>
+<p>目前大概有这几种方法：</p>
+<ol>
+<li>Manber：计算polynomial-based fingerprints，两个文件的相似性取决于它们相同的这个fp的数量。</li>
+<li>superfeature：抽样选取一些Rabin fp作为feature，并把它们合起来成为一个大的superfeature，对这个东西进行index。这个好像应用比较广泛。</li>
+<li>TAPER：每个file都是一个bloom filter，比较filter相同的bit位数。</li>
+</ol>
+</li>
+<li><p>delta encoding</p>
+</li>
+<li><p>Additional Delta Compression Challenges</p>
+</li>
+</ol>
+<h2 id="E-Data-Restore"><a href="#E-Data-Restore" class="headerlink" title="E. Data Restore"></a>E. Data Restore</h2><p>这里笔墨最多的还是在说碎片化问题，同时也简要介绍了去重系统的三个主要应用场景：primary storage、backup storage、cloud storage，以及碎片化问题给它们的薄弱方面的狠狠一击（）</p>
+<ol>
+<li><p>primary storage</p>
+<p>它最主要的问题还是IO-sensitive</p>
+</li>
+<li><p>backup storage</p>
+<p>它最主要的问题是随着备份版本增多碎片化问题的愈发严重</p>
+</li>
+<li><p>cloud storage</p>
+<p>它最主要的问题是速度，其受网络带宽、碎片化的限制。</p>
+</li>
+</ol>
+<h2 id="F-Garbage-Collection"><a href="#F-Garbage-Collection" class="headerlink" title="F. Garbage Collection"></a>F. Garbage Collection</h2><p>这部分也大概是讲了GC常见的两种方法，一个是reference count，另一个是mark &amp; sweep。</p>
+<p>前者需要<strong>inline</strong>地维护refcnt，后者则可以<strong>offline</strong>运行。</p>
+<p>并且在backup system中，GC一般是删除了几个备份版本之后的background process。而在primary storage中，GC通常是inline的。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/04/22/articles/rewrite/note/"></a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

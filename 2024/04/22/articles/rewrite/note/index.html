@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title"></h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 22, 2024&nbsp;&nbsp;14:01:48</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/opennaive/p/3312731.html">https://www.cnblogs.com/opennaive/p/3312731.html</a></p>
+</blockquote>
+<h1 id="Abstract"><a href="#Abstract" class="headerlink" title="Abstract"></a>Abstract</h1><p>主要提出了三个经过去重后解决<strong>碎片化问题</strong>的restore手段：<code>increasing cache size</code>, <code>container capping</code>, <code>using a forward assembly area</code>。</p>
+<blockquote>
+<p>capping是一种在去重阶段减少碎片化但会导致去重率降低的技术，这个在之前我已经看到了代码</p>
+<p>实现；</p>
+<p>【回想一下capping的实现，也确实。</p>
+<p>每次dedup一次处理的segment大小为20MB，容器固定大小为4MB。</p>
+<p>我们通过capping技巧降低碎片化程度。在capping的实现中，我们记录所有涉及到去重的容器中所需去重块数，&lt;container_id, chunk_num&gt;，并且当涉及容器过多时会舍弃那些chunk_num小的不进行去重。</p>
+<p>因为，chunk_num小，说明容器中有效块少，读放大率大，碎片化程度大，所以与其引用这些有效率小的容器，不如牺牲一下去重率，再把这些重复块copy一次。】</p>
+<p>forward assembly是一种在restore时进行cache和prefetch的技术，并且通过算法优化减少了cache所需的RAM。</p>
+<p>【这个东西好像也是老朋友了，也即recipe+cachechunk restore的实现原理】</p>
+</blockquote>
+<h1 id="思考1"><a href="#思考1" class="headerlink" title="思考1"></a>思考1</h1><p>感觉之后有必要再回忆一下代码实现和论文里看到的专业名词的差异了。</p>
+<p>首先，总结一下论文中的流程。需要备份的应用先将backup转化为数据流，通过网络传输到deduplication app上。后者经过分块、去重、写回这几个流程，外加gc和restore两个辅助流程，实现了备份管理组织。</p>
+<p>其中落实到具体算法，分块流程采用content-based chunk，在具体实现中是通过各种hash算法计算出fingerprint，从而实现对各个chunk的区分；去重阶段是通过一个全局指纹表，来判断chunk的重复；写回阶段，是根据去重的结果，将需要写回的chunks以顺序形式分割为一个个容器（容器体现为一个个文件），写回磁盘。【这也体现出为什么说IO单位是一个container了，你读磁盘确实一次就是一次性读一个文件的啊（）】</p>
+<p>再落实到具体的优化策略：</p>
+<ol>
+<li><p>data layout</p>
+<p>去重结束后，会针对去重过程中收集到的块信息对数据布局进行适当的调整。</p>
+<p>对于MFDedup策略，GC过程较为简单，可能最主要在restore的时候需要访问数据布局；</p>
+<p>对于Odess，在GC中会根据二叉树进行数据块的迁移，保证<strong>每个叶子结点包含的chunks都大概率连续存储在连续的容器中</strong>，在restore时根据recipe进行恢复，从而无需访问数据布局。</p>
+</li>
+<li><p>capping【经典rewrite技术，通过降低去重率来提高恢复速度】</p>
+<p>去重时，会根据容器的重复率进行capping，具体体现为造一个&lt;cid, chunk_num&gt;的map，根据这个map来进行容器的筛选。当涉及容器过多时会舍弃那些chunk_num小的不进行去重，从而<strong>限制一个备份版本能够使用的旧容器的最大数量</strong><code>FLAGS_CappingThreshold</code>（每20MB）和<strong>新容器最大数量</strong>（不超过5个，因为20MB/4MB）。</p>
+<blockquote>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231025221335792.png" alt="image-20231025221335792"></p>
+<p>这段论述很精彩。要限制chunk碎片化，就是要限制restore过程中读取的容器数量；要限制restore涉及容器数量，就是要限制一个备份版本所涉及的所有容器数量；而所有容器数量中，我们能限制的就是这b最多能引用多少个旧容器。感觉这个逻辑链很完美。</p>
+<p>不过，为什么不像gc那样通过计算每个容器的活chunk比例呢，就像gc那样？而且实现也无需太复杂，毕竟容器大小都是固定的，所以比例只需计算map-&gt;second*chunk_sz/c_sz这样粗略即可，然后从尾到头（降序）进行逐一判断该比率即可。</p>
+<p><strong>这点值得思考下。</strong></p>
+</blockquote>
+</li>
+<li><p>forward assembly</p>
+<p>在writeback时，每个备份版本都有一个对应的文件（logicFile）记录其meta data，根据chunk的不同类型（dedup or unique）对其进行记录。然后之后在恢复过程中，遍历此logic file，就可以做到“预先得知需要取的容器”，【而且在具体实现中，是<strong>通过cid从小到大进行容器遍历</strong>的，因为cid连续表明文件创建连续表明磁盘连续】从而借助cache进行乱序恢复就行。</p>
+<p>Odess由于预先根据二叉树进行了组织，所以在恢复过程中recipe涉及到的容器数会更少，读放大会更小。</p>
+</li>
+</ol>
+<h1 id="Design"><a href="#Design" class="headerlink" title="Design"></a>Design</h1><p>这部分具体来说，就是详细介绍了capping和forward assembly area的运作方法。</p>
+<ol>
+<li><p>capping</p>
+<p>capping的实现写法很容易理解，没什么好说的，但重要的是其思想精髓。我们的目的是防止备份碎片化，从而影响restore速率，保证读放大小。那么，为了保证读放大小，我们自然而然想到应该尽可能减少涉及到的容器个数（想想读放大计算公式），这也就是capping的核心思想：限制容器数量。</p>
+<p>每个segment的新容器数量被限制在1~5范围内，旧容器数量由一个参数规定。</p>
+</li>
+<li><p>foward assembly area</p>
+<blockquote>
+<p>经典的LRU cache每次读入一整个容器，对一整个容器进行lru；这玩意每次读一个容器，仅保留容器中需要的chunks，会把容器其他部分释放</p>
+</blockquote>
+<p>这个相比起来有些复杂，并且跟以前看到的好像也不大一样，它大概更像是一个restore技术。在整个pipeline中，我们记录下recipe表。然后在恢复过程中，我们申请一块foward assembly area，每次读取一段recipe，然后根据recipe读取容器，并将所需chunks写入这块area中，若area开头有一段continuous的chunks，则写入文件，移动指针。</p>
+<p>其中area以循环队列形式出现。这个也很容易理解，这个东西听起来就很循环。</p>
+<p>fixed和rolling的区别可能是这样的。假设cache固定为1，也即一次只读入一个容器。fixed每次读取固定数量的recipe，然后全恢复完了再写回，恢复该段期间不读recipe；rolling的话就是每次读入一个container，就把前面continuous的部分写回，然后写回多少chunk就再继续读多少recipe，从而实现滚动。</p>
+</li>
+</ol>
+<h1 id="思考2"><a href="#思考2" class="headerlink" title="思考2"></a>思考2</h1><p>码的，遇到了一个很严重的没想过的问题。。。</p>
+<p>在论文中，那个recipe恢复的原理是一次读取固定大小，然后针对固定大小的地方进行随机恢复。但是我目前的写法的话需要进行多次的fseek，我就很害怕会导致每次fseek跨越很大。</p>
+<p>但是，在实际测试中，我发现针对于cid、offset升序的情况，似乎这样得到的offset序列也是稳定升序的：</p>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231027101550605.png" alt="image-20231027101550605"></p>
+<p>并且经计算，非升序的仅占7%，并且平均seek跨越为23459150.000000。可以看到，这个数字还是比较resonable的，那么这玩意是不是gc的功劳呢？</p>
+<p>测试需要等得久一些，不妨就先只从理论上来分析为什么这个GC算法可以让cid相邻的容器在文件中的位置也是稳定升序的。</p>
+<p>好像仔细一想也确实，因为你看，你一个个segment处理是顺序的，所以你一个个chunks加入到chunks_to_add也是顺序的，这样就保证了内部升序，那么容器间升序是怎么做到的？额我怎么知道。。。这个好像更像数据内部特征了，与gc无瓜。</p>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231027103752642.png" alt="image-20231027103752642"></p>
+<p>确实，换了个数据集马上就寄了哎。而且看数据感觉能看得出来这b在不同容器间确实是反复横跳的。所以fseek的问题确实存在。</p>
+<p>不过，我仔细想了想，感觉使用fseek跟它那啥玩意似乎各有优劣。</p>
+<p>fseek：</p>
+<ol>
+<li>优点<ol>
+<li>代码简单</li>
+<li>一个container只用io一次</li>
+</ol>
+</li>
+<li>缺点<ol>
+<li>会反复横跳文件多个位置，并且这个横跳开销较大，我看到甚至好几次都跨度甚至达到g水平，有个2g和1g之类的</li>
+</ol>
+</li>
+</ol>
+<p>那啥玩意：</p>
+<ol>
+<li>优点<ol>
+<li>不会发生横跳情况</li>
+</ol>
+</li>
+<li>缺点<ol>
+<li>一个container需要io多次，但是container io的seek部分应该跨度较小</li>
+</ol>
+</li>
+</ol>
+<p>等看完论文问一下两位学长吧，就问我简单粗暴用的那个seek开销会不会太大了，说明下发现测试数据中有跨度2g版本。</p>
+<p>其实感觉也没必要了，毕竟最后测出来速度就是seek那个最牛逼。这可能也说明最主要开销还是容器重复IO罢。</p>
+<p>草，感觉这里在说XX（）因为我们自始至终恢复都是直接恢复进RAM或者SSD的hhhh所以seek自然不是问题了</p>
+<h1 id="evaluation"><a href="#evaluation" class="headerlink" title="evaluation"></a>evaluation</h1><p>文章中的评估方法这部分介绍得很详细，很适合菜鸡如我感受一下它的这个流程。</p>
+<h2 id="dataset"><a href="#dataset" class="headerlink" title="dataset"></a>dataset</h2><ol>
+<li><p>workgroup dataset：</p>
+<p>There are 154 fulls and 392 incrementals in this 3.8 TB collection, with the fulls ranging from 3 GB to 56 GB, with a mean size of 21 GB. </p>
+<p>模型是：每天一增量，每周一全量的备份日程。使用TTTD技术进行chunk处理。</p>
+</li>
+<li><p>2-year dataset</p>
+<p>HPstorage提供（工业界），synthetic data set合成数据集，高度碎片化。</p>
+<p>一开始是一个10GB的文件系统快照，每几天就会随机选择2%的文件，并且synthetically（综合地）改变每个文件中10%的内容，并且增加200MB新文件。</p>
+<blockquote>
+<p>During each simulated week, one full backup and four incremental backups, one for each other weekday, are taken via uncompressed tar for a total of 480 backups covering 96 simulated weeks (1.9 years).</p>
+</blockquote>
+<p>每周有1个全备份和4个增量备份，每天的备份都是以未压缩的tar形式存在，然后一共进行2 year，也即一共有480个backup、96个模拟周。</p>
+<p>依然使用TTTD技术进行chunk处理。</p>
+</li>
+</ol>
+<p>由于备份数量还是太多，所以在实际中应该是不可能保留所有这些备份的，而是会保留一定数量。所以，我们设置<strong>每个备份只被保留30天</strong>，也即在备份第n个backup时删除第n-30个backup。【当然，尝试了别的schedule发现了不会影响结果】</p>
+<blockquote>
+<p>此处介绍常见的备份轮换（<em>Backup rotation scheme</em>）算法（from <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Backup_rotation_scheme#">wiki</a>）：</p>
+<ol>
+<li><p><strong>Grandfather-Father-Son (GFS)</strong></p>
+<p>这是一种经典的备份轮换方案，通常包括每日、每周和每月备份。每日备份称为“儿子”（Son），每周备份称为“父亲”（Father），每月备份称为“祖父”（Grandfather）。</p>
+<p>儿子备份按照FIFO系统进行3个月的轮换。父亲备份类似地按照每两年的周期进行轮换，而祖父备份则按照每年的周期进行轮换。</p>
+</li>
+<li><p><strong>Tower of Hanoi</strong>：多级备份。例如，第一级备份可能是每天一次，第二级是每周一次，第三级是每月一次，以此类推。</p>
+<p>感觉这个用了汉诺塔原理的备份轮换算法还挺有意思的，之后学习下汉诺塔是啥玩意，然后再来看看这个算法简介。</p>
+</li>
+<li><p><strong>Weekly Rotation</strong>：每周备份轮换，保留过去几周的备份。</p>
+</li>
+<li><p><strong>Daily Rotation</strong>：每日备份轮换，保留过去几天的备份。</p>
+</li>
+</ol>
+</blockquote>
+<h2 id="baseline"><a href="#baseline" class="headerlink" title="baseline"></a>baseline</h2><p>LRU caching, no capping</p>
+<p>这个部分大概就是针对no capping的普通LRU，对两个数据集，测了随着cache增大而变化的speed factor、读放大这俩指标。</p>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231027221346694.png" alt="image-20231027221346694"></p>
+<p>可以看到图标是备份版本，纵轴是speed factor，横轴是cache大小。</p>
+<p>然后根据线性回归算法说明了下碎片化程度与备份层级增多为线性强正相关，因而这也就说明，<strong>增加一倍的备份就会使restore速度double</strong>。</p>
+<p>然后再说明了一下这两个数据集碎片化变化趋势不同，是因为碎片化程度可以被看做多个影响因素一维向量叠加后的成果，而不是一个固定的标量。</p>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231028220214261.png" alt="image-20231028220214261"></p>
+<h2 id="capping"><a href="#capping" class="headerlink" title="capping"></a>capping</h2><p>通过数据表示了capping后放弃的去重比率和速度提升倍数的关系。缓存越大，提升越有限，所以需要放弃更大比例的去重才能获取同样的效果。</p>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231027223619971.png" alt="image-20231027223619971"></p>
+<p>也表明了与碎片化的关系：</p>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231027223837565.png" alt="image-20231027223837565"></p>
+<p>不过为啥2year还能超过100%的？</p>
+<p>这个则是体现了，去重率越低（rewrite越多）恢复速度越快，并且缓存越大越快。并且要注意segment大小需要适中。</p>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231027224435204.png" alt="image-20231027224435204"></p>
+<p>那么，此处为什么改变segment的大小，会影响capping效果，就值得思考。</p>
+<p>假设cache足够大。首先，segment的大小不会影响capping的比率。所以我们需要从容器分布的角度来理解。由于segment只能体现局部性质，那么当一个容器在当前segment分布稀疏（导致被capping，从而其引用数据块的references从此被改变到新容器），而在之后的其他segment又密集，就会导致我们不大精准地rewrite了那部分数据。而当segment越大，我们的视野就越大，判断也会越精准，从而再次减小读放大，从而提高性能。</p>
+<p>至于为什么当cache为128MB时，segment越大反而会起反效果呢？作者解释说，这是因为，去重过程中以S为segment大小相当于restore过程中以S为forward assembly area大小，而area越大，就必须得要有一个更大更充分的cache。那么如果当S接近于或大于cache size，LRU换入换出就会频繁，也就没半毛钱好处了。</p>
+<h2 id="assembly"><a href="#assembly" class="headerlink" title="assembly"></a>assembly</h2><blockquote>
+<p>RAM used for LRU is simply the number of container slots in the cache times the container size (4 MB). For the forward assembly area methods, it is the size of the forward assembly area.</p>
+</blockquote>
+<p>对于LRU来说，RAM大小指的是它的LRU列表元素个数*容器大小这个值；对于faa来说，RAM大小指的是forward assembly area的大小。</p>
+<blockquote>
+<p>在odes中，chunkcache的大小为128*4MB=512MB，应该是用的整块整块读的LRU算法</p>
+</blockquote>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231027232135327.png" alt="image-20231027232135327"></p>
+<p>可以看到，在有限RAM的情况下，改进的restore算法相比于LRU有极大提升，且rolling猛于fixed。</p>
+<h2 id="capping-amp-assembly"><a href="#capping-amp-assembly" class="headerlink" title="capping &amp; assembly"></a>capping &amp; assembly</h2><p>首先一开始大概说了下容器大小的影响，这个测试部分做得确实很完善：</p>
+<p><img src="/2024/04/22/articles/rewrite/note/image-20231028132153808.png" alt="image-20231028132153808"></p>
+<blockquote>
+<p>在存储领域中，backup ingestion是什么意思</p>
+<p>在存储领域中，”backup ingestion” 指的是备份摄取或备份导入的过程。这一阶段涉及将备份数据从源存储系统传输或复制到备份系统中，以确保数据的安全存储和管理。这个过程可能包括数据传输、数据转换、压缩、加密等步骤，确保备份数据能够有效地存储和恢复。</p>
+<p>意思是说deduplication是在这个过程进行的吗</p>
+<p>是的，通常在备份摄取（backup ingestion）的过程中，会应用去重（deduplication）技术。去重的目标是识别和消除备份数据中的重复块，以节省存储空间并提高备份效率。在备份数据传输到备份系统之前或之后，去重过程可以帮助减少存储需求，降低备份存储的成本，并加速备份和恢复操作。</p>
+</blockquote>
+<p>提到了个sparce indexing，感觉有必要先去看看mfdedup的indexing方法。</p>
+<p>在看之前，可以先稍微回忆下你现在理解的indexing是什么。回忆一下去重过程，本质上就是对到来的数据流进行重复检测，不重复则写入新的container，重复则找到以前重复块的位置进行引用。其中这个“重复检测”我想就是indexing的工作。具体而言，它应该是一张表的形式，记录着每个chunk的fp及其所处的位置。那么，将它存储在哪，以及如何对它进行快速查找，这就是我们需要考虑的。</p>
+<p>在Odess实现中，提供了两种存储这个indexing table的形式。一个是存储在内存，另一个是通过<strong>RocksDB</strong>存储在磁盘中。</p>
+<p>对于sparce indexing，它大概思想就是每次只抽样查询部分的indexing table来判断去重。</p>
+<blockquote>
+<p>sparce indexing：</p>
+<p>一般来说，基于chunks的去重都要求使用full index，而这RAM一般承受不起，但是纯用disk io就太慢了。所以它采取了一招：</p>
+<ol>
+<li><p>将input stream划分为多个segment，每个segment仅与它最接近的之前的某个segment进行去重，也即<u>只需对那个被选中的抽样segment进行index构建</u>。</p>
+</li>
+<li><p>为了找到最接近的segment，使用了sampling（抽样）和sparce indexing。</p>
+<ol>
+<li><p>samples： We <strong>choose a small portion of the chunks in the stream as samples</strong>; samples是一些chunks。</p>
+</li>
+<li><p>sparce indexing：Our sparse index <strong>maps</strong> these samples <strong>to the existing segments</strong> in which they occur.也就是&lt;fp, segment_id&gt;</p>
+</li>
+</ol>
+</li>
+<li><p>避免了full index，而只有sampled chunks的fp被保留在RAM中。</p>
+</li>
+</ol>
+<p>它所用的数据局部性：</p>
+<p>If two pieces of backup streams share any chunks, they are likely to share many chunks. <u>如果两个segment共享了某个chunk，那么它们很有可能共享很多chunks。</u></p>
+<p><strong>也就是说，它是这样的流程：</strong></p>
+<ol>
+<li>以segment为单位读取input stream；</li>
+<li>计算该segment的每个chunk的fp，然后对每个chunk查询sparce indexing table: &lt;fp, segment_id&gt;，记录所需读取的segment_id；</li>
+<li>读取这些segment_id对应的segment的chunk indexing table（存储在disk中）；</li>
+<li>for every chunks： 重复，copy entry ；不重复，add to new container</li>
+<li>最后再将该segment的信息写入磁盘，填写sparce indexing表。</li>
+</ol>
+<p>而sparce indexing表最一开始，由对input segment进行chunks的随机抽样得出（或者逐渐构建起来，反正大概是这个意思）</p>
+<p>可以看到，它将segment info保留在disk中，在RAM中只保留fp2seg_id的映射，每次只需简单从磁盘中读取几个segment info即可，利用数据局部性极大地降低了磁盘IO次数。</p>
+</blockquote>
+<p>然后我猜测估计mfdedup的indexing就是只保留neighborhood的indexing，也是类似的意思。</p>
+<p>这个sparce indexing的好处除了有节省RAM之外，还有一个减少碎片化（因为每次只从受限个数的segment中进行去重，resonable）</p>
+<p>我们对其算法进行了一定修改：将sparce indexing从原来的&lt;fp, seg_id&gt;改为&lt;fp, cid&gt;，并且每次只取top T个包含sample chunks最多的容器，从而将对segment进行cap修改为对container进行cap。仔细想想，这样确实依然保证了原算法的核心思想，也属于是segment size = container size的特种了。</p>
+<p>草，不过这个&lt;fp, cid&gt;不就是Odess中的recipe（或者说是全局指纹表）吗？乐。Odess也确实体现了这种capping+sparce indexing结合的方法【只不过进行简化了，每个chunk固定取其第一个container】，只能说不愧是落地实现，处处映射。</p>
+<h1 id="future-works"><a href="#future-works" class="headerlink" title="future works"></a>future works</h1><p>我们目前这玩意还是有缺点，就是它只是针对局部的segment进行capping，可能就使优化效果不是那么绝对。所以我们提出了两个解决方法：</p>
+<ol>
+<li><p>adaptive capping</p>
+<p>令当前的capping level根据recent segment的container nums进行调整，也许可以理解为再给这个recent seg的&lt;cid, nums&gt;信息进行一个FIFO，从而将局部视角扩展到略微全局平均一点的视角。</p>
+<p>这个会在那些unevenly fragment的备份中起到更好的优化作用。【至于为什么，可以回忆下我之前说的那个在一些部分被稀疏引用、在一些部分被密集引用的那个例子。具体大概在evaluation-capping那个部分。】</p>
+</li>
+<li><p>只记录recent segment中是否被使用，而不记录具体使用情况（如次数）</p>
+<blockquote>
+<p>We hope this will give us the same performance as using a larger segment size without actually needing to increase our segment buffer space.</p>
+</blockquote>
+<p>这也是我之前提到的，当cache足够大，segment理论上是越大越好的，因为这样就会有全局视角。</p>
+</li>
+</ol>
+<h1 id="related-works"><a href="#related-works" class="headerlink" title="related works"></a>related works</h1><ol>
+<li><p>CBR</p>
+<p>CBR和Capping的思想极为相似。</p>
+<p>CBR：当且仅当某个容器包含该段至少T个块时，才会dedup该容器在该段中的chunks。并且这个T是会adaptive的。</p>
+<p>听起来简直和capping一模一样，只不过确实如blog所说capping更注重限制容器个数，从而获取<strong>读性能</strong>；CBR更注重限制<strong>rewrite比率</strong>。而且由于T的adaptive，CBR很有可能unbound，也即万一T=1那么碎片化问题无法缓解。</p>
+</li>
+<li></li>
+</ol>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>精炼一下看完这篇论文后我的收获。</p>
+<ol>
+<li><p>design</p>
+<p>首先是对论文提出算法的理解。</p>
+<p>论文提出的最有用的应该就是<strong>capping</strong>这个rewrite技术。它的核心思想是将input stream划分为定长segment（通常20MB），通过限制每个segment的容器数量（重复chunks所在容器数、新容器数（不超过5个）），对部分chunks进行deny dedup重写，从而减少restore过程的读放大。</p>
+</li>
+<li><p>evaluation</p>
+<p>然后就是论文中写得很好的evaluation部分了。它主要从以下这几个方面进行了全方位的性能评估：baseline、only capping、only assembly、capping+assembly。</p>
+<ol>
+<li><p>测试指标：containers read per MB restored（读放大）、speed factor（1/读放大）、cumulative deduplication factor（累积去重率）、relative loss of cumulative deduplication factor（放弃的去重比率）、缓存大小</p>
+</li>
+<li><p>dataset：介绍了两个经典data set，很值得看看，体会下practical的备份场景是什么样的。</p>
+</li>
+<li><p>baseline：由于我们之后的几个实验都需要测试缓存大小对restore相关指标的影响，所以在一开始首先测试基准情况下随缓存大小的指标变化。</p>
+<p>基准情况：no capping， no assembly； use LRU cache to restore</p>
+<p>指标：containers read per MB restored <strong>&amp;&amp;</strong> speed factor 随备份版本号变化，with different cache size</p>
+</li>
+<li><p>capping：</p>
+<p>指标：cumulative deduplication factor和speed factor的关系、relative去重率和relative速度的关系；with different <strong>cache size</strong> and <strong>segment size</strong></p>
+<p>重点体现了capping在降低去重率和提升restore速率之间的平衡；以及测试了capping相关指标（segment size）对capping的影响。</p>
+</li>
+<li><p>assembly：</p>
+<p>指标：与baseline进行speed factor的对比测试；with different cache size</p>
+</li>
+<li><p>both</p>
+<p>没什么好说的，体现了下container size的影响。</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>总的来说，是一篇测试很完善、rewrite很经典的文章，让本垃圾入门者也能轻易get到的好文。</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2024/04/22/articles/%E7%BB%BC%E8%BF%B0/read/"></a>
+            
+            
+            <a class="next" rel="next" href="/2024/04/22/articles/GC/read/"></a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

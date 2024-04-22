@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>GC相关 | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">GC相关</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十二月 9, 2023&nbsp;&nbsp;20:25:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>本次先暂时只做个速读了</p>
+<h1 id="1"><a href="#1" class="headerlink" title="1"></a>1</h1><p>The Logic of Physical Garbage Collection in Deduplicating Storage</p>
+<p>这篇文章看起来像是说他提出了两种GC方法，一个是PGC（physical），另一个是LGC（logical），没太看明白。</p>
+<h2 id="摘抄"><a href="#摘抄" class="headerlink" title="摘抄"></a>摘抄</h2><ol>
+<li><p>这段话大致介绍了GC的重要性，感觉写得很不错，一些词可以参考一下<br>Most storage systems that write in a log-structured manner need a mechanism for garbage collection (GC), <strong>reclaiming and consolidating space by identifying unused areas on disk</strong>. In a deduplicating storage system, GC is complicated by <strong>the possibility of numerous references to the same underlying data</strong>.</p>
+<p>Freeing unreferenced space is a basic storage system operation.</p>
+</li>
+<li><p>determining the liveness of chunks  判断chunk是否应该活着</p>
+</li>
+</ol>
+<h1 id="2"><a href="#2" class="headerlink" title="2"></a>2</h1><p>A_Focused_Garbage_Collection_Approach_for_Primary_Deduplicated_Storage_with_Low_Memory_Overhead</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>大概是提出了一种用于优化GC的Mark&amp;Sweep中的Mark阶段的方法，也即使用一个什么<em>Austere RefGraph</em>。它大概意思就是每次GC可以不针对全部文件，而是只针对那些被删除的文件及其他relative file（含有共享块），从而由此可以把deleted file的chunk分为两种类型：no-shared和shared。所以问题就转化为如何找到一个文件的relative file。然后我们通过refgraph来保存这些相关的meta data。</p>
+<p>感觉大体上就是Odess的GC所用的方法，也许OdessGC对其做了一些简化。之后有兴趣可以钻验一下Odess以前的commit，了解一下这个项目是怎么一步步地被开发出来到今天这么庞大的。</p>
+<p>不过看起来，好像本文是针对“Primary storage”，也即主存的？emmm，我们的大概是基于disk storage的。这点可能得注意一下。</p>
+<p>针对主存的话，很重要的一点就是其CPU占用率、速度等因素。to-disk的话就不一定了。</p>
+<p><img src="/2023/12/09/deduplication_GC/image-20231209224653551.png" alt="image-20231209224653551"></p>
+<p>确实，你说得好啊，我们之前的Odess是针对的backup storage，所以检测一个块能否被删除可以判断其是否“out-of-date”。而针对primary storage的去重只能判断其refcnt和“版本内”重复。相当于backup storage是多个版本比较，这个primary storage是一个版本内比较。体会一下这两种场景的差异性。</p>
+<p>同时，我也悟了一点，就是测pmem场景的时候老师为什么要求的是比较那个trace内部的重复率，而不是比较两个trace之间的了。因为pmem也是主存场景（非易失性内存）。那个trace的具体场景应该是存放在内存中的文件系统。所以他的意思是Odess加上这个就可以新概念拓宽数据集了。</p>
+<p>我考，这下真悟了，66666我大彻大悟</p>
+<p>所以主流的对Mark&amp;sweep的优化都不大适合于primary storage，毕竟它没有什么备份版本，或者什么内存cpu占用率太高了。</p>
+<p>而且对于这种primary storage，感觉现在单位不是container了，而是不固定大小的file。比如本篇文章，就是根据file内部chunk的共享信息，来搭建起file之间联系的graph的：</p>
+<p><img src="/2023/12/09/deduplication_GC/image-20231209234315248.png" alt="image-20231209234315248"></p>
+<p><strong>明天估计得根据今天的领悟去重新思考一下老师说的第三个问题了。</strong></p>
+<p>这个图画的很帅</p>
+<p><img src="/2023/12/09/deduplication_GC/image-20231209234806628.png" alt="image-20231209234806628"></p>
+<h2 id="摘抄-1"><a href="#摘抄-1" class="headerlink" title="摘抄"></a>摘抄</h2><ol>
+<li><p> <strong>reclaim</strong> <strong>stale</strong> chunks in large-scale primary deduplication systems 在大规模的主去重系统中回收陈旧chunk</p>
+</li>
+<li><p>介绍什么是去重</p>
+<p>Data deduplication, which allows files to <u>share their ”common” (i.e., duplicated) data in chunk-level [1],</u> has been used in many use cases, including backup storage [2], [3], data syncing [4], and flash storage [5].</p>
+</li>
+<li><p>为什么去重会影响GC的性能（这里由于target是主存，所以学习一下语法思路等即可）</p>
+<p>Specifically, duplicated chunks will be physically stored only once, and these ”common” chunks in different files will be referenced many times. With the storage data evolution (i.e., caused by file operations), the deduplicated systems are full of active chunks (i.e., still referenced by some files) and stale chunks(i.e., no longer referenced by any file). And GC workflow has to recognize and remove stale chunks by tracking references of all chunks. Considering the number of chunks can be at billion-level in primary storage, GC will be a heavy task(very time- and memory-consuming), and it may lead to system stalls or worse latency, which are critical issues for primary storage.</p>
+</li>
+<li><p>可以看看related work的A部分。可以看到比较契合我写的部分</p>
+<p><img src="/2023/12/09/deduplication_GC/image-20231209225429890.png" alt="image-20231209225429890"></p>
+<p>可以着重参考一下</p>
+</li>
+<li></li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>看完了全文，现在来提炼一下其大致摘要吧。</p>
+<p>本篇文章主要针对对Primary Storage的去重系统中的GC阶段开销大问题，提出了FGC的解决方法。</p>
+<p>当前主流最常用的GC方法是Mark &amp; Sweep，但由于它需要在Mark阶段扫描所有的文件来判断一个chunk的liveness，所以它的开销还是非常大。针对此，FGC提出了，无需扫描所有文件。它将删除文件中的chunk分为shared和non-shared两种类型，故而每次Mark阶段理论上只需找出所有shared的chunk，也即只需扫描与删除文件存在共享chunk关系的其他相关文件即可。</p>
+<p>故而，我们需要维护一个数据结构，来记录这样的关联关系。顶点为一个文件，两个顶点有边表示两个文件共享了某个chunk。</p>
+<p>然而，如果记录这样一个全图是相当耗费空间的，因此又提出了新的优化点：对于每个chunk，我们只需记录当前文件与每个chunk对应的base file之间的引用关系即可，也即一个file至多有chunk数条边。</p>
+<p><img src="/2023/12/09/deduplication_GC/image-20231210162344305.png" alt="image-20231210162344305"></p>
+<p>并且通过统计可得，大部分情况下一个文件通常只对应一个base file就够了。</p>
+<p>因而综上所述，这样一来我们就完美减少了GC的Mark阶段所涉及的文件数。它原本需要扫描所有的文件，现在只需要扫描delete file及其related file这几个（大多数情况下就两个）文件就行了。</p>
+<p>不过这个RefGraph大小虽然够小了，但是要维护它还是有一定的开销：</p>
+<ol>
+<li>宏观上，新增graph的边被抽象为无序的异步命令序列；但是删除就需要获取锁。</li>
+<li>微观上，新增graph的边只需要扫描新文件即可；但是删除就可能需要遍历所有的related file进行graph的重构。</li>
+</ol>
+<p>并且，在实际的primary storage场景中，增删改（改可视为增删操作的混合）十分频繁，每次都进行real-time的更新是不现实的。</p>
+<p>故此，我们将这个维护graph的步骤，也跟tracker一起放在了GC的pre-calcu阶段。</p>
+<p>不过我很好奇，这个听起来很牛逼，为啥只投了个CCFB呢？</p>
+<p><img src="/2023/12/09/deduplication_GC/image-20231210163157842.png" alt="image-20231210163157842"></p>
+<p><img src="/2023/12/09/deduplication_GC/image-20231210163341573.png" alt="image-20231210163341573"></p>
+<p>难道是因为速度比不过RC-Optimal吗，但是memory overhead确实挺不错。。。算了，不明白，也许山外山人外人吧。</p>
+<p>总之，看下来感觉还是对primary storage这个应用场景有了更进一步的了解，也对GC的整体算法框架有了一定的了解。</p>
+<p>不过感觉这篇文章主要聚焦的还是GC过程的效率，而Odess的话应该聚焦的是GC过程对<strong>碎片化问题</strong>的解决，侧重点还是各有不同。不过感觉Odess应该也是很前沿了，它用的cache-centered的算法应该也是很牛逼的。</p>
+<p>感觉还是对所谓“idea”的产生理解比较抽象。也许都是初步有个雏形，知道这个方面暂时前沿还没有人做过，然后慢慢开始增加新的point的吧。。。所以最关键还是要先对这个领域的研究现状有一个全面完整的了解。加油吧只能说，还得是沉淀！</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2023/12/10/deduplication_overview/">综述读后笔记</a>
+            
+            
+            <a class="next" rel="next" href="/2023/12/08/fastcdc/">FastCDC</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
