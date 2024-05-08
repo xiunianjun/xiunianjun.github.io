@@ -418,6 +418,17 @@
 <p><img src="/2023/12/26/operating-system/image-20231211012341491.png" alt="image-20231211012341491"></p>
 <p><img src="/2023/12/26/operating-system/image-20231211012414371.png" alt="image-20231211012414371"></p>
 <p><img src="/2023/12/26/operating-system/image-20231211012426377.png" alt="image-20231211012426377"></p>
+<blockquote>
+<p>为什么实时调度都要用RR或者FIFO策略？</p>
+<ol>
+<li><strong>确定性</strong>：实时任务通常要求确定性的响应时间。SCHED_FIFO和SCHED_RR提供了可预测的调度行为，保证了高优先级任务能够及时获得CPU时间。相比之下，CFS设计用于提供公平性，但并不保证确定性的响应时间107。</li>
+<li><strong>优先级抢占</strong>：实时调度策略允许高优先级任务抢占低优先级任务的执行，这在需要立即处理的任务（如中断处理）中非常重要。CFS策略下的任务抢占行为是基于CPU使用时间的公平性，而非严格的优先级7。</li>
+<li><strong>实时性能要求</strong>：实时任务往往与系统的实时性能要求相关，如工业控制、音频/视频同步等，这些场景需要确保任务能够满足特定的时间约束。FIFO和RR策略能够提供这种保证，而CFS则更侧重于长时的CPU使用公平性5。</li>
+<li><strong>时间片管理</strong>：SCHED_RR通过时间片轮转为相同优先级的任务提供了公平的调度机会，而SCHED_FIFO则保证了相同优先级的任务将顺序执行，直到任务主动放弃CPU。CFS的时间片管理机制不适合实时任务的时间敏感性要求9。</li>
+<li><strong>系统资源的保障</strong>：实时任务可能需要独占或优先访问系统资源，而CFS策略下，系统资源是按需动态分配的，这可能导致实时任务无法获得足够的资源来满足其时间要求4。</li>
+<li><strong>实时任务的严格性</strong>：实时任务通常不能容忍延迟，因此需要一个能够保证任务在规定时间内执行的调度策略。FIFO和RR策略提供了这种严格性，而CFS策略则更适用于对实时性要求不高的普通任务8。 总的来说，实时调度策略（SCHED_FIFO和SCHED_RR）提供了实时任务执行所需的确定性和响应性，而CFS策略则更适合于一般目的的进程调度，它提供了良好的CPU使用公平性和效率。在需要严格实时性能的场景中，使用RR或FIFO策略是更合适的选择。</li>
+</ol>
+</blockquote>
 <h3 id="MLFQ"><a href="#MLFQ" class="headerlink" title="MLFQ"></a>MLFQ</h3><p><img src="/2023/12/26/operating-system/image-20231211011942018.png" alt="image-20231211011942018"></p>
 <p><img src="/2023/12/26/operating-system/image-20231211012500643.png" alt="image-20231211012500643"></p>
 <p><img src="/2023/12/26/operating-system/image-20231211012553738.png" alt="image-20231211012553738"></p>

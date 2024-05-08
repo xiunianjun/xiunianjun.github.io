@@ -262,6 +262,15 @@
 </ol>
 </li>
 </ol>
+<blockquote>
+<p>此处具体来说，可以以Shinjuku OS一文中的说法为例。对于现实中那些短请求较多的workload，比如说搜索引擎、FaaS、In-memory DB（支持简单的get/put和长请求range query）等，从理论上来说，使用Processor Sharing(PS)的调度策略会防止高尾延迟，而这PS就可以类似为一种跟RR比较相似的时间片策略。这也很符合直觉，因为RR一类的策略具有公平性和均等性的特点，使得短请求不至于被运行到完成的长请求饿死。</p>
+<p>那么，为什么不能用Linux原生的real-time策略？我认为主要有两点原因：</p>
+<ol>
+<li>稳定性      用real-time策略可能导致内核不稳定，因为实时调度类在内核中调度优先级最高</li>
+<li>性能问题  Linux的real-time策略需要进行频繁的中断、上下文切换，开销较大较笨重，不够轻量级；Per-CPU策略只能让worker自己中断监测时间【主要原因】</li>
+</ol>
+<p>故而，Shinjuku OS的解决方法是直接设置一个轻量级的专用OS，ghOSt则是将这个RR策略委托在了用户态实现，并且设立一个centrallized的线程集中控制，就避免了频繁的中断开销。</p>
+</blockquote>
 <h2 id="传统方法"><a href="#传统方法" class="headerlink" title="传统方法"></a>传统方法</h2><ol>
 <li><p>新增Linux调度类，从而新增新的调度算法</p>
 <p>编码困难，部署开销大，而且很难随着linux内核维护</p>
@@ -424,6 +433,7 @@
 <p>这部分还是比较简单的，其实可以去看这个<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/educg-group-17066-1466467/202318123111334-1848/-/blob/main/record/Dev-Docs/final-stage/develop/cgroup%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%A1%88.md">开发思路文档</a>，思路写得更详细更具体，在此就只说说基本思路了。实现cgroup的基本逻辑：</p>
 <p>多个cgroup通过链表形式链接，都有一个cg id。然后，每个task可以通过cg_ctl来把自己加入某个cgroup或者从某个中删除，每次调用task_tick都会检查一下salary是否耗尽，耗尽则reschedule，并且设置pnt那边salary&lt;=0就不return。同时，在context switch之前也会update on cpu和off cpu，纪录更精确的CPU时。</p>
 <h1 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a>Evaluation</h1><p>这部分确实没什么好说的（虽然也很挣扎……）具体看项目文档吧。</p>
+<p>不过有一点目前还是比较存疑，也即那个RocksDB场景似乎不是I/O密集型而是计算密集型（）因为具体的RockDB数据库是In-memory的，并且每个请求也都是polling一段纯粹的CPU工作时来模拟请求的处理，所以我认为当初这方面我们的认知出了点问题，不过看起来影响不大。</p>
 
         </div>
 
@@ -442,6 +452,8 @@
             </div>
         </section>
         <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2024/04/27/algorithm_questions/">算法题</a>
             
             
             <a class="next" rel="next" href="/2024/04/10/read_linux/">对Linux研究汇总</a>

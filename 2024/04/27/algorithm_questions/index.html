@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>算法题 | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">算法题</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 27, 2024&nbsp;&nbsp;14:09:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>因为各种各样的原因，我需要开始进行一定的算法训练，在此记下过程中的一些心得体会和文章摘抄。刷的题目集是 <a target="_blank" rel="noopener" href="https://www.programmercarl.com/">代码随想录</a>。</p>
+<h1 id="置顶"><a href="#置顶" class="headerlink" title="置顶"></a>置顶</h1><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/happy-number/">202. 快乐数</a></p>
+<p>很难崩</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/palindromic-substrings/">647. 回文子串</a></p>
+<p>TODO</p>
+<h1 id="每日一题"><a href="#每日一题" class="headerlink" title="每日一题"></a>每日一题</h1><p>2024.5.1 Medium <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/total-cost-to-hire-k-workers/">2462. 雇佣 K 位工人的总代价</a></p>
+<p>这个比较有意思。其中一个c++写法需要注意：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">element</span> &#123;</span><br><span class="line">    <span class="type">int</span> index;</span><br><span class="line">    <span class="type">int</span> val;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Compare</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> element &amp;a, <span class="type">const</span> element &amp;b)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 首先比较 val 值</span></span><br><span class="line">        <span class="keyword">if</span> (a.val != b.val) &#123;</span><br><span class="line">            <span class="keyword">return</span> a.val &gt; b.val; <span class="comment">// 小顶堆：较小的 val 在堆顶</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果 val 值相同，则比较 index 值</span></span><br><span class="line">        <span class="keyword">return</span> a.index &gt; b.index; <span class="comment">// 小顶堆：较小的 index 在堆顶</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">std::priority_queue&lt;element, std::vector&lt;element&gt;, Compare&gt; heap;</span><br></pre></td></tr></table></figure>
+
+<p>可以直接写成：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pair第一位对应val，第二位对应index</span></span><br><span class="line">priority_queue&lt;pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;, vector&lt;pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;&gt;, greater&lt;pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;&gt;&gt; q;</span><br></pre></td></tr></table></figure>
+
+<p>很直观，pair的greater逻辑应该就是先比第一个再比第二个，学到了。</p>
+<h1 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h1><h2 id="数学"><a href="#数学" class="headerlink" title="数学"></a>数学</h2><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/sqrtx/">69. x 的平方根 </a>  牛顿迭代</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/convert-to-base-2/">1017. 负二进制转换</a>  是我最讨厌的数学种类之一……</p>
+<h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/minimum-size-subarray-sum/">209. 长度最小的子数组</a>  TODO</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/spiral-matrix-ii/">59. 螺旋矩阵 II</a></p>
+<h3 id="二分查找"><a href="#二分查找" class="headerlink" title="二分查找"></a>二分查找</h3><blockquote>
+<p>二分查找涉及的很多的边界条件，逻辑比较简单，但就是写不好。例如到底是 <code>while(left &lt; right)</code> 还是 <code>while(left &lt;= right)</code>，到底是<code>right = middle</code>呢，还是要<code>right = middle - 1</code>呢？</p>
+<p>大家写二分法经常写乱，主要是因为<strong>对区间的定义没有想清楚，区间的定义就是不变量</strong>。要在二分查找的过程中，保持不变量，就是在while寻找中每一次边界的处理都要坚持根据区间的定义来操作，这就是<strong>循环不变量</strong>规则。</p>
+<p>写二分法，区间的定义一般为两种，**左闭右闭即[left, right]，或者左闭右开即[left, right)**。</p>
+</blockquote>
+<blockquote>
+<p><strong>第一种写法，</strong>我们定义 target 是在一个在左闭右闭的区间里，<strong>也就是[left, right] （这个很重要非常重要）</strong>。</p>
+<p>区间的定义这就决定了二分法的代码应该如何写，<strong>因为定义target在[left, right]区间，所以有如下两点：</strong></p>
+<ul>
+<li>while (left &lt;= right) 要使用 &lt;= ，因为left == right是有意义的，所以使用 &lt;=</li>
+<li>if (nums[middle] &gt; target) right 要赋值为 middle - 1，因为当前这个nums[middle]一定不是target，那么接下来要查找的左区间结束下标位置就是 middle - 1</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>第二种写法，</strong>如果说定义 target 是在一个在左闭右开的区间里，也就是[left, right) ，那么二分法的边界处理方式则截然不同。</p>
+<p>有如下两点：</p>
+<ul>
+<li>while (left &lt; right)，这里使用 &lt; ,因为left == right在区间[left, right)是没有意义的</li>
+<li>if (nums[middle] &gt; target) right 更新为 middle，因为当前nums[middle]不等于target，去左区间继续寻找，而寻找区间是左闭右开区间，所以right更新为middle，即：下一个查询区间不会去比较nums[middle]</li>
+</ul>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://programmercarl.com/0035.%E6%90%9C%E7%B4%A2%E6%8F%92%E5%85%A5%E4%BD%8D%E7%BD%AE.html">35.搜索插入位置</a></p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/">34. 在排序数组中查找元素的第一个和最后一个位置</a></p>
+<p>做了这么多二分下来，感觉二分最核心的还是脑补出这样一个结构：left和right一左一右紧挨着，此时，</p>
+<ol>
+<li><p>left指向target</p>
+<ol>
+<li><p>middle=left</p>
+<p>直接return，此时target = left = right - 1 = middle</p>
+</li>
+<li><p>middle=right</p>
+<ol>
+<li><p>开区间：不可能出现该情况。</p>
+</li>
+<li><p>闭区间：right紧缩。下一轮return，target = left = right = middle</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>right指向target</p>
+<ol>
+<li><p>middle=left</p>
+<p>left紧缩。</p>
+<ol>
+<li><p>开区间：下一轮left = right退出循环，target = left = right = middle + 1</p>
+</li>
+<li><p>闭区间：下一轮return，target = left = right = middle</p>
+</li>
+</ol>
+</li>
+<li><p>middle=right</p>
+<ol>
+<li>开区间：不可能出现该情况。</li>
+<li>闭区间：直接，此时target = right = left + 1 = middle</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p>所以总结：</p>
+<ol>
+<li>对于开区间来说，<code>middle != right</code>恒成立，这点也很直观。</li>
+<li>传统的二分查找开闭区间都是在内层return middle，外层return -1。</li>
+</ol>
+<p>想要解决区间问题，最重要的就是想清楚这四点……</p>
+<p>还有二分枚举：</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/sqrtx/">69. x 的平方根 </a></p>
+<h3 id="双指针"><a href="#双指针" class="headerlink" title="双指针"></a>双指针</h3><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/squares-of-a-sorted-array/">977. 有序数组的平方</a></p>
+<p><img src="/2024/04/27/algorithm_questions/image-20240427223534521.png" alt="image-20240427223534521"></p>
+<p>6666，我用的是方法二，也即找到零点分界线再左右遍历，它这个思路三比我高超</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/3sum/">15. 三数之和</a> 见哈希表一节</p>
+<h3 id="滑动窗口"><a href="#滑动窗口" class="headerlink" title="滑动窗口"></a>滑动窗口</h3><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/minimum-size-subarray-sum/">209. 长度最小的子数组</a></p>
+<p>算是简单的滑动窗口了。right bound负责遍历拓展视野，left bound负责在区间的底线反复横跳。</p>
+<h3 id="各种遍历顺序"><a href="#各种遍历顺序" class="headerlink" title="各种遍历顺序"></a>各种遍历顺序</h3><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/sort-the-matrix-diagonally/">1329. 将矩阵按对角线排序</a></p>
+<p>因为矩阵的下标不能为负数。同一“对角线”上的点，i-j的值相等，但是，可能是负数，所以我们，把那部分负数的值，变换到都大于等于0。 考虑到，i最小为0，j最大为m-1 时，（i-j）最小为：0-(m-1) = 1-m，故i-j+m，就把原来可能为负的区间，向右平移，变成最小值为1的区间。</p>
+<p>因此，我们就可以将每条对角线映射到&lt;i-j+m, array&gt;这样的映射中了。</p>
+<h3 id="TopK"><a href="#TopK" class="headerlink" title="TopK"></a>TopK</h3><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/top-k-frequent-elements/">347. 前 K 个高频元素</a></p>
+<p>这个On做法亮瞎我了。。。</p>
+<h2 id="链表"><a href="#链表" class="headerlink" title="链表"></a>链表</h2><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/remove-linked-list-elements/">203. 移除链表元素</a></p>
+<p>学到了一个很有意思的写法：dummyHead</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ListNode* <span class="title">removeElements</span><span class="params">(ListNode* head, <span class="type">int</span> val)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> dummyHead = std::<span class="built_in">make_shared</span>&lt;ListNode&gt;(<span class="number">0</span>, head);</span><br><span class="line">    <span class="keyword">auto</span> tmp = dummyHead.<span class="built_in">get</span>();</span><br><span class="line">    <span class="keyword">while</span> (tmp-&gt;next) &#123;</span><br><span class="line">        <span class="keyword">if</span> (tmp-&gt;next-&gt;val == val) &#123;</span><br><span class="line">            tmp-&gt;next = tmp-&gt;next-&gt;next;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            tmp = tmp-&gt;next;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dummyHead-&gt;next;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还有递归写法也值得一看：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ListNode* <span class="title">removeElements</span><span class="params">(ListNode* head, <span class="type">int</span> val)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!head)  <span class="keyword">return</span> head;</span><br><span class="line">    head-&gt;next = <span class="built_in">removeElements</span>(head-&gt;next, val);</span><br><span class="line">    <span class="keyword">return</span> head-&gt;val == val ? head-&gt;next : head;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/reverse-linked-list/">206. 反转链表</a></p>
+<p>可以很好地练一下递归写法</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/swap-nodes-in-pairs/">24. 两两交换链表中的节点</a></p>
+<p>还有这题递归写法也很经典</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/intersection-of-two-linked-lists-lcci/">面试题 02.07. 链表相交</a>   <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/linked-list-cycle-ii/">142. 环形链表 II</a></p>
+<p>经典指针</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/aMhZSa/">LCR 027. 回文链表</a></p>
+<p>这题的递归写法思路很有意思</p>
+<h2 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h2><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/two-sum/">1. 两数之和</a></p>
+<p>一次遍历的做法值得注意</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/4sum-ii/">454. 四数相加 II</a>  经典老题，不过这次真是水平提升了居然很快想出一两年前觉得很难的正解hhh</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/3sum/">15. 三数之和</a>   这题其实最难的是去重。</p>
+<p>我的思路是两重循环建立哈希表，然后一重循环找元组。</p>
+<p>对于去重，需要做以下几件事：</p>
+<ol>
+<li><p>保证i&lt;j&lt;k</p>
+</li>
+<li><p><strong>排序</strong></p>
+<p>这个很重要。。。。也是我绞尽脑汁好久没想出来的。有了这个，才能让重复元素连续出现，确保i&lt;j&lt;k的情况不会重复</p>
+</li>
+<li><p>两重循环建立哈希表的时候，保证i和j不重复</p>
+<p>具体来说，对于连续的重复元素，都只取第一个作为i、j，后面的都跳过。</p>
+</li>
+<li><p>一重循环找元组的时候，保证k不重复</p>
+<p>k就不能像3一样简单粗暴地取第一个然后跳过了，因为有可能第一个不满足i&lt;j&lt;k但是第二个满足。</p>
+<p>所以我们要做的，就是把那些满足的加入res之后，赶紧把它给erase了，这样一来就能防止重复了。</p>
+</li>
+</ol>
+<p>还有这题的双指针解法也很需要注意。</p>
+<p><img src="/2024/04/27/algorithm_questions/image-20240501201841386.png" alt="image-20240501201841386"></p>
+<p>我一直没怎么考虑到数组已排序的条件，所以在想怎么用双指针做时一直没想到这点。。。实在是很巧妙。再加上理解为太大了小一点（紧缩有边界），太小了大一点（紧缩左边界），也是挺有意思。</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/4sum/">18. 四数之和</a></p>
+<p>跟三数之和解法一模一样。值得注意的是，需要注意这里的隐式类型转换坑。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> m = <span class="number">0</span>; m &lt; nums.size() - <span class="number">3</span>; m ++)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>当m=0，num.size() = 2,此时居然会得到m &lt; nums.size() - 3为true，解释一下这个现象</strong></p>
+<p>在表达式 <code>m &lt; nums.size() - 3</code> 中，如果 <code>nums.size() = 2</code>，那么 <code>nums.size() - 3</code> 的计算结果为 <code>2 - 3 = -1</code>。这个结果是一个 <code>int</code> 类型的常量 <code>-1</code>，但由于 <code>nums.size()</code> 的返回类型是 <code>size_t</code>，它是一个无符号整数类型。</p>
+<p>在 C++ 中，当无符号整数和有符号整数进行运算时，有符号整数会转换为无符号整数类型。这意味着在计算 <code>nums.size() - 3</code> 时，<code>-1</code> 会被转换为无符号整数。</p>
+<p>具体来说，<code>-1</code> 在无符号整数 <code>size_t</code> 中表示为一个非常大的数，因为在无符号整数中，负数表示为最大的正数减去对应的绝对值。例如，在一个 32 位无符号整数中，<code>-1</code> 会被解释为 <code>4294967295</code>。</p>
+<p>因此，当 <code>m</code> 为 <code>0</code> 时，表达式 <code>m &lt; nums.size() - 3</code> 变成了 <code>0 &lt; -1</code>（解释为一个非常大的正数），结果是 <code>true</code>。这是因为 <code>0</code> 小于非常大的正数，因此得到 <code>true</code> 结果。</p>
+<p>这说明在 C++ 中的类型转换时，要特别注意有符号整数和无符号整数之间的转换，因为它们可能导致意外的结果。在这种情况下，您可能需要确保变量和表达式类型匹配，以避免未预期的行为。</p>
+</blockquote>
+<h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><h3 id="翻转"><a href="#翻转" class="headerlink" title="翻转"></a>翻转</h3><p>各种经典的翻转：</p>
+<p><a target="_blank" rel="noopener" href="https://kamacoder.com/problempage.php?pid=1065">55.右旋字符串</a></p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/reverse-string-ii/">541. 反转字符串 II</a></p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/reverse-words-in-a-string/">151. 反转字符串中的单词</a></p>
+<h3 id="回文"><a href="#回文" class="headerlink" title="回文"></a>回文</h3><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/palindromic-substrings/">647. 回文子串</a></p>
+<h3 id="KMP"><a href="#KMP" class="headerlink" title="KMP"></a>KMP</h3><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/find-the-index-of-the-first-occurrence-in-a-string/">28. 找出字符串中第一个匹配项的下标</a></p>
+<p>也是终于第一次自己写出了KMP。。。</p>
+<p>【【算法】为什么说KMP是自动机？- 字符串匹配DFA的构建和优化】 <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1rW4y1H7nz/?share_source=copy_web&amp;vd_source=f268a75a895f54b9c1bc316efde67a44">https://www.bilibili.com/video/BV1rW4y1H7nz/?share_source=copy_web&amp;vd_source=f268a75a895f54b9c1bc316efde67a44</a></p>
+<p>红字表示等待指针，第一个指针永远等待，通过构筑所有可能输入来构筑等待指针，然后每过一个状态等待指针往下一个字母移动。</p>
+<p><img src="/2024/04/27/algorithm_questions/image-20240502155748704.png" alt="image-20240502155748704"></p>
+<p>然后的话，我们可以化简的思想，就是将这张表简化为只有两列，一列是收到正确消息前进到哪个状态，一类是收到错误消息回退到哪个状态，因为一直回退其实跟直接跳效果是一样的</p>
+<p><img src="/2024/04/27/algorithm_questions/image-20240502160957249.png" alt="image-20240502160957249"></p>
+<p><img src="/2024/04/27/algorithm_questions/image-20240502164319105.png" alt="image-20240502164319105"></p>
+<h2 id="栈和队列"><a href="#栈和队列" class="headerlink" title="栈和队列"></a>栈和队列</h2><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/remove-all-adjacent-duplicates-in-string/">1047. 删除字符串中的所有相邻重复项</a></p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/sliding-window-maximum/">239. 滑动窗口最大值</a></p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/04/21/userspace_scheduling_framework/">COS: A User-space Scheduling Framework</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
