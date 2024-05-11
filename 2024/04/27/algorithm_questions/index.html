@@ -238,6 +238,8 @@
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pair第一位对应val，第二位对应index</span></span><br><span class="line">priority_queue&lt;pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;, vector&lt;pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;&gt;, greater&lt;pair&lt;<span class="type">int</span>, <span class="type">int</span>&gt;&gt;&gt; q;</span><br></pre></td></tr></table></figure>
 
 <p>很直观，pair的greater逻辑应该就是先比第一个再比第二个，学到了。</p>
+<p>24.5.10 <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/count-tested-devices-after-test-operations/">2960. 统计已测试设备</a></p>
+<p>居然无师自通了<a target="_blank" rel="noopener" href="https://oi-wiki.org/basic/prefix-sum/#%E5%B7%AE%E5%88%86">差分</a>，不过差分居然可以视为前缀和，对这个思想感到非常巧妙。当然更复杂的树差分这里暂且只先了解一下概念了。。。</p>
 <h1 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h1><h2 id="数学"><a href="#数学" class="headerlink" title="数学"></a>数学</h2><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/sqrtx/">69. x 的平方根 </a>  牛顿迭代</p>
 <p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/convert-to-base-2/">1017. 负二进制转换</a>  是我最讨厌的数学种类之一……</p>
 <h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/minimum-size-subarray-sum/">209. 长度最小的子数组</a>  TODO</p>
@@ -386,6 +388,14 @@
 <p><img src="/2024/04/27/algorithm_questions/image-20240502164319105.png" alt="image-20240502164319105"></p>
 <h2 id="栈和队列"><a href="#栈和队列" class="headerlink" title="栈和队列"></a>栈和队列</h2><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/remove-all-adjacent-duplicates-in-string/">1047. 删除字符串中的所有相邻重复项</a></p>
 <p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/sliding-window-maximum/">239. 滑动窗口最大值</a></p>
+<ol>
+<li><p>加入二叉树的时间统计；</p>
+<p>仅测试GrayEncoding？</p>
+</li>
+<li><p>随机聚合的效果（恢复吞吐）。 （不设置阈值，随机顺序分类迁移）CHM和VMS数据集</p>
+</li>
+</ol>
+<p>cache size？</p>
 
         </div>
 
@@ -404,6 +414,8 @@
             </div>
         </section>
         <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2024/05/11/SMR_DePFC/">SMR</a>
             
             
             <a class="next" rel="next" href="/2024/04/21/userspace_scheduling_framework/">COS: A User-space Scheduling Framework</a>
