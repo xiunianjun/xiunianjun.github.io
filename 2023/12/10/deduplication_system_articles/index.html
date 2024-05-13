@@ -228,26 +228,7 @@
             <blockquote>
 <p>各个超链接导向对应的文章分链接。</p>
 </blockquote>
-<h1 id="Deduplication"><a href="#Deduplication" class="headerlink" title="Deduplication"></a>Deduplication</h1><h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a><a href="/2023/12/10/deduplication_overview">综述</a></h2><h2 id="Indexing"><a href="#Indexing" class="headerlink" title="Indexing"></a>Indexing</h2><h3 id="sparce-indexing"><a href="#sparce-indexing" class="headerlink" title="sparce indexing"></a>sparce indexing</h3><p>基于chunks的去重都要求使用full index，而这RAM一般承受不起，但是纯用disk io就太慢了。所以它利用了数据局部性：</p>
-<p>If two pieces of backup streams share any chunks, they are likely to share many chunks. <u>如果两个segment共享了某个chunk，那么它们很有可能共享很多chunks。</u></p>
-<p><strong>是这样的流程：</strong></p>
-<ol>
-<li>分段为segment；</li>
-<li>计算该segment的每个chunk的fp，然后对每个chunk查询其对应的sparce indexing table: &lt;fp, segment_id&gt;，记录<u>可能跟它共享很多chunk的segment</u>的segment_id；</li>
-<li>读取这些segment_id对应的segment的chunk indexing table（存储在disk中）；</li>
-<li>for every chunks： 重复，copy entry ；不重复，add to new container</li>
-<li>最后再将该segment的信息写入磁盘，填写sparce indexing表。</li>
-</ol>
-<p>而sparce indexing表最一开始，由对input segment进行chunks的随机抽样得出（或者逐渐构建起来，反正大概是这个意思）</p>
-<p>可以看到，它将segment info保留在disk中，在RAM中只保留fp2seg_id的映射，每次只需简单从磁盘中读取几个segment info即可，利用数据局部性极大地降低了磁盘IO次数。</p>
-<p>Odess采用的就是类似这种capping+sparce indexing的方法。</p>
-<p>将sparce indexing从原来的&lt;fp, seg_id&gt;改为&lt;fp, cid&gt;，并且每次只取top T个包含sample chunks最多的容器，从而将对segment进行cap修改为对container进行cap。仔细想想，这样确实依然保证了原算法的核心思想，也属于是segment size = container size的特种了。</p>
-<p>不这个&lt;fp, cid&gt;不就是Odess中的recipe（或者说是全局指纹表）吗？乐。Odess也确实体现了这种capping+sparce indexing结合的方法【只不过进行简化了，每个chunk固定取其第一个container】。</p>
-<h2 id="Chunking"><a href="#Chunking" class="headerlink" title="Chunking"></a>Chunking</h2><h3 id="FastCDC"><a href="#FastCDC" class="headerlink" title="FastCDC"></a><a href="/2023/12/08/fastcdc">FastCDC</a></h3><h2 id="Fragment"><a href="#Fragment" class="headerlink" title="Fragment"></a>Fragment</h2><h3 id="data-layout"><a href="#data-layout" class="headerlink" title="data layout"></a>data layout</h3><h4 id="MFDedup"><a href="#MFDedup" class="headerlink" title="MFDedup"></a><a href="/2023/10/11/MFDedup">MFDedup</a></h4><p>有机会可以再看看代码实现。</p>
-<h3 id="rewrite"><a href="#rewrite" class="headerlink" title="rewrite"></a>rewrite</h3><h4 id="capping"><a href="#capping" class="headerlink" title="capping"></a><a href="/2024/01/07/Capping">capping</a></h4><p>这篇文章的测试做得很友好很完善，值得精读。</p>
-<p>对stream进行分段为segment；限制每个版本的容器数（主要是指引用的旧容器数）；将那些包含重复块rate较小的容器所包含的重复块视为unique block进行rewrite。</p>
-<h4 id="SMR-amp-amp-DePFC"><a href="#SMR-amp-amp-DePFC" class="headerlink" title="SMR &amp;&amp; DePFC"></a><a href="/2024/05/11/SMR_DePFC">SMR &amp;&amp; DePFC</a></h4><p>非常impressive的两个方法</p>
-<h1 id="Restore"><a href="#Restore" class="headerlink" title="Restore"></a>Restore</h1><h2 id="cache"><a href="#cache" class="headerlink" title="cache"></a>cache</h2><h2 id="recipe"><a href="#recipe" class="headerlink" title="recipe"></a>recipe</h2><h3 id="forward-assembly"><a href="#forward-assembly" class="headerlink" title="forward-assembly"></a>forward-assembly</h3><h3 id="OdessStorage"><a href="#OdessStorage" class="headerlink" title="OdessStorage"></a>OdessStorage</h3><h1 id="GC"><a href="#GC" class="headerlink" title="GC"></a><a href="/2023/12/09/deduplication_GC">GC</a></h1>
+<h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a><a href="/2023/12/10/deduplication_overview">综述</a></h1><h1 id="Indexing"><a href="#Indexing" class="headerlink" title="Indexing"></a><a href="/2023/11/11/Indexing">Indexing</a></h1><h1 id="Chunking"><a href="#Chunking" class="headerlink" title="Chunking"></a>Chunking</h1><h2 id="FastCDC"><a href="#FastCDC" class="headerlink" title="FastCDC"></a><a href="/2023/12/08/fastcdc">FastCDC</a></h2><h1 id="Fragment"><a href="#Fragment" class="headerlink" title="Fragment"></a>Fragment</h1><h2 id="data-layout"><a href="#data-layout" class="headerlink" title="data layout"></a>data layout</h2><h3 id="MFDedup"><a href="#MFDedup" class="headerlink" title="MFDedup"></a><a href="/2023/10/11/MFDedup">MFDedup</a></h3><h2 id="Rewriting"><a href="#Rewriting" class="headerlink" title="Rewriting"></a><a href="/2024/05/11/Rewriting">Rewriting</a></h2><h1 id="GC"><a href="#GC" class="headerlink" title="GC"></a><a href="/2023/12/09/deduplication_GC">GC</a></h1>
         </div>
 
         

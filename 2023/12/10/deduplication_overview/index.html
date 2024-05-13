@@ -242,7 +242,7 @@
 <h3 id="delta-compression"><a href="#delta-compression" class="headerlink" title="delta compression"></a>delta compression</h3><p>它的提出是针对于小文件/相似chunk的。它的思想感觉有点类似密码学，大概是这样：</p>
 <figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">given file <span class="selector-tag">A</span>,<span class="selector-tag">B</span></span><br><span class="line">calc △ab，</span><br><span class="line">我们就可以通过△ab和<span class="selector-tag">B</span>来恢复出一个<span class="selector-tag">A</span>。</span><br></pre></td></tr></table></figure>
 
-<p>目前正在尝试把它纳入到deduplication system中。</p>
+<p>目前正在尝试把它纳入到deduplication system中。不过目前的瓶颈似乎是这样的，delta compression是要求要将当前chunk同base chunk进行对比，所以怎么找到base chunk就成了问题。</p>
 <h3 id="Deduplication"><a href="#Deduplication" class="headerlink" title="Deduplication"></a>Deduplication</h3><p>总之，在compression byte-by-byte识别redundant data这样粒度太小的劣势下，通过计算“cryptographically secure hash-based fingerprints”来识别redundant data的chunk-level的deduplication优势就来了！</p>
 <h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><p><img src="/2023/12/10/deduplication_overview/image-20231210223322234.png" alt="image-20231210223322234"></p>
 <p>这里也是给了一张很棒的图来总结了上文。</p>
