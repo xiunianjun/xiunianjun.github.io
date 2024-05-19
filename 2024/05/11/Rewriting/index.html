@@ -227,6 +227,8 @@
         <div class="post-content">
             <h1 id="Capping"><a href="#Capping" class="headerlink" title="Capping"></a><a href="/2024/01/07/Capping">Capping</a></h1><p>测试做得很友好很完善</p>
 <p>对stream进行分段为segment；限制每个版本的容器数（主要是指引用的旧容器数）；将那些包含重复块rate较小的容器所包含的重复块视为unique block进行rewrite。</p>
+<h1 id="HAR"><a href="#HAR" class="headerlink" title="HAR"></a>HAR</h1><p>sparse container和out-of-order container；连续备份间sparse container有继承趋势；每次重写所有继承的sparse container，并且维护当前的sparse container列表以供下次备份参考。</p>
+<p>TODO</p>
 <h1 id="SMR"><a href="#SMR" class="headerlink" title="SMR"></a>SMR</h1><p><a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/abstract/document/8402122/">Improving Restore Performance in Deduplication Systems via a Cost-Efficient Rewriting Scheme</a></p>
 <p>在去重时选择容器这个问题可以建模为一个NP的算法问题：（或者说Restoration，由于是反过程所以感觉原理也比较相似）</p>
 <p><strong>Input</strong>:         n个等长集合；数组target【container、recipe】</p>
@@ -274,7 +276,20 @@
 <blockquote>
 <p>我看这篇文章，其实是想在当前代码框架尝试着去复现它的。然而，当前的代码框架是一个顺序写入recipe和block的逻辑，貌似不大支持有的chunk可能得在下一个segment的时候才能被确定recipe中的容器位置，我能想到的唯一解决方法是先把这些视为duplicate，等到最后整个dedup完成（所有segment输入完毕）的时候再统一进行一次recipe的更新，不过实现代价可能有点大所以暂时没敢动。</p>
 </blockquote>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>这里也暂且放个我的DePFC + Capping的代码实现吧，虽然最后发现还是不大行（指跟现有代码框架不大兼容，但感觉逻辑一类还是差不多），虽然未经debug，感觉也是可供参考。下面的代码暂没更新fp index，只是基本逻辑框架。</p>
+<p>不过想了想，如果是结合HAR实现的话，可能不一定会这么复杂。首先得知道为什么<strong>HAR的话PFC是每隔两个版本才被重写一次</strong>，因为你刚重写完的那个版本中PFC所在容器肯定不是sparse的吧，所以下一个版本自然也不会认定其为herite然后重写。因此，我们就需要的是根据相隔版本来构造RCrecent。而且值得注意的是，HAR检测需要重写的块是通过一个global的视角来实现的，只要对应容器是herite的那么它就是需要重写的，因此就不用考虑什么FCBuffer这种现象，更进一步的也不用啥LRU cache了，这个可以通过恢复时采用OPT算法或者更大的缓存来实现。具体来说，逻辑大概是这样：</p>
+<ol>
+<li><p>如果chunk所在cid ∉ sparse herite</p>
+<p>去重or重写</p>
+</li>
+<li><p>如果chunk所在cid ∈ sparse herite</p>
+<ol>
+<li>如果chunk在上上个版本的RCrecent    PFC</li>
+<li>不在    PFC</li>
+</ol>
+</li>
+</ol>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>DePFC的代码感觉比别的两个要复杂，这里也暂且放个我的DePFC + Capping的代码实现吧，虽然最后发现还是不大行（指跟现有代码框架不大兼容，但感觉逻辑一类还是差不多），虽然未经debug，感觉也是可供参考。下面的代码暂没更新fp index，只是基本逻辑框架。</p>
+<p>TODO，之后有时间继续完善下吧</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	基本思路：</span></span><br><span class="line"><span class="comment">	1. Capping识别出FC</span></span><br><span class="line"><span class="comment">	2. doDePFC()分类出PFC和RFC</span></span><br><span class="line"><span class="comment">		1. 不断地从wl中获取，unique跳过，普通duplicate跳过</span></span><br><span class="line"><span class="comment">		2. FCBuffer满时全部视为PFC，加入PFC set，更新global fp index</span></span><br><span class="line"><span class="comment">		3. 驱逐遍历时，PFC加入PFC set，RFC更新rewritten index</span></span><br><span class="line"><span class="comment">		4. 如果FCBuffer中某一容器出现频率达到阈值，移出FCBuffer（相当于视作RFC了）</span></span><br><span class="line"><span class="comment">	3. 在写入阶段</span></span><br><span class="line"><span class="comment">		1. unique和duplicate正常处理（写入data block、写入recipe）</span></span><br><span class="line"><span class="comment">		2. 如果是PFC，写入new container</span></span><br><span class="line"><span class="comment">	当前代码框架是顺序写入逻辑，要求写入时必须要写入recipe。上述思路会致使一些chunk在本segment输入结束时仍未得知自己是PFC还是RFC还是普通duplicate，从而无法顺序写入recipe，导致可能需要先把FC都视为duplicate，然后之后再进行一个统一的更新recipe。由于实现太过复杂，时间上来不大及，故而暂且先放下。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
 
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Data Structure */</span></span><br><span class="line"><span class="comment">// FCBuffer &lt;cid, FCs&gt;</span></span><br><span class="line">std::unordered_map&lt;<span class="type">uint64_t</span>, std::list&lt;SHA1FP&gt;&gt; FCBuffer;</span><br><span class="line"><span class="type">const</span> <span class="type">static</span> <span class="type">uint64_t</span> FCBufferCapacity = ContainerSize / ExpectChunkSize;</span><br><span class="line"><span class="type">int</span> FCBufferCurrentSize = <span class="number">0</span>;</span><br><span class="line"><span class="type">uint64_t</span> FCBuffer_new_cid = fid;</span><br><span class="line"></span><br><span class="line"><span class="comment">// old rewritten index</span></span><br><span class="line">std::unordered_set&lt;SHA1FP, TupleHasher, TupleEqualer&gt; RCIndex;</span><br><span class="line"><span class="comment">// new rewritten index</span></span><br><span class="line">std::unordered_set&lt;SHA1FP, TupleHasher, TupleEqualer&gt; new_RCIndex;</span><br><span class="line"></span><br><span class="line">LRUCache SRC;	<span class="comment">// LRU for container id</span></span><br><span class="line"></span><br><span class="line">std::unordered_set&lt;SHA1FP, TupleHasher, TupleEqualer&gt; PFC;</span><br><span class="line"><span class="comment">// 记录FC中被视为duplicate的（与Capping兼容情况）</span></span><br><span class="line">std::unordered_set&lt;SHA1FP, TupleHasher, TupleEqualer&gt; InterCapping;</span><br></pre></td></tr></table></figure>
@@ -309,8 +324,6 @@
             </div>
         </section>
         <section class="post-nav">
-            
-                <a class="prev" rel="prev" href="/2024/05/11/SMR_DePFC/">SMR</a>
             
             
             <a class="next" rel="next" href="/2024/04/27/algorithm_questions/">算法题</a>
