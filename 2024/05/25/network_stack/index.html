@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title"></h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">五月 25, 2024&nbsp;&nbsp;14:58:59</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <blockquote>
+<p><a href>实验指导书</a></p>
+<p><a href>我的代码&amp;&amp;相关注释</a></p>
+</blockquote>
+<h1 id="置顶"><a href="#置顶" class="headerlink" title="置顶"></a>置顶</h1><p>关于对分片的支持          CS144似乎是将分片支持放在了TCP层，也即由TCP实现分片和传输。在本实验中，我需要思索一下udp怎么适配分片，发送是已经没问题的了，接收需要好好修改一下。</p>
+<h1 id="总体架构"><a href="#总体架构" class="headerlink" title="总体架构"></a>总体架构</h1><p>发送过程：</p>
+<ol>
+<li>UDP发送包</li>
+<li>IP发送包</li>
+<li>ARP发送包<ol>
+<li>地址未知，调用<code>arp_req</code>发送ARP请求</li>
+<li>地址已知，ETH协议</li>
+</ol>
+</li>
+<li>ETH发送包</li>
+</ol>
+<p>接收过程：</p>
+<ol>
+<li><p>ETH收到包</p>
+<ol>
+<li><p>ARP协议</p>
+<ol>
+<li><p>收到了ARP请求报文</p>
+<p>调用<code>arp_resp</code>回应自身MAC地址</p>
+</li>
+<li><p>否则，则为收到了ARP响应报文</p>
+<p>调用<code>eth_out</code>发送驻留的IP报文</p>
+</li>
+</ol>
+</li>
+<li><p>IP协议</p>
+</li>
+</ol>
+</li>
+<li><p>IP收到包</p>
+<ol>
+<li>ICMP协议<ol>
+<li>IP报文协议字段错误，调用<code>icmp_unreachable</code></li>
+<li>如果为ICMP回显请求，发送ICMP响应</li>
+</ol>
+</li>
+<li>UDP协议</li>
+</ol>
+</li>
+<li><p>UDP收到包</p>
+<ol>
+<li>内部错误，调用<code>icmp_unreachable</code></li>
+<li>否则，调用<code>main::handler()</code></li>
+</ol>
+</li>
+</ol>
+<h1 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h1><p>本质上只是类似于一种【抓包程序】：将网卡设置为混杂模式，同时增设一个BPF过滤器，通过接收网络上所有包并筛选出那些目标IP地址等于设置的协议栈地址的部分，然后发送也是借这个网卡发出去，从而达成收发数据包的目的。</p>
+<p>具体可见<code>driver.c</code>文件中的代码和注释。</p>
+<h1 id="协议栈"><a href="#协议栈" class="headerlink" title="协议栈"></a>协议栈</h1><h2 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h2><h3 id="大小端"><a href="#大小端" class="headerlink" title="大小端"></a>大小端</h3><p>网络上传输的数据都是字节流，对于一个多字节数值，在进行网络传输的时候，先传递哪个字节？按照TCP/IP协议规定：网络字节序是大端字节序。但是，X86平台上是以小端字节序存储，也就是，在发送之前我们需要将小端存储的字节序转换成大端法存储的数值，而在接收时，也需要将大端序转成小端序存放的数值。</p>
+<p>我们只需关注那些<strong>长度大于一个字节的数据类型</strong>即可，如protocol_type、opcode16等等等，buf数组以及长度等字段的类型单位只为一个字节大小，无需swap。</p>
+<h3 id="字节对齐"><a href="#字节对齐" class="headerlink" title="字节对齐"></a>字节对齐</h3><p>在大多数计算机体系结构中，数据访问通常按照特定的字长（如32位或64位）进行对齐。结构体（struct）作为复合数据类型，其成员可以是基本数据类型（如int、long、float等），也可以是其他复合数据类型（如数组、结构体、联合体等）。</p>
+<p>在默认情况下，编译器会根据结构体的每个成员的自然对齐条件来分配内存空间，这是为了提高数据访问和运算的效率。自然对齐，也称为默认对齐方式，通常是根据结构体成员中最大尺寸的成员来确定对齐边界。这意味着，即使某些成员的实际大小小于对齐边界，编译器也可能在它们之间插入填充字节，以确保整个结构体满足对齐要求。</p>
+<p>网络传输是字节流传输，但是当发生结构体对齐时，编译器会自动加入填充字节，这样发送出去的字节流某些字段会指向错误的地方，因此，在实验中，我们需要禁用结构体内部字段的对齐。</p>
+<p>在实验代码中，可以使用伪指令pack(n)，编译器将按照n个字节对齐。注意：如果指定的n大于结构体最大成员的size，则其不起作用，结构体仍然按照size最大的成员进行对齐。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack(1) <span class="comment">// 编译器将按照1个字节对齐</span></span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">ether_hdr</span></span></span><br><span class="line"><span class="class"> &#123;</span></span><br><span class="line">     <span class="type">uint8_t</span> dst[NET_MAC_LEN]; <span class="comment">// 目标mac地址</span></span><br><span class="line">     <span class="type">uint8_t</span> src[NET_MAC_LEN]; <span class="comment">// 源mac地址</span></span><br><span class="line">     <span class="type">uint16_t</span> protocol16;      <span class="comment">// 协议/长度</span></span><br><span class="line"> &#125; <span class="type">ether_hdr_t</span>;</span><br><span class="line"> <span class="meta">#<span class="keyword">pragma</span> pack() <span class="comment">// 取消自定义字节对齐方式</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Map的使用"><a href="#Map的使用" class="headerlink" title="Map的使用"></a>Map的使用</h3><p>本实验用C语言实现了一个标准的泛型容器map，非常值得一看。</p>
+<h2 id="ETH"><a href="#ETH" class="headerlink" title="ETH"></a>ETH</h2><p><img src="/2024/05/25/network_stack/%E4%BB%A5%E5%A4%AA%E7%BD%91%E6%95%B0%E6%8D%AE%E5%B8%A71.png" alt="../_images/%E4%BB%A5%E5%A4%AA%E7%BD%91%E6%95%B0%E6%8D%AE%E5%B8%A71.png"></p>
+<p><img src="/2024/05/25/network_stack/%E5%B8%A7%E6%A0%BC%E5%BC%8F1.png" alt="../_images/%E5%B8%A7%E6%A0%BC%E5%BC%8F1.png"></p>
+<h2 id="ARP"><a href="#ARP" class="headerlink" title="ARP"></a>ARP</h2><p>在TCP/IP的网络构造和网络通信中无需事先知道MAC地址究竟是什么，只要确定了IP地址，就可向这个目标地址发送IP数据报了。然而，在数据链路层使用的是硬件地址（MAC）进行报文传输，IP地址不能被物理网络所识别，因此必须建立IP地址和MAC地址的映射关系，这一过程称为ARP（Address Resolution Protocol）地址解析协议。</p>
+<p>ARP协议以目标IP地址为线索，用来定位下一个应该接收数据包的网络设备对应的MAC地址。如果目标主机不在同一个链路上，可以通过ARP查找下一跳网关的MAC地址。<strong>注意，ARP只适用于IPv4，不能用于IPv6</strong>。IPv6可以用ICMPv6替代ARP发送邻居探索消息。</p>
+<p>那么ARP又是如何知道MAC地址的呢？简单地说，ARP是借助ARP请求与ARP响应两种类型的包确定MAC地址的。此外，在每台使用ARP的主机中，都保留了一个专用的内存区（称为缓存），存放最近的IP地址与硬件地址的对应关系。一旦收到ARP应答，主机将获得的IP地址和硬件地址的对应关系存到缓存中。当发送报文时，首先去缓存中查找相应的项，如果找到相应项，便将报文直接发送出去；如果找不到，再利用ARP进行解析。ARP 缓存信息在一定时间内有效，过期不更新就会被删除。</p>
+<p>ARP是一个独立的三层协议，所以ARP报文在向数据链路层传输时不需要经过IP协议的封装，而是直接生成自己的报文，其中包括ARP报头，到数据链路层后再对应的数据链路层（如以太网协议）进行封装。ARP报文分为ARP请求和应答报文两种，报文格式如下图所示。</p>
+<p><img src="/2024/05/25/network_stack/ARP.png" alt="../_images/ARP.png"></p>
+<h2 id="IP"><a href="#IP" class="headerlink" title="IP"></a>IP</h2><p>数据链路层提供两个直连设备之间的通信功能，而一旦跨越不同的数据链路，就需要借助网络层。IP(Internet Protocol，网际协议) 是TCP/IP协议网络层的协议，其主要作用是“实现终端节点之间的通信”，也叫“点对点（point-to-point）通信”。IP可大致分为三大作用模块，分别是IP寻址、IP分包与组包以及路由转发，其中，路由转发功能涉及到路由协议，在本节实验中不做重点介绍。</p>
+<p><img src="/2024/05/25/network_stack/IP%E5%9C%B0%E5%9D%80.png" alt="../_images/IP%E5%9C%B0%E5%9D%80.png"></p>
+<p>IP提供了一种尽力而为、无连接的数据报交付服务。“尽力而为”的含义是不保证IP数据报能成功到达目的地。“无连接”意味着IP不维护网络单元（即路由器）中数据报相关的任何链接状态信息，每个数据报独立于其他数据报来处理，这也意味着IP数据报可不按顺序交付。</p>
+<p>本实验是基于IPv4协议上完成的，以下主要介绍IPv4版本的IP协议。IPv4的头部结构长度为20字节，若含有可变长的选项部分，最多60字节。</p>
+<p><img src="/2024/05/25/network_stack/IP%E9%A6%96%E9%83%A8.png" alt="../_images/IP%E9%A6%96%E9%83%A8.PNG"></p>
+<p>这3个字段（标识、标志、位偏移）则描述如何实现分片重组:</p>
+<ol>
+<li><strong>标识</strong> ：唯一地标识主机发送的每一个数据报，其初始值是随机的，每发送一个数据报其值就加1。同一个数据报的所有分片都具有相同的标识值。本实验中，标识字段可从0开始计数，然后往上自增。</li>
+<li><strong>标志</strong> : 位1保留，位2表禁止分片(DF)，若设置了此位，IP模块将不对数据报进行分片，在此情况下若IP数据报超过MTU，IP模块将丢弃数据报并返回一个ICMP差错报文；位3标识更多分片(MF)，除了数据报的最后一个分片，其他分片都要把它设置为1。</li>
+<li><strong>位偏移</strong> ：分片相对原始IP数据报数据部分的偏移。<u>实际的偏移值为该值左移3位后得到的</u>，所以除了最后一个IP数据报分片外，每个IP分片的<u>数据部分的长度都必须是8的整数倍</u>。</li>
+</ol>
+<p>其它字段：</p>
+<ol>
+<li><strong>生存时间</strong> ：数据报到达目的地之前允许经过的<u>路由器跳数</u>。TTL值被发送端设置，常设置为64。数据报在转发过程中每经过一个路由该值就被路由器减1.当TTL值为0时，路由器就将该数据包丢弃，并向源端发送一个ICMP差错报文。TTL可以防止数据报陷入路由循环。</li>
+<li><strong>协议</strong> : 区分IP协议上的上层协议。在Linux系统的/etc/protocols文件中定义了所有上层协议对应的协议字段，<u>ICMP为1，TCP为6，UDP为17</u>。</li>
+<li><strong>头部校验和</strong> ： 由发送端填充接收端对其使用<u>CRC算法校验</u>，检查IP数据报头部在传输过程中是否损坏。IP头部校验和只针对IP首部做校验，对其负载数据的校验是上层协议负责的，它不需要关心负载数据在传输过程中出错与否。IP数据报在转发的过程中，其头部字段就会被改变一次（比如修改TTL等），但IP数据报中的负载数据字段是不会改变的，因此，通过只校验IP头部的方式，也可以提高路由器处理分组的效率。</li>
+<li><strong>源IP地址和目的IP地址</strong> : 表示数据报的发送端和接收端。</li>
+<li><strong>区分服务(Type Of Service，TOS)</strong> ：3位优先权字段(现已被忽略) + 4位TOS字段 + 1位保留字段(须为0)。4位TOS字段分别表示最小延时、最大吞吐量、最高可靠性、最小费用，其中最多有一个能置为1。应用程序根据实际需要来设置TOS值。本实验中，可将TOS设置为0。<ul>
+<li>最小延时：确保数据包尽快到达目的地，适用于需要低延迟的应用，如 VoIP 或在线游戏、ssh和telnet这样的登录程序。</li>
+<li>最大吞吐量：允许数据包以最大速率传输，适用于需要高带宽的应用，如视频会议、文件传输ftp。</li>
+<li>最高可靠性：减少数据包丢失和错误，适用于需要高可靠性的应用，如金融交易。</li>
+<li>最小费用：选择成本最低的路径传输数据包，适用于成本敏感的应用。</li>
+</ul>
+</li>
+</ol>
+<p><img src="/2024/05/25/network_stack/IP%E5%88%86%E7%89%87.png" alt="../_images/IP%E5%88%86%E7%89%87.PNG"></p>
+<h2 id="ICMP"><a href="#ICMP" class="headerlink" title="ICMP"></a>ICMP</h2><p>将Internet控制报文协议（Internet Control Message Protocol，ICMP）与IP结合使用，以便提供与IP协议层配置和IP数据包处理相关的诊断和控制信息。ICMP主要功能包括：确认IP包是否成功送达目标地址、通知发送过程当中IP包被废弃的具体原因、改善网络设置等。ICMP协议应用在许多网络管理命令中。例如，<strong>ping命令</strong>使用ICMP回送请求和应答报文，路由分析诊断程序tracert使用ICMP时间超过报文等。</p>
+<p>报文是在IP数据报内被封装传输的。ICMP头部8个字节，所有数据都在ICMP头部后面。ICMP报文格式具体见RFC777，RFC792规范。</p>
+<p><img src="/2024/05/25/network_stack/ICMP%E6%A0%BC%E5%BC%8F.png" alt="../_images/ICMP%E6%A0%BC%E5%BC%8F.png"></p>
+<p>ICMP的消息大致可以分为两类：一类是通知出错原因的错误消息（又称差错报文，error message），另一类是用于诊断的查询消息（又称询问或信息报文，information message）。</p>
+<p><img src="/2024/05/25/network_stack/ICMP%E7%B1%BB%E5%9E%8B.png" alt="../_images/ICMP%E7%B1%BB%E5%9E%8B.png"></p>
+<ul>
+<li><p>差错报文</p>
+<p>差错报文保留IP数据包中的前8个字节意义：TCP、UDP前八字节都含有源端口号，可以反馈给源主机。接收ICMP差错报文的模块就会把它与某个协议和用户进程联系起来。其中协议：根据IP数据报首部中的协议字段来判断，用户进程：根据包含在IP数据报前8字节中的TCP、UDP报文首部中的TCP、UDP端口号判断。</p>
+<p><img src="/2024/05/25/network_stack/ICMP%E5%B7%AE%E9%94%99%E6%8A%A5%E6%96%87.png" alt="../_images/ICMP%E5%B7%AE%E9%94%99%E6%8A%A5%E6%96%87.png"></p>
+</li>
+<li><p>查询报文</p>
+<p>其中16位校验和（Checksum）涵盖了整个报文，其校验和的计算方法和IP协议校验和算法是一样的；</p>
+<p>标识符（Identifier）：如果是ICMP请求报文，该字段在Linux/macOS中用的是进程ID。如果是ICMP应答报文，则只需拷贝来自ICMP请求报文的标识符字段；</p>
+<p>序列号（Sequence number）：如果是ICMP请求报文，该字段在Linux/macOS中是从0递增的，每个进程独立。如果是ICMP应答报文，则只需拷贝来自ICMP请求报文的序列号字段；</p>
+<p>数据（Optional data）：如果是ICMP请求报文，该字段包括时间戳以及一串填充数据。如果是ICMP应答报文，则只需拷贝来自ICMP请求报文的数据字段。</p>
+<p><img src="/2024/05/25/network_stack/ICMP%E4%BF%A1%E6%81%AF%E6%8A%A5%E6%96%87.png" alt="../_images/ICMP%E4%BF%A1%E6%81%AF%E6%8A%A5%E6%96%87.png"></p>
+<p><img src="/2024/05/25/network_stack/image-20240526200525596.png" alt="image-20240526200525596"></p>
+</li>
+</ul>
+<h1 id="附加题"><a href="#附加题" class="headerlink" title="附加题"></a>附加题</h1><h2 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h2><p>首先实现server逻辑吧</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2024/06/15/network_system_security/">网络与系统安全</a>
+            
+            
+            <a class="next" rel="next" href="/2024/05/11/Rewriting/">Rewriting</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
