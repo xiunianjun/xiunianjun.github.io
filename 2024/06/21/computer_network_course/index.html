@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>计算机网络 | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">计算机网络</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">六月 21, 2024&nbsp;&nbsp;18:36:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p><img src="/2024/06/21/computer_network_course/image-20240616162640888.png" alt="image-20240616162640888"></p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><ol>
+<li><p>计算机网络的定义</p>
+<p>计算机网络就是互连的、自治（无主从关系）的计算机集合。通过交换网络互连主机，交换结点指路由器or交换机</p>
+</li>
+<li><p>Internet的定义和组成</p>
+<p>网络之网络，全球最大互联网络</p>
+<ol>
+<li><p>计算设备</p>
+<p>主机=端系统</p>
+</li>
+<li><p>通信链路</p>
+<p>光纤卫星铜缆</p>
+</li>
+<li><p>分组交换：转发分组</p>
+<p>路由器、交换机</p>
+</li>
+<li><p>通信基础设施</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619195855812.png" alt="image-20240619195855812"></p>
+</li>
+<li><p>API</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619195914170.png" alt="image-20240619195914170"></p>
+</li>
+</ol>
+</li>
+<li><p>协议</p>
+<p>硬件（主机、路由器、通信链路）是计算机网络的基础</p>
+<p>数据交换必须依照定义好的规则：计算机网络的所有通信过程都必须遵守某种/些规则—协议</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616163247227.png" alt="image-20240616163247227"></p>
+<p>协议的三要素：</p>
+<ol>
+<li><p>语法</p>
+<p>数据与控制信息格式、信号电平</p>
+</li>
+<li><p>语义</p>
+<p>何种控制信息、何种响应、差错控制</p>
+</li>
+<li><p>时序</p>
+<p>事件顺序、速度匹配</p>
+</li>
+</ol>
+</li>
+<li><p>计算机网络分类</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616163411427.png" alt="image-20240616163411427"></p>
+</li>
+<li><p>ISP</p>
+<p>Internet Service Provider，互联网服务提供商。</p>
+<p>ISP 是提供互联网接入服务的公司或组织，它们允许用户通过各种方式连接到互联网。ISP 可以是商业公司、社区组织或政府机构，它们通常提供以下服务：</p>
+<ol>
+<li><strong>互联网接入</strong>：ISP 提供连接到全球互联网的途径，用户可以通过有线或无线方式接入。</li>
+<li><strong>数据传输</strong>：ISP 负责传输用户的数据，包括网页浏览、电子邮件、文件下载和上传等。</li>
+<li><strong>网络管理</strong>：ISP 管理其网络基础设施，确保网络的稳定性和可靠性。</li>
+<li><strong>增值服务</strong>：许多ISP还提供额外的服务，如网络安全、云存储、域名注册等。</li>
+<li><strong>网络监管</strong>：在某些情况下，ISP 可能需要遵守政府的监管政策，对用户的数据传输进行监控或过滤。</li>
+</ol>
+<p>ISP 可以是本地的小型服务提供商，也可以是覆盖全国或跨国的大型服务提供商。用户通常会根据价格、服务质量、速度和其他因素选择ISP。</p>
+</li>
+</ol>
+<h2 id="计算机网络结构"><a href="#计算机网络结构" class="headerlink" title="计算机网络结构"></a>计算机网络结构</h2><p><img src="/2024/06/21/computer_network_course/image-20240616163427996.png" alt="image-20240616163427996"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616163438956.png" alt="image-20240616163438956"></p>
+<h3 id="网络边缘"><a href="#网络边缘" class="headerlink" title="网络边缘"></a>网络边缘</h3><ol>
+<li>主机（端系统）</li>
+<li>CS结构</li>
+<li>P2P结构，在对等实体之间通信</li>
+</ol>
+<h3 id="接入网络"><a href="#接入网络" class="headerlink" title="接入网络"></a>接入网络</h3><h4 id="总体架构"><a href="#总体架构" class="headerlink" title="总体架构"></a>总体架构</h4><p>将网络边缘接入核心网络（边缘路由器）</p>
+<p>家庭的直连路由器，企业的一般连接交换机</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616164632454.png" alt="image-20240616164632454"></p>
+<h4 id="接入方式"><a href="#接入方式" class="headerlink" title="接入方式"></a>接入方式</h4><ol>
+<li><p>电话接入（DSL）</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616163638076.png" alt="image-20240616163638076"></p>
+<blockquote>
+<p>FDM（Frequency-Division Multiplexing，频分多路复用）指的是一种在特定频段内分配不同用途的通信方式。频率分配方式允许不同的通信服务或信号在同一物理通道上共存，但通过不同的频率范围来区分，确保它们不会互相干扰。</p>
+<ul>
+<li><strong>下行（下载）（Downlink）</strong>：指的是信号从基站（或中心节点）传输到移动设备（如手机、平板电脑等）的过程。</li>
+<li><strong>上行（上传）（Uplink）</strong>：与下行相反，上行指的是信号从移动设备传输到基站（或中心节点）的过程。</li>
+</ul>
+</blockquote>
+</li>
+<li><p>电缆网络</p>
+<p>使用FDM频分多路复用</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616163938017.png" alt="image-20240616163938017"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616163954071.png" alt="image-20240616163954071"></p>
+</li>
+<li><p>光纤到户（FTTH）</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616164305243.png" alt="image-20240616164305243"></p>
+</li>
+</ol>
+<h3 id="网络核心"><a href="#网络核心" class="headerlink" title="网络核心"></a>网络核心</h3><p>互联的路由器网络</p>
+<p>网络核心的关键功能：路由+转发</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616164718533.png" alt="image-20240616164718533"></p>
+<h3 id="网络之网络"><a href="#网络之网络" class="headerlink" title="网络之网络"></a>网络之网络</h3><p><img src="/2024/06/21/computer_network_course/image-20240616164829438.png" alt="image-20240616164829438"></p>
+<p>如何互连数以万计的ISP？</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616164957169.png" alt="image-20240616164957169"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165009288.png" alt="image-20240616165009288"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165024115.png" alt="image-20240616165024115"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165054260.png" alt="image-20240616165054260"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165132950.png" alt="image-20240616165132950"></p>
+<p>所以因此需要引入分级系统</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165224049.png" alt="image-20240616165224049"></p>
+<h2 id="数据交换"><a href="#数据交换" class="headerlink" title="数据交换"></a>数据交换</h2><p>recall: 互联的路由器网络Q：如何实现数据通过网络核心从源主机到达目的主机？A：<strong>数据交换</strong></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165744420.png" alt="image-20240616165744420"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165756475.png" alt="image-20240616165756475"></p>
+<h3 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h3><p><img src="/2024/06/21/computer_network_course/image-20240616165830421.png" alt="image-20240616165830421"></p>
+<ol>
+<li><p>电路交换</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165916118.png" alt="image-20240616165916118"></p>
+</li>
+<li><p>报文交换（注意，这个是<strong>一整个文件直接发</strong>）</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616165954326.png" alt="image-20240616165954326"></p>
+</li>
+<li><p>分组交换（package switching）</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616170054572.png" alt="image-20240616170054572"></p>
+</li>
+</ol>
+<h3 id="存储转发-报文vs分组"><a href="#存储转发-报文vs分组" class="headerlink" title="存储转发(报文vs分组)"></a>存储转发(报文vs分组)</h3><p>报文交换与分组交换都是存储-转发模式</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616171421826.png" alt="image-20240616171421826"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616171511041.png" alt="image-20240616171511041"></p>
+<p>需要经过三段路程，每段5s</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616171807926.png" alt="image-20240616171807926"></p>
+<p>相当于有了一层流水线。每一跳需要1ms，一共5000个报文，最后叠起来相当于1+5000+1=5002ms。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616172342062.png" alt="image-20240616172342062"></p>
+<p><strong>相当于（分组数+路由器数）*分组大小除以带宽 = (M/L)*L/R+(h-1)*L/R = M/R+nL/R</strong></p>
+<h3 id="分组vs电路"><a href="#分组vs电路" class="headerlink" title="分组vs电路"></a>分组vs电路</h3><p><img src="/2024/06/21/computer_network_course/image-20240616172820593.png" alt="image-20240616172820593"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616172846770.png" alt="image-20240616172846770"></p>
+<p>拥塞相对来说也是电路的优点，他本身自带可靠传输</p>
+<h2 id="计算机网络性能指标"><a href="#计算机网络性能指标" class="headerlink" title="计算机网络性能指标"></a>计算机网络性能指标</h2><p><img src="/2024/06/21/computer_network_course/image-20240616202330010.png" alt="image-20240616202330010"></p>
+<h3 id="速率-带宽-吞吐量"><a href="#速率-带宽-吞吐量" class="headerlink" title="速率/带宽/吞吐量"></a>速率/带宽/吞吐量</h3><p>“速率”在题目中一般都叫<strong>数据传输速率</strong></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616173033909.png" alt="image-20240616173033909"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616173114894.png" alt="image-20240616173114894"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616181328758.png" alt="image-20240616181328758"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616203154644.png" alt="image-20240616203154644"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616181338245.png" alt="image-20240616181338245"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616181350071.png" alt="image-20240616181350071"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616203239440.png" alt="image-20240616203239440"></p>
+<h3 id="延迟-时延"><a href="#延迟-时延" class="headerlink" title="延迟/时延"></a>延迟/时延</h3><p><img src="/2024/06/21/computer_network_course/image-20240616203417746.png" alt="image-20240616203417746"></p>
+<p>传输时延也叫发送时延</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616173223579.png" alt="image-20240616173223579"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616173254183.png" alt="image-20240616173254183"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616173400088.png" alt="image-20240616173400088"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616174928447.png" alt="image-20240616174928447"></p>
+<p>也是非常颠覆我。。。不过确实传播延迟有时候相比传输延迟小得多，3kb就是其三百倍的样子，完全可以忽略不计。</p>
+<ol>
+<li><p>排队延迟</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616180702138.png" alt="image-20240616180702138"></p>
+</li>
+</ol>
+<h3 id="时延带宽积"><a href="#时延带宽积" class="headerlink" title="时延带宽积"></a>时延带宽积</h3><p><img src="/2024/06/21/computer_network_course/image-20240616180834856.png" alt="image-20240616180834856"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616204331118.png" alt="image-20240616204331118"></p>
+<p>相当于是体积了</p>
+<h3 id="往返时间RTT"><a href="#往返时间RTT" class="headerlink" title="往返时间RTT"></a>往返时间RTT</h3><p><img src="/2024/06/21/computer_network_course/image-20240616180854331.png" alt="image-20240616180854331"></p>
+<h3 id="利用率"><a href="#利用率" class="headerlink" title="利用率"></a>利用率</h3><p><img src="/2024/06/21/computer_network_course/image-20240616181215148.png" alt="image-20240616181215148"></p>
+<p>貌似上图认为ack是不携带数据的了，所以没算tack</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616211411078.png" alt="image-20240616211411078"></p>
+<h2 id="计算机网络体系结构"><a href="#计算机网络体系结构" class="headerlink" title="计算机网络体系结构"></a>计算机网络体系结构</h2><p><img src="/2024/06/21/computer_network_course/image-20240616213653142.png" alt="image-20240616213653142"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616213754255.png" alt="image-20240616213754255"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616213905748.png" alt="image-20240616213905748"></p>
+<h3 id="OSI参考模型"><a href="#OSI参考模型" class="headerlink" title="OSI参考模型"></a>OSI参考模型</h3><p>开放系统互联（OSI）参考模型</p>
+<p>异构网络系统互联的国际标准</p>
+<p>7层：</p>
+<ol>
+<li><p>应用层</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202757801.png" alt="image-20240619202757801"></p>
+</li>
+<li><p>表示层</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616214145639.png" alt="image-20240616214145639"></p>
+</li>
+<li><p>会话层</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202732386.png" alt="image-20240619202732386"></p>
+</li>
+<li><p>传输层</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202659578.png" alt="image-20240619202659578"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202714592.png" alt="image-20240619202714592"></p>
+</li>
+<li><p>网络层</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202634495.png" alt="image-20240619202634495"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202647251.png" alt="image-20240619202647251"></p>
+</li>
+<li><p>数据链路层</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202611749.png" alt="image-20240619202611749"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202625291.png" alt="image-20240619202625291"></p>
+</li>
+<li><p>物理层</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619202558647.png" alt="image-20240619202558647"></p>
+</li>
+</ol>
+<h3 id="TCP-IP模型"><a href="#TCP-IP模型" class="headerlink" title="TCP/IP模型"></a>TCP/IP模型</h3><p><img src="/2024/06/21/computer_network_course/image-20240616214711678.png" alt="image-20240616214711678"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616215229447.png" alt="image-20240616215229447"></p>
+<h1 id="物理层"><a href="#物理层" class="headerlink" title="物理层"></a>物理层</h1><h2 id="基本功能"><a href="#基本功能" class="headerlink" title="基本功能"></a>基本功能</h2><p><img src="/2024/06/21/computer_network_course/image-20240616215756098.png" alt="image-20240616215756098"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616220035337.png" alt="image-20240616220035337"></p>
+<p>Data Terminal Equipment</p>
+<p>Data Circuit-terminating Equipment</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616220640069.png" alt="image-20240616220640069"></p>
+<h2 id="数据通信基础"><a href="#数据通信基础" class="headerlink" title="数据通信基础"></a>数据通信基础</h2><p><img src="/2024/06/21/computer_network_course/image-20240616220652893.png" alt="image-20240616220652893"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616220709453.png" alt="image-20240616220709453"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616221049587.png" alt="image-20240616221049587"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616221117853.png" alt="image-20240616221117853"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616221155335.png" alt="image-20240616221155335"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616221243562.png" alt="image-20240616221243562"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616221348498.png" alt="image-20240616221348498"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616221603304.png" alt="image-20240616221603304"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616221618414.png" alt="image-20240616221618414"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616221658885.png" alt="image-20240616221658885"></p>
+<h2 id="物理介质"><a href="#物理介质" class="headerlink" title="物理介质"></a>物理介质</h2><h3 id="导引型"><a href="#导引型" class="headerlink" title="导引型"></a>导引型</h3><p><img src="/2024/06/21/computer_network_course/image-20240616222102887.png" alt="image-20240616222102887"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616222115067.png" alt="image-20240616222115067"></p>
+<h3 id="非导引型"><a href="#非导引型" class="headerlink" title="非导引型"></a>非导引型</h3><p><img src="/2024/06/21/computer_network_course/image-20240616222129402.png" alt="image-20240616222129402"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616222138465.png" alt="image-20240616222138465"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616222148014.png" alt="image-20240616222148014"></p>
+<h2 id="信道与信道容量"><a href="#信道与信道容量" class="headerlink" title="信道与信道容量"></a>信道与信道容量</h2><p><img src="/2024/06/21/computer_network_course/image-20240616222218890.png" alt="image-20240616222218890"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616222252100.png" alt="image-20240616222252100"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616222701784.png" alt="image-20240616222701784"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616222822912.png" alt="image-20240616222822912"></p>
+<p>第一个给了个理想无噪声，第二个给了个噪声的</p>
+<h2 id="信道共享-多路复用"><a href="#信道共享-多路复用" class="headerlink" title="信道共享-多路复用"></a>信道共享-多路复用</h2><p><img src="/2024/06/21/computer_network_course/image-20240616223922180.png" alt="image-20240616223922180"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616223943863.png" alt="image-20240616223943863"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224005008.png" alt="image-20240616224005008"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224030951.png" alt="image-20240616224030951"></p>
+<p>感觉意思就是说有的用户用高频的有的用低频的，到时候再解调什么的就行</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224618995.png" alt="image-20240616224618995"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224629990.png" alt="image-20240616224629990"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224556890.png" alt="image-20240616224556890"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224607722.png" alt="image-20240616224607722"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224737866.png" alt="image-20240616224737866"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224747385.png" alt="image-20240616224747385"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224936523.png" alt="image-20240616224936523"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616224820667.png" alt="image-20240616224820667"></p>
+<h2 id="基带传输基础"><a href="#基带传输基础" class="headerlink" title="基带传输基础"></a>基带传输基础</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p><img src="/2024/06/21/computer_network_course/image-20240616225148922.png" alt="image-20240616225148922"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616225217233.png" alt="image-20240616225217233"></p>
+<h3 id="典型编码"><a href="#典型编码" class="headerlink" title="典型编码"></a>典型编码</h3><h4 id="不-归零"><a href="#不-归零" class="headerlink" title="(不)归零"></a>(不)归零</h4><p><img src="/2024/06/21/computer_network_course/image-20240616225226497.png" alt="image-20240616225226497"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616225244776.png" alt="image-20240616225244776"></p>
+<p>就是说把0变成了-1</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616225330691.png" alt="image-20240616225330691"></p>
+<p>就是每个1只占一点点，估计可以用来区分连续的1</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616225413268.png" alt="image-20240616225413268"></p>
+<h4 id="差分码"><a href="#差分码" class="headerlink" title="差分码"></a>差分码</h4><p><img src="/2024/06/21/computer_network_course/image-20240616225434216.png" alt="image-20240616225434216"></p>
+<h4 id="AMI码"><a href="#AMI码" class="headerlink" title="AMI码"></a>AMI码</h4><p><img src="/2024/06/21/computer_network_course/image-20240616225456510.png" alt="image-20240616225456510"></p>
+<h4 id="双相码-曼彻斯特码"><a href="#双相码-曼彻斯特码" class="headerlink" title="双相码(曼彻斯特码)"></a>双相码(曼彻斯特码)</h4><p><img src="/2024/06/21/computer_network_course/image-20240616230207351.png" alt="image-20240616230207351"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616230238237.png" alt="image-20240616230238237"></p>
+<p>有点类似双极归零，就是归是不是零，只在1和-1跳变</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616230450904.png" alt="image-20240616230450904"></p>
+<h4 id="nBmB"><a href="#nBmB" class="headerlink" title="nBmB"></a>nBmB</h4><p>谜语人看不懂</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616230536060.png" alt="image-20240616230536060"></p>
+<h2 id="频带传输基础"><a href="#频带传输基础" class="headerlink" title="频带传输基础"></a>频带传输基础</h2><h3 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h3><p>基带信号低通特性，可在低通特性信号传输</p>
+<p>许多带通信道不具有低通特性，故而需要调制基带信号为与对应信道传输特性相匹配的信号</p>
+<p>利用模拟基带信号调制载波：模拟调制</p>
+<p>数字：数字调制</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616230702685.png" alt="image-20240616230702685"></p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><h4 id="2ASK"><a href="#2ASK" class="headerlink" title="2ASK"></a>2ASK</h4><p><img src="/2024/06/21/computer_network_course/image-20240616230743496.png" alt="image-20240616230743496"></p>
+<p>就是说0就没有了</p>
+<h4 id="2FSK"><a href="#2FSK" class="headerlink" title="2FSK"></a>2FSK</h4><p><img src="/2024/06/21/computer_network_course/image-20240616230758129.png" alt="image-20240616230758129"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616230809912.png" alt="image-20240616230809912"></p>
+<p>就是说1的更密集更高频</p>
+<h4 id="2PSK"><a href="#2PSK" class="headerlink" title="2PSK"></a>2PSK</h4><p><img src="/2024/06/21/computer_network_course/image-20240616230832981.png" alt="image-20240616230832981"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616230841958.png" alt="image-20240616230841958"></p>
+<p>就是说1和0的相位不一样</p>
+<h4 id="2DPSK"><a href="#2DPSK" class="headerlink" title="2DPSK"></a>2DPSK</h4><p><img src="/2024/06/21/computer_network_course/image-20240616230850371.png" alt="image-20240616230850371"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616230910866.png" alt="image-20240616230910866"></p>
+<p>就是说相位不一样代表差分，还是跟差分差不多的概念</p>
+<h3 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h3><ol>
+<li><p>频带利用率</p>
+<p>ASK、PSK、DPSK频带利用率相同，FSK的最低，因为他是通过改变频率区分的1和0</p>
+</li>
+<li><p>误码率</p>
+<p>PSK误码率最低，ASK误码率最高</p>
+<p>PSK＞FSK＞ASK</p>
+</li>
+<li><p>对信道特性敏感性</p>
+<p>ASK最高，性能最差</p>
+<p>FSK和PSK不敏感</p>
+</li>
+</ol>
+<h3 id="其他方法"><a href="#其他方法" class="headerlink" title="其他方法"></a>其他方法</h3><h4 id="多进制数字调制"><a href="#多进制数字调制" class="headerlink" title="多进制数字调制"></a>多进制数字调制</h4><p><img src="/2024/06/21/computer_network_course/image-20240616231133229.png" alt="image-20240616231133229"></p>
+<h4 id="正交幅值调制QAM"><a href="#正交幅值调制QAM" class="headerlink" title="正交幅值调制QAM"></a>正交幅值调制QAM</h4><p><img src="/2024/06/21/computer_network_course/image-20240616231154175.png" alt="image-20240616231154175"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616231205807.png" alt="image-20240616231205807"></p>
+<h2 id="物理层设备"><a href="#物理层设备" class="headerlink" title="物理层设备"></a>物理层设备</h2><p><img src="/2024/06/21/computer_network_course/image-20240616231219905.png" alt="image-20240616231219905"></p>
+<h1 id="数据链路层"><a href="#数据链路层" class="headerlink" title="数据链路层"></a>数据链路层</h1><h2 id="基本功能-1"><a href="#基本功能-1" class="headerlink" title="基本功能"></a>基本功能</h2><p><img src="/2024/06/21/computer_network_course/image-20240616232113016.png" alt="image-20240616232113016"></p>
+<p>原来MAC是这个意思草</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616232407049.png" alt="image-20240616232407049"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616232157584.png" alt="image-20240616232157584"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616232823849.png" alt="image-20240616232823849"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616233746618.png" alt="image-20240616233746618"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616233814494.png" alt="image-20240616233814494"></p>
+<h2 id="链路层服务"><a href="#链路层服务" class="headerlink" title="链路层服务"></a>链路层服务</h2><h3 id="组帧"><a href="#组帧" class="headerlink" title="组帧"></a>组帧</h3><p><img src="/2024/06/21/computer_network_course/image-20240616232914447.png" alt="image-20240616232914447"></p>
+<p>MTU只计算帧的数据部分</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616233431887.png" alt="image-20240616233431887"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616232500015.png" alt="image-20240616232500015"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616232538632.png" alt="image-20240616232538632"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616232604440.png" alt="image-20240616232604440"></p>
+<p>使用转义字节</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616232633324.png" alt="image-20240616232633324"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616232656255.png" alt="image-20240616232656255"></p>
+<p>这个是只要有5个1就马上添0，不管下一个是不是1，这样一来接收只要数五个1就去一个0就行。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616233409528.png" alt="image-20240616233409528"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616233359684.png" alt="image-20240616233359684"></p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p><img src="/2024/06/21/computer_network_course/image-20240616233628418.png" alt="image-20240616233628418"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616233651637.png" alt="image-20240616233651637"></p>
+<h2 id="差错检测与纠正"><a href="#差错检测与纠正" class="headerlink" title="差错检测与纠正"></a>差错检测与纠正</h2><p><img src="/2024/06/21/computer_network_course/image-20240616234121634.png" alt="image-20240616234121634"></p>
+<p>因材施教兄弟</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616233932787.png" alt="image-20240616233932787"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616234207525.png" alt="image-20240616234207525"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616234431464.png" alt="image-20240616234431464"></p>
+<h3 id="检错编码"><a href="#检错编码" class="headerlink" title="检错编码"></a>检错编码</h3><h4 id="奇偶校验码"><a href="#奇偶校验码" class="headerlink" title="奇偶校验码"></a>奇偶校验码</h4><p><img src="/2024/06/21/computer_network_course/image-20240616234850541.png" alt="image-20240616234850541"></p>
+<p>不论是奇校验还是偶校验：</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616234909419.png" alt="image-20240616234909419"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616235017331.png" alt="image-20240616235017331"></p>
+<p>这个二维的很有意思</p>
+<h4 id="Internet校验和-Checksum"><a href="#Internet校验和-Checksum" class="headerlink" title="Internet校验和(Checksum)"></a>Internet校验和(Checksum)</h4><p><img src="/2024/06/21/computer_network_course/image-20240616235111428.png" alt="image-20240616235111428"></p>
+<h4 id="循环冗余校验码-CRC"><a href="#循环冗余校验码-CRC" class="headerlink" title="循环冗余校验码(CRC)"></a>循环冗余校验码(CRC)</h4><p><img src="/2024/06/21/computer_network_course/image-20240616235132449.png" alt="image-20240616235132449"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616235140156.png" alt="image-20240616235140156"></p>
+<h3 id="差错纠正"><a href="#差错纠正" class="headerlink" title="差错纠正"></a>差错纠正</h3><p><img src="/2024/06/21/computer_network_course/image-20240616235240477.png" alt="image-20240616235240477"></p>
+<h2 id="可靠数据传输"><a href="#可靠数据传输" class="headerlink" title="可靠数据传输"></a>可靠数据传输</h2><p><img src="/2024/06/21/computer_network_course/image-20240616235356246.png" alt="image-20240616235356246"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616235407324.png" alt="image-20240616235407324"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616235426886.png" alt="image-20240616235426886"></p>
+<h3 id="RDT1"><a href="#RDT1" class="headerlink" title="RDT1"></a>RDT1</h3><p>保证底层信道完全可靠，所以无需做可靠传输保障处理</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616235455451.png" alt="image-20240616235455451"></p>
+<h3 id="RDT2"><a href="#RDT2" class="headerlink" title="RDT2"></a>RDT2</h3><p>信道可能发生错误，但不发送丢包，需要引入重传机制</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240616235525116.png" alt="image-20240616235525116"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617135412820.png" alt="image-20240617135412820"></p>
+<p>传送等待模式</p>
+<p>也就是说发送方如果收到正确ACK，发送下一个数据包；否则，收到错误ACK，重传上一个数据包</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617135729694.png" alt="image-20240617135729694"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617135817642.png" alt="image-20240617135817642"></p>
+<p>重复ACK指的是这次收到的是ackno为0的，下次还是ackno为0，说明新传过来的校验和GG了，这时候就要重传1的数据包。</p>
+<h3 id="RDT3"><a href="#RDT3" class="headerlink" title="RDT3"></a>RDT3</h3><p>信道既可能发生错误，也可能丢包</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617141001279.png" alt="image-20240617141001279"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617141913685.png" alt="image-20240617141913685"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617141040533.png" alt="image-20240617141040533"></p>
+<p>只在收到ACK才发下一个包，因为只有2个序列号（停等操作）</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617141147763.png" alt="image-20240617141147763"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617141319092.png" alt="image-20240617141319092"></p>
+<h3 id="流水线协议"><a href="#流水线协议" class="headerlink" title="流水线协议"></a>流水线协议</h3><p><img src="/2024/06/21/computer_network_course/image-20240617141347228.png" alt="image-20240617141347228"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617141424824.png" alt="image-20240617141424824"></p>
+<h3 id="滑动窗口"><a href="#滑动窗口" class="headerlink" title="滑动窗口"></a>滑动窗口</h3><p><img src="/2024/06/21/computer_network_course/image-20240617142026623.png" alt="image-20240617142026623"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617142047615.png" alt="image-20240617142047615"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617142846912.png" alt="image-20240617142846912"></p>
+<p>这里的dp指的应该是单向传播速度吧，下面那什么沙比公式别记了</p>
+<h4 id="GBN后退N帧"><a href="#GBN后退N帧" class="headerlink" title="GBN后退N帧"></a>GBN后退N帧</h4><p><img src="/2024/06/21/computer_network_course/image-20240617143855886.png" alt="image-20240617143855886"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617143943076.png" alt="image-20240617143943076"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617144018370.png" alt="image-20240617144018370"></p>
+<h4 id="SR选择重传"><a href="#SR选择重传" class="headerlink" title="SR选择重传"></a>SR选择重传</h4><p><img src="/2024/06/21/computer_network_course/image-20240617144127788.png" alt="image-20240617144127788"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617144143849.png" alt="image-20240617144143849"></p>
+<p>值得注意的是跟TCP的可靠传输还是不一样的，ACK只针对单个分组，而非从xx到xx都ACK了</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617144332678.png" alt="image-20240617144332678"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617144543878.png" alt="image-20240617144543878"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617144649342.png" alt="image-20240617144649342"></p>
+<p>确实，需要注意序号位数。。。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617145235961.png" alt="image-20240617145235961"></p>
+<p>这个是通过右上角那个图推出来的：</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617145249283.png" alt="image-20240617145249283"></p>
+<p>这个就相当于Ws+Wr，Ws+Wr内的序号不能重复，所以需要&lt;=2^k。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617145338385.png" alt="image-20240617145338385"></p>
+<h2 id="多路访问控制-MAC-协议"><a href="#多路访问控制-MAC-协议" class="headerlink" title="多路访问控制(MAC)协议"></a>多路访问控制(MAC)协议</h2><h3 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h3><p>链路有两类：</p>
+<ol>
+<li><p>点对点</p>
+<p>拨号、交换机和主机中间</p>
+</li>
+<li><p>广播链路（共享介质）</p>
+<p>以太网总线、HFC上行、无线局域网</p>
+</li>
+</ol>
+<p>第二种链路会<strong>单一共享广播信道</strong>，故而会产生结点传输<strong>冲突</strong>，故而需要MAC协议。</p>
+<p>采用分布式算法决定结点如何、何时共享信道。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617151255800.png" alt="image-20240617151255800"></p>
+<p>三种类型</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617151320726.png" alt="image-20240617151320726"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617152947735.png" alt="image-20240617152947735"></p>
+<h3 id="信道划分MAC协议"><a href="#信道划分MAC协议" class="headerlink" title="信道划分MAC协议"></a>信道划分MAC协议</h3><p><img src="/2024/06/21/computer_network_course/image-20240619213046037.png" alt="image-20240619213046037"></p>
+<h4 id="TDMA"><a href="#TDMA" class="headerlink" title="TDMA"></a>TDMA</h4><p><img src="/2024/06/21/computer_network_course/image-20240617151356249.png" alt="image-20240617151356249"></p>
+<h4 id="FDMA"><a href="#FDMA" class="headerlink" title="FDMA"></a>FDMA</h4><p><img src="/2024/06/21/computer_network_course/image-20240617151418660.png" alt="image-20240617151418660"></p>
+<p>又是经典的分时VS分频，这个思想也是非常CS，套到OS调度上就是经典的并发和并行。</p>
+<h3 id="随机访问MAC协议"><a href="#随机访问MAC协议" class="headerlink" title="随机访问MAC协议"></a>随机访问MAC协议</h3><p><img src="/2024/06/21/computer_network_course/image-20240619213059025.png" alt="image-20240619213059025"></p>
+<p>没有实现的结点间协调，要发的时候就利用信道100%速率发送，故而需要定义如何检测和恢复冲突</p>
+<h4 id="ALOHA协议"><a href="#ALOHA协议" class="headerlink" title="ALOHA协议"></a>ALOHA协议</h4><p><img src="/2024/06/21/computer_network_course/image-20240617152006883.png" alt="image-20240617152006883"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617152047676.png" alt="image-20240617152047676"></p>
+<p>虽然感觉好像怪怪的这个算法</p>
+<h4 id="时隙ALOHA协议"><a href="#时隙ALOHA协议" class="headerlink" title="时隙ALOHA协议"></a>时隙ALOHA协议</h4><p><img src="/2024/06/21/computer_network_course/image-20240617151640273.png" alt="image-20240617151640273"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617151944158.png" alt="image-20240617151944158"></p>
+<h4 id="CSMA协议"><a href="#CSMA协议" class="headerlink" title="CSMA协议"></a>CSMA协议</h4><p><img src="/2024/06/21/computer_network_course/image-20240617152121248.png" alt="image-20240617152121248"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617152329788.png" alt="image-20240617152329788"></p>
+<h5 id="坚持与非坚持"><a href="#坚持与非坚持" class="headerlink" title="坚持与非坚持"></a>坚持与非坚持</h5><p><img src="/2024/06/21/computer_network_course/image-20240617152838831.png" alt="image-20240617152838831"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617152419399.png" alt="image-20240617152419399"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617152445809.png" alt="image-20240617152445809"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617152551773.png" alt="image-20240617152551773"></p>
+<h5 id="CSMA-CD"><a href="#CSMA-CD" class="headerlink" title="CSMA/CD"></a>CSMA/CD</h5><p><img src="/2024/06/21/computer_network_course/image-20240617152221946.png" alt="image-20240617152221946"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617153136999.png" alt="image-20240617153136999"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617153315952.png" alt="image-20240617153315952"></p>
+<p>只要经过2t时间没有检测到碰撞，说明一定没发生碰撞</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617153442538.png" alt="image-20240617153442538"></p>
+<p>希望在检测到碰撞时帧还没发完。按书上的理解是发送方无法检测到碰撞所以不会重发，可能是因为<strong>发送方在发送完数据后就不再监听</strong>。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617153731821.png" alt="image-20240617153731821"></p>
+<p>这里也就是带宽吧</p>
+<h3 id="轮转访问MAC协议"><a href="#轮转访问MAC协议" class="headerlink" title="轮转访问MAC协议"></a>轮转访问MAC协议</h3><p>综合上述二者的优点</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617154353847.png" alt="image-20240617154353847"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617154402238.png" alt="image-20240617154402238"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617154414777.png" alt="image-20240617154414777"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617154442028.png" alt="image-20240617154442028"></p>
+<h2 id="局域网技术"><a href="#局域网技术" class="headerlink" title="局域网技术"></a>局域网技术</h2><h3 id="MAC地址"><a href="#MAC地址" class="headerlink" title="MAC地址"></a>MAC地址</h3><p>注意48位、16进制表示</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617200332236.png" alt="image-20240617200332236"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617200448053.png" alt="image-20240617200448053"></p>
+<p>MAC地址由IEEE统一管理分配，网卡生产商购买MAC地址空间<strong>（前24比特）</strong></p>
+<h3 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h3><h4 id="协议概述"><a href="#协议概述" class="headerlink" title="协议概述"></a>协议概述</h4><p>统治地位的有线LAN技术，造价低廉应用广泛</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617200602916.png" alt="image-20240617200602916"></p>
+<p>确实，所以CSMA也是陈年老技术了</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617200834603.png" alt="image-20240617200834603"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617202113727.png" alt="image-20240617202113727"></p>
+<h4 id="帧结构"><a href="#帧结构" class="headerlink" title="帧结构"></a>帧结构</h4><p><img src="/2024/06/21/computer_network_course/image-20240617202210793.png" alt="image-20240617202210793"></p>
+<p>注意只在MAC一样才接受</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617202339307.png" alt="image-20240617202339307"></p>
+<p>注意，这里PPT规定了最小帧长为64B，所以最小数据量为46B</p>
+<h4 id="ETH标准"><a href="#ETH标准" class="headerlink" title="ETH标准"></a>ETH标准</h4><p><img src="/2024/06/21/computer_network_course/image-20240617202358145.png" alt="image-20240617202358145"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617202458531.png" alt="image-20240617202458531"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617202601001.png" alt="image-20240617202601001"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617203116637.png" alt="image-20240617203116637"></p>
+<p>没看懂具体改了啥。。。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617203133629.png" alt="image-20240617203133629"></p>
+<h4 id="交换机"><a href="#交换机" class="headerlink" title="交换机"></a>交换机</h4><h5 id="概述-3"><a href="#概述-3" class="headerlink" title="概述"></a>概述</h5><p><img src="/2024/06/21/computer_network_course/image-20240617203242041.png" alt="image-20240617203242041"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617203344888.png" alt="image-20240617203344888"></p>
+<h5 id="交换表"><a href="#交换表" class="headerlink" title="交换表"></a>交换表</h5><p><img src="/2024/06/21/computer_network_course/image-20240617203440103.png" alt="image-20240617203440103"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617203454330.png" alt="image-20240617203454330"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617212316590.png" alt="image-20240617212316590"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617212336995.png" alt="image-20240617212336995"></p>
+<h5 id="交换方式"><a href="#交换方式" class="headerlink" title="交换方式"></a>交换方式</h5><p><img src="/2024/06/21/computer_network_course/image-20240617212900812.png" alt="image-20240617212900812"></p>
+<h4 id="集线器中继器交换机路由器"><a href="#集线器中继器交换机路由器" class="headerlink" title="集线器中继器交换机路由器"></a>集线器中继器交换机路由器</h4><p><strong>交换机可以隔绝冲突域，路由器可以隔绝广播域</strong></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617213052333.png" alt="image-20240617213052333"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617232544193.png" alt="image-20240617232544193"></p>
+<blockquote>
+<p>直通传输（Cut-through）是一种网络交换技术，用于描述数据包在网络设备（如交换机或路由器）中的传输方式。在直通传输模式下，数据包一旦开始被接收，就会立即开始传输到输出端口，而不必等待整个数据包被完全接收。这种方式可以减少数据包的传输延迟，提高网络性能</p>
+<p>这个概念我忘了前面哪里有说。。TODO记得留意一下</p>
+</blockquote>
+<ol>
+<li><strong>集线器（Hub）</strong>：<ul>
+<li>集线器是一种基本的网络设备，用于连接多个设备到一个网络。</li>
+<li>它在物理层（OSI模型的第一层）工作，不具备智能处理数据包的能力。</li>
+<li>集线器将接收到的信号进行放大或再生，然后广播到所有其他端口，不管数据包的目的地是哪里。</li>
+<li>这会导致所有连接到集线器的设备<strong>共享同一个冲突域和广播域</strong>。</li>
+<li>集线器通常用于小型或成本敏感的网络环境。</li>
+</ul>
+</li>
+<li><strong>中继器（Repeater）</strong>：<ul>
+<li>中继器用于扩展网络的距离，它接收信号，重新生成该信号，然后将其发送到网络的下一个部分。</li>
+<li>它同样在物理层工作，不进行任何数据包的智能处理。</li>
+<li>中继器可以是无源的，仅放大信号，或有源的，提供信号再生和放大。</li>
+<li>中继器不区分数据包的目的地，它简单地复制信号到所有连接的设备。</li>
+<li>中继器通常用于连接两个网络段或扩展以太网电缆的长度。</li>
+</ul>
+</li>
+<li><strong>交换机（Switch）</strong>：<ul>
+<li>交换机是一种更高级的网络设备，用于连接多个设备并管理数据包的传输。</li>
+<li>它在数据链路层（OSI模型的第二层）工作，具有智能处理能力，可以识别数据包的目的地。</li>
+<li>交换机使用MAC地址表来确定数据包的转发路径，只将数据包发送到正确的端口，而不是所有端口。</li>
+<li>这使得每个交换机端口都是一个独立的冲突域，减少了冲突的可能性，并提高了网络效率。</li>
+<li>交换机还支持全双工通信，允许同时发送和接收数据，进一步提高了性能。</li>
+<li>交换机通常用于构建更复杂和高效的网络结构。</li>
+</ul>
+</li>
+</ol>
+<h2 id="VLANs"><a href="#VLANs" class="headerlink" title="VLANs"></a>VLANs</h2><h3 id="概述-4"><a href="#概述-4" class="headerlink" title="概述"></a>概述</h3><p><img src="/2024/06/21/computer_network_course/image-20240617221048575.png" alt="image-20240617221048575"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617221202352.png" alt="image-20240617221202352"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617221226966.png" alt="image-20240617221226966"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617221245948.png" alt="image-20240617221245948"></p>
+<h3 id="帧格式"><a href="#帧格式" class="headerlink" title="帧格式"></a>帧格式</h3><p><img src="/2024/06/21/computer_network_course/image-20240617221400830.png" alt="image-20240617221400830"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617221419637.png" alt="image-20240617221419637"></p>
+<h2 id="PPP协议"><a href="#PPP协议" class="headerlink" title="PPP协议"></a>PPP协议</h2><h3 id="概述-5"><a href="#概述-5" class="headerlink" title="概述"></a>概述</h3><ul>
+<li><strong>PPP</strong>: 是一种点对点的链路层协议，主要用于直接连接两个网络节点的链路层。PPP广泛用于拨号和专线连接，如通过电话线、光纤或无线链路连接的网络。</li>
+<li><strong>Ethernet</strong>: 是一种局域网技术，用于在局域网内连接多个设备。它定义了包括物理层和数据链路层的规范。</li>
+</ul>
+<p>PPP协议本身不使用MAC地址。PPP协议在链路层工作，但它是为点对点连接设计的，不涉及广播或多播，因此不需要使用MAC地址来识别多个设备。PPP连接的每一端都有一个唯一的标识符，通常是通过配置或协商得到的，而不是通过MAC地址。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617222436513.png" alt="image-20240617222436513"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617222506820.png" alt="image-20240617222506820"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617222547789.png" alt="image-20240617222547789"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617222601401.png" alt="image-20240617222601401"></p>
+<h3 id="帧格式-1"><a href="#帧格式-1" class="headerlink" title="帧格式"></a>帧格式</h3><p><img src="/2024/06/21/computer_network_course/image-20240617222627210.png" alt="image-20240617222627210"></p>
+<h3 id="透明传输"><a href="#透明传输" class="headerlink" title="透明传输"></a>透明传输</h3><p><img src="/2024/06/21/computer_network_course/image-20240617223701607.png" alt="image-20240617223701607"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617223711957.png" alt="image-20240617223711957"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617223752787.png" alt="image-20240617223752787"></p>
+<h3 id="协议"><a href="#协议" class="headerlink" title="协议"></a>协议</h3><p><img src="/2024/06/21/computer_network_course/image-20240617223937417.png" alt="image-20240617223937417"></p>
+<h3 id="PPPoE"><a href="#PPPoE" class="headerlink" title="PPPoE"></a>PPPoE</h3><p><img src="/2024/06/21/computer_network_course/image-20240617224027232.png" alt="image-20240617224027232"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224314169.png" alt="image-20240617224314169"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224447644.png" alt="image-20240617224447644"></p>
+<p>反正就是说新增两个设备，设备之间用PPP协议通信，设备和主机间用ETH协议通信</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224514776.png" alt="image-20240617224514776"></p>
+<p>这个就是去掉pppoe client，使得主机和服务器直接PPP通信</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224537191.png" alt="image-20240617224537191"></p>
+<h2 id="链路虚拟化"><a href="#链路虚拟化" class="headerlink" title="链路虚拟化"></a>链路虚拟化</h2><p>反正感觉看起来就是网络之网络，就是说网络内部独立的，网络之间就是网级层</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224554966.png" alt="image-20240617224554966"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224605793.png" alt="image-20240617224605793"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224655233.png" alt="image-20240617224655233"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224725975.png" alt="image-20240617224725975"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224735292.png" alt="image-20240617224735292"></p>
+<h1 id="网络层"><a href="#网络层" class="headerlink" title="网络层"></a>网络层</h1><h2 id="网络层服务"><a href="#网络层服务" class="headerlink" title="网络层服务"></a>网络层服务</h2><h3 id="概述-6"><a href="#概述-6" class="headerlink" title="概述"></a>概述</h3><p>每个主机和路由器都运行网络层协议，路由器检查所有穿越他的IP数据报头部</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224924311.png" alt="image-20240617224924311"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617224947404.png" alt="image-20240617224947404"></p>
+<p>注意连接建立原来也算是网络层概念。。。不过只能说直观上确实是这样的</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225048181.png" alt="image-20240617225048181"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225112357.png" alt="image-20240617225112357"></p>
+<p>现在感觉就对应着第一种无连接的数据报网络了</p>
+<h3 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h3><p>分组在路由器丢失or排队</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225156251.png" alt="image-20240617225156251"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225221714.png" alt="image-20240617225221714"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225236818.png" alt="image-20240617225236818"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225249263.png" alt="image-20240617225249263"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225256920.png" alt="image-20240617225256920"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225325749.png" alt="image-20240617225325749"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617225338894.png" alt="image-20240617225338894"></p>
+<h4 id="ATM-ABR拥塞控制"><a href="#ATM-ABR拥塞控制" class="headerlink" title="ATM ABR拥塞控制"></a>ATM ABR拥塞控制</h4><p><img src="/2024/06/21/computer_network_course/image-20240617225423505.png" alt="image-20240617225423505"></p>
+<p>右边那个就有点像TCP了，或者说TCP也能算是二者结合吧</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230202667.png" alt="image-20240617230202667"></p>
+<h2 id="虚电路网络与数据报网络"><a href="#虚电路网络与数据报网络" class="headerlink" title="虚电路网络与数据报网络"></a>虚电路网络与数据报网络</h2><p><img src="/2024/06/21/computer_network_course/image-20240617225112357.png" alt="image-20240617225112357"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230323253.png" alt="image-20240617230323253"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230943325.png" alt="image-20240617230943325"></p>
+<h3 id="虚电路网络-VC"><a href="#虚电路网络-VC" class="headerlink" title="虚电路网络(VC)"></a>虚电路网络(VC)</h3><p><img src="/2024/06/21/computer_network_course/image-20240617230344903.png" alt="image-20240617230344903"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230427699.png" alt="image-20240617230427699"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230526121.png" alt="image-20240617230526121"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230544090.png" alt="image-20240617230544090"></p>
+<p>这种就显得太固定了，然后需要用的路由器也比较多</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230621209.png" alt="image-20240617230621209"></p>
+<h3 id="数据报网络"><a href="#数据报网络" class="headerlink" title="数据报网络"></a>数据报网络</h3><p><img src="/2024/06/21/computer_network_course/image-20240617230635080.png" alt="image-20240617230635080"></p>
+<h4 id="数据转发表"><a href="#数据转发表" class="headerlink" title="数据转发表"></a>数据转发表</h4><p><img src="/2024/06/21/computer_network_course/image-20240617230700651.png" alt="image-20240617230700651"></p>
+<p>同时为了防止表项过多，会进行聚合：</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230724221.png" alt="image-20240617230724221"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230739847.png" alt="image-20240617230739847"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617230822290.png" alt="image-20240617230822290"></p>
+<p>这点在化简路由表时很有用</p>
+<h2 id="路由器体系结构"><a href="#路由器体系结构" class="headerlink" title="路由器体系结构"></a>路由器体系结构</h2><p><img src="/2024/06/21/computer_network_course/image-20240617231712939.png" alt="image-20240617231712939"></p>
+<h3 id="输入端口"><a href="#输入端口" class="headerlink" title="输入端口"></a>输入端口</h3><p><img src="/2024/06/21/computer_network_course/image-20240617231800325.png" alt="image-20240617231800325"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617231945435.png" alt="image-20240617231945435"></p>
+<h3 id="交换结构"><a href="#交换结构" class="headerlink" title="交换结构"></a>交换结构</h3><p><img src="/2024/06/21/computer_network_course/image-20240617232003411.png" alt="image-20240617232003411"></p>
+<h4 id="经内存交换"><a href="#经内存交换" class="headerlink" title="经内存交换"></a>经内存交换</h4><p><img src="/2024/06/21/computer_network_course/image-20240617232047786.png" alt="image-20240617232047786"></p>
+<h4 id="经总线"><a href="#经总线" class="headerlink" title="经总线"></a>经总线</h4><p><img src="/2024/06/21/computer_network_course/image-20240617232112865.png" alt="image-20240617232112865"></p>
+<h4 id="经网络"><a href="#经网络" class="headerlink" title="经网络"></a>经网络</h4><p><img src="/2024/06/21/computer_network_course/image-20240617232136619.png" alt="image-20240617232136619"></p>
+<h3 id="输出端口"><a href="#输出端口" class="headerlink" title="输出端口"></a>输出端口</h3><p><img src="/2024/06/21/computer_network_course/image-20240617232208920.png" alt="image-20240617232208920"></p>
+<p>草，果然每个需要排队的地方必有调度算法。。。不过我感觉路由的话FIFO不就行了吗，也不好说，可能因为目的端口不同？</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617232314481.png" alt="image-20240617232314481"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617232323289.png" alt="image-20240617232323289"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617232342886.png" alt="image-20240617232342886"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617232352272.png" alt="image-20240617232352272"></p>
+<p>多级队列是吧</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617232418578.png" alt="image-20240617232418578"></p>
+<p>感觉相比于FIFO，相当于不是在满的时候马上出队然后丢弃，而是先滞留内存了</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617232502788.png" alt="image-20240617232502788"></p>
+<p>感觉应该就是优先级越高δ服务量越高之类的吧</p>
+<h2 id="IP协议"><a href="#IP协议" class="headerlink" title="IP协议"></a>IP协议</h2><p><img src="/2024/06/21/computer_network_course/image-20240617232729411.png" alt="image-20240617232729411"></p>
+<h3 id="数据报格式"><a href="#数据报格式" class="headerlink" title="数据报格式"></a>数据报格式</h3><p><img src="/2024/06/21/computer_network_course/image-20240617232837062.png" alt="image-20240617232837062"></p>
+<ol>
+<li><p>版本号</p>
+<p>4代表IPv4,6代表v6</p>
+</li>
+<li><p>首部长度</p>
+<p>IP分组首部长度，<strong>以4字节为单位</strong></p>
+<p>如，=5代表IP首部长度为20字节</p>
+</li>
+<li><p>服务类型（TOS）</p>
+<p>指示期望获得哪种类型的服务</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233253384.png" alt="image-20240617233253384"></p>
+</li>
+<li><p>总长度</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233333197.png" alt="image-20240617233333197"></p>
+</li>
+<li><p>标识(ID)</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233739506.png" alt="image-20240617233739506"></p>
+<p>就是IP分组编号。值得注意的是，所有分片的标识都是一样的</p>
+</li>
+<li><p>标志位</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233758145.png" alt="image-20240617233758145"></p>
+</li>
+<li><p>片偏移</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233824278.png" alt="image-20240617233824278"></p>
+</li>
+<li><p>生存时间(TTL)</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233350192.png" alt="image-20240617233350192"></p>
+</li>
+<li><p>协议</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233401743.png" alt="image-20240617233401743"></p>
+</li>
+<li><p>首部校验和</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233417504.png" alt="image-20240617233417504"></p>
+</li>
+<li><p>地址</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233429113.png" alt="image-20240617233429113"></p>
+</li>
+<li><p>选项</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233441371.png" alt="image-20240617233441371"></p>
+</li>
+<li><p>填充</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233501863.png" alt="image-20240617233501863"></p>
+<p>注意IP报文是4字节对齐的</p>
+</li>
+</ol>
+<h3 id="MTU与分片"><a href="#MTU与分片" class="headerlink" title="MTU与分片"></a>MTU与分片</h3><p><img src="/2024/06/21/computer_network_course/image-20240617233641741.png" alt="image-20240617233641741"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233706280.png" alt="image-20240617233706280"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617233946734.png" alt="image-20240617233946734"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617234011068.png" alt="image-20240617234011068"></p>
+<h3 id="IP编址"><a href="#IP编址" class="headerlink" title="IP编址"></a>IP编址</h3><h4 id="概述-7"><a href="#概述-7" class="headerlink" title="概述"></a>概述</h4><p><img src="/2024/06/21/computer_network_course/image-20240617234622985.png" alt="image-20240617234622985"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617234902380.png" alt="image-20240617234902380"></p>
+<p><img src="/2024/06/21/computer_network_course/10c942a1deb2f67d629fd8c9814df1a0.png" alt="10c942a1deb2f67d629fd8c9814df1a0"></p>
+<h4 id="子网"><a href="#子网" class="headerlink" title="子网"></a>子网</h4><p><img src="/2024/06/21/computer_network_course/image-20240617234927264.png" alt="image-20240617234927264"></p>
+<p>也就是只有交换机什么的</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618153018611.png" alt="image-20240618153018611"></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Initial_Mind/article/details/125473927">https://blog.csdn.net/Initial_Mind/article/details/125473927</a></p>
+<p>这个使用哈夫曼树的理解非常有意思。</p>
+<h4 id="分类和特殊地址"><a href="#分类和特殊地址" class="headerlink" title="分类和特殊地址"></a>分类和特殊地址</h4><p><img src="/2024/06/21/computer_network_course/image-20240617235038774.png" alt="image-20240617235038774"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235212716.png" alt="image-20240617235212716"></p>
+<p>注意全0可以作为源地址</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235331287.png" alt="image-20240617235331287"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235322399.png" alt="image-20240617235322399"></p>
+<h4 id="子网掩码"><a href="#子网掩码" class="headerlink" title="子网掩码"></a>子网掩码</h4><p><img src="/2024/06/21/computer_network_course/image-20240617235357868.png" alt="image-20240617235357868"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235408591.png" alt="image-20240617235408591"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235441174.png" alt="image-20240617235441174"></p>
+<h4 id="CIDR"><a href="#CIDR" class="headerlink" title="CIDR"></a>CIDR</h4><p><img src="/2024/06/21/computer_network_course/image-20240617235609747.png" alt="image-20240617235609747"></p>
+<p>算是一种表示方法和思想吧</p>
+<h5 id="路由聚合"><a href="#路由聚合" class="headerlink" title="路由聚合"></a>路由聚合</h5><p><img src="/2024/06/21/computer_network_course/image-20240617235628961.png" alt="image-20240617235628961"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235637974.png" alt="image-20240617235637974"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235704926.png" alt="image-20240617235704926"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235712983.png" alt="image-20240617235712983"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240617235731528.png" alt="image-20240617235731528"></p>
+<p>一个子网属于一个广播域是吧</p>
+<p>刚刚在想为什么不同子网一定要路由器不能直接交换机MAC。。这其实就是为什么不能只有MAC没有IP的问题。感觉估计还是因为IP地址比较好表示吧</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618000347600.png" alt="image-20240618000347600"></p>
+<p>主要MAC是不变的，很多情况下可变IP大有作用，所以很麻烦</p>
+<h3 id="IPv6"><a href="#IPv6" class="headerlink" title="IPv6"></a>IPv6</h3><h4 id="概述-8"><a href="#概述-8" class="headerlink" title="概述"></a>概述</h4><p><img src="/2024/06/21/computer_network_course/image-20240618150425487.png" alt="image-20240618150425487"></p>
+<p>禁止分片的话是怎么处理MTU的呢。。。</p>
+<h4 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h4><p><img src="/2024/06/21/computer_network_course/image-20240618150529656.png" alt="image-20240618150529656"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618150710104.png" alt="image-20240618150710104"></p>
+<p>128位地址，每个冒号分割16位，也即四位十六进制</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618150821249.png" alt="image-20240618150821249"></p>
+<p>注意，没有广播的概念了</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618151100637.png" alt="image-20240618151100637"></p>
+<p><strong>多播=组播</strong></p>
+<p>IPv6没有传统意义上的广播地址，这是因为IPv6采用了一种不同的方法来处理广播和多播消息。</p>
+<p>在IPv4中，广播地址允许一个网络段内的所有主机接收到发送到这个地址的数据包。IPv6中，广播的概念被多播地址所取代。多播地址允许向一组特定的主机发送消息，这些主机都对特定的多播组感兴趣。</p>
+<p>IPv6的多播地址范围从 <code>FF00::/8</code> 开始，这意味着所有以 “FF” 开头的IPv6地址都是多播地址。多播地址进一步分为几个范围，包括：</p>
+<ul>
+<li>节点本地多播地址：<code>FF01::/16</code></li>
+<li>链路本地多播地址：<code>FF02::/16</code></li>
+<li>点对点多播地址：<code>FF05::/16</code></li>
+<li>组播地址：<code>FF08::/16</code> 到 <code>FF0F::/16</code></li>
+</ul>
+<p>链路本地多播地址特别类似于IPv4中的广播地址，因为它仅在同一链路上有效，并且所有在同一链路上的设备都会接收到发送到这个地址的数据包。</p>
+<p>总的来说，IPv6使用多播地址来实现广播的功能，但它们提供了更多的灵活性和控制能力。</p>
+<ol>
+<li><strong>组播（Multicast）</strong>：<ul>
+<li>组播是一种将数据包发送到一组特定主机的方法，这些主机都对特定的数据流或服务感兴趣。</li>
+<li>组播地址是D类地址（IPv4）或具有特定前缀的地址（IPv6）。</li>
+<li>组播使用特定的组播地址，所有加入该组播组的主机都会接收到发送到该地址的数据包。</li>
+<li>组播流量是优化的，网络设备如路由器和交换机使用组播转发树来确保数据包只沿着必要的路径传播，避免不必要的复制和传输。</li>
+</ul>
+</li>
+<li><strong>任意播（Anycast）</strong>：<ul>
+<li>任意播是一种将数据包发送到最近的一个服务器或主机的方法，这些服务器或主机拥有相同的IP地址。</li>
+<li>任意播地址通常用于提供高可用性和负载均衡，例如DNS服务。</li>
+<li>任意播地址在逻辑上是单播地址，但是可以分配给多个接口，通常是在不同的地理位置。</li>
+<li>当数据包发送到任意播地址时，网络会根据路由度量（如跳数、延迟或路径成本）选择最近的接口来接收该数据包。</li>
+</ul>
+</li>
+</ol>
+<h4 id="过渡"><a href="#过渡" class="headerlink" title="过渡"></a>过渡</h4><p><img src="/2024/06/21/computer_network_course/image-20240618151201617.png" alt="image-20240618151201617"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618151318717.png" alt="image-20240618151318717"></p>
+<h2 id="IP相关协议"><a href="#IP相关协议" class="headerlink" title="IP相关协议"></a>IP相关协议</h2><h3 id="ARP协议"><a href="#ARP协议" class="headerlink" title="ARP协议"></a>ARP协议</h3><p><img src="/2024/06/21/computer_network_course/image-20240618161506572.png" alt="image-20240618161506572"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618161551482.png" alt="image-20240618161551482"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618161621830.png" alt="image-20240618161621830"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618161654416.png" alt="image-20240618161654416"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618161747765.png" alt="image-20240618161747765"></p>
+<h3 id="ICMP"><a href="#ICMP" class="headerlink" title="ICMP"></a>ICMP</h3><p><img src="/2024/06/21/computer_network_course/image-20240618162021930.png" alt="image-20240618162021930"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162036966.png" alt="image-20240618162036966"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162109115.png" alt="image-20240618162109115"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162126479.png" alt="image-20240618162126479"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162155300.png" alt="image-20240618162155300"></p>
+<p>这八字节应该是传输层数据报前八字节，包含端口号</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162325095.png" alt="image-20240618162325095"></p>
+<h3 id="DHCP"><a href="#DHCP" class="headerlink" title="DHCP"></a>DHCP</h3><p><img src="/2024/06/21/computer_network_course/image-20240618162505592.png" alt="image-20240618162505592"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162514274.png" alt="image-20240618162514274"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162642055.png" alt="image-20240618162642055"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162704324.png" alt="image-20240618162704324"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618162716676.png" alt="image-20240618162716676"></p>
+<h3 id="NAT"><a href="#NAT" class="headerlink" title="NAT"></a>NAT</h3><p><img src="/2024/06/21/computer_network_course/image-20240618162746811.png" alt="image-20240618162746811"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163043373.png" alt="image-20240618163043373"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163104196.png" alt="image-20240618163104196"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163117011.png" alt="image-20240618163117011"></p>
+<p>注意收发都会修改</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163201299.png" alt="image-20240618163201299"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163225383.png" alt="image-20240618163225383"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163238551.png" alt="image-20240618163238551"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163308591.png" alt="image-20240618163308591"></p>
+<h2 id="路由算法"><a href="#路由算法" class="headerlink" title="路由算法"></a>路由算法</h2><p><img src="/2024/06/21/computer_network_course/image-20240618163548086.png" alt="image-20240618163548086"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163557037.png" alt="image-20240618163557037"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163604517.png" alt="image-20240618163604517"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618163614834.png" alt="image-20240618163614834"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164719201.png" alt="image-20240618164719201"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164855676.png" alt="image-20240618164855676"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164905484.png" alt="image-20240618164905484"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164913493.png" alt="image-20240618164913493"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164921074.png" alt="image-20240618164921074"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164929713.png" alt="image-20240618164929713"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164937957.png" alt="image-20240618164937957"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164945815.png" alt="image-20240618164945815"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618164953974.png" alt="image-20240618164953974"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165000559.png" alt="image-20240618165000559"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165007411.png" alt="image-20240618165007411"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165015153.png" alt="image-20240618165015153"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165022338.png" alt="image-20240618165022338"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165030566.png" alt="image-20240618165030566"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165039247.png" alt="image-20240618165039247"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165046772.png" alt="image-20240618165046772"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165102352.png" alt="image-20240618165102352"></p>
+<h3 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h3><p><img src="/2024/06/21/computer_network_course/image-20240618165548450.png" alt="image-20240618165548450"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618165557644.png" alt="image-20240618165557644"></p>
+<h3 id="层次路由"><a href="#层次路由" class="headerlink" title="层次路由"></a>层次路由</h3><p><img src="/2024/06/21/computer_network_course/image-20240618192003082.png" alt="image-20240618192003082"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192014118.png" alt="image-20240618192014118"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192033186.png" alt="image-20240618192033186"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192115751.png" alt="image-20240618192115751"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192154023.png" alt="image-20240618192154023"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192215676.png" alt="image-20240618192215676"></p>
+<h2 id="路由协议"><a href="#路由协议" class="headerlink" title="路由协议"></a>路由协议</h2><p><img src="/2024/06/21/computer_network_course/image-20240620205538807.png" alt="image-20240620205538807"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618193032157.png" alt="image-20240618193032157"></p>
+<h3 id="AS内部路由"><a href="#AS内部路由" class="headerlink" title="AS内部路由"></a>AS内部路由</h3><p><img src="/2024/06/21/computer_network_course/image-20240618192238854.png" alt="image-20240618192238854"></p>
+<p>OSFP向系统所有路由器泛洪发送邻近路由器链路状态，当链路状态变化或者固定时间间隔发送消息</p>
+<h4 id="RIP"><a href="#RIP" class="headerlink" title="RIP"></a>RIP</h4><p>分布式的基于距离向量的路由选择</p>
+<p>RIP和相邻路由器以固定时间间隔交换自己的路由表信息</p>
+<p>基于UDP，有更新报文和请求报文</p>
+<p>不支持认证，UDP不可靠；使用IPv6</p>
+<ol>
+<li>和哪些路由器交换信息？仅和<strong>相邻</strong>路由器交换信息</li>
+<li>交换什么信息？当前本路由器的<strong>路由表</strong></li>
+<li>在什么时候交换信息？按<strong>固定的时间间隔</strong>交换路由信息</li>
+</ol>
+<p><img src="/2024/06/21/computer_network_course/image-20240620200047975.png" alt="image-20240620200047975"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240620200358715.png" alt="image-20240620200358715"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240620201335773.png" alt="image-20240620201335773"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192323279.png" alt="image-20240618192323279"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192406794.png" alt="image-20240618192406794"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192417364.png" alt="image-20240618192417364"></p>
+<h4 id="OSPF"><a href="#OSPF" class="headerlink" title="OSPF"></a>OSPF</h4><p><img src="/2024/06/21/computer_network_course/image-20240620201616033.png" alt="image-20240620201616033"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240620204424274.png" alt="image-20240620204424274"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240620204628967.png" alt="image-20240620204628967"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240620205022504.png" alt="image-20240620205022504"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192644100.png" alt="image-20240618192644100"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192709385.png" alt="image-20240618192709385"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192728098.png" alt="image-20240618192728098"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192738654.png" alt="image-20240618192738654"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192753724.png" alt="image-20240618192753724"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192814736.png" alt="image-20240618192814736"></p>
+<h3 id="AS间路由协议-BGP"><a href="#AS间路由协议-BGP" class="headerlink" title="AS间路由协议:BGP"></a>AS间路由协议:BGP</h3><p><img src="/2024/06/21/computer_network_course/image-20240620205222356.png" alt="image-20240620205222356"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240620205412346.png" alt="image-20240620205412346"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240620205446030.png" alt="image-20240620205446030"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240620205508740.png" alt="image-20240620205508740"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192844369.png" alt="image-20240618192844369"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192917775.png" alt="image-20240618192917775"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192926730.png" alt="image-20240618192926730"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192934573.png" alt="image-20240618192934573"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192949106.png" alt="image-20240618192949106"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618192957126.png" alt="image-20240618192957126"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618193004081.png" alt="image-20240618193004081"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618193017397.png" alt="image-20240618193017397"></p>
+<h1 id="传输层"><a href="#传输层" class="headerlink" title="传输层"></a>传输层</h1><h2 id="传输层服务"><a href="#传输层服务" class="headerlink" title="传输层服务"></a>传输层服务</h2><p><img src="/2024/06/21/computer_network_course/image-20240618193450070.png" alt="image-20240618193450070"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618193716070.png" alt="image-20240618193716070"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618193726277.png" alt="image-20240618193726277"></p>
+<p>注意，<strong>均不保证延迟和带宽</strong>？</p>
+<h2 id="传输层多路复用-分用"><a href="#传输层多路复用-分用" class="headerlink" title="传输层多路复用/分用"></a>传输层多路复用/分用</h2><p><img src="/2024/06/21/computer_network_course/image-20240618194838864.png" alt="image-20240618194838864"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618194858354.png" alt="image-20240618194858354"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618201625231.png" alt="image-20240618201625231"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618201710169.png" alt="image-20240618201710169"></p>
+<p>断句：传输层 无连接 分用</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618201747119.png" alt="image-20240618201747119"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202105750.png" alt="image-20240618202105750"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202313891.png" alt="image-20240618202313891"></p>
+<h2 id="UDP协议"><a href="#UDP协议" class="headerlink" title="UDP协议"></a>UDP协议</h2><p><img src="/2024/06/21/computer_network_course/image-20240618202341271.png" alt="image-20240618202341271"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202350669.png" alt="image-20240618202350669"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202431694.png" alt="image-20240618202431694"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202440304.png" alt="image-20240618202440304"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202545388.png" alt="image-20240618202545388"></p>
+<h2 id="TCP协议"><a href="#TCP协议" class="headerlink" title="TCP协议"></a>TCP协议</h2><h3 id="概述-9"><a href="#概述-9" class="headerlink" title="概述"></a>概述</h3><p><img src="/2024/06/21/computer_network_course/image-20240618202614351.png" alt="image-20240618202614351"></p>
+<h3 id="报文结构"><a href="#报文结构" class="headerlink" title="报文结构"></a>报文结构</h3><p><img src="/2024/06/21/computer_network_course/image-20240618202625592.png" alt="image-20240618202625592"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202637730.png" alt="image-20240618202637730"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618204307775.png" alt="image-20240618204307775"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202820008.png" alt="image-20240618202820008"></p>
+<p>这点跟IP报文还是一样的</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202832949.png" alt="image-20240618202832949"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202841833.png" alt="image-20240618202841833"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202858749.png" alt="image-20240618202858749"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202906257.png" alt="image-20240618202906257"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618202913210.png" alt="image-20240618202913210"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618203606879.png" alt="image-20240618203606879"></p>
+<p>最大段长度（Maximum Segment Size，MSS）是TCP（传输控制协议）中的一个重要参数，它定义了TCP段的最大有效载荷大小。MSS不包括TCP头部，只计算数据部分的大小。MSS的主要作用是为了避免在网络传输过程中出现数据包的分片（fragmentation），因为某些网络层（如以太网）对传输的数据包大小有限制。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618203814711.png" alt="image-20240618203814711"></p>
+<h3 id="可靠传输"><a href="#可靠传输" class="headerlink" title="可靠传输"></a>可靠传输</h3><p><img src="/2024/06/21/computer_network_course/image-20240618204341149.png" alt="image-20240618204341149"></p>
+<p>注意，<strong>收到重复ACK也会重传？</strong></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618204548608.png" alt="image-20240618204548608"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618204614075.png" alt="image-20240618204614075"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618210136182.png" alt="image-20240618210136182"></p>
+<p>值得注意的是，TCP应该只重发最早没被确认的段，也即只对他启动计时器？所以这里收到ACK重启定时器，并且是之前从未确认过的，说明就是它检测的那个段收到了确认，所以需要。。。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618210301720.png" alt="image-20240618210301720"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618210316345.png" alt="image-20240618210316345"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618210323455.png" alt="image-20240618210323455"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618210539722.png" alt="image-20240618210539722"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618210618952.png" alt="image-20240618210618952"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618210628800.png" alt="image-20240618210628800"></p>
+<h3 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a>流量控制</h3><p><img src="/2024/06/21/computer_network_course/image-20240618211534446.png" alt="image-20240618211534446"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618211549677.png" alt="image-20240618211549677"></p>
+<p><strong>处理零窗口探测</strong>：在某些情况下，发送方可能会使用零窗口探测（Zero Window Probe）机制，即发送一个小的TCP段（通常只有1字节的数据），以询问接收方是否可以接收更多的数据。如果接收方仍然无法接收数据，它会再次发送一个窗口大小为0的确认（ACK）。</p>
+<h3 id="连接管理"><a href="#连接管理" class="headerlink" title="连接管理"></a>连接管理</h3><p><img src="/2024/06/21/computer_network_course/image-20240618211806133.png" alt="image-20240618211806133"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618211823684.png" alt="image-20240618211823684"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618211854530.png" alt="image-20240618211854530"></p>
+<p>server直接关闭，client需要等待</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618211911581.png" alt="image-20240618211911581"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618211922483.png" alt="image-20240618211922483"></p>
+<h3 id="拥塞控制-1"><a href="#拥塞控制-1" class="headerlink" title="拥塞控制"></a>拥塞控制</h3><p><img src="/2024/06/21/computer_network_course/image-20240619194551482.png" alt="image-20240619194551482"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618212439358.png" alt="image-20240618212439358"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618213120626.png" alt="image-20240618213120626"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618213209314.png" alt="image-20240618213209314"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618213220412.png" alt="image-20240618213220412"></p>
+<p>就是说又会翻倍又会加一</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618213240899.png" alt="image-20240618213240899"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618213318352.png" alt="image-20240618213318352"></p>
+<p>就是说会动态随着丢失事件调整慢启动的阈值</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618213430806.png" alt="image-20240618213430806"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618214156127.png" alt="image-20240618214156127"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618214206324.png" alt="image-20240618214206324"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618214217979.png" alt="image-20240618214217979"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619194917186.png" alt="image-20240619194917186"></p>
+<p>一收到确认就马上翻倍</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619195047477.png" alt="image-20240619195047477"></p>
+<h3 id="吞吐率"><a href="#吞吐率" class="headerlink" title="吞吐率"></a>吞吐率</h3><p><img src="/2024/06/21/computer_network_course/image-20240618214406004.png" alt="image-20240618214406004"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618214428764.png" alt="image-20240618214428764"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618214436967.png" alt="image-20240618214436967"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215258277.png" alt="image-20240618215258277"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215305709.png" alt="image-20240618215305709"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215316682.png" alt="image-20240618215316682"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215324148.png" alt="image-20240618215324148"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215411254.png" alt="image-20240618215411254"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215418322.png" alt="image-20240618215418322"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215425559.png" alt="image-20240618215425559"></p>
+<h3 id="公平性"><a href="#公平性" class="headerlink" title="公平性"></a>公平性</h3><p><img src="/2024/06/21/computer_network_course/image-20240618215441930.png" alt="image-20240618215441930"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215454248.png" alt="image-20240618215454248"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618215523827.png" alt="image-20240618215523827"></p>
+<h1 id="应用层"><a href="#应用层" class="headerlink" title="应用层"></a>应用层</h1><h2 id="网络应用体系结构"><a href="#网络应用体系结构" class="headerlink" title="网络应用体系结构"></a>网络应用体系结构</h2><p><img src="/2024/06/21/computer_network_course/image-20240618220317520.png" alt="image-20240618220317520"></p>
+<h3 id="CS结构"><a href="#CS结构" class="headerlink" title="CS结构"></a>CS结构</h3><p><img src="/2024/06/21/computer_network_course/image-20240618220434549.png" alt="image-20240618220434549"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618220517328.png" alt="image-20240618220517328"></p>
+<h3 id="P2P"><a href="#P2P" class="headerlink" title="P2P"></a>P2P</h3><p><img src="/2024/06/21/computer_network_course/image-20240618220534023.png" alt="image-20240618220534023"></p>
+<h3 id="混合"><a href="#混合" class="headerlink" title="混合"></a>混合</h3><p><img src="/2024/06/21/computer_network_course/image-20240618220602439.png" alt="image-20240618220602439"></p>
+<h2 id="网络应用通信原理"><a href="#网络应用通信原理" class="headerlink" title="网络应用通信原理"></a>网络应用通信原理</h2><p><img src="/2024/06/21/computer_network_course/image-20240618220639660.png" alt="image-20240618220639660"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618220720588.png" alt="image-20240618220720588"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618220738943.png" alt="image-20240618220738943"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221057603.png" alt="image-20240618221057603"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221236135.png" alt="image-20240618221236135"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221248379.png" alt="image-20240618221248379"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221257061.png" alt="image-20240618221257061"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221349342.png" alt="image-20240618221349342"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221436878.png" alt="image-20240618221436878"></p>
+<h2 id="域名解析DNS"><a href="#域名解析DNS" class="headerlink" title="域名解析DNS"></a>域名解析DNS</h2><p><img src="/2024/06/21/computer_network_course/image-20240618221749782.png" alt="image-20240618221749782"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221815201.png" alt="image-20240618221815201"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221829595.png" alt="image-20240618221829595"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221843336.png" alt="image-20240618221843336"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221901172.png" alt="image-20240618221901172"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221926589.png" alt="image-20240618221926589"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618221944449.png" alt="image-20240618221944449"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618222038803.png" alt="image-20240618222038803"></p>
+<p>注意两种查询方法</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618222131272.png" alt="image-20240618222131272"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618222214261.png" alt="image-20240618222214261"></p>
+<p>这个没太看懂。。。</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618222233927.png" alt="image-20240618222233927"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618222245052.png" alt="image-20240618222245052"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618222302715.png" alt="image-20240618222302715"></p>
+<h2 id="FTP"><a href="#FTP" class="headerlink" title="FTP"></a>FTP</h2><p><img src="/2024/06/21/computer_network_course/image-20240618222444161.png" alt="image-20240618222444161"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618222600012.png" alt="image-20240618222600012"></p>
+<p>TODO 没看懂跟什么带外传送有关系，，，</p>
+<p>带外传送（Out-of-Band, OOB）是一种数据传输机制，允许在正常的数据通信通道之外发送紧急或高优先级的信号或数据</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618222741470.png" alt="image-20240618222741470"></p>
+<h2 id="Email"><a href="#Email" class="headerlink" title="Email"></a>Email</h2><p><img src="/2024/06/21/computer_network_course/image-20240618233741098.png" alt="image-20240618233741098"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618233847057.png" alt="image-20240618233847057"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618233933077.png" alt="image-20240618233933077"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618234144230.png" alt="image-20240618234144230"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618234155432.png" alt="image-20240618234155432"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618234350183.png" alt="image-20240618234350183"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618234400615.png" alt="image-20240618234400615"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618234416410.png" alt="image-20240618234416410"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618234438812.png" alt="image-20240618234438812"></p>
+<h2 id="HTTP"><a href="#HTTP" class="headerlink" title="HTTP"></a>HTTP</h2><h3 id="概述-10"><a href="#概述-10" class="headerlink" title="概述"></a>概述</h3><p>CS结构</p>
+<p>TCP，无状态</p>
+<p>消息类型：请求和响应</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618235544921.png" alt="image-20240618235544921"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618235641463.png" alt="image-20240618235641463"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618235657924.png" alt="image-20240618235657924"></p>
+<p>方法POST，GET</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240618235629851.png" alt="image-20240618235629851"></p>
+<h3 id="HTTP1-0"><a href="#HTTP1-0" class="headerlink" title="HTTP1.0"></a>HTTP1.0</h3><ol>
+<li><p>一个TCP一个对象，非持久性连接（默认）</p>
+</li>
+<li><p>过程</p>
+<ol>
+<li>TCP连接请求</li>
+<li>TCP建立连接</li>
+<li>发送HTTP请求</li>
+<li>接收并响应</li>
+<li>为每个对象重复上述过程</li>
+</ol>
+</li>
+<li><p>时间分析</p>
+<p>每个对象需要2RTT</p>
+</li>
+<li><p>并行连接</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619000049410.png" alt="image-20240619000049410"></p>
+<p>需要4个RTT（2个for WEB RTT，2个for 其他对象）</p>
+</li>
+</ol>
+<h3 id="HTTP1-1"><a href="#HTTP1-1" class="headerlink" title="HTTP1.1"></a>HTTP1.1</h3><ol>
+<li><p>持久连接（默认选项）</p>
+<p>3个RTT（2个for WEB RTT，1个for 其他对象）</p>
+</li>
+</ol>
+<p><img src="/2024/06/21/computer_network_course/image-20240619000552227.png" alt="image-20240619000552227"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619000205953.png" alt="image-20240619000205953"></p>
+<ol start="2">
+<li>调度问题</li>
+</ol>
+<p><img src="/2024/06/21/computer_network_course/image-20240619000902686.png" alt="image-20240619000902686"></p>
+<h3 id="HTTP2"><a href="#HTTP2" class="headerlink" title="HTTP2"></a>HTTP2</h3><p><img src="/2024/06/21/computer_network_course/image-20240619000942458.png" alt="image-20240619000942458"></p>
+<h3 id="HTTP3"><a href="#HTTP3" class="headerlink" title="HTTP3"></a>HTTP3</h3><p>QUIC</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619001800702.png" alt="image-20240619001800702"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619001901149.png" alt="image-20240619001901149"></p>
+<h3 id="WEB缓存"><a href="#WEB缓存" class="headerlink" title="WEB缓存"></a>WEB缓存</h3><p><img src="/2024/06/21/computer_network_course/image-20240619002002256.png" alt="image-20240619002002256"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619002022497.png" alt="image-20240619002022497"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619002628777.png" alt="image-20240619002628777"></p>
+<h3 id="有状态"><a href="#有状态" class="headerlink" title="有状态"></a>有状态</h3><p><img src="/2024/06/21/computer_network_course/image-20240619002747068.png" alt="image-20240619002747068"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619002756641.png" alt="image-20240619002756641"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619002811422.png" alt="image-20240619002811422"></p>
+<h3 id="VS-SMTP"><a href="#VS-SMTP" class="headerlink" title="VS SMTP"></a>VS SMTP</h3><p><img src="/2024/06/21/computer_network_course/image-20240619003018034.png" alt="image-20240619003018034"></p>
+<h2 id="P2P应用"><a href="#P2P应用" class="headerlink" title="P2P应用"></a>P2P应用</h2><p>没有服务器</p>
+<h3 id="文件分发"><a href="#文件分发" class="headerlink" title="文件分发"></a>文件分发</h3><p><img src="/2024/06/21/computer_network_course/image-20240619003330317.png" alt="image-20240619003330317"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619003600452.png" alt="image-20240619003600452"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619003757604.png" alt="image-20240619003757604"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619003808852.png" alt="image-20240619003808852"></p>
+<h3 id="BitTorrent"><a href="#BitTorrent" class="headerlink" title="BitTorrent"></a>BitTorrent</h3><p><img src="/2024/06/21/computer_network_course/image-20240619003902008.png" alt="image-20240619003902008"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619003933827.png" alt="image-20240619003933827"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619003945397.png" alt="image-20240619003945397"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004006809.png" alt="image-20240619004006809"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004024449.png" alt="image-20240619004024449"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004033179.png" alt="image-20240619004033179"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004101029.png" alt="image-20240619004101029"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004110999.png" alt="image-20240619004110999"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004118612.png" alt="image-20240619004118612"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004127628.png" alt="image-20240619004127628"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004136394.png" alt="image-20240619004136394"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004144892.png" alt="image-20240619004144892"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004153800.png" alt="image-20240619004153800"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004201501.png" alt="image-20240619004201501"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004229422.png" alt="image-20240619004229422"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004241426.png" alt="image-20240619004241426"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004253899.png" alt="image-20240619004253899"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004312024.png" alt="image-20240619004312024"></p>
+<h1 id="无线网络"><a href="#无线网络" class="headerlink" title="无线网络"></a>无线网络</h1><h2 id="无线与移动网络概述"><a href="#无线与移动网络概述" class="headerlink" title="无线与移动网络概述"></a>无线与移动网络概述</h2><ol>
+<li><p>无线</p>
+<p>通过无线链路进行通信</p>
+</li>
+<li><p>移动</p>
+<p>处理改变网络接入点的移动用户</p>
+</li>
+</ol>
+<p>无线网络的要素</p>
+<ol>
+<li><p>无线主机</p>
+</li>
+<li><p>基站</p>
+<p>中继，通常连接到有线网络，负责区域内有线x无线通信</p>
+</li>
+<li><p>无线链路</p>
+<p>使用MAC（多路访问控制）协议协调</p>
+</li>
+</ol>
+<p>无线网络模式</p>
+<ol>
+<li><p>基础设施模式</p>
+<p>基站将移动主机连接到有线网络</p>
+<p>移动主机不通信</p>
+</li>
+<li><p>自组织网络模式  ad hoc mode</p>
+<p>无基站</p>
+<p>只能连接到无线链路范围其他结点</p>
+<p>内部路由</p>
+</li>
+</ol>
+<p>无线网络分类</p>
+<ol>
+<li><p>基础设施</p>
+</li>
+<li><p>无基础设施</p>
+<p>没有基站，没有连接到更大互联网（蓝牙、ad hoc）</p>
+</li>
+</ol>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004647930.png" alt="image-20240619004647930"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004723968.png" alt="image-20240619004723968"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619004937368.png" alt="image-20240619004937368"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005007856.png" alt="image-20240619005007856"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005029451.png" alt="image-20240619005029451"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005053048.png" alt="image-20240619005053048"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005107867.png" alt="image-20240619005107867"></p>
+<h2 id="无线链路与网络特性"><a href="#无线链路与网络特性" class="headerlink" title="无线链路与网络特性"></a>无线链路与网络特性</h2><p>特性</p>
+<ol>
+<li>信号强度衰减</li>
+<li>其他源干扰</li>
+<li>多径传播</li>
+<li>信噪比和比特差错率需要权衡（SNR、BER）</li>
+<li>额外问题（除了MAC）<ol>
+<li>隐蔽站问题</li>
+<li>信号衰减</li>
+</ol>
+</li>
+</ol>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005130554.png" alt="image-20240619005130554"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005144009.png" alt="image-20240619005144009"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005317930.png" alt="image-20240619005317930"></p>
+<h2 id="无线局域网：IEEE802-11"><a href="#无线局域网：IEEE802-11" class="headerlink" title="无线局域网：IEEE802.11"></a>无线局域网：IEEE802.11</h2><h3 id="概述-11"><a href="#概述-11" class="headerlink" title="概述"></a>概述</h3><p><img src="/2024/06/21/computer_network_course/image-20240619005421307.png" alt="image-20240619005421307"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005522041.png" alt="image-20240619005522041"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005603395.png" alt="image-20240619005603395"></p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005633370.png" alt="image-20240619005633370"></p>
+<h3 id="CSMA-CA"><a href="#CSMA-CA" class="headerlink" title="CSMA/CA"></a>CSMA/CA</h3><h4 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h4><p>发送数据前先检测是否空闲（需要空闲DIFS时间），发RTS预约帧，接收端收到RTS广播（延迟SIFS）发送CTS响应，收到CTS开始传数据</p>
+<p>CRC校验</p>
+<p>停等协议</p>
+<p>如果信道忙就开始退避</p>
+<p><img src="/2024/06/21/computer_network_course/image-20240619005827749-1719580324630-26.png" alt="image-20240619005827749"></p>
+<p>反正就是DIFS之后才发帧，然后SIFS后才确认，源站相当于收到了CTS进行确认故而发的SIFS</p>
+<h4 id="与CD比较"><a href="#与CD比较" class="headerlink" title="与CD比较"></a>与CD比较</h4><ol>
+<li><p>相同点</p>
+<p>先听再说，有限重传（二进制指数退避）</p>
+</li>
+<li><p>不同点</p>
+<ol>
+<li>传输介质</li>
+<li>载波检测方式</li>
+</ol>
+</li>
+<li><p>CD检测，CA避免</p>
+</li>
+</ol>
+<h3 id="帧结构及地址"><a href="#帧结构及地址" class="headerlink" title="帧结构及地址"></a>帧结构及地址</h3><p><img src="/2024/06/21/computer_network_course/image-20240619005849838.png" alt="image-20240619005849838"></p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/06/15/network_system_security/">网络与系统安全</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
