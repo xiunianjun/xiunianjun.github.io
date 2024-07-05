@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>计算机系统 | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">计算机系统</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">七月 5, 2024&nbsp;&nbsp;15:36:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p><img src="/2024/07/05/csapp/image-20240702224531198.png" alt="image-20240702224531198"></p>
+<h1 id="信息的表示和处理"><a href="#信息的表示和处理" class="headerlink" title="信息的表示和处理"></a>信息的表示和处理</h1><h2 id="浮点数"><a href="#浮点数" class="headerlink" title="浮点数"></a>浮点数</h2><h3 id="BG"><a href="#BG" class="headerlink" title="BG"></a>BG</h3><p><img src="/2024/07/05/csapp/image-20240628002814940.png" alt="image-20240628002814940"></p>
+<p><img src="/2024/07/05/csapp/image-20240628002830814.png" alt="image-20240628002830814"></p>
+<p><img src="/2024/07/05/csapp/image-20240628002854006.png" alt="image-20240628002854006"></p>
+<h3 id="IEEE"><a href="#IEEE" class="headerlink" title="IEEE"></a>IEEE</h3><p><img src="/2024/07/05/csapp/image-20240628002940522.png" alt="image-20240628002940522"></p>
+<p><img src="/2024/07/05/csapp/image-20240628003037704.png" alt="image-20240628003037704"></p>
+<p><img src="/2024/07/05/csapp/image-20240628003205567.png" alt="image-20240628003205567"></p>
+<p><img src="/2024/07/05/csapp/image-20240628003604607.png" alt="image-20240628003604607"></p>
+<p><img src="/2024/07/05/csapp/image-20240628003738042.png" alt="image-20240628003738042"></p>
+<p><img src="/2024/07/05/csapp/image-20240628003850523.png" alt="image-20240628003850523"></p>
+<p><img src="/2024/07/05/csapp/image-20240628004039980.png" alt="image-20240628004039980"></p>
+<p>TODO为什么。。。</p>
+<p><img src="/2024/07/05/csapp/image-20240628004109379.png" alt="image-20240628004109379"></p>
+<p><img src="/2024/07/05/csapp/image-20240628004127673.png" alt="image-20240628004127673"></p>
+<h3 id="示例与性质"><a href="#示例与性质" class="headerlink" title="示例与性质"></a>示例与性质</h3><p><img src="/2024/07/05/csapp/image-20240628004419912.png" alt="image-20240628004419912"></p>
+<p><img src="/2024/07/05/csapp/image-20240628004606462.png" alt="image-20240628004606462"></p>
+<p><img src="/2024/07/05/csapp/image-20240628004644488.png" alt="image-20240628004644488"></p>
+<p><img src="/2024/07/05/csapp/image-20240628004709127.png" alt="image-20240628004709127"></p>
+<p>TODO这几张图非常值得细看</p>
+<p><img src="/2024/07/05/csapp/image-20240628004748518.png" alt="image-20240628004748518"></p>
+<h3 id="舍入、加法、乘法"><a href="#舍入、加法、乘法" class="headerlink" title="舍入、加法、乘法"></a>舍入、加法、乘法</h3><p><img src="/2024/07/05/csapp/image-20240628004826845.png" alt="image-20240628004826845"></p>
+<h4 id="舍入"><a href="#舍入" class="headerlink" title="舍入"></a>舍入</h4><p><img src="/2024/07/05/csapp/image-20240628004920214.png" alt="image-20240628004920214"></p>
+<p><img src="/2024/07/05/csapp/image-20240628004956444.png" alt="image-20240628004956444"></p>
+<p><img src="/2024/07/05/csapp/image-20240702230246859.png" alt="image-20240702230246859"></p>
+<h4 id="乘法"><a href="#乘法" class="headerlink" title="乘法"></a>乘法</h4><p><img src="/2024/07/05/csapp/image-20240628005030397.png" alt="image-20240628005030397"></p>
+<h4 id="加法"><a href="#加法" class="headerlink" title="加法"></a>加法</h4><p><img src="/2024/07/05/csapp/image-20240628005049221.png" alt="image-20240628005049221"></p>
+<h3 id="C语言"><a href="#C语言" class="headerlink" title="C语言"></a>C语言</h3><p><img src="/2024/07/05/csapp/image-20240628005122778.png" alt="image-20240628005122778"></p>
+<h2 id="整数"><a href="#整数" class="headerlink" title="整数"></a>整数</h2><h3 id="位表示"><a href="#位表示" class="headerlink" title="位表示"></a>位表示</h3><p><img src="/2024/07/05/csapp/image-20240629153141129.png" alt="image-20240629153141129"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153204463.png" alt="image-20240629153204463"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153356447.png" alt="image-20240629153356447"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153411140.png" alt="image-20240629153411140"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153429921.png" alt="image-20240629153429921"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153605927.png" alt="image-20240629153605927"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153625384.png" alt="image-20240629153625384"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153635004.png" alt="image-20240629153635004"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153701055.png" alt="image-20240629153701055"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153722963.png" alt="image-20240629153722963"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153736890.png" alt="image-20240629153736890"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153744355.png" alt="image-20240629153744355"></p>
+<p>注意指针</p>
+<h3 id="位级运算"><a href="#位级运算" class="headerlink" title="位级运算"></a>位级运算</h3><h4 id="布尔代数"><a href="#布尔代数" class="headerlink" title="布尔代数"></a>布尔代数</h4><p><img src="/2024/07/05/csapp/image-20240629153906940.png" alt="image-20240629153906940"></p>
+<p><img src="/2024/07/05/csapp/image-20240629153941254.png" alt="image-20240629153941254"></p>
+<p><img src="/2024/07/05/csapp/image-20240629154024724.png" alt="image-20240629154024724"></p>
+<p><img src="/2024/07/05/csapp/image-20240629154052292.png" alt="image-20240629154052292"></p>
+<h4 id="移位运算"><a href="#移位运算" class="headerlink" title="移位运算"></a>移位运算</h4><p><img src="/2024/07/05/csapp/image-20240629154136148.png" alt="image-20240629154136148"></p>
+<p>最后一句没看懂，如果是补码表示那确实都是了吧</p>
+<h3 id="整型数"><a href="#整型数" class="headerlink" title="整型数"></a>整型数</h3><h4 id="表示"><a href="#表示" class="headerlink" title="表示"></a>表示</h4><p><img src="/2024/07/05/csapp/image-20240629154220534.png" alt="image-20240629154220534"></p>
+<p><img src="/2024/07/05/csapp/image-20240629154229618.png" alt="image-20240629154229618"></p>
+<p><img src="/2024/07/05/csapp/image-20240629154235938.png" alt="image-20240629154235938"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161141314.png" alt="image-20240629161141314"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161217510.png" alt="image-20240629161217510"></p>
+<h4 id="转换"><a href="#转换" class="headerlink" title="转换"></a>转换</h4><p><img src="/2024/07/05/csapp/image-20240629161314409.png" alt="image-20240629161314409"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161333420.png" alt="image-20240629161333420"></p>
+<p><img src="/2024/07/05/csapp/image-20240702233325227.png" alt="image-20240702233325227"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161447550.png" alt="image-20240629161447550"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161509178.png" alt="image-20240629161509178"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161602993.png" alt="image-20240629161602993"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161612858.png" alt="image-20240629161612858"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162956106.png" alt="image-20240629162956106"></p>
+<p><img src="/2024/07/05/csapp/image-20240629164841992.png" alt="image-20240629164841992"></p>
+<h4 id="扩展和截断"><a href="#扩展和截断" class="headerlink" title="扩展和截断"></a>扩展和截断</h4><p><img src="/2024/07/05/csapp/image-20240629161645313.png" alt="image-20240629161645313"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161701432.png" alt="image-20240629161701432"></p>
+<p>注意默认符号</p>
+<p><img src="/2024/07/05/csapp/image-20240629161727622.png" alt="image-20240629161727622"></p>
+<p><img src="/2024/07/05/csapp/image-20240629161810378.png" alt="image-20240629161810378"></p>
+<h4 id="整数运算"><a href="#整数运算" class="headerlink" title="整数运算"></a>整数运算</h4><p><img src="/2024/07/05/csapp/image-20240629162126645.png" alt="image-20240629162126645"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162237623.png" alt="image-20240629162237623"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162303813.png" alt="image-20240629162303813"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162436304.png" alt="image-20240629162436304"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162454909.png" alt="image-20240629162454909"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162512325.png" alt="image-20240629162512325"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162537705.png" alt="image-20240629162537705"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162552931.png" alt="image-20240629162552931"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162619437.png" alt="image-20240629162619437"></p>
+<p>注意向零舍入</p>
+<p><img src="/2024/07/05/csapp/image-20240629162827843.png" alt="image-20240629162827843"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162839410.png" alt="image-20240629162839410"></p>
+<p><img src="/2024/07/05/csapp/image-20240629162900059.png" alt="image-20240629162900059"></p>
+<h3 id="内存指针字符串表示"><a href="#内存指针字符串表示" class="headerlink" title="内存指针字符串表示"></a>内存指针字符串表示</h3><p><img src="/2024/07/05/csapp/image-20240629164920573.png" alt="image-20240629164920573"></p>
+<p><img src="/2024/07/05/csapp/image-20240629164957997.png" alt="image-20240629164957997"></p>
+<p><img src="/2024/07/05/csapp/image-20240629165017470.png" alt="image-20240629165017470"></p>
+<p>注意一直都是字节编址的</p>
+<p><img src="/2024/07/05/csapp/image-20240629165444674.png" alt="image-20240629165444674"></p>
+<p>貌似IA32、Sun都是32位的</p>
+<p><img src="/2024/07/05/csapp/image-20240629165503459.png" alt="image-20240629165503459"></p>
+<p>所以对于小端系统字符串读取就有点意思</p>
+<p><img src="/2024/07/05/csapp/image-20240629165939717.png" alt="image-20240629165939717"></p>
+<h1 id="程序的机器级表示"><a href="#程序的机器级表示" class="headerlink" title="程序的机器级表示"></a>程序的机器级表示</h1><h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><p><img src="/2024/07/05/csapp/image-20240629170051669.png" alt="image-20240629170051669"></p>
+<p><img src="/2024/07/05/csapp/image-20240629170351822.png" alt="image-20240629170351822"></p>
+<h3 id="8086CPU"><a href="#8086CPU" class="headerlink" title="8086CPU"></a>8086CPU</h3><p><img src="/2024/07/05/csapp/image-20240629170440224.png" alt="image-20240629170440224"></p>
+<h4 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h4><p><img src="/2024/07/05/csapp/image-20240629170510220.png" alt="image-20240629170510220"></p>
+<p><img src="/2024/07/05/csapp/image-20240629170520093.png" alt="image-20240629170520093"></p>
+<h4 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h4><h5 id="数据和指针寄存器"><a href="#数据和指针寄存器" class="headerlink" title="数据和指针寄存器"></a>数据和指针寄存器</h5><p><img src="/2024/07/05/csapp/image-20240629170604953.png" alt="image-20240629170604953"></p>
+<p><img src="/2024/07/05/csapp/image-20240629170637945.png" alt="image-20240629170637945"></p>
+<p><img src="/2024/07/05/csapp/image-20240629170722076.png" alt="image-20240629170722076"></p>
+<p><img src="/2024/07/05/csapp/image-20240629170732259.png" alt="image-20240629170732259"></p>
+<p><img src="/2024/07/05/csapp/image-20240629171138833.png" alt="image-20240629171138833"></p>
+<p><img src="/2024/07/05/csapp/image-20240629171202406.png" alt="image-20240629171202406"></p>
+<p><img src="/2024/07/05/csapp/image-20240629171245825.png" alt="image-20240629171245825"></p>
+<h5 id="标志寄存器"><a href="#标志寄存器" class="headerlink" title="标志寄存器"></a>标志寄存器</h5><p><img src="/2024/07/05/csapp/image-20240629171256030.png" alt="image-20240629171256030"></p>
+<p><img src="/2024/07/05/csapp/image-20240629171304302.png" alt="image-20240629171304302"></p>
+<ol>
+<li><p>CF</p>
+<p><img src="/2024/07/05/csapp/image-20240629171321061.png" alt="image-20240629171321061"></p>
+</li>
+<li><p>ZF</p>
+<p><img src="/2024/07/05/csapp/image-20240629171331939.png" alt="image-20240629171331939"></p>
+</li>
+<li><p>SF</p>
+<p><img src="/2024/07/05/csapp/image-20240629171349228.png" alt="image-20240629171349228"></p>
+</li>
+<li><p>PF</p>
+<p><img src="/2024/07/05/csapp/image-20240629171403897.png" alt="image-20240629171403897"></p>
+</li>
+<li><p>OF</p>
+<p><img src="/2024/07/05/csapp/image-20240629171445755.png" alt="image-20240629171445755"></p>
+<p><img src="/2024/07/05/csapp/image-20240629171507896.png" alt="image-20240629171507896"></p>
+<p><img src="/2024/07/05/csapp/image-20240629171527864.png" alt="image-20240629171527864"></p>
+<p><img src="/2024/07/05/csapp/image-20240629171551841.png" alt="image-20240629171551841"></p>
+<p><img src="/2024/07/05/csapp/image-20240629171610688.png" alt="image-20240629171610688"></p>
+</li>
+<li><p>AF</p>
+<p><img src="/2024/07/05/csapp/image-20240629171636058.png" alt="image-20240629171636058"></p>
+</li>
+</ol>
+<h5 id="段寄存器"><a href="#段寄存器" class="headerlink" title="段寄存器"></a>段寄存器</h5><p><img src="/2024/07/05/csapp/image-20240629171727426.png" alt="image-20240629171727426"></p>
+<h4 id="指令系统"><a href="#指令系统" class="headerlink" title="指令系统"></a>指令系统</h4><p>8086／8088的指令系统包含了六种类型，其中数据传送指令14条，算术运算指令20条，逻辑运算指令13条，串操作指令10条，控制转移指令28条，处理器控制指令12条。</p>
+<h5 id="寻址方式"><a href="#寻址方式" class="headerlink" title="寻址方式"></a>寻址方式</h5><p><img src="/2024/07/05/csapp/image-20240629171907296.png" alt="image-20240629171907296"></p>
+<p>存储器寻址花样比较多</p>
+<p><img src="/2024/07/05/csapp/image-20240629171931179.png" alt="image-20240629171931179"></p>
+<h3 id="IA32处理器体系结构"><a href="#IA32处理器体系结构" class="headerlink" title="IA32处理器体系结构"></a>IA32处理器体系结构</h3><h4 id="基本结构"><a href="#基本结构" class="headerlink" title="基本结构"></a>基本结构</h4><p><img src="/2024/07/05/csapp/image-20240629172043968.png" alt="image-20240629172043968"></p>
+<p><img src="/2024/07/05/csapp/image-20240629172051621.png" alt="image-20240629172051621"></p>
+<h4 id="寄存器-1"><a href="#寄存器-1" class="headerlink" title="寄存器"></a>寄存器</h4><p><img src="/2024/07/05/csapp/image-20240629172644379.png" alt="image-20240629172644379"></p>
+<h5 id="基本寄存器"><a href="#基本寄存器" class="headerlink" title="基本寄存器"></a>基本寄存器</h5><p><img src="/2024/07/05/csapp/image-20240629172702238.png" alt="image-20240629172702238"></p>
+<p><img src="/2024/07/05/csapp/image-20240629172710920.png" alt="image-20240629172710920"></p>
+<p><img src="/2024/07/05/csapp/image-20240629172721939.png" alt="image-20240629172721939"></p>
+<p>就是启动那会儿的对吧</p>
+<p><img src="/2024/07/05/csapp/image-20240629172911651.png" alt="image-20240629172911651"></p>
+<p><img src="/2024/07/05/csapp/image-20240629172942789.png" alt="image-20240629172942789"></p>
+<p>保护模式就是启动完了开启映射了</p>
+<p><img src="/2024/07/05/csapp/image-20240629173003354.png" alt="image-20240629173003354"></p>
+<p><img src="/2024/07/05/csapp/image-20240629173027302.png" alt="image-20240629173027302"></p>
+<p>状态就是反应状态，控制就是可以用来控制CPU</p>
+<p><img src="/2024/07/05/csapp/image-20240629173100198.png" alt="image-20240629173100198"></p>
+<p>注意标红的就行，注意奇偶标志的范围。跟8086差不多。</p>
+<h5 id="系统寄存器"><a href="#系统寄存器" class="headerlink" title="系统寄存器*"></a>系统寄存器*</h5><p><img src="/2024/07/05/csapp/image-20240629173220305.png" alt="image-20240629173220305"></p>
+<p>值得注意调试的也在！还有任务寄存器，应该就是进程虚拟地址之类的相关的了吧</p>
+<h5 id="浮点单元FPU"><a href="#浮点单元FPU" class="headerlink" title="浮点单元FPU*"></a>浮点单元FPU*</h5><p><img src="/2024/07/05/csapp/image-20240629173255252.png" alt="image-20240629173255252"></p>
+<h4 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理*"></a>内存管理*</h4><p>TODO，这部分我打算之后再复习一下OS</p>
+<h5 id="实地址模式"><a href="#实地址模式" class="headerlink" title="实地址模式"></a>实地址模式</h5><p><img src="/2024/07/05/csapp/image-20240629173320431.png" alt="image-20240629173320431"></p>
+<h5 id="保护模式"><a href="#保护模式" class="headerlink" title="保护模式"></a>保护模式</h5><p><img src="/2024/07/05/csapp/image-20240629173356263.png" alt="image-20240629173356263"></p>
+<p><img src="/2024/07/05/csapp/image-20240629173420997.png" alt="image-20240629173420997"></p>
+<h4 id="指令执行周期"><a href="#指令执行周期" class="headerlink" title="指令执行周期"></a>指令执行周期</h4><p><img src="/2024/07/05/csapp/image-20240629173654565.png" alt="image-20240629173654565"></p>
+<p><img src="/2024/07/05/csapp/image-20240629173713560.png" alt="image-20240629173713560"></p>
+<h4 id="程序如何运行"><a href="#程序如何运行" class="headerlink" title="程序如何运行"></a>程序如何运行</h4><p><img src="/2024/07/05/csapp/image-20240629173744806.png" alt="image-20240629173744806"></p>
+<p><img src="/2024/07/05/csapp/image-20240629173801306.png" alt="image-20240629173801306"></p>
+<p><img src="/2024/07/05/csapp/image-20240629173820041.png" alt="image-20240629173820041"></p>
+<p><img src="/2024/07/05/csapp/image-20240629173837010.png" alt="image-20240629173837010"></p>
+<p><img src="/2024/07/05/csapp/image-20240629173849453.png" alt="image-20240629173849453"></p>
+<h4 id="计算机如何启动"><a href="#计算机如何启动" class="headerlink" title="计算机如何启动"></a>计算机如何启动</h4><p><img src="/2024/07/05/csapp/image-20240629173914760.png" alt="image-20240629173914760"></p>
+<h3 id="汇编语言"><a href="#汇编语言" class="headerlink" title="汇编语言"></a>汇编语言</h3><h4 id="发展历程"><a href="#发展历程" class="headerlink" title="发展历程*"></a>发展历程*</h4><p><img src="/2024/07/05/csapp/image-20240629174031407.png" alt="image-20240629174031407"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174038941.png" alt="image-20240629174038941"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174051144.png" alt="image-20240629174051144"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174105278.png" alt="image-20240629174105278"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174113473.png" alt="image-20240629174113473"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174122908.png" alt="image-20240629174122908"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174131584.png" alt="image-20240629174131584"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174138746.png" alt="image-20240629174138746"></p>
+<h4 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h4><p><img src="/2024/07/05/csapp/image-20240629175818512.png" alt="image-20240629175818512"></p>
+<p><img src="/2024/07/05/csapp/image-20240629180520973.png" alt="image-20240629180520973"></p>
+<p><img src="/2024/07/05/csapp/image-20240629180540476.png" alt="image-20240629180540476"></p>
+<p><img src="/2024/07/05/csapp/image-20240629180923392.png" alt="image-20240629180923392"></p>
+<p><img src="/2024/07/05/csapp/image-20240629180931787.png" alt="image-20240629180931787"></p>
+<h4 id="汇编基础"><a href="#汇编基础" class="headerlink" title="汇编基础"></a>汇编基础</h4><h5 id="寄存器-2"><a href="#寄存器-2" class="headerlink" title="寄存器"></a>寄存器</h5><p><img src="/2024/07/05/csapp/image-20240629181016885.png" alt="image-20240629181016885"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181028511.png" alt="image-20240629181028511"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181042536.png" alt="image-20240629181042536"></p>
+<h5 id="操作数和数据传送"><a href="#操作数和数据传送" class="headerlink" title="操作数和数据传送"></a>操作数和数据传送</h5><p><img src="/2024/07/05/csapp/image-20240629181108519.png" alt="image-20240629181108519"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181116760.png" alt="image-20240629181116760"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181135761.png" alt="image-20240629181135761"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181150927.png" alt="image-20240629181150927"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181213241.png" alt="image-20240629181213241"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181223042.png" alt="image-20240629181223042"></p>
+<p>不愧是CISC</p>
+<p><img src="/2024/07/05/csapp/image-20240629181238528.png" alt="image-20240629181238528"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181246277.png" alt="image-20240629181246277"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181256555.png" alt="image-20240629181256555"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181312739.png" alt="image-20240629181312739"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181320748.png" alt="image-20240629181320748"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181443984.png" alt="image-20240629181443984"></p>
+<h5 id="寻址"><a href="#寻址" class="headerlink" title="寻址"></a>寻址</h5><p><img src="/2024/07/05/csapp/image-20240629181459835.png" alt="image-20240629181459835"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181515327.png" alt="image-20240629181515327"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181523184.png" alt="image-20240629181523184"></p>
+<p>比如说数组元素访问，a[2]，其中Rb就是a的基址，Ri就是这个2，S就是sizeof(a[0])。D可能就是具体这个a[2]的某个字节了。</p>
+<h5 id="栈操作"><a href="#栈操作" class="headerlink" title="栈操作"></a>栈操作</h5><p><img src="/2024/07/05/csapp/image-20240629181752917.png" alt="image-20240629181752917"></p>
+<p><img src="/2024/07/05/csapp/image-20240629181808216.png" alt="image-20240629181808216"></p>
+<h4 id="算术和逻辑运算"><a href="#算术和逻辑运算" class="headerlink" title="算术和逻辑运算"></a>算术和逻辑运算</h4><p><img src="/2024/07/05/csapp/image-20240629182416903.png" alt="image-20240629182416903"></p>
+<p>我靠，注意这个leaq还可以作为这种计算算术表达式的操作，6666</p>
+<p><img src="/2024/07/05/csapp/image-20240629182430734.png" alt="image-20240629182430734"></p>
+<p><img src="/2024/07/05/csapp/image-20240629182438714.png" alt="image-20240629182438714"></p>
+<p><img src="/2024/07/05/csapp/image-20240629182606816.png" alt="image-20240629182606816"></p>
+<p>怎么感觉有点沙比</p>
+<p><img src="/2024/07/05/csapp/image-20240629182850116.png" alt="image-20240629182850116"></p>
+<p>66666</p>
+<h4 id="比较和跳转"><a href="#比较和跳转" class="headerlink" title="比较和跳转"></a>比较和跳转</h4><p><img src="/2024/07/05/csapp/image-20240629182942737.png" alt="image-20240629182942737"></p>
+<h5 id="布尔指令"><a href="#布尔指令" class="headerlink" title="布尔指令"></a>布尔指令</h5><p><img src="/2024/07/05/csapp/image-20240629183049780.png" alt="image-20240629183049780"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183112219.png" alt="image-20240629183112219"></p>
+<p>这个牛逼</p>
+<p><img src="/2024/07/05/csapp/image-20240629183127524.png" alt="image-20240629183127524"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183143024.png" alt="image-20240629183143024"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183154740.png" alt="image-20240629183154740"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183202322.png" alt="image-20240629183202322"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183229936.png" alt="image-20240629183229936"></p>
+<h5 id="比较指令"><a href="#比较指令" class="headerlink" title="比较指令"></a>比较指令</h5><p><img src="/2024/07/05/csapp/image-20240629183256285.png" alt="image-20240629183256285"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183304590.png" alt="image-20240629183304590"></p>
+<h5 id="跳转指令"><a href="#跳转指令" class="headerlink" title="跳转指令"></a>跳转指令</h5><p><img src="/2024/07/05/csapp/image-20240629183327424.png" alt="image-20240629183327424"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183333183.png" alt="image-20240629183333183"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183343729.png" alt="image-20240629183343729"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183353963.png" alt="image-20240629183353963"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183401113.png" alt="image-20240629183401113"></p>
+<h3 id="Linux汇编程序"><a href="#Linux汇编程序" class="headerlink" title="Linux汇编程序"></a>Linux汇编程序</h3><p>典中典</p>
+<p><img src="/2024/07/05/csapp/image-20240629174244456.png" alt="image-20240629174244456"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174525821.png" alt="image-20240629174525821"></p>
+<p>TODO 这里没懂</p>
+<p><img src="/2024/07/05/csapp/image-20240629174539249.png" alt="image-20240629174539249"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174609163.png" alt="image-20240629174609163"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174631990.png" alt="image-20240629174631990"></p>
+<p><img src="/2024/07/05/csapp/image-20240629174649526.png" alt="image-20240629174649526"></p>
+<h2 id="控制"><a href="#控制" class="headerlink" title="控制"></a>控制</h2><p><img src="/2024/07/05/csapp/image-20240629183513168.png" alt="image-20240629183513168"></p>
+<h3 id="流程控制-条件码"><a href="#流程控制-条件码" class="headerlink" title="流程控制:条件码"></a>流程控制:条件码</h3><p><img src="/2024/07/05/csapp/image-20240629183547473.png" alt="image-20240629183547473"></p>
+<p>就是标志寄存器呗</p>
+<p><img src="/2024/07/05/csapp/image-20240629183619040.png" alt="image-20240629183619040"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183723813.png" alt="image-20240629183723813"></p>
+<p><img src="/2024/07/05/csapp/image-20240629183731735.png" alt="image-20240629183731735"></p>
+<p>注意这个访问条件码，新东西</p>
+<p><img src="/2024/07/05/csapp/image-20240629183812043.png" alt="image-20240629183812043"></p>
+<p>感觉他这说得好谜语，总之意思大概就是根据条件码的值然后设置寄存器的值，比如说：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmp al, 0x05  ; 比较 AL 寄存器的值和立即数5</span><br><span class="line">sete bl       ; 如果 AL 等于 5，则将 BL 寄存器设置为1，否则设置为0</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/07/05/csapp/image-20240629183940888.png" alt="image-20240629183940888"></p>
+<h3 id="条件分支"><a href="#条件分支" class="headerlink" title="条件分支"></a>条件分支</h3><p><img src="/2024/07/05/csapp/image-20240629184007086.png" alt="image-20240629184007086"></p>
+<p><del>（SF^OF）就是说除了 负数^溢出 这种情况，也即只有11和00的情况会被考虑，后者是普通情况，前者只有正数-负数这种情况会出现，而此时必定是大于。同时</del>ZF代表排除==的情况。</p>
+<p>然后，SF=1，OF=0表示的是相减负数，SF=0，OF=1表示的是负溢出，此时必定为负数-正数，所以必是小于。</p>
+<p>而对于无符号数，只有在结果为负数，也即小于的情况会溢出，所以只需判断CF标志</p>
+<p><img src="/2024/07/05/csapp/image-20240629184027469.png" alt="image-20240629184027469"></p>
+<p><img src="/2024/07/05/csapp/image-20240629184044655.png" alt="image-20240629184044655"></p>
+<p><img src="/2024/07/05/csapp/image-20240629184100233.png" alt="image-20240629184100233"></p>
+<p><img src="/2024/07/05/csapp/image-20240629184106808.png" alt="image-20240629184106808"></p>
+<p><img src="/2024/07/05/csapp/image-20240629184137328.png" alt="image-20240629184137328"></p>
+<p>确实</p>
+<p><img src="/2024/07/05/csapp/image-20240629184150880.png" alt="image-20240629184150880"></p>
+<p>相当于是两个分支都算一遍，最后再用这个条件传送指令决定哪个是哪个</p>
+<p><img src="/2024/07/05/csapp/image-20240629184305948.png" alt="image-20240629184305948"></p>
+<p>确实。。。</p>
+<h3 id="循环结构的实现"><a href="#循环结构的实现" class="headerlink" title="循环结构的实现"></a>循环结构的实现</h3><h4 id="do-while"><a href="#do-while" class="headerlink" title="do-while"></a>do-while</h4><p><img src="/2024/07/05/csapp/image-20240629184327058.png" alt="image-20240629184327058"></p>
+<p><img src="/2024/07/05/csapp/image-20240629184338809.png" alt="image-20240629184338809"></p>
+<h4 id="while"><a href="#while" class="headerlink" title="while"></a>while</h4><h5 id="跳到中间"><a href="#跳到中间" class="headerlink" title="跳到中间"></a>跳到中间</h5><p><img src="/2024/07/05/csapp/image-20240629184352822.png" alt="image-20240629184352822"></p>
+<p>GCC的 <code>-Og</code> 选项是一种优化级别，旨在提供编译速度和运行时性能之间的平衡。这个选项从GCC 4.7版本开始引入，目的是在不牺牲太多编译速度的情况下，优化生成的代码以提高程序的运行效率。</p>
+<ul>
+<li><strong>优化级别</strong>：<code>-Og</code> 通常提供比 <code>-O0</code>（没有优化）更高的优化级别，但低于 <code>-O1</code>、<code>-O2</code> 和 <code>-O3</code>。它专注于那些不太耗时且能够带来明显性能提升的优化。</li>
+<li><strong>调试友好</strong>：<code>-Og</code> 选项生成的代码旨在保持与源代码的可读性和对应性，使得调试过程更加容易。这与 <code>-O0</code> 类似，但 <code>-Og</code> 仍然会应用一些优化，以提高程序的运行性能。</li>
+</ul>
+<p><img src="/2024/07/05/csapp/image-20240629184417054.png" alt="image-20240629184417054"></p>
+<p><img src="/2024/07/05/csapp/image-20240629184439472.png" alt="image-20240629184439472"></p>
+<h5 id="guarded-do"><a href="#guarded-do" class="headerlink" title="guarded-do"></a>guarded-do</h5><p><img src="/2024/07/05/csapp/image-20240629184549604.png" alt="image-20240629184549604"></p>
+<p>就是说又转化了一层</p>
+<p>感觉像是在第一次进去的时候少了一次goto</p>
+<p><img src="/2024/07/05/csapp/image-20240629184748001.png" alt="image-20240629184748001"></p>
+<h4 id="for"><a href="#for" class="headerlink" title="for"></a>for</h4><p><img src="/2024/07/05/csapp/image-20240629184807369.png" alt="image-20240629184807369"></p>
+<h5 id="for-while"><a href="#for-while" class="headerlink" title="for-while"></a>for-while</h5><p><img src="/2024/07/05/csapp/image-20240629184816225.png" alt="image-20240629184816225"></p>
+<p><img src="/2024/07/05/csapp/image-20240629184825669.png" alt="image-20240629184825669"></p>
+<h5 id="for-dowhile"><a href="#for-dowhile" class="headerlink" title="for-dowhile"></a>for-dowhile</h5><p><img src="/2024/07/05/csapp/image-20240629184839514.png" alt="image-20240629184839514"></p>
+<h3 id="Switch语句"><a href="#Switch语句" class="headerlink" title="Switch语句"></a>Switch语句</h3><p><img src="/2024/07/05/csapp/image-20240629184909493.png" alt="image-20240629184909493"></p>
+<p>总结到位</p>
+<p><img src="/2024/07/05/csapp/image-20240629184944779.png" alt="image-20240629184944779"></p>
+<p>6666</p>
+<p><img src="/2024/07/05/csapp/image-20240629185053919.png" alt="image-20240629185053919"></p>
+<p><img src="/2024/07/05/csapp/image-20240629185106744.png" alt="image-20240629185106744"></p>
+<p><img src="/2024/07/05/csapp/image-20240629185523195.png" alt="image-20240629185523195"></p>
+<p><img src="/2024/07/05/csapp/image-20240629185552179.png" alt="image-20240629185552179"></p>
+<p>注意这个fall-through的处理</p>
+<p>甚至还是在switch case里才初始化的w，也确实不是每个case都得初始化</p>
+<p><img src="/2024/07/05/csapp/image-20240629185636197.png" alt="image-20240629185636197"></p>
+<h2 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h2><p><img src="/2024/07/05/csapp/image-20240629214313618.png" alt="image-20240629214313618"></p>
+<h3 id="栈结构"><a href="#栈结构" class="headerlink" title="栈结构"></a>栈结构</h3><p><img src="/2024/07/05/csapp/image-20240629214417784.png" alt="image-20240629214417784"></p>
+<p>这个内存管理应该指的是栈上不是堆上。。</p>
+<p><img src="/2024/07/05/csapp/image-20240629214456115.png" alt="image-20240629214456115"></p>
+<p><img src="/2024/07/05/csapp/image-20240629214610483.png" alt="image-20240629214610483"></p>
+<p><img src="/2024/07/05/csapp/image-20240629214713468.png" alt="image-20240629214713468"></p>
+<h3 id="调用约定"><a href="#调用约定" class="headerlink" title="调用约定"></a>调用约定</h3><h4 id="传递控制"><a href="#传递控制" class="headerlink" title="传递控制"></a>传递控制</h4><p><img src="/2024/07/05/csapp/image-20240629215705403.png" alt="image-20240629215705403"></p>
+<h4 id="传递数据"><a href="#传递数据" class="headerlink" title="传递数据"></a>传递数据</h4><p>x86-64架构中常见的几个用于函数参数传递的寄存器：</p>
+<ul>
+<li>**<code>RDI</code>**：通常用作第一个整数或指针类型的函数参数。</li>
+<li>**<code>RSI</code>**：用作第二个整数或指针类型的函数参数。</li>
+<li>**<code>RDX</code>**：用作第三个整数或指针类型的函数参数。</li>
+<li>**<code>RCX</code>**：用作第四个整数或指针类型的函数参数。</li>
+<li><strong><code>R8</code></strong> 和 **<code>R9</code>**：在需要更多参数的情况下，从这些寄存器开始。</li>
+</ul>
+<p><img src="/2024/07/05/csapp/image-20240629215823440.png" alt="image-20240629215823440"></p>
+<p>所以多的参数是由后往前推的，返回地址最后推。</p>
+<p><img src="/2024/07/05/csapp/image-20240629221044803.png" alt="image-20240629221044803"></p>
+<h4 id="管理局部数据"><a href="#管理局部数据" class="headerlink" title="管理局部数据"></a>管理局部数据</h4><p><img src="/2024/07/05/csapp/image-20240629215949003.png" alt="image-20240629215949003"></p>
+<p><img src="/2024/07/05/csapp/image-20240629220044988.png" alt="image-20240629220044988"></p>
+<p><img src="/2024/07/05/csapp/image-20240629220241130.png" alt="image-20240629220241130"></p>
+<p>就是说callee的参数其实理论上是叫放在caller的栈帧的</p>
+<p><img src="/2024/07/05/csapp/image-20240629220343050.png" alt="image-20240629220343050"></p>
+<p><img src="/2024/07/05/csapp/image-20240629220619265.png" alt="image-20240629220619265"></p>
+<p><img src="/2024/07/05/csapp/image-20240629220700065.png" alt="image-20240629220700065"></p>
+<p><img src="/2024/07/05/csapp/image-20240629220710873.png" alt="image-20240629220710873"></p>
+<p><img src="/2024/07/05/csapp/image-20240629221510150.png" alt="image-20240629221510150"></p>
+<p>我去，简答题</p>
+<h4 id="寄存器保存约定"><a href="#寄存器保存约定" class="headerlink" title="寄存器保存约定"></a>寄存器保存约定</h4><p>在x86-64位架构中，callee-saved registers通常包括：</p>
+<ul>
+<li><strong>RBX</strong>，r12,r13,r14</li>
+<li><strong>RSP</strong>（栈指针，如果被修改）</li>
+<li><strong>RBP</strong>（基指针，如果被用作帧指针）</li>
+</ul>
+<p>caller-save寄存器：</p>
+<ul>
+<li><strong>RAX</strong>：用于存储函数的返回值。</li>
+<li>rdi/rsi/rdx/rcx/r8/r9：参数</li>
+<li><strong>R10,R11</strong>：被调用过程可修改</li>
+</ul>
+<p><img src="/2024/07/05/csapp/image-20240629221605026.png" alt="image-20240629221605026"></p>
+<h3 id="递归"><a href="#递归" class="headerlink" title="递归"></a>递归</h3><p><img src="/2024/07/05/csapp/image-20240629222028179.png" alt="image-20240629222028179"></p>
+<p><img src="/2024/07/05/csapp/image-20240629222108223.png" alt="image-20240629222108223"></p>
+<h2 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h2><p><img src="/2024/07/05/csapp/image-20240629222321520.png" alt="image-20240629222321520"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000257041.png" alt="image-20240630000257041"></p>
+<h3 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h3><p><img src="/2024/07/05/csapp/image-20240629222455645.png" alt="image-20240629222455645"></p>
+<p>64位系统是吧</p>
+<p><img src="/2024/07/05/csapp/image-20240629222601321.png" alt="image-20240629222601321"></p>
+<p><img src="/2024/07/05/csapp/image-20240629222634282.png" alt="image-20240629222634282"></p>
+<p><img src="/2024/07/05/csapp/image-20240629222659076.png" alt="image-20240629222659076"></p>
+<p><img src="/2024/07/05/csapp/image-20240629222709361.png" alt="image-20240629222709361"></p>
+<p><img src="/2024/07/05/csapp/image-20240629223847665.png" alt="image-20240629223847665"></p>
+<p>对，相当于A3是一个指向3*int的指针，然后A4其实就跟A2是一个道理，相当于*(A4[0])为int。</p>
+<p><img src="/2024/07/05/csapp/image-20240629224333393.png" alt="image-20240629224333393"></p>
+<p><img src="/2024/07/05/csapp/image-20240629224451182.png" alt="image-20240629224451182"></p>
+<p><img src="/2024/07/05/csapp/image-20240629230258371.png" alt="image-20240629230258371"></p>
+<p><img src="/2024/07/05/csapp/image-20240629230315624.png" alt="image-20240629230315624"></p>
+<p><img src="/2024/07/05/csapp/image-20240629230451483.png" alt="image-20240629230451483"></p>
+<p><img src="/2024/07/05/csapp/image-20240629230513156.png" alt="image-20240629230513156"></p>
+<p><img src="/2024/07/05/csapp/image-20240629230657214.png" alt="image-20240629230657214"></p>
+<p><img src="/2024/07/05/csapp/image-20240629230713454.png" alt="image-20240629230713454"></p>
+<p><img src="/2024/07/05/csapp/image-20240629230809676.png" alt="image-20240629230809676"></p>
+<p><img src="/2024/07/05/csapp/image-20240629230821364.png" alt="image-20240629230821364"></p>
+<h3 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h3><p><img src="/2024/07/05/csapp/image-20240629230917379.png" alt="image-20240629230917379"></p>
+<p><img src="/2024/07/05/csapp/image-20240629232052538.png" alt="image-20240629232052538"></p>
+<p><img src="/2024/07/05/csapp/image-20240629232120725.png" alt="image-20240629232120725"></p>
+<p><img src="/2024/07/05/csapp/image-20240629233035806.png" alt="image-20240629233035806"></p>
+<p><img src="/2024/07/05/csapp/image-20240629233050110.png" alt="image-20240629233050110"></p>
+<p><img src="/2024/07/05/csapp/image-20240629233145636.png" alt="image-20240629233145636"></p>
+<p>注意c后面还得7B的padding</p>
+<p><img src="/2024/07/05/csapp/image-20240629233228570.png" alt="image-20240629233228570"></p>
+<p><img src="/2024/07/05/csapp/image-20240629233258201.png" alt="image-20240629233258201"></p>
+<h3 id="浮点数-1"><a href="#浮点数-1" class="headerlink" title="浮点数*"></a>浮点数*</h3><h2 id="高级主题"><a href="#高级主题" class="headerlink" title="高级主题"></a>高级主题</h2><p><img src="/2024/07/05/csapp/image-20240629233620950.png" alt="image-20240629233620950"></p>
+<h3 id="内存布局"><a href="#内存布局" class="headerlink" title="内存布局"></a>内存布局</h3><p><img src="/2024/07/05/csapp/image-20240629233704820.png" alt="image-20240629233704820"></p>
+<p><img src="/2024/07/05/csapp/image-20240629233751563.png" alt="image-20240629233751563"></p>
+<p><img src="/2024/07/05/csapp/image-20240629233818527.png" alt="image-20240629233818527"></p>
+<p>巨长的data段。。</p>
+<h3 id="缓冲区溢出"><a href="#缓冲区溢出" class="headerlink" title="缓冲区溢出"></a>缓冲区溢出</h3><h4 id="安全隐患"><a href="#安全隐患" class="headerlink" title="安全隐患"></a>安全隐患</h4><p><img src="/2024/07/05/csapp/image-20240629233905182.png" alt="image-20240629233905182"></p>
+<p><img src="/2024/07/05/csapp/image-20240629233915558.png" alt="image-20240629233915558"></p>
+<p><img src="/2024/07/05/csapp/image-20240629233936070.png" alt="image-20240629233936070"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234000472.png" alt="image-20240629234000472"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234014638.png" alt="image-20240629234014638"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234042302.png" alt="image-20240629234042302"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234049319.png" alt="image-20240629234049319"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234104831.png" alt="image-20240629234104831"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234131782.png" alt="image-20240629234131782"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234145352.png" alt="image-20240629234145352"></p>
+<h4 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h4><p><img src="/2024/07/05/csapp/image-20240629234207160.png" alt="image-20240629234207160"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234217727.png" alt="image-20240629234217727"></p>
+<p><img src="/2024/07/05/csapp/image-20240629235604349.png" alt="image-20240629235604349"></p>
+<p><img src="/2024/07/05/csapp/image-20240629235622372.png" alt="image-20240629235622372"></p>
+<h4 id="防范"><a href="#防范" class="headerlink" title="防范"></a>防范</h4><p><img src="/2024/07/05/csapp/image-20240629234300252.png" alt="image-20240629234300252"></p>
+<p><img src="/2024/07/05/csapp/image-20240629234315480.png" alt="image-20240629234315480"></p>
+<p><img src="/2024/07/05/csapp/image-20240629235225142.png" alt="image-20240629235225142"></p>
+<p><img src="/2024/07/05/csapp/image-20240629235253787.png" alt="image-20240629235253787"></p>
+<p><img src="/2024/07/05/csapp/image-20240629235349536.png" alt="image-20240629235349536"></p>
+<p><img src="/2024/07/05/csapp/image-20240629235358006.png" alt="image-20240629235358006"></p>
+<p>感觉看起来主要还是检查ra</p>
+<h3 id="联合union"><a href="#联合union" class="headerlink" title="联合union"></a>联合union</h3><p><img src="/2024/07/05/csapp/image-20240629235753374.png" alt="image-20240629235753374"></p>
+<p><img src="/2024/07/05/csapp/image-20240629235804300.png" alt="image-20240629235804300"></p>
+<p><img src="/2024/07/05/csapp/image-20240629235935481.png" alt="image-20240629235935481"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000000489.png" alt="image-20240630000000489"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000034088.png" alt="image-20240630000034088"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000125056.png" alt="image-20240630000125056"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000140734.png" alt="image-20240630000140734"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000152893.png" alt="image-20240630000152893"></p>
+<h1 id="处理器体系结构"><a href="#处理器体系结构" class="headerlink" title="处理器体系结构"></a>处理器体系结构</h1><h2 id="指令集体系结构"><a href="#指令集体系结构" class="headerlink" title="指令集体系结构"></a>指令集体系结构</h2><h3 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h3><p><img src="/2024/07/05/csapp/image-20240630000445224.png" alt="image-20240630000445224"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000517112.png" alt="image-20240630000517112"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000724760.png" alt="image-20240630000724760"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001151603.png" alt="image-20240630001151603"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001300168.png" alt="image-20240630001300168"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001344591.png" alt="image-20240630001344591"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001504382.png" alt="image-20240630001504382"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001603829.png" alt="image-20240630001603829"></p>
+<h3 id="Y86-64"><a href="#Y86-64" class="headerlink" title="Y86-64"></a>Y86-64</h3><p><img src="/2024/07/05/csapp/image-20240630000411251.png" alt="image-20240630000411251"></p>
+<p><img src="/2024/07/05/csapp/image-20240630000619748.png" alt="image-20240630000619748"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001645731.png" alt="image-20240630001645731"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001715603.png" alt="image-20240630001715603"></p>
+<p>指令操作码包含8位，低4位指示具体操作类型fn</p>
+<p><img src="/2024/07/05/csapp/image-20240630001810469.png" alt="image-20240630001810469"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001918709.png" alt="image-20240630001918709"></p>
+<p><img src="/2024/07/05/csapp/image-20240630001933825.png" alt="image-20240630001933825"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002240880.png" alt="image-20240630002240880"></p>
+<p>注意这个无寄存器含义</p>
+<p><img src="/2024/07/05/csapp/image-20240630002341294.png" alt="image-20240630002341294"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002425220.png" alt="image-20240630002425220"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002511971.png" alt="image-20240630002511971"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002629778.png" alt="image-20240630002629778"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002653765.png" alt="image-20240630002653765"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002707921.png" alt="image-20240630002707921"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002744417.png" alt="image-20240630002744417"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002803889.png" alt="image-20240630002803889"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002838792.png" alt="image-20240630002838792"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002922874.png" alt="image-20240630002922874"></p>
+<p><img src="/2024/07/05/csapp/image-20240630002953146.png" alt="image-20240630002953146"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003015562.png" alt="image-20240630003015562"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003033119.png" alt="image-20240630003033119"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003132644.png" alt="image-20240630003132644"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003226956.png" alt="image-20240630003226956"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003308339.png" alt="image-20240630003308339"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003345142.png" alt="image-20240630003345142"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003412147.png" alt="image-20240630003412147"></p>
+<h2 id="逻辑设计"><a href="#逻辑设计" class="headerlink" title="逻辑设计"></a>逻辑设计</h2><p><img src="/2024/07/05/csapp/image-20240630005121767.png" alt="image-20240630005121767"></p>
+<h3 id="概述-3"><a href="#概述-3" class="headerlink" title="概述"></a>概述</h3><p><img src="/2024/07/05/csapp/image-20240630003633436.png" alt="image-20240630003633436"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003651801.png" alt="image-20240630003651801"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003711963.png" alt="image-20240630003711963"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003725861.png" alt="image-20240630003725861"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003831380.png" alt="image-20240630003831380"></p>
+<h3 id="运算"><a href="#运算" class="headerlink" title="运算"></a>运算</h3><p><img src="/2024/07/05/csapp/image-20240630003914161.png" alt="image-20240630003914161"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003929456.png" alt="image-20240630003929456"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003954287.png" alt="image-20240630003954287"></p>
+<p><img src="/2024/07/05/csapp/image-20240630004016749.png" alt="image-20240630004016749"></p>
+<p><img src="/2024/07/05/csapp/image-20240630004029661.png" alt="image-20240630004029661"></p>
+<p><img src="/2024/07/05/csapp/image-20240630004052308.png" alt="image-20240630004052308"></p>
+<p><img src="/2024/07/05/csapp/image-20240630004139622.png" alt="image-20240630004139622"></p>
+<p><img src="/2024/07/05/csapp/image-20240630004207913.png" alt="image-20240630004207913"></p>
+<h3 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h3><p><img src="/2024/07/05/csapp/image-20240630004812398.png" alt="image-20240630004812398"></p>
+<p><img src="/2024/07/05/csapp/image-20240630004839398.png" alt="image-20240630004839398"></p>
+<p><img src="/2024/07/05/csapp/image-20240630003711963.png" alt="image-20240630003711963"></p>
+<p><img src="/2024/07/05/csapp/image-20240630004934849.png" alt="image-20240630004934849"></p>
+<p><img src="/2024/07/05/csapp/image-20240630004949715.png" alt="image-20240630004949715"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005016582.png" alt="image-20240630005016582"></p>
+<h2 id="顺序执行处理器"><a href="#顺序执行处理器" class="headerlink" title="顺序执行处理器"></a>顺序执行处理器</h2><h3 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h3><p><img src="/2024/07/05/csapp/image-20240630005231234.png" alt="image-20240630005231234"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005304559.png" alt="image-20240630005304559"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005333867.png" alt="image-20240630005333867"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005350153.png" alt="image-20240630005350153"></p>
+<h3 id="SEQ实现"><a href="#SEQ实现" class="headerlink" title="SEQ实现"></a>SEQ实现</h3><h4 id="概述-4"><a href="#概述-4" class="headerlink" title="概述"></a>概述</h4><p><img src="/2024/07/05/csapp/image-20240630005446870.png" alt="image-20240630005446870"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005523225.png" alt="image-20240630005523225"></p>
+<h4 id="指令具体步骤"><a href="#指令具体步骤" class="headerlink" title="指令具体步骤"></a>指令具体步骤</h4><p><img src="/2024/07/05/csapp/image-20240630005548958.png" alt="image-20240630005548958"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010421000.png" alt="image-20240630010421000"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005620242.png" alt="image-20240630005620242"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005657734.png" alt="image-20240630005657734"></p>
+<p>译码会解析寄存器含义了</p>
+<p><img src="/2024/07/05/csapp/image-20240630005817597.png" alt="image-20240630005817597"></p>
+<p>M是指令。</p>
+<p>取指阶段会对指令进行解读，看出rA、rB、imm什么的都是指令的啥部位，同时会更新PC</p>
+<p>译码阶段会读取寄存器值</p>
+<p><img src="/2024/07/05/csapp/image-20240630005830578.png" alt="image-20240630005830578"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005908039.png" alt="image-20240630005908039"></p>
+<p><img src="/2024/07/05/csapp/image-20240630005931093.png" alt="image-20240630005931093"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010005681.png" alt="image-20240630010005681"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010017237.png" alt="image-20240630010017237"></p>
+<p>注意这个执行，很有意思，设为0xF比直接中断好</p>
+<p><img src="/2024/07/05/csapp/image-20240630010102762.png" alt="image-20240630010102762"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010135763.png" alt="image-20240630010135763"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010157513.png" alt="image-20240630010157513"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010231380.png" alt="image-20240630010231380"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010243854.png" alt="image-20240630010243854"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010307773.png" alt="image-20240630010307773"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010325132.png" alt="image-20240630010325132"></p>
+<h4 id="硬件逻辑"><a href="#硬件逻辑" class="headerlink" title="硬件逻辑"></a>硬件逻辑</h4><p><img src="/2024/07/05/csapp/image-20240630010555172.png" alt="image-20240630010555172"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010611643.png" alt="image-20240630010611643"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010632517.png" alt="image-20240630010632517"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010644321.png" alt="image-20240630010644321"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010655931.png" alt="image-20240630010655931"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010708660.png" alt="image-20240630010708660"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010723802.png" alt="image-20240630010723802"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010741891.png" alt="image-20240630010741891"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010757282.png" alt="image-20240630010757282"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010813278.png" alt="image-20240630010813278"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010826316.png" alt="image-20240630010826316"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010840550.png" alt="image-20240630010840550"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010851970.png" alt="image-20240630010851970"></p>
+<p><img src="/2024/07/05/csapp/image-20240630010908920.png" alt="image-20240630010908920"></p>
+<h2 id="流水线基础"><a href="#流水线基础" class="headerlink" title="流水线基础"></a>流水线基础</h2><h3 id="基本设计"><a href="#基本设计" class="headerlink" title="基本设计"></a>基本设计</h3><p><img src="/2024/07/05/csapp/image-20240630011348702.png" alt="image-20240630011348702"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011431579.png" alt="image-20240630011431579"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011513826.png" alt="image-20240630011513826"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011538449.png" alt="image-20240630011538449"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011613462.png" alt="image-20240630011613462"></p>
+<h3 id="冒险"><a href="#冒险" class="headerlink" title="冒险"></a>冒险</h3><p><img src="/2024/07/05/csapp/image-20240630011631666.png" alt="image-20240630011631666"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011652103.png" alt="image-20240630011652103"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011743540.png" alt="image-20240630011743540"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011757158.png" alt="image-20240630011757158"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011827695.png" alt="image-20240630011827695"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011845172.png" alt="image-20240630011845172"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011904991.png" alt="image-20240630011904991"></p>
+<p><img src="/2024/07/05/csapp/image-20240630011934056.png" alt="image-20240630011934056"></p>
+<h2 id="冒险处理"><a href="#冒险处理" class="headerlink" title="冒险处理"></a>冒险处理</h2><p><img src="/2024/07/05/csapp/image-20240630013307359.png" alt="image-20240630013307359"></p>
+<h3 id="数据冒险"><a href="#数据冒险" class="headerlink" title="数据冒险"></a>数据冒险</h3><h4 id="暂停"><a href="#暂停" class="headerlink" title="暂停"></a>暂停</h4><p><img src="/2024/07/05/csapp/image-20240630012139978.png" alt="image-20240630012139978"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012255568.png" alt="image-20240630012255568"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012324420.png" alt="image-20240630012324420"></p>
+<h4 id="数据转发"><a href="#数据转发" class="headerlink" title="数据转发"></a>数据转发</h4><p><img src="/2024/07/05/csapp/image-20240630012416757.png" alt="image-20240630012416757"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012502683.png" alt="image-20240630012502683"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012549684.png" alt="image-20240630012549684"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012612209.png" alt="image-20240630012612209"></p>
+<h3 id="加载使用冒险"><a href="#加载使用冒险" class="headerlink" title="加载使用冒险"></a>加载使用冒险</h3><p><img src="/2024/07/05/csapp/image-20240630012627079.png" alt="image-20240630012627079"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012655123.png" alt="image-20240630012655123"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012719752.png" alt="image-20240630012719752"></p>
+<h3 id="控制冒险"><a href="#控制冒险" class="headerlink" title="控制冒险"></a>控制冒险</h3><p><img src="/2024/07/05/csapp/image-20240630012743913.png" alt="image-20240630012743913"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012853884.png" alt="image-20240630012853884"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012916659.png" alt="image-20240630012916659"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012931439.png" alt="image-20240630012931439"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012948209.png" alt="image-20240630012948209"></p>
+<h3 id="控制组合"><a href="#控制组合" class="headerlink" title="控制组合"></a>控制组合</h3><p><img src="/2024/07/05/csapp/image-20240630013014298.png" alt="image-20240630013014298"></p>
+<p><img src="/2024/07/05/csapp/image-20240630013111622.png" alt="image-20240630013111622"></p>
+<p><img src="/2024/07/05/csapp/image-20240630013125796.png" alt="image-20240630013125796"></p>
+<p><img src="/2024/07/05/csapp/image-20240630013138985.png" alt="image-20240630013138985"></p>
+<p><img src="/2024/07/05/csapp/image-20240630013152159.png" alt="image-20240630013152159"></p>
+<p><img src="/2024/07/05/csapp/image-20240630013208512.png" alt="image-20240630013208512"></p>
+<h2 id="性能评估"><a href="#性能评估" class="headerlink" title="性能评估"></a>性能评估</h2><p>CPI：执行每条指令所需的平均时钟周期数</p>
+<p><img src="/2024/07/05/csapp/image-20240704174855401.png" alt="image-20240704174855401"></p>
+<p>注意这个算式，因为流水线执行，近似认为1个cycle一条指令</p>
+<p>数据冒险可以用暂停和数据转发实现（想想就知道），加载使用必须插1个气泡，控制冒险插2个，ret插3个</p>
+<p><img src="/2024/07/05/csapp/image-20240630012743913.png" alt="image-20240630012743913"></p>
+<p><img src="/2024/07/05/csapp/image-20240630012916659.png" alt="image-20240630012916659"></p>
+<p><img src="/2024/07/05/csapp/image-20240704175143438.png" alt="image-20240704175143438"></p>
+<h1 id="优化程序性能"><a href="#优化程序性能" class="headerlink" title="优化程序性能"></a>优化程序性能</h1><p><img src="/2024/07/05/csapp/image-20240630133748010.png" alt="image-20240630133748010"></p>
+<h2 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h2><p><img src="/2024/07/05/csapp/image-20240630133811094.png" alt="image-20240630133811094"></p>
+<p><img src="/2024/07/05/csapp/image-20240630133856073.png" alt="image-20240630133856073"></p>
+<h2 id="编译器优化"><a href="#编译器优化" class="headerlink" title="编译器优化"></a>编译器优化</h2><p><img src="/2024/07/05/csapp/image-20240630134011707.png" alt="image-20240630134011707"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134040373.png" alt="image-20240630134040373"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134109151.png" alt="image-20240630134109151"></p>
+<p><img src="/2024/07/05/csapp/image-20240630135959526.png" alt="image-20240630135959526"></p>
+<h2 id="各种优化方法"><a href="#各种优化方法" class="headerlink" title="各种优化方法"></a>各种优化方法</h2><p><img src="/2024/07/05/csapp/image-20240630134138846.png" alt="image-20240630134138846"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134156618.png" alt="image-20240630134156618"></p>
+<p>一般都是转为指针访问</p>
+<p><img src="/2024/07/05/csapp/image-20240630134519002.png" alt="image-20240630134519002"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134556944.png" alt="image-20240630134556944"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134615112.png" alt="image-20240630134615112"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134710745.png" alt="image-20240630134710745"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134734845.png" alt="image-20240630134734845"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134748924.png" alt="image-20240630134748924"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134923171.png" alt="image-20240630134923171"></p>
+<p><img src="/2024/07/05/csapp/image-20240630134944225.png" alt="image-20240630134944225"></p>
+<p>66666</p>
+<p><img src="/2024/07/05/csapp/image-20240630135352615.png" alt="image-20240630135352615"></p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p><img src="/2024/07/05/csapp/image-20240630135509167.png" alt="image-20240630135509167"></p>
+<p><img src="/2024/07/05/csapp/image-20240630135759205.png" alt="image-20240630135759205"></p>
+<h3 id="基础优化"><a href="#基础优化" class="headerlink" title="基础优化"></a>基础优化</h3><p><img src="/2024/07/05/csapp/image-20240630140204862.png" alt="image-20240630140204862"></p>
+<h3 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h3><p><img src="/2024/07/05/csapp/image-20240630140352288.png" alt="image-20240630140352288"></p>
+<p><img src="/2024/07/05/csapp/image-20240630140409146.png" alt="image-20240630140409146"></p>
+<p><img src="/2024/07/05/csapp/image-20240630140448474.png" alt="image-20240630140448474"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225409553.png" alt="image-20240630225409553"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225438683.png" alt="image-20240630225438683"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225456483.png" alt="image-20240630225456483"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225508254.png" alt="image-20240630225508254"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225614641.png" alt="image-20240630225614641"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225642406.png" alt="image-20240630225642406"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225658504.png" alt="image-20240630225658504"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225719047.png" alt="image-20240630225719047"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225728826.png" alt="image-20240630225728826"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225745030.png" alt="image-20240630225745030"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225817123.png" alt="image-20240630225817123"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225836771.png" alt="image-20240630225836771"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225848400.png" alt="image-20240630225848400"></p>
+<p><img src="/2024/07/05/csapp/image-20240630225902072.png" alt="image-20240630225902072"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230021815.png" alt="image-20240630230021815"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230036198.png" alt="image-20240630230036198"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230051794.png" alt="image-20240630230051794"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230418357.png" alt="image-20240630230418357"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230428557.png" alt="image-20240630230428557"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230501629.png" alt="image-20240630230501629"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230541510.png" alt="image-20240630230541510"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230647983.png" alt="image-20240630230647983"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230710718.png" alt="image-20240630230710718"></p>
+<p><img src="/2024/07/05/csapp/image-20240630230919375.png" alt="image-20240630230919375"></p>
+<h1 id="存储器层次结构"><a href="#存储器层次结构" class="headerlink" title="存储器层次结构"></a>存储器层次结构</h1><h2 id="存储器层级结构与局部性"><a href="#存储器层级结构与局部性" class="headerlink" title="存储器层级结构与局部性"></a>存储器层级结构与局部性</h2><h3 id="概述-5"><a href="#概述-5" class="headerlink" title="概述"></a>概述</h3><p><img src="/2024/07/05/csapp/image-20240630231448071.png" alt="image-20240630231448071"></p>
+<p><img src="/2024/07/05/csapp/image-20240630231736879.png" alt="image-20240630231736879"></p>
+<p><img src="/2024/07/05/csapp/image-20240630232656362.png" alt="image-20240630232656362"></p>
+<p><img src="/2024/07/05/csapp/image-20240630232337513.png" alt="image-20240630232337513"></p>
+<p><img src="/2024/07/05/csapp/image-20240630232414904.png" alt="image-20240630232414904"></p>
+<p><img src="/2024/07/05/csapp/image-20240630232820913.png" alt="image-20240630232820913"></p>
+<p><img src="/2024/07/05/csapp/image-20240630233029450.png" alt="image-20240630233029450"></p>
+<p><img src="/2024/07/05/csapp/image-20240630233112434.png" alt="image-20240630233112434"></p>
+<h3 id="存储器结构"><a href="#存储器结构" class="headerlink" title="存储器结构"></a>存储器结构</h3><p><img src="/2024/07/05/csapp/image-20240630233214840.png" alt="image-20240630233214840"></p>
+<p><img src="/2024/07/05/csapp/image-20240630233608614.png" alt="image-20240630233608614"></p>
+<p><img src="/2024/07/05/csapp/image-20240630233709252.png" alt="image-20240630233709252"></p>
+<p><img src="/2024/07/05/csapp/image-20240630233801245.png" alt="image-20240630233801245"></p>
+<p><img src="/2024/07/05/csapp/image-20240630233955535.png" alt="image-20240630233955535"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234008062.png" alt="image-20240630234008062"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234225579.png" alt="image-20240630234225579"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234250107.png" alt="image-20240630234250107"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234314688.png" alt="image-20240630234314688"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234429142.png" alt="image-20240630234429142"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234442022.png" alt="image-20240630234442022"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234458920.png" alt="image-20240630234458920"></p>
+<h3 id="读写操作"><a href="#读写操作" class="headerlink" title="读写操作"></a>读写操作</h3><p><img src="/2024/07/05/csapp/image-20240630234532013.png" alt="image-20240630234532013"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234546448.png" alt="image-20240630234546448"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234558321.png" alt="image-20240630234558321"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234726167.png" alt="image-20240630234726167"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234739157.png" alt="image-20240630234739157"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234754773.png" alt="image-20240630234754773"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234801631.png" alt="image-20240630234801631"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234808895.png" alt="image-20240630234808895"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234817762.png" alt="image-20240630234817762"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234839700.png" alt="image-20240630234839700"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234851304.png" alt="image-20240630234851304"></p>
+<h3 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h3><h4 id="结构-1"><a href="#结构-1" class="headerlink" title="结构"></a>结构</h4><p><img src="/2024/07/05/csapp/image-20240630234915634.png" alt="image-20240630234915634"></p>
+<p><img src="/2024/07/05/csapp/image-20240630234933851.png" alt="image-20240630234933851"></p>
+<p><img src="/2024/07/05/csapp/image-20240630235117792.png" alt="image-20240630235117792"></p>
+<h4 id="容量"><a href="#容量" class="headerlink" title="容量"></a>容量</h4><p>磁盘容量的计算方法 容量 = 每个扇区可记录的字节数 x 扇区总数</p>
+<p><img src="/2024/07/05/csapp/image-20240630235225773.png" alt="image-20240630235225773"></p>
+<p><img src="/2024/07/05/csapp/image-20240630235439929.png" alt="image-20240630235439929"></p>
+<p><img src="/2024/07/05/csapp/image-20240630235448405.png" alt="image-20240630235448405"></p>
+<p><img src="/2024/07/05/csapp/image-20240630235540406.png" alt="image-20240630235540406"></p>
+<p><img src="/2024/07/05/csapp/image-20240630235551978.png" alt="image-20240630235551978"></p>
+<h4 id="时间"><a href="#时间" class="headerlink" title="时间"></a>时间</h4><p>磁盘访问的平均读取时间 访问时间 = 寻道时间 + 平均旋转延迟 + 数据传输时间</p>
+<p>平均旋转延迟就是假设每次转半圈，也即1/2 * (1/RPM)*60 秒</p>
+<p>数据传输时间就是，转一圈时间 / 每圈扇区数，其中每圈扇区数 = 平均扇区数 / 磁道数</p>
+<p><img src="/2024/07/05/csapp/image-20240630235722678.png" alt="image-20240630235722678"></p>
+<p><img src="/2024/07/05/csapp/image-20240630235628333.png" alt="image-20240630235628333"></p>
+<p><img src="/2024/07/05/csapp/image-20240630235702316.png" alt="image-20240630235702316"></p>
+<p><img src="/2024/07/05/csapp/image-20240630235758288.png" alt="image-20240630235758288"></p>
+<h4 id="调度算法"><a href="#调度算法" class="headerlink" title="调度算法"></a>调度算法</h4><p><img src="/2024/07/05/csapp/image-20240701000025738.png" alt="image-20240701000025738"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000038474.png" alt="image-20240701000038474"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000141180.png" alt="image-20240701000141180"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000216168.png" alt="image-20240701000216168"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000226791.png" alt="image-20240701000226791"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000240550.png" alt="image-20240701000240550"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000259526.png" alt="image-20240701000259526"></p>
+<h4 id="与CPU交互"><a href="#与CPU交互" class="headerlink" title="与CPU交互"></a>与CPU交互</h4><p><img src="/2024/07/05/csapp/image-20240701000327650.png" alt="image-20240701000327650"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000344179.png" alt="image-20240701000344179"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000358729.png" alt="image-20240701000358729"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000412445.png" alt="image-20240701000412445"></p>
+<h4 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h4><p><img src="/2024/07/05/csapp/image-20240701000505024.png" alt="image-20240701000505024"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000515106.png" alt="image-20240701000515106"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000609925.png" alt="image-20240701000609925"></p>
+<h3 id="局部性"><a href="#局部性" class="headerlink" title="局部性"></a>局部性</h3><p><img src="/2024/07/05/csapp/image-20240701000620354.png" alt="image-20240701000620354"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000633149.png" alt="image-20240701000633149"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000648470.png" alt="image-20240701000648470"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000658527.png" alt="image-20240701000658527"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000717439.png" alt="image-20240701000717439"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000759240.png" alt="image-20240701000759240"></p>
+<p><img src="/2024/07/05/csapp/image-20240701000959815.png" alt="image-20240701000959815"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001026637.png" alt="image-20240701001026637"></p>
+<p>66666说得很本质</p>
+<p><img src="/2024/07/05/csapp/image-20240701001130245.png" alt="image-20240701001130245"></p>
+<h2 id="高速缓冲器Cache"><a href="#高速缓冲器Cache" class="headerlink" title="高速缓冲器Cache"></a>高速缓冲器Cache</h2><h3 id="高速缓存存储器组织结构和操作"><a href="#高速缓存存储器组织结构和操作" class="headerlink" title="高速缓存存储器组织结构和操作"></a>高速缓存存储器组织结构和操作</h3><p><img src="/2024/07/05/csapp/image-20240701001304028.png" alt="image-20240701001304028"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001315744.png" alt="image-20240701001315744"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001331218.png" alt="image-20240701001331218"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001417754.png" alt="image-20240701001417754"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001648953.png" alt="image-20240701001648953"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001737776.png" alt="image-20240701001737776"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001751156.png" alt="image-20240701001751156"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001830506.png" alt="image-20240701001830506"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001932525.png" alt="image-20240701001932525"></p>
+<p><img src="/2024/07/05/csapp/image-20240701001954052.png" alt="image-20240701001954052"></p>
+<p><img src="/2024/07/05/csapp/image-20240701002012687.png" alt="image-20240701002012687"></p>
+<p><img src="/2024/07/05/csapp/image-20240701002043426.png" alt="image-20240701002043426"></p>
+<p><img src="/2024/07/05/csapp/image-20240701002106379.png" alt="image-20240701002106379"></p>
+<p><img src="/2024/07/05/csapp/image-20240701002201179.png" alt="image-20240701002201179"></p>
+<p><img src="/2024/07/05/csapp/image-20240701002247066.png" alt="image-20240701002247066"></p>
+<p><img src="/2024/07/05/csapp/image-20240701002257639.png" alt="image-20240701002257639"></p>
+<p><img src="/2024/07/05/csapp/image-20240701002929917.png" alt="image-20240701002929917"></p>
+<p><img src="/2024/07/05/csapp/image-20240701002946176.png" alt="image-20240701002946176"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003014200.png" alt="image-20240701003014200"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003031669.png" alt="image-20240701003031669"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003213303.png" alt="image-20240701003213303"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003250061.png" alt="image-20240701003250061"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003307383.png" alt="image-20240701003307383"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003401049.png" alt="image-20240701003401049"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003422937.png" alt="image-20240701003422937"></p>
+<h3 id="高速缓存对程序性能的影响"><a href="#高速缓存对程序性能的影响" class="headerlink" title="高速缓存对程序性能的影响"></a>高速缓存对程序性能的影响</h3><h4 id="不命中率"><a href="#不命中率" class="headerlink" title="不命中率"></a>不命中率</h4><p>这个不命中率的计算：</p>
+<p><img src="/2024/07/05/csapp/image-20240705122255695.png" alt="image-20240705122255695"></p>
+<p><img src="/2024/07/05/csapp/image-20240705123753331.png" alt="image-20240705123753331"></p>
+<p>那就是说一个块可以放B/4个int，然后每隔B/4个int就会出现冲突不命中，这个时候就要加载进去就是1/B/4</p>
+<h4 id="存储器山"><a href="#存储器山" class="headerlink" title="存储器山"></a>存储器山</h4><p><img src="/2024/07/05/csapp/image-20240701003543629.png" alt="image-20240701003543629"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003601477.png" alt="image-20240701003601477"></p>
+<h4 id="重新排列提高空间局部性"><a href="#重新排列提高空间局部性" class="headerlink" title="重新排列提高空间局部性"></a>重新排列提高空间局部性</h4><p><img src="/2024/07/05/csapp/image-20240701003627431.png" alt="image-20240701003627431"></p>
+<p><img src="/2024/07/05/csapp/image-20240701003638009.png" alt="image-20240701003638009"></p>
+<p><img src="/2024/07/05/csapp/image-20240701105851119.png" alt="image-20240701105851119"></p>
+<p><img src="/2024/07/05/csapp/image-20240701110000652.png" alt="image-20240701110000652"></p>
+<p><img src="/2024/07/05/csapp/image-20240701110048277.png" alt="image-20240701110048277"></p>
+<p>6666</p>
+<p>不过这样的话，如果放宽到整个，那A依然还是不怎么那个的吧</p>
+<p><img src="/2024/07/05/csapp/image-20240701110200830.png" alt="image-20240701110200830"></p>
+<p>所以感觉还是这个最好</p>
+<h4 id="使用块提高时间局部性"><a href="#使用块提高时间局部性" class="headerlink" title="使用块提高时间局部性"></a>使用块提高时间局部性</h4><p><img src="/2024/07/05/csapp/image-20240701110519231.png" alt="image-20240701110519231"></p>
+<p><img src="/2024/07/05/csapp/image-20240701110718021.png" alt="image-20240701110718021"></p>
+<p><img src="/2024/07/05/csapp/image-20240701110732339.png" alt="image-20240701110732339"></p>
+<p><img src="/2024/07/05/csapp/image-20240701110812570.png" alt="image-20240701110812570"></p>
+<p><img src="/2024/07/05/csapp/image-20240701110825808.png" alt="image-20240701110825808"></p>
+<p><img src="/2024/07/05/csapp/image-20240701110837443.png" alt="image-20240701110837443"></p>
+<p><img src="/2024/07/05/csapp/image-20240701111903105.png" alt="image-20240701111903105"></p>
+<p><img src="/2024/07/05/csapp/image-20240701111914613.png" alt="image-20240701111914613"></p>
+<p>确实，养成好习惯</p>
+<p><img src="/2024/07/05/csapp/image-20240705205842958.png" alt="image-20240705205842958"></p>
+<h1 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h1><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="/2024/07/05/csapp/image-20240704211635823.png" alt="image-20240704211635823"></p>
+<p><img src="/2024/07/05/csapp/image-20240704211737812.png" alt="image-20240704211737812"></p>
+<p><img src="/2024/07/05/csapp/image-20240704211953231.png" alt="image-20240704211953231"></p>
+<p><img src="/2024/07/05/csapp/image-20240704212021758.png" alt="image-20240704212021758"></p>
+<p><img src="/2024/07/05/csapp/image-20240704213240297.png" alt="image-20240704213240297"></p>
+<p><img src="/2024/07/05/csapp/image-20240704213511788.png" alt="image-20240704213511788"></p>
+<p>重定位</p>
+<p><img src="/2024/07/05/csapp/image-20240704213719440.png" alt="image-20240704213719440"></p>
+<p><img src="/2024/07/05/csapp/image-20240704213738517.png" alt="image-20240704213738517"></p>
+<p><img src="/2024/07/05/csapp/image-20240704214226162.png" alt="image-20240704214226162"></p>
+<h2 id="概述-6"><a href="#概述-6" class="headerlink" title="概述"></a>概述</h2><p><img src="/2024/07/05/csapp/image-20240701112241696.png" alt="image-20240701112241696"></p>
+<p><img src="/2024/07/05/csapp/image-20240701112305467.png" alt="image-20240701112305467"></p>
+<p><img src="/2024/07/05/csapp/image-20240701112315389.png" alt="image-20240701112315389"></p>
+<p><img src="/2024/07/05/csapp/image-20240701112349299.png" alt="image-20240701112349299"></p>
+<p><img src="/2024/07/05/csapp/image-20240701112433533.png" alt="image-20240701112433533"></p>
+<p><img src="/2024/07/05/csapp/image-20240701112656526.png" alt="image-20240701112656526"></p>
+<p><img src="/2024/07/05/csapp/image-20240701113135807.png" alt="image-20240701113135807"></p>
+<p><img src="/2024/07/05/csapp/image-20240701113206887.png" alt="image-20240701113206887"></p>
+<p><img src="/2024/07/05/csapp/image-20240701113246732.png" alt="image-20240701113246732"></p>
+<p><img src="/2024/07/05/csapp/image-20240701113604991.png" alt="image-20240701113604991"></p>
+<h2 id="目标文件及格式"><a href="#目标文件及格式" class="headerlink" title="目标文件及格式"></a>目标文件及格式</h2><p><img src="/2024/07/05/csapp/image-20240701113633547.png" alt="image-20240701113633547"></p>
+<p><img src="/2024/07/05/csapp/image-20240701115555150.png" alt="image-20240701115555150"></p>
+<p><img src="/2024/07/05/csapp/image-20240701115608457.png" alt="image-20240701115608457"></p>
+<p><img src="/2024/07/05/csapp/image-20240701115925301.png" alt="image-20240701115925301"></p>
+<p><img src="/2024/07/05/csapp/image-20240701120329045.png" alt="image-20240701120329045"></p>
+<p><img src="/2024/07/05/csapp/image-20240701120411699.png" alt="image-20240701120411699"></p>
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><h3 id="符号解析"><a href="#符号解析" class="headerlink" title="符号解析"></a>符号解析</h3><p><img src="/2024/07/05/csapp/image-20240701173414489.png" alt="image-20240701173414489"></p>
+<p><img src="/2024/07/05/csapp/image-20240701173551499.png" alt="image-20240701173551499"></p>
+<p><img src="/2024/07/05/csapp/image-20240701173621134.png" alt="image-20240701173621134"></p>
+<p><img src="/2024/07/05/csapp/image-20240701173806738.png" alt="image-20240701173806738"></p>
+<p><img src="/2024/07/05/csapp/image-20240701174036766.png" alt="image-20240701174036766"></p>
+<p>在默认情况下，<code>gcc</code> 使用一个叫做 “common” 的机制来处理未初始化的全局变量和静态变量。这种机制允许多个编译单元（例如多个源文件）共享同一个未初始化的全局变量或静态变量。然而，这可能导致一些不可预见的行为，尤其是在多线程环境中。</p>
+<p>使用 <code>-fno-common</code> 选项可以关闭这种默认行为，强制 <code>gcc</code> 为每个使用未初始化全局变量或静态变量的编译单元创建一个唯一的符号。这样做可以避免潜在的共享问题，但可能会增加程序的内存使用量。</p>
+<p><img src="/2024/07/05/csapp/image-20240701175729290.png" alt="image-20240701175729290"></p>
+<p><img src="/2024/07/05/csapp/image-20240701180215212.png" alt="image-20240701180215212"></p>
+<h3 id="重定位"><a href="#重定位" class="headerlink" title="重定位"></a>重定位</h3><p><img src="/2024/07/05/csapp/image-20240701180353769.png" alt="image-20240701180353769"></p>
+<p><img src="/2024/07/05/csapp/image-20240701180448296.png" alt="image-20240701180448296"></p>
+<p><img src="/2024/07/05/csapp/image-20240701180614927.png" alt="image-20240701180614927"></p>
+<p><img src="/2024/07/05/csapp/image-20240701180648979.png" alt="image-20240701180648979"></p>
+<p><img src="/2024/07/05/csapp/image-20240701180725265.png" alt="image-20240701180725265"></p>
+<p><img src="/2024/07/05/csapp/image-20240701180734185.png" alt="image-20240701180734185"></p>
+<p><img src="/2024/07/05/csapp/image-20240701180908786.png" alt="image-20240701180908786"></p>
+<p><img src="/2024/07/05/csapp/image-20240701181256913.png" alt="image-20240701181256913"></p>
+<p><img src="/2024/07/05/csapp/image-20240701181312762.png" alt="image-20240701181312762"></p>
+<h2 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h2><p><img src="/2024/07/05/csapp/image-20240701181428456.png" alt="image-20240701181428456"></p>
+<h3 id="静态链接"><a href="#静态链接" class="headerlink" title="静态链接"></a>静态链接</h3><p><img src="/2024/07/05/csapp/image-20240701181559394.png" alt="image-20240701181559394"></p>
+<p><img src="/2024/07/05/csapp/image-20240701181653520.png" alt="image-20240701181653520"></p>
+<p><img src="/2024/07/05/csapp/image-20240701181702426.png" alt="image-20240701181702426"></p>
+<p><img src="/2024/07/05/csapp/image-20240701181713380.png" alt="image-20240701181713380"></p>
+<p><img src="/2024/07/05/csapp/image-20240701181721497.png" alt="image-20240701181721497"></p>
+<p><img src="/2024/07/05/csapp/image-20240701181817409.png" alt="image-20240701181817409"></p>
+<h3 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h3><p><img src="/2024/07/05/csapp/image-20240701181902374.png" alt="image-20240701181902374"></p>
+<p><img src="/2024/07/05/csapp/image-20240701181951703.png" alt="image-20240701181951703"></p>
+<p><img src="/2024/07/05/csapp/image-20240701182256860.png" alt="image-20240701182256860"></p>
+<h2 id="库打桩机制"><a href="#库打桩机制" class="headerlink" title="库打桩机制"></a>库打桩机制</h2><h1 id="异常控制流"><a href="#异常控制流" class="headerlink" title="异常控制流"></a>异常控制流</h1><h2 id="异常和进程"><a href="#异常和进程" class="headerlink" title="异常和进程"></a>异常和进程</h2><h3 id="异常控制流-1"><a href="#异常控制流-1" class="headerlink" title="异常控制流"></a>异常控制流</h3><p><img src="/2024/07/05/csapp/image-20240701183024791.png" alt="image-20240701183024791"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183101895.png" alt="image-20240701183101895"></p>
+<h3 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h3><h4 id="概述-7"><a href="#概述-7" class="headerlink" title="概述"></a>概述</h4><p><img src="/2024/07/05/csapp/image-20240701183120279.png" alt="image-20240701183120279"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183213271.png" alt="image-20240701183213271"></p>
+<h4 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h4><p><img src="/2024/07/05/csapp/image-20240701183224377.png" alt="image-20240701183224377"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183317047.png" alt="image-20240701183317047"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183408486.png" alt="image-20240701183408486"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183508635.png" alt="image-20240701183508635"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183529030.png" alt="image-20240701183529030"></p>
+<h4 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h4><p><img src="/2024/07/05/csapp/image-20240701183538986.png" alt="image-20240701183538986"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183614572.png" alt="image-20240701183614572"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183628668.png" alt="image-20240701183628668"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183636280.png" alt="image-20240701183636280"></p>
+<h3 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h3><p><img src="/2024/07/05/csapp/image-20240701183655575.png" alt="image-20240701183655575"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183708454.png" alt="image-20240701183708454"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183717705.png" alt="image-20240701183717705"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183729258.png" alt="image-20240701183729258"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183738316.png" alt="image-20240701183738316"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183748785.png" alt="image-20240701183748785"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183806132.png" alt="image-20240701183806132"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183837685.png" alt="image-20240701183837685"></p>
+<p><img src="/2024/07/05/csapp/image-20240701183852388.png" alt="image-20240701183852388"></p>
+<h3 id="进程控制"><a href="#进程控制" class="headerlink" title="进程控制"></a>进程控制</h3><p><img src="/2024/07/05/csapp/image-20240701183942673.png" alt="image-20240701183942673"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184010877.png" alt="image-20240701184010877"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184035892.png" alt="image-20240701184035892"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184055783.png" alt="image-20240701184055783"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184104258.png" alt="image-20240701184104258"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184125859.png" alt="image-20240701184125859"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184139058.png" alt="image-20240701184139058"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184236414.png" alt="image-20240701184236414"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184244012.png" alt="image-20240701184244012"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184441815.png" alt="image-20240701184441815"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184453139.png" alt="image-20240701184453139"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184508224.png" alt="image-20240701184508224"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184519568.png" alt="image-20240701184519568"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184529392.png" alt="image-20240701184529392"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184536701.png" alt="image-20240701184536701"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184554813.png" alt="image-20240701184554813"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184603458.png" alt="image-20240701184603458"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184612098.png" alt="image-20240701184612098"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184619563.png" alt="image-20240701184619563"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184633673.png" alt="image-20240701184633673"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184655814.png" alt="image-20240701184655814"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184703717.png" alt="image-20240701184703717"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184718272.png" alt="image-20240701184718272"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184727503.png" alt="image-20240701184727503"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184735380.png" alt="image-20240701184735380"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184745282.png" alt="image-20240701184745282"></p>
+<p><img src="/2024/07/05/csapp/image-20240701184756389.png" alt="image-20240701184756389"></p>
+<h2 id="信号与非本地跳转"><a href="#信号与非本地跳转" class="headerlink" title="信号与非本地跳转"></a>信号与非本地跳转</h2><p><img src="/2024/07/05/csapp/image-20240701185121530.png" alt="image-20240701185121530"></p>
+<h3 id="Shells"><a href="#Shells" class="headerlink" title="Shells"></a>Shells</h3><p><img src="/2024/07/05/csapp/image-20240701185158635.png" alt="image-20240701185158635"></p>
+<p><img src="/2024/07/05/csapp/image-20240701185247526.png" alt="image-20240701185247526"></p>
+<h3 id="信号"><a href="#信号" class="headerlink" title="信号"></a>信号</h3><p><img src="/2024/07/05/csapp/image-20240701185344198.png" alt="image-20240701185344198"></p>
+<p><img src="/2024/07/05/csapp/image-20240701185357427.png" alt="image-20240701185357427"></p>
+<p><img src="/2024/07/05/csapp/image-20240701203244422.png" alt="image-20240701203244422"></p>
+<p><img src="/2024/07/05/csapp/image-20240701203359433.png" alt="image-20240701203359433"></p>
+<p><img src="/2024/07/05/csapp/image-20240701203526794.png" alt="image-20240701203526794"></p>
+<p><img src="/2024/07/05/csapp/image-20240701203558046.png" alt="image-20240701203558046"></p>
+<p><img src="/2024/07/05/csapp/image-20240701203629240.png" alt="image-20240701203629240"></p>
+<p><img src="/2024/07/05/csapp/image-20240701203651652.png" alt="image-20240701203651652"></p>
+<p><img src="/2024/07/05/csapp/image-20240701203711313.png" alt="image-20240701203711313"></p>
+<p><img src="/2024/07/05/csapp/image-20240701203727977.png" alt="image-20240701203727977"></p>
+<p><img src="/2024/07/05/csapp/image-20240701204830000.png" alt="image-20240701204830000"></p>
+<p><img src="/2024/07/05/csapp/image-20240701204909119.png" alt="image-20240701204909119"></p>
+<p><img src="/2024/07/05/csapp/image-20240701204945220.png" alt="image-20240701204945220"></p>
+<p><img src="/2024/07/05/csapp/image-20240701204956451.png" alt="image-20240701204956451"></p>
+<p><img src="/2024/07/05/csapp/image-20240701205006962.png" alt="image-20240701205006962"></p>
+<p><img src="/2024/07/05/csapp/image-20240701205025116.png" alt="image-20240701205025116"></p>
+<p><img src="/2024/07/05/csapp/image-20240701205101889.png" alt="image-20240701205101889"></p>
+<p><img src="/2024/07/05/csapp/image-20240701205627208.png" alt="image-20240701205627208"></p>
+<h3 id="非本地跳转"><a href="#非本地跳转" class="headerlink" title="非本地跳转"></a>非本地跳转</h3><p><img src="/2024/07/05/csapp/image-20240701205710019.png" alt="image-20240701205710019"></p>
+<p><img src="/2024/07/05/csapp/image-20240701205739557.png" alt="image-20240701205739557"></p>
+<p><img src="/2024/07/05/csapp/image-20240701205820601.png" alt="image-20240701205820601"></p>
+<p>6666</p>
+<p><img src="/2024/07/05/csapp/image-20240701205918314.png" alt="image-20240701205918314"></p>
+<h1 id="虚拟内存"><a href="#虚拟内存" class="headerlink" title="虚拟内存"></a>虚拟内存</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="地址空间"><a href="#地址空间" class="headerlink" title="地址空间"></a>地址空间</h3><p><img src="/2024/07/05/csapp/image-20240701210602068.png" alt="image-20240701210602068"></p>
+<p><img src="/2024/07/05/csapp/image-20240701210616879.png" alt="image-20240701210616879"></p>
+<p><img src="/2024/07/05/csapp/image-20240701210720176.png" alt="image-20240701210720176"></p>
+<p><img src="/2024/07/05/csapp/image-20240701210736379.png" alt="image-20240701210736379"></p>
+<p><img src="/2024/07/05/csapp/image-20240701210818329.png" alt="image-20240701210818329"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211017636.png" alt="image-20240701211017636"></p>
+<h3 id="虚拟内存作用"><a href="#虚拟内存作用" class="headerlink" title="虚拟内存作用"></a>虚拟内存作用</h3><h4 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h4><p><img src="/2024/07/05/csapp/image-20240701211208304.png" alt="image-20240701211208304"></p>
+<p>碎片化</p>
+<p><img src="/2024/07/05/csapp/image-20240701211505551.png" alt="image-20240701211505551"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211525884.png" alt="image-20240701211525884"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211550731.png" alt="image-20240701211550731"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211603952.png" alt="image-20240701211603952"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211647612.png" alt="image-20240701211647612"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211710372.png" alt="image-20240701211710372"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211722090.png" alt="image-20240701211722090"></p>
+<h4 id="内存管理-1"><a href="#内存管理-1" class="headerlink" title="内存管理"></a>内存管理</h4><p><img src="/2024/07/05/csapp/image-20240701211830620.png" alt="image-20240701211830620"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211848944.png" alt="image-20240701211848944"></p>
+<p><img src="/2024/07/05/csapp/image-20240701211936967.png" alt="image-20240701211936967"></p>
+<h4 id="内存保护"><a href="#内存保护" class="headerlink" title="内存保护"></a>内存保护</h4><p><img src="/2024/07/05/csapp/image-20240701212003103.png" alt="image-20240701212003103"></p>
+<h3 id="地址翻译"><a href="#地址翻译" class="headerlink" title="地址翻译"></a>地址翻译</h3><p><img src="/2024/07/05/csapp/image-20240701212321094.png" alt="image-20240701212321094"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212337020.png" alt="image-20240701212337020"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212359103.png" alt="image-20240701212359103"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212450773.png" alt="image-20240701212450773"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212634781.png" alt="image-20240701212634781"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212644887.png" alt="image-20240701212644887"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212707265.png" alt="image-20240701212707265"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212727989.png" alt="image-20240701212727989"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212746777.png" alt="image-20240701212746777"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212758718.png" alt="image-20240701212758718"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212819032.png" alt="image-20240701212819032"></p>
+<p><img src="/2024/07/05/csapp/image-20240701212905986.png" alt="image-20240701212905986"></p>
+<p><img src="/2024/07/05/csapp/image-20240701213408370.png" alt="image-20240701213408370"></p>
+<p><img src="/2024/07/05/csapp/image-20240701213419824.png" alt="image-20240701213419824"></p>
+<h2 id="系统举例"><a href="#系统举例" class="headerlink" title="系统举例"></a>系统举例</h2><h3 id="内存映射"><a href="#内存映射" class="headerlink" title="内存映射"></a>内存映射</h3><p><img src="/2024/07/05/csapp/image-20240701213652719.png" alt="image-20240701213652719"></p>
+<p><img src="/2024/07/05/csapp/image-20240701213913835.png" alt="image-20240701213913835"></p>
+<h2 id="动态内存分配"><a href="#动态内存分配" class="headerlink" title="动态内存分配"></a>动态内存分配</h2><h3 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h3><p><img src="/2024/07/05/csapp/image-20240701215250961.png" alt="image-20240701215250961"></p>
+<p><img src="/2024/07/05/csapp/image-20240701215411425.png" alt="image-20240701215411425"></p>
+<p><img src="/2024/07/05/csapp/image-20240701215532824.png" alt="image-20240701215532824"></p>
+<p><img src="/2024/07/05/csapp/image-20240701215734067.png" alt="image-20240701215734067"></p>
+<p><img src="/2024/07/05/csapp/image-20240701215825849.png" alt="image-20240701215825849"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220116450.png" alt="image-20240701220116450"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220126617.png" alt="image-20240701220126617"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220137656.png" alt="image-20240701220137656"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220258050.png" alt="image-20240701220258050"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220311488.png" alt="image-20240701220311488"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220336591.png" alt="image-20240701220336591"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220429050.png" alt="image-20240701220429050"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220527191.png" alt="image-20240701220527191"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220632256.png" alt="image-20240701220632256"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220652325.png" alt="image-20240701220652325"></p>
+<p><img src="/2024/07/05/csapp/image-20240701220705254.png" alt="image-20240701220705254"></p>
+<p><img src="/2024/07/05/csapp/image-20240701221126769.png" alt="image-20240701221126769"></p>
+<p><img src="/2024/07/05/csapp/image-20240701221218263.png" alt="image-20240701221218263"></p>
+<p><img src="/2024/07/05/csapp/image-20240701221209603.png" alt="image-20240701221209603"></p>
+<p><img src="/2024/07/05/csapp/image-20240701221245255.png" alt="image-20240701221245255"></p>
+<p><img src="/2024/07/05/csapp/image-20240701221413712.png" alt="image-20240701221413712"></p>
+<p><img src="/2024/07/05/csapp/image-20240701221445932.png" alt="image-20240701221445932"></p>
+<h2 id="高级概念"><a href="#高级概念" class="headerlink" title="高级概念"></a>高级概念</h2><h3 id="显式空闲链表"><a href="#显式空闲链表" class="headerlink" title="显式空闲链表"></a>显式空闲链表</h3><p><img src="/2024/07/05/csapp/image-20240701222744422.png" alt="image-20240701222744422"></p>
+<p><img src="/2024/07/05/csapp/image-20240701222857308.png" alt="image-20240701222857308"></p>
+<p><img src="/2024/07/05/csapp/image-20240701222930510.png" alt="image-20240701222930510"></p>
+<p><img src="/2024/07/05/csapp/image-20240701222951641.png" alt="image-20240701222951641"></p>
+<p><img src="/2024/07/05/csapp/image-20240701223023701.png" alt="image-20240701223023701"></p>
+<p><img src="/2024/07/05/csapp/image-20240701223217289.png" alt="image-20240701223217289"></p>
+<h3 id="分离空闲链表"><a href="#分离空闲链表" class="headerlink" title="分离空闲链表"></a>分离空闲链表</h3><p><img src="/2024/07/05/csapp/image-20240701223303514.png" alt="image-20240701223303514"></p>
+<p><img src="/2024/07/05/csapp/image-20240701223540733.png" alt="image-20240701223540733"></p>
+<p><img src="/2024/07/05/csapp/image-20240701223550670.png" alt="image-20240701223550670"></p>
+<h3 id="垃圾收集"><a href="#垃圾收集" class="headerlink" title="垃圾收集"></a>垃圾收集</h3><p><img src="/2024/07/05/csapp/image-20240701223835382.png" alt="image-20240701223835382"></p>
+<p><img src="/2024/07/05/csapp/image-20240701223920204.png" alt="image-20240701223920204"></p>
+<p><img src="/2024/07/05/csapp/image-20240701223940709.png" alt="image-20240701223940709"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224013235.png" alt="image-20240701224013235"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224117241.png" alt="image-20240701224117241"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224214330.png" alt="image-20240701224214330"></p>
+<h3 id="内存相关风险"><a href="#内存相关风险" class="headerlink" title="内存相关风险"></a>内存相关风险</h3><p><img src="/2024/07/05/csapp/image-20240701224252768.png" alt="image-20240701224252768"></p>
+<h1 id="系统级IO"><a href="#系统级IO" class="headerlink" title="系统级IO"></a>系统级IO</h1><h2 id="Unix-I-O"><a href="#Unix-I-O" class="headerlink" title="Unix I/O"></a>Unix I/O</h2><p><img src="/2024/07/05/csapp/image-20240701224616595.png" alt="image-20240701224616595"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224705416.png" alt="image-20240701224705416"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224728445.png" alt="image-20240701224728445"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224842783.png" alt="image-20240701224842783"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224905732.png" alt="image-20240701224905732"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224923019.png" alt="image-20240701224923019"></p>
+<p><img src="/2024/07/05/csapp/image-20240701224935827.png" alt="image-20240701224935827"></p>
+<p><img src="/2024/07/05/csapp/image-20240701225212610.png" alt="image-20240701225212610"></p>
+<p><img src="/2024/07/05/csapp/image-20240701225224047.png" alt="image-20240701225224047"></p>
+<p><img src="/2024/07/05/csapp/image-20240701225243365.png" alt="image-20240701225243365"></p>
+<p><img src="/2024/07/05/csapp/image-20240701225253867.png" alt="image-20240701225253867"></p>
+<p><img src="/2024/07/05/csapp/image-20240701225309429.png" alt="image-20240701225309429"></p>
+<h2 id="RIO包"><a href="#RIO包" class="headerlink" title="RIO包"></a>RIO包</h2><p><img src="/2024/07/05/csapp/image-20240701225444810.png" alt="image-20240701225444810"></p>
+<p><img src="/2024/07/05/csapp/image-20240701225457477.png" alt="image-20240701225457477"></p>
+<p><img src="/2024/07/05/csapp/image-20240701225509309.png" alt="image-20240701225509309"></p>
+<p><img src="/2024/07/05/csapp/image-20240701225525914.png" alt="image-20240701225525914"></p>
+<h2 id="读取文件元数据，共享和重定位"><a href="#读取文件元数据，共享和重定位" class="headerlink" title="读取文件元数据，共享和重定位"></a>读取文件元数据，共享和重定位</h2><p><img src="/2024/07/05/csapp/image-20240701225638863.png" alt="image-20240701225638863"></p>
+<p><img src="/2024/07/05/csapp/image-20240701230745789.png" alt="image-20240701230745789"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231003886.png" alt="image-20240701231003886"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231028158.png" alt="image-20240701231028158"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231100947.png" alt="image-20240701231100947"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231131628.png" alt="image-20240701231131628"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231217074.png" alt="image-20240701231217074"></p>
+<h2 id="标准IO"><a href="#标准IO" class="headerlink" title="标准IO"></a>标准IO</h2><p><img src="/2024/07/05/csapp/image-20240701231258600.png" alt="image-20240701231258600"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231309548.png" alt="image-20240701231309548"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231332860.png" alt="image-20240701231332860"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231344798.png" alt="image-20240701231344798"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231424516.png" alt="image-20240701231424516"></p>
+<p>666</p>
+<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p><img src="/2024/07/05/csapp/image-20240701231457387.png" alt="image-20240701231457387"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231506057.png" alt="image-20240701231506057"></p>
+<p><img src="/2024/07/05/csapp/image-20240701231515701.png" alt="image-20240701231515701"></p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/06/21/computer_network_course/">计算机网络</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
