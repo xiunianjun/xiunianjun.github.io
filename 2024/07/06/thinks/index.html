@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>杂记 | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">杂记</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">七月 6, 2024&nbsp;&nbsp;15:25:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>最近思考人生有点多，看到一些醍醐灌顶的话感觉仅仅写在日记不足以表达我的感受，于是干脆就决定另开这个模块，引用一些我看了觉得“这简直就是我”的文字了。格式混乱，排版随意。</p>
+<blockquote>
+<p>是否建议从AI转专业到数学系？ - AAOi的回答 - 知乎<br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/654320642/answer/3481125064">https://www.zhihu.com/question/654320642/answer/3481125064</a></p>
+</blockquote>
+<p><strong>因此如果抱着投机想法学AI，以此为专业，极大可能成为A君这样的辛苦追逐者</strong>。觉得人生就是“追逐一个又一个风口，既要努力奔跑，还要像赌博一样押对赛道”……会觉得这其中毫无规律。</p>
+<p>但读phD，搞research（或者在工业界摸爬滚打）的要义在于<strong>看清学科的landscape</strong>，能到足够高鸟瞰，培养学术品味，让你经过训练的直觉带你去向你想要的世界。</p>
+<p><strong>是「成为正确的人，才走上正确的路」，而不是「上对路，就成了对的人」。</strong></p>
+<p>所以问题并不在数学orCS。你问“是否应该转专业？”，其实想问“我转专业会不会成功？会不会后悔？”。但这不是个好问题。因为没人能向你保证基于你的case你未来会不会后悔。更well formulated的问题是：</p>
+<ul>
+<li>数学是什么？AI是什么？</li>
+<li>数学的landscape是什么？AI的呢？</li>
+<li>我为什么喜欢/不喜欢数学？我为什么喜欢/不喜欢AI？</li>
+<li>我更容易看清数学的landscape还是AI的？</li>
+</ul>
+<p>然后用这些问题的结论回答你的问题。</p>
+<p>【这段话超级赞同！！】</p>
+<p>numberphile podcast有一期采访David Eisenbud，他说他博士刚开始的导师，他跟着做没进展，郁闷。他的同学跟他说“<strong>去找你personally喜欢的人、group of people…他们的领域就是你的领域</strong>”。他真的照做了……对此我深有同感。每当我遇到大难题，比如不知道怎么当leader，怎么做research，怎么社交…解决方法就是去找一个我现实生活中看得见的，在这方面做得优秀的人。不需要问他问题、被教一二三…只要这个人在我视线范围内时常出现，我能看到他，就会豁然开朗，很快自己摸索出方法。</p>
+<p>这其实是学任何东西的一条捷径——接触<strong>那些</strong>人。这也是为什么很多过来人教导本科生会说“如果搞research，比刷gpa更重要的是接触牛人大佬”，这些人的情绪、观点和思考方式潜移默化会影响你，是比读书更快的学习方法。</p>
+<p>只能说我目前的解决方法是「有意识与这种市场情绪脱相关」，既不要正相关“什么火追什么”，也不要负相关——没来由情绪“就烦这个。恶心。我就不看就不了解”。不要被它控制。回归学术本身，用对待数学的态度对待AI：关注“什么问题？解决方法？为什么对？”。试图理清逻辑脉络；通过模仿/魔改掌握分析/构造方法。其它无关紧要商业八卦如不能给自己带来娱乐就当噪声忽略就好。<br>学生时代一定珍惜时间沉浸学术。本学科的基础知识和常用思维才是看清科技趋势仰仗的「算法」，新闻只是data。</p>
+<blockquote>
+<p>蒋炎岩老师：给报考同学的劝退信</p>
+<p><a target="_blank" rel="noopener" href="https://jyywiki.cn/Letter.md">https://jyywiki.cn/Letter.md</a></p>
+</blockquote>
+<p>对于博士生，你的竞争对手是全世界某个研究领域里最聪明的一些人 (和一些最勤奋的卷王)。<strong>我认为水 (哪怕是 CCF-A 类) paper 太无聊了</strong>。我希望每一份工作都带有 “groundbreaking” 的属性：解决一个全新的重要问题，或是能给旧重要问题的解决带来重要的影响 &lt;……&gt; 我希望投稿的每一份工作都能使这个领域最顶级的专家也感到很 cool，为此，而你必须首先成为领域专家。&lt;……&gt;</p>
+<p>对于硕士生，根据先前的经验，除非你在本科阶段受过非常良好的训练，并且自身素质极为优秀，在时间线的压力下让硕士生承担研究课题会使导师身心俱疲。本质上，硕士生的诉求是 “出去工作”，而课题组的诉求是 “完成科研任务”。因此，对于硕士生，我们更多的会安排一些事务性的工作，或是工程项目一部分，最后拼凑成毕业设计。作为交换，在完成任务的前提下可以得到更多的自由时间。</p>
+<p><strong>常见误区与劝退</strong></p>
+<p>以下是一些常见的误区：</p>
+<ul>
+<li><p>“先读个硕士观望一下要不要读博士”：对我们来说，这是一个不存在的选项 (现在南京大学计算机系在推免时也分开了硕士和博士)。科研的入门训练是极为艰苦且漫长的。对硕士生，我们选择直接拿来当马仔。</p>
+<p>【非常一针见血！我在保研历程中，和许多老师交流过，也问过了许多老师他们对硕/博是怎么培养的，最终还是感觉，老师们都很无敌，但是我感觉还是适配度更重要】</p>
+</li>
+<li><p>&lt;……&gt; 另一方面，我更希望导师和学生站在平等的合作者位置，并且我非常喜欢能够据理力争挑战我观点的学生。&lt;……&gt;</p>
+</li>
+<li><p>“我发表了论文/专利/软著，我有过良好的科研训练”：我对论文的标准是 “教会你的大/小专家同行一些不 trivial 的事情”。据我近年观察，<strong>大部分申请者发表的论文都是减分项</strong>。相比于发表了 “错误” 论文或是在大创项目里学会了一本正经胡说八道的同学，我更偏好能耐心读论文和写代码的 “一张有潜力的白纸”。科学研究是脚踏实地的，前人所做到的 (内卷程度) 可能远比你想象得要大，认真读了 3-4 年博士依然没有论文的也大有人在，完全不必急功近利。</p>
+</li>
+</ul>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/07/05/csapp/">计算机系统</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
