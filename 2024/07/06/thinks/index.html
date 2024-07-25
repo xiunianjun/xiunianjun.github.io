@@ -138,6 +138,71 @@
                 <div class="container">
     
     
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
 
     
     <article class="post-wrap">
@@ -161,7 +226,7 @@
 
         <div class="post-content">
             <p>最近思考人生有点多，看到一些醍醐灌顶的话感觉仅仅写在日记不足以表达我的感受，于是干脆就决定另开这个模块，引用一些我看了觉得“这简直就是我”的文字了。格式混乱，排版随意。</p>
-<blockquote>
+<h1 id="7-6"><a href="#7-6" class="headerlink" title="7.6"></a>7.6</h1><blockquote>
 <p>是否建议从AI转专业到数学系？ - AAOi的回答 - 知乎<br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/654320642/answer/3481125064">https://www.zhihu.com/question/654320642/answer/3481125064</a></p>
 </blockquote>
 <p><strong>因此如果抱着投机想法学AI，以此为专业，极大可能成为A君这样的辛苦追逐者</strong>。觉得人生就是“追逐一个又一个风口，既要努力奔跑，还要像赌博一样押对赛道”……会觉得这其中毫无规律。</p>
@@ -196,6 +261,60 @@
 <li><p>“我发表了论文/专利/软著，我有过良好的科研训练”：我对论文的标准是 “教会你的大/小专家同行一些不 trivial 的事情”。据我近年观察，<strong>大部分申请者发表的论文都是减分项</strong>。相比于发表了 “错误” 论文或是在大创项目里学会了一本正经胡说八道的同学，我更偏好能耐心读论文和写代码的 “一张有潜力的白纸”。科学研究是脚踏实地的，前人所做到的 (内卷程度) 可能远比你想象得要大，认真读了 3-4 年博士依然没有论文的也大有人在，完全不必急功近利。</p>
 </li>
 </ul>
+<h1 id="7-25"><a href="#7-25" class="headerlink" title="7.25"></a>7.25</h1><p>如果很多问题是有共性的，那么这肯定是个好问题。</p>
+<p>感觉能不能找到好的结构往往来源于接触到的data是不是高精度高质量的，另外，有这种压缩的意识也是很关键的，毕竟大多数时间人们被教育的都是模仿、从众、复制，也都生活在与专家不同的恐惧里，这也就自然产生了一种专家写的文章是“神圣”不可被拆解的，<strong>为了防止带入主观的观点而不去将信息变形，所以</strong>根本上大部分人都没有压缩的意识，好像稍微转换了一下，自己就误读了知识，而别人也会因此产生质疑。</p>
+<p>【“从混乱中找出结构和有序”，“柏拉图式的学科审美”，这几个概念确实是相当惊艳，其实也就是一直说到嘴痛的所谓“sense”。</p>
+<p>他也有一点说得很对，要不断尝试从各种事情中抽离出其中的规律和结构，不管是对的还是错的，总之一定要有自己的想法。抽离出来之后，对他进行验证，这也许就是一种科研。】</p>
+<p>长期习惯以他人视角来审视自己，导致自己不知不觉成为他人凝视下的客体，丧失主角感</p>
+<p>社会无孔不入地强化着审视，是因为大家集体相信着一些固定的剧本。</p>
+<p>顺应别人对客体化的需求，还能让你变得很成功。</p>
+<p>是做一个自由的，但是不一定成功的主角，还是做一个成功的，但总在迎合别人的NPC</p>
+<p>当一个人自我客体化太严重，会压制自己的认知(情绪和感知)来迎合他人，久而久之就看不见了……</p>
+<p>自我客体化阻碍进入心流，因为会分一部分思考来审视自我</p>
+<p>我是为了什么在做这个，我不是为了他在看什么而在做这个</p>
+<p>把名声分为两部分：怎么看待自己，别人怎么看待我 (真理之路和意见之路)</p>
+<p>我们无法完全控制第二类，但是我们可以更重于第一类</p>
+<p>自我看待经常会被过去严重扭曲，往消极方向发展</p>
+<p>并且投射自身的不安到他人身上</p>
+<p>这个问题是否重要？</p>
+<p>比较重要还没研究，比较重要研究不深，可以做但工作量大，可以做但比较边缘</p>
+<p>把自己觉得重要的问题拿出来和老师讨论</p>
+<p>为什么要做这个问题？</p>
+<p>准备怎么做？</p>
+<p>设计实验，讲好故事</p>
+<p>构建一个系统，让你学习不疲惫</p>
+<p>1.评估你当前的状态</p>
+<p>了解自己当下才能定点优化。具体可以像这样take note，什么时候吃饭什么时候开始学习，做了什么有什么感受</p>
+<p>这样就可以对周边环境和自己的感受更加敏感</p>
+<p>2.承认自己的情绪和感受，不运用情绪解决问题，但是解决问题时考虑情绪</p>
+<p>3.降低开始的活化能！</p>
+<p>分解任务，先从简单的开始做起</p>
+<p>4.撑下去</p>
+<p>切换上下文，奖励机制，多散步，换个新环境</p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/524855881/answer/2825485383?utm_psn=1798437379352162304">https://www.zhihu.com/question/524855881/answer/2825485383?utm_psn=1798437379352162304</a></p>
+<p>1.大胆质疑</p>
+<p>有人性格如此，习惯挑战权威，有人小心谨慎，大胆假设小心求证。锋芒毕露是一种风格，不动声色步步为营也是一种思路，而共同的底层能力是：</p>
+<p>对原假设、备择假设的判别，</p>
+<p>【了解各种可能性】</p>
+<p>对模型assumption的清晰理解，</p>
+<p>【充分理解课题】</p>
+<p>对结论成立所依赖的各种condition的敏感。</p>
+<p>【敏锐发现所有condition】</p>
+<p>2.连接概念</p>
+<p>breakthrough可遇不可求，大部分文章也不过是在old wine in new bottle。</p>
+<p>由于每个人背景知识的不同，derive conclusion所基于的逻辑框架、推演步骤也不同。</p>
+<p>【每个人从一个结论连结推测到另一个结论的方法不一样】</p>
+<p>从一个具体的实验结果出发，如何解释这个实验和所在研究领域以往科学发现之间的关系，</p>
+<p>如何不拘泥于单一context而是generalize到更广阔的空间，</p>
+<p>不同人会串联起不同的概念结构，依据同样的实验结果，做出不同的argument。</p>
+<p>3.思想实验</p>
+<p>这样的方法论也可以放在实验室科研中，在具体动手之前，在脑中构建 ’if …, then …’</p>
+<p>平时读文献也可以练习这样的能力，比如阅读文献follow：abstract + Main Figs + 1st paragraph of Discussion，这样的顺序。从abstract中看是否是自己感兴趣的科研问题。看main figs从横轴纵轴meaning，图形形状、颜色annotation开始，看一遍主图试想如果自己是作者会怎么interpret这些结果和讲一个怎样的故事。Discussion第一段一般会summarize 一个study的主要发现，同时点两句significance。比主图要精炼，比abstract要详细。</p>
+<p>对比自己的interpretation和原作者，一方面可以’查缺补漏‘，如果原作者看出了什么connection而自己miss掉的话，另一方面如果interpretation有conflict，说不定就可以作为自己下一个课题的preliminary study。</p>
+<p>【反正就是需要带脑子读就是了，不要全盘接受，多问问自己如果是自己会怎么样】</p>
+<p>斜插几句，科研上也经常强调communication skill。多表达多交流是一方面，我个人觉得，与其push自己‘大胆发声’，强凹发言，找到自己舒服的表达方式就好。我发现我身边人在提出质疑、表达观点时候，用的方式各有不同。</p>
+<p>【草，你怎么知道我现在在纠结这个……】</p>
+<p>你觉得有了别人没有的东西，比如认知、经历等，你就会自信。</p>
 
         </div>
 

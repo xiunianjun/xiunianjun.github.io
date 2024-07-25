@@ -229,7 +229,14 @@
 <h1 id="置顶"><a href="#置顶" class="headerlink" title="置顶"></a>置顶</h1><p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/happy-number/">202. 快乐数</a></p>
 <p>很难崩</p>
 <p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/palindromic-substrings/">647. 回文子串</a></p>
+<p>TODO用DP做一下</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/count-complete-tree-nodes/">222. 完全二叉树的节点个数</a></p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/construct-binary-tree-from-inorder-and-postorder-traversal/">106. 从中序与后序遍历序列构造二叉树</a></p>
 <p>TODO</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/maximum-binary-tree/">654. 最大二叉树</a></p>
+<p>TODO</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/validate-binary-search-tree/">98. 验证二叉搜索树</a></p>
+<p>TODO，区间思想做一下</p>
 <h1 id="每日一题"><a href="#每日一题" class="headerlink" title="每日一题"></a>每日一题</h1><p>2024.5.1 Medium <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/total-cost-to-hire-k-workers/">2462. 雇佣 K 位工人的总代价</a></p>
 <p>这个比较有意思。其中一个c++写法需要注意：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">element</span> &#123;</span><br><span class="line">    <span class="type">int</span> index;</span><br><span class="line">    <span class="type">int</span> val;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Compare</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> element &amp;a, <span class="type">const</span> element &amp;b)</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 首先比较 val 值</span></span><br><span class="line">        <span class="keyword">if</span> (a.val != b.val) &#123;</span><br><span class="line">            <span class="keyword">return</span> a.val &gt; b.val; <span class="comment">// 小顶堆：较小的 val 在堆顶</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果 val 值相同，则比较 index 值</span></span><br><span class="line">        <span class="keyword">return</span> a.index &gt; b.index; <span class="comment">// 小顶堆：较小的 index 在堆顶</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">std::priority_queue&lt;element, std::vector&lt;element&gt;, Compare&gt; heap;</span><br></pre></td></tr></table></figure>
@@ -392,6 +399,8 @@
 <p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/sliding-window-maximum/">239. 滑动窗口最大值</a></p>
 <h2 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h2><p><a target="_blank" rel="noopener" href="https://www.programmercarl.com/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E7%BB%9F%E4%B8%80%E8%BF%AD%E4%BB%A3%E6%B3%95.html#%E6%80%9D%E8%B7%AF">二叉树的统一迭代法</a></p>
 <p>有意思</p>
+<p><a target="_blank" rel="noopener" href="https://leetcode.cn/problems/count-complete-tree-nodes/">222. 完全二叉树的节点个数</a></p>
+<p>这题log方n解法是真牛逼吧，有时间好好写一遍</p>
 
         </div>
 
