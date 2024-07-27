@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>IPADS-OSLab | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">IPADS-OSLab</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">七月 27, 2024&nbsp;&nbsp;0:19:00</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h1 id="Lab0-拆炸弹"><a href="#Lab0-拆炸弹" class="headerlink" title="Lab0: 拆炸弹"></a>Lab0: 拆炸弹</h1><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>感觉做下来还是蛮有意思，做得最难受的是phase4，这加密过程看得我脑壳痛……</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_24433609/article/details/125991550">关于指令集架构</a></p>
+<p>第一次接触ARM架构，还是蛮新奇的。</p>
+<ol>
+<li><p><code>stp    x29, x30, [sp, #-16]!</code></p>
+<p>将寄存器 x29（帧指针, EBP）和 x30（链接寄存器, RA）压入栈中，同时将栈指针sp减去16字节。</p>
+<p>[sp, #-16]表示的是sp-16的位置，然后!表示把这个值写回sp寄存器</p>
+<p>还有<code>ldp    x29, x30, [sp], #16</code>也是同理。</p>
+<p>感觉这两个指令还蛮有意思的，节省了部分开销（可能有点点类似什么超标量的思想（当然还是完全不一样）），而且确实用的地方很多（保护&amp;恢复现场），节省了很多开销。</p>
+</li>
+<li><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># adrp 指令获取目标地址的高 12 位，并将其放入 x1 寄存器</span><br><span class="line"># GOT 是一个在程序的可执行文件中或在程序加载到内存时由动态链接器创建的表。</span><br><span class="line"># 它包含了程序中所有被引用的全局变量和外部（其他共享库中的）符号的地址。</span><br><span class="line"># PLT 是一个用于支持动态链接的跳转表，它包含了对外部函数的引用。</span><br><span class="line"># 当程序调用一个外部函数时，它首先跳转到 PLT 中相应的条目。</span><br><span class="line"># 然后，PLT 条目会将控制权传递给动态链接器，链接器解析函数的实际地址，</span><br><span class="line"># 并将其存储在 GOT 中。下一次调用同一个函数时，程序会直接跳转到 GOT 中存储的地址，而不再通过 PLT。</span><br><span class="line">adrp	x1, 4a0000 &lt;.got.plt+0x18&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>x0/w0  x1/w1</p>
+</li>
+</ol>
+<h2 id="具体内容"><a href="#具体内容" class="headerlink" title="具体内容"></a>具体内容</h2><p>通关！</p>
+<p><img src="/2024/07/27/ipads_os/image-20240727180820446.png" alt="image-20240727180820446"></p>
+<h3 id="phase0"><a href="#phase0" class="headerlink" title="phase0"></a>phase0</h3><p>只需要控制w1和w0的值相等就即可。用GDB调试一下就行。</p>
+<h3 id="phase1"><a href="#phase1" class="headerlink" title="phase1"></a>phase1</h3><p>这次是字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  40076c:	f9402c21 	ldr	x1, [x1, #88]</span><br><span class="line">  400770:	94008504 	bl	421b80 &lt;strcmp&gt;</span><br><span class="line"># 就是说如果w0不为零就爆炸，也就是说输入的字符串要跟x1所在字符串一样</span><br><span class="line">  400774:	35000060 	cbnz	w0, 400780 &lt;phase_1+0x20&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/07/27/ipads_os/image-20240726233511926.png" alt="image-20240726233511926"></p>
+<h3 id="phase2"><a href="#phase2" class="headerlink" title="phase2"></a>phase2</h3><p>需要了解其栈结构，并且看懂它这个循环代码。迭代计算斐波那契数列。</p>
+<h3 id="phase3"><a href="#phase3" class="headerlink" title="phase3"></a>phase3</h3><p>phase_3是一个类似分支条件的结构。</p>
+<p>第一个参数为3(w1)，第二个参数x需满足 : (x^(x&gt;&gt;3)) &amp; 0x07（取后三位） == 3(w1)。3 3即可满足要求。</p>
+<p>第一个参数为6，这段计算太复杂了我有点没看懂，略……不过看其他俩的套路应该是6 6。</p>
+<p>第一个参数为2(w1)，第二个参数x需满足 : (x &amp; 0x7) == 2。2 2即可满足要求。</p>
+<h3 id="phase4"><a href="#phase4" class="headerlink" title="phase4"></a>phase4</h3><p>一个简单的对输入字符串加密的程序，给定一个经过两次编码变换的结果字符串，要求逆向求出其原始字符串。</p>
+<p>helloworlc-&gt;isggstsvke</p>
+<ol>
+<li><p>观察encrypt_method2可知其大概是一个字母变换的函数，并且要求输入只能是仅含小写字母（不能含a）的序列</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">4009b4:	51018400 	sub	w0, w0, #0x61</span><br><span class="line">4009bc:	7100641f 	cmp	w0, #0x19</span><br></pre></td></tr></table></figure></li>
+<li><p>在phase_4中可打印出目标字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 输入字符串和某静态字符串应该相等</span><br><span class="line">  400a24:	94008457 	bl	421b80 &lt;strcmp&gt;</span><br></pre></td></tr></table></figure>
+
+<p>打印x0和x1即可得到两个字符串的地址，访存可知目标字符串为isggstsvke。</p>
+</li>
+<li><p>测试调试几遍可知，大概思路是encrypt_method1负责乱序，encrypt_method2负责字母映射编码</p>
+</li>
+<li><p>观察encrypt_method2可获取字母映射表的静态存储地址，打印获得映射表，对2中的字符串反编码，得到原始字母序列</p>
+<p>字母映射表在地址0x400998处，查询[x0-97]附近值即可。</p>
+<p><img src="/2024/07/27/ipads_os/image-20240727024252825.png" alt="image-20240727024252825"></p>
+</li>
+<li><p>encrypt_method1的变换我没太看懂（也有点懒研究哈哈哈），我最终从字母里感觉有点像helloworld（再加上还是10个字哈哈哈）猜出来的。</p>
+</li>
+</ol>
+<h3 id="phase5"><a href="#phase5" class="headerlink" title="phase5"></a>phase5</h3><p>最后一个phase是一个递归函数，使用x0和x1交替传递返回值和参数。</p>
+<p>观察可知phase_5要求func_5这个递归函数最终返回的是3。查看func_5的逻辑，可以将其转化为类似的伪代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (x1 == <span class="number">0</span>)  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">if</span> (x0 == *x1)  explode();</span><br><span class="line"><span class="keyword">if</span> (*x1 &lt;= x0) <span class="keyword">goto</span> END;</span><br><span class="line">x1 = *(x1 + <span class="number">8</span>);</span><br><span class="line">x0 = func(x0, x1);</span><br><span class="line">x0 *= <span class="number">2</span>;</span><br><span class="line"><span class="keyword">return</span>;</span><br><span class="line">END:</span><br><span class="line">x1 = *(x1 + <span class="number">16</span>)</span><br><span class="line">x0 = func(x0, x1);</span><br><span class="line">x0 = x0 * <span class="number">2</span> + <span class="number">1</span></span><br><span class="line"><span class="keyword">return</span></span><br><span class="line">    </span><br><span class="line"><span class="comment">// 更高级语言一点</span></span><br><span class="line"><span class="type">int</span> func (<span class="type">int</span> a, <span class="type">int</span> *b) &#123;</span><br><span class="line">  <span class="keyword">if</span> (*b == <span class="number">0</span>)  <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">  <span class="keyword">if</span> (a == *b)  GG.</span><br><span class="line">  <span class="keyword">if</span> (a &lt; *b) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span> * func(a, (b + <span class="number">8</span>));</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span> * func(a, (b + <span class="number">16</span>)) + <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中x1指向一个数组。</p>
+<p>所以我们可以看出来，他大概就是一直将输入a和数组b中的元素进行对比。如果a大于等于该元素，那么就移动一个步长，继续比较，并且返回一个偶数；否则，移动两个步长，返回一个奇数。</p>
+<p>由于phase_5中要求我们得到3，故而可能的结果序列只能是 3 1 0，也即前两次递归都进入分支2（输入必须小于），其他次递归都进入分支1，最后一次递归是由<code>*b == 0</code>终止。</p>
+<p>于是我们可以看看x1所指向的数组的内容：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240727180732827.png" alt="image-20240727180732827"></p>
+<p>[49] 0 [20] 0 [92] 0 20 0 [3] 0 [37] 0 92 0 [55] 0 [94] 0 3 0 0 0 0 0 37等等等</p>
+<p>当输入为93的时候轨迹如上，很完美实现它的要求。</p>
+<h1 id="Lab1-内核启动"><a href="#Lab1-内核启动" class="headerlink" title="Lab1: 内核启动"></a>Lab1: 内核启动</h1><p>这里开始进入了ChCore，指导书地址：<a target="_blank" rel="noopener" href="https://ipads.se.sjtu.edu.cn/courses/os/">https://ipads.se.sjtu.edu.cn/courses/os/</a></p>
+<blockquote>
+<p>如果选择使用<code>docker</code>编译lab，则安装<code>docker.io</code>，而不安装<code>gcc-aarch64-linux-gnu</code>。跑lab时可直接运行<code>make</code>和<code>make build</code>。</p>
+</blockquote>
+<p>算是差不多还没怎么用过docker，这次正好来试试。</p>
+<blockquote>
+<p><code>sudo usermod -aG docker os</code>：</p>
+<ul>
+<li>这个命令将用户 <code>os</code> 添加到 <code>docker</code> 用户组中。</li>
+</ul>
+</blockquote>
+<p>本实验代码包含了基础的ChCore 微内核操作系统，除了练习题相关的源码以外，其余部分通过二进制格式提供。</p>
+<p><a target="_blank" rel="noopener" href="https://static.docs.arm.com/100076/0100/arm_instruction_set_reference_guide_100076_0100_00_en.pdf">https://static.docs.arm.com/100076/0100/arm_instruction_set_reference_guide_100076_0100_00_en.pdf</a></p>
+<p>ARM手册</p>
+<p>之前也简单探究过内核启动的流程，这里放上站内文章链接：</p>
+<p><a href="/2023/07/26/kernel_boot">kernel boot</a></p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/labs/"># labs</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/07/06/thinks/">杂记</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
