@@ -227,7 +227,7 @@
         <div class="post-content">
             <h1 id="内核启动流程"><a href="#内核启动流程" class="headerlink" title="内核启动流程"></a>内核启动流程</h1><p>在传统的BIOS系统中，计算机具体的启动流程如下：</p>
 <ol>
-<li>电源启动：当计算机的电源打开时，电源供电给计算机的硬件设备。</li>
+<li>电源启动</li>
 <li>BIOS自检：计算机的BIOS固件会自检硬件设备，包括RAM、处理器、硬盘等，以确保它们正常工作。</li>
 <li>引导设备选择：BIOS会根据预先定义的启动顺序（通常是硬盘、光驱、USB等）选择一个启动设备。</li>
 <li>MBR（Master Boot Record）加载：如果选择的启动设备是硬盘，BIOS会加载该硬盘的MBR，其中包含了引导加载程序。</li>
@@ -236,19 +236,20 @@
 <li>操作系统加载：用户选择操作系统后，GRUB会加载相应的操作系统或内核，并将控制权交给它。</li>
 </ol>
 <h2 id="cpu供电"><a href="#cpu供电" class="headerlink" title="cpu供电"></a>cpu供电</h2><p>首先电源对cpu进行供电</p>
-<h2 id="BIOS"><a href="#BIOS" class="headerlink" title="BIOS"></a>BIOS</h2><h4 id="执行-0xFFFFFFF0-地址处的指令"><a href="#执行-0xFFFFFFF0-地址处的指令" class="headerlink" title="执行 0xFFFFFFF0 地址处的指令"></a>执行 0xFFFFFFF0 地址处的指令</h4><p>CPU 开始执行 0xFFFFFFF0 地址处的指令，该地址处是一条 JUMP 指令，这条指令清空了基址寄存器的值，并让指令跳回到 BIOS 开始处以执行 BIOS。<br>CPU 启动后其大多数寄存器会被初始化为预定的值，包括指令寄存器（Instruction register，IR），它保存着 CPU 将要执行指令的内存地址。</p>
-<p>此时， CPU 会有一个特殊行为：对 IR 的初始值加上一个基址寄存器的值，生成一个 32 位的地址 0xFFFFFFF0。之所以称为特殊行为，是因为实模式下 CPU 只能寻址 1MB 地址空间，而这个 32 位地址已经大于 1MB 的内存限制。因此，0xFFFFFFF0 也被称为重置向量（reset vector），参考上图 0xFFFFFFF0 处的标识。</p>
-<h4 id="初始化必要硬件"><a href="#初始化必要硬件" class="headerlink" title="初始化必要硬件"></a>初始化必要硬件</h4><p>BIOS 内部可以分成两个区块: code block（普通程序）、boot block（引导程序）。上电后，boot block 会先被执行，它会检查 code block 的代码是否正确，如果正确，就会转到 code block 继续执行下去。0xF0000 地址实际上是 BIOS 中的 boot block 的开始处。在这个阶段，会初始化部分硬件。系统的 CPU、USB 只有部分被初始化。</p>
-<h4 id="加电自检POST"><a href="#加电自检POST" class="headerlink" title="加电自检POST"></a>加电自检POST</h4><p>初始化完成后，CPU 进行 BIOS 加电自检（power on self test, POST）。这个过程会检查计算机的各项组件，如 CPU、显卡、内存、鼠标、键盘等。如果找不到内存或者键盘都有可能让BIOS停止工作并且打印一些相关的错误信息，如果找不到显卡 BIOS 会发出蜂鸣警告</p>
-<h4 id="执行其他bios"><a href="#执行其他bios" class="headerlink" title="执行其他bios"></a>执行其他bios</h4><p>接下来bios会开始寻找其他设备的 ROM，如果找到任何其他设备的 BIOS，它们也会被执行。</p>
-<h4 id="设置中断向量表"><a href="#设置中断向量表" class="headerlink" title="设置中断向量表"></a>设置中断向量表</h4><p>BIOS在初始化过程中会设置中断向量表（Interrupt Vector Table，IVT），它是一个存储中断处理程序地址的表格。</p>
-<p>BIOS会在计算机启动时加载到内存中，并在初始化过程中设置IVT。默认情况下，BIOS会提供一组固件中断处理程序，用于处理硬件相关的中断事件，如时钟中断、键盘中断等。这些固件中断处理程序是由BIOS开发商提供的，并且通常被称为BIOS中断服务例程（BIOS Interrupt Service Routines，ISR）。</p>
+<h2 id="BIOS"><a href="#BIOS" class="headerlink" title="BIOS"></a>BIOS</h2><h3 id="执行-0xFFFFFFF0-地址处的指令"><a href="#执行-0xFFFFFFF0-地址处的指令" class="headerlink" title="执行 0xFFFFFFF0 地址处的指令"></a>执行 0xFFFFFFF0 地址处的指令</h3><p>CPU 开始执行 0xFFFFFFF0 地址处的指令，该地址处是一条 JUMP 指令，这条指令清空了基址寄存器的值，并让指令跳回到 BIOS 开始处以执行 BIOS。<br>CPU 启动后其大多数寄存器会被初始化为预定的值，包括指令寄存器（Instruction register，IR），它保存着 CPU 将要执行指令的内存地址。</p>
+<p>此时， CPU 会有一个特殊行为：对 IR 的初始值加上一个基址寄存器的值，生成一个 32 位的地址 0xFFFFFFF0。之所以称为特殊行为，是因为实模式下 CPU 只能寻址 1MB 地址空间，而这个 32 位地址已经大于 1MB 的内存限制。因此，0xFFFFFFF0 也被称为重置向量（reset vector）。</p>
+<h3 id="初始化必要硬件"><a href="#初始化必要硬件" class="headerlink" title="初始化必要硬件"></a>初始化必要硬件</h3><p>BIOS 内部可以分成两个区块: code block（普通程序）、boot block（引导程序）。上电后，boot block 会先被执行，它会检查 code block 的代码是否正确，如果正确，就会转到 code block 继续执行下去。0xF0000 地址实际上是 BIOS 中的 boot block 的开始处。</p>
+<p>在这个阶段，会初始化部分硬件。系统的 CPU、USB 只有部分被初始化。</p>
+<h3 id="加电自检POST"><a href="#加电自检POST" class="headerlink" title="加电自检POST"></a>加电自检POST</h3><p>初始化完成后，CPU 进行 BIOS 加电自检（power on self test, POST）。这个过程会检查计算机的各项组件，如 CPU、显卡、内存、鼠标、键盘等。如果找不到内存或者键盘都有可能让BIOS停止工作并且打印一些相关的错误信息，如果找不到显卡 BIOS 会发出蜂鸣警告</p>
+<h3 id="执行其他bios"><a href="#执行其他bios" class="headerlink" title="执行其他bios"></a>执行其他bios</h3><p>接下来bios会开始寻找其他设备的 <strong>ROM</strong>，如果找到任何其他设备的 BIOS，它们也会被执行。</p>
+<h3 id="设置中断向量表"><a href="#设置中断向量表" class="headerlink" title="设置中断向量表"></a>设置中断向量表</h3><p>BIOS在初始化过程中会设置中断向量表（Interrupt Vector Table，IVT），它是一个存储中断处理程序地址的表格。</p>
+<p>BIOS会<strong>在计算机启动时加载到内存中</strong>，并在初始化过程中设置IVT。默认情况下，BIOS会提供一组固件中断处理程序，用于处理硬件相关的中断事件，如时钟中断、键盘中断等。这些固件中断处理程序是由BIOS开发商提供的，并且通常被称为BIOS中断服务例程（BIOS Interrupt Service Routines，ISR）。</p>
 <p>这些固件中断处理程序是针对特定硬件的操作，它们执行特定的功能，如处理键盘输入、显示字符、控制外设等。这些处理程序被存储在IVT中相应的中断向量位置，并在硬件触发中断时被调用。</p>
 <p>需要注意的是，随着操作系统的引导和加载，操作系统会接管对中断的处理，并根据自己的需求替换IVT中的中断处理程序。操作系统可以使用自己的中断处理程序来处理特定的中断事件，以满足操作系统的功能需求。</p>
-<h4 id="显示bios界面"><a href="#显示bios界面" class="headerlink" title="显示bios界面"></a>显示bios界面</h4><p>下一步，显卡就会显示 BIOS 界面，并进行更深入的检查。</p>
-<h4 id="写相关资源信息"><a href="#写相关资源信息" class="headerlink" title="写相关资源信息"></a>写相关资源信息</h4><p>检查完成后，BIOS 会根据自己的”系统资源表”，对系统进行进一步确认，从而确定计算机配有哪些资源或设备。例如 BIOS 支持随插即用，它会检测并配置随插即用设备。然后 BIOS 会遵循高级配置电源接口（Advanced Configuration Power Interface，ACPI）在内存中设置好一系列的数据来描述硬件信息，以便被操作系统内核利用。</p>
-<h2 id="MBR"><a href="#MBR" class="headerlink" title="MBR"></a>MBR</h2><p>到这一步，BIOS 开始尝试加载操作系统。它会从硬盘，光驱，软驱，网络等几个地方依次寻找操作系统（用户可以在 BIOS 设定中修改查找的优先级）。如果找不到操作系统，BIOS 会停机并给出错误信息。</p>
-<p>假设在硬盘上找到了操作系统，它会首先读取硬盘上的大小为 512 Bytes 的 0号扇区，这个扇区被称为 主引导记录（Master Boot Record，MBR），其包含三部分：</p>
+<h3 id="显示bios界面"><a href="#显示bios界面" class="headerlink" title="显示bios界面"></a>显示bios界面</h3><p>下一步，显卡就会显示 BIOS 界面，并进行更深入的检查。</p>
+<h3 id="写相关资源信息"><a href="#写相关资源信息" class="headerlink" title="写相关资源信息"></a>写相关资源信息</h3><p>检查完成后，BIOS 会根据自己的”系统资源表”，对系统进行进一步确认，从而确定计算机配有哪些资源或设备。例如 BIOS 支持随插即用，它会检测并配置随插即用设备。然后 BIOS 会遵循高级配置电源接口（Advanced Configuration Power Interface，ACPI）在内存中设置好一系列的数据来描述硬件信息，以便被操作系统内核利用。</p>
+<h2 id="MBR加载"><a href="#MBR加载" class="headerlink" title="MBR加载"></a>MBR加载</h2><p>到这一步，BIOS 开始尝试加载操作系统。它会从硬盘，光驱，软驱，网络等几个地方依次寻找操作系统（用户可以在 BIOS 设定中修改查找的优先级）。如果找不到操作系统，BIOS 会停机并给出错误信息。</p>
+<p>假设在硬盘上找到了操作系统，它会首先读取硬盘上的大小为 512 Bytes 的 0号扇区，这个扇区被称为 <strong>主引导记录</strong>（Master Boot Record，MBR），其包含三部分：</p>
 <p>a) 引导程序（Boot Loader）</p>
 <p>b) 硬盘分区表（Partition Table）</p>
 <p>c) 结束标志字</p>
@@ -261,7 +262,7 @@
 <p>运行/sbin/init，进行系统初始化</p>
 <p>做很多设置，例如挂载根文件系统</p>
 <h1 id="GRUB详解"><a href="#GRUB详解" class="headerlink" title="GRUB详解"></a>GRUB详解</h1><p>下文将从文件系统初始化的角度对上面提到的GRUB进行详解。</p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>文件系统在启动流程中的发展历程可以分为以下三个部分：</p>
+<p>文件系统在启动流程中的发展历程可以分为以下三个部分：</p>
 <ol>
 <li><p>GRUB文件系统</p>
 <p>由 GRUB 自身通过 BIOS 提供的服务加载</p>
@@ -272,7 +273,6 @@
 <li><p>真正的根文件系统</p>
 </li>
 </ol>
-<p>下面，将介绍1和2两个流程。</p>
 <h2 id="GRUB"><a href="#GRUB" class="headerlink" title="GRUB"></a>GRUB</h2><blockquote>
 <p>GRUB（GNU GRand Unified Bootloader）是一种常用的引导加载程序，用于在计算机启动时加载操作系统。</p>
 <p>GRUB的主要功能是在计算机启动时提供一个菜单，让用户选择要启动的操作系统或内核。它支持多个操作系统，包括各种版本的Linux、Windows、BSD等。通过GRUB，用户可以在多个操作系统之间轻松切换。</p>

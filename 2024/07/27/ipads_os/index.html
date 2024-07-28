@@ -238,6 +238,8 @@
 <li><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># adrp 指令获取目标地址的高 12 位，并将其放入 x1 寄存器</span><br><span class="line"># GOT 是一个在程序的可执行文件中或在程序加载到内存时由动态链接器创建的表。</span><br><span class="line"># 它包含了程序中所有被引用的全局变量和外部（其他共享库中的）符号的地址。</span><br><span class="line"># PLT 是一个用于支持动态链接的跳转表，它包含了对外部函数的引用。</span><br><span class="line"># 当程序调用一个外部函数时，它首先跳转到 PLT 中相应的条目。</span><br><span class="line"># 然后，PLT 条目会将控制权传递给动态链接器，链接器解析函数的实际地址，</span><br><span class="line"># 并将其存储在 GOT 中。下一次调用同一个函数时，程序会直接跳转到 GOT 中存储的地址，而不再通过 PLT。</span><br><span class="line">adrp	x1, 4a0000 &lt;.got.plt+0x18&gt;</span><br></pre></td></tr></table></figure></li>
 <li><p>x0/w0  x1/w1</p>
 </li>
+<li><p>需要下载<code>aarch64-linux-gnu-objdump</code>，貌似不能用通用的<code>objdump</code>（加了-m选项也还是不行）。</p>
+</li>
 </ol>
 <h2 id="具体内容"><a href="#具体内容" class="headerlink" title="具体内容"></a>具体内容</h2><p>通关！</p>
 <p><img src="/2024/07/27/ipads_os/image-20240727180820446.png" alt="image-20240727180820446"></p>
@@ -281,22 +283,179 @@
 <p><img src="/2024/07/27/ipads_os/image-20240727180732827.png" alt="image-20240727180732827"></p>
 <p>[49] 0 [20] 0 [92] 0 20 0 [3] 0 [37] 0 92 0 [55] 0 [94] 0 3 0 0 0 0 0 37等等等</p>
 <p>当输入为93的时候轨迹如上，很完美实现它的要求。</p>
-<h1 id="Lab1-内核启动"><a href="#Lab1-内核启动" class="headerlink" title="Lab1: 内核启动"></a>Lab1: 内核启动</h1><p>这里开始进入了ChCore，指导书地址：<a target="_blank" rel="noopener" href="https://ipads.se.sjtu.edu.cn/courses/os/">https://ipads.se.sjtu.edu.cn/courses/os/</a></p>
-<blockquote>
-<p>如果选择使用<code>docker</code>编译lab，则安装<code>docker.io</code>，而不安装<code>gcc-aarch64-linux-gnu</code>。跑lab时可直接运行<code>make</code>和<code>make build</code>。</p>
+<h1 id="Lab1-内核启动"><a href="#Lab1-内核启动" class="headerlink" title="Lab1: 内核启动"></a>Lab1: 内核启动</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://static.docs.arm.com/100076/0100/arm_instruction_set_reference_guide_100076_0100_00_en.pdf">ARM手册</a></p>
 </blockquote>
-<p>算是差不多还没怎么用过docker，这次正好来试试。</p>
-<blockquote>
-<p><code>sudo usermod -aG docker os</code>：</p>
-<ul>
-<li>这个命令将用户 <code>os</code> 添加到 <code>docker</code> 用户组中。</li>
-</ul>
+<p>感觉最大的收获还是亲身体验了一把启动流程，以前只简单看过XV6的C代码和听过课的讲解，这还是第一次直接钻到汇编底下看。。。感觉OS作为软硬件接口，非常好的一个地方就是他不会太hw，有需要就设一下寄存器让硬件自己猜就行了，这点我很喜欢哈哈。</p>
+<p><img src="/2024/07/27/ipads_os/image-20240728215416372.png" alt="image-20240728215416372"></p>
+<h2 id="实验内容"><a href="#实验内容" class="headerlink" title="实验内容"></a>实验内容</h2><blockquote>
+<p>之前也简单探究过OS启动的流程，这里放上站内文章链接：</p>
+<p><a href="/2023/07/26/kernel_boot">kernel boot</a>【BIOS-&gt;GRUB】</p>
+<p><a href="https://xiunianjun.github.io/2023/01/10/xv6$chap2/#Code-starting-xv6-and-the-first-process:~:text=%E4%BA%8Epcb%E8%A1%A8%E3%80%82-,Code%3A%20starting%20xv6%20and%20the%20first%20process,-%E7%9C%8B%E5%AE%8C%E4%B8%80%E9%81%8D%E8%AF%B4">Code: starting xv6 and the first process</a>【GRUB将操作权给到OS之后的启动】</p>
 </blockquote>
-<p>本实验代码包含了基础的ChCore 微内核操作系统，除了练习题相关的源码以外，其余部分通过二进制格式提供。</p>
-<p><a target="_blank" rel="noopener" href="https://static.docs.arm.com/100076/0100/arm_instruction_set_reference_guide_100076_0100_00_en.pdf">https://static.docs.arm.com/100076/0100/arm_instruction_set_reference_guide_100076_0100_00_en.pdf</a></p>
-<p>ARM手册</p>
-<p>之前也简单探究过内核启动的流程，这里放上站内文章链接：</p>
-<p><a href="/2023/07/26/kernel_boot">kernel boot</a></p>
+<p>感觉此处的bootloader就是类似于grub的结构，负责切换异常级别、初始化串口和内存映射并且最终跳转到真.OS。</p>
+<p>总体流程及关键函数大概是：</p>
+<ol>
+<li><p>内核镜像构建</p>
+<p>本实验代码包含了基础的ChCore 微内核操作系统，除了练习题相关的源码以外，其余部分通过二进制格式提供，最终编译构建成为一个ELF格式的内核映像文件。</p>
+<p>可以使用readelf工具或者什么objdump来查看<code>kernel.img</code>。</p>
+<p>通过<code>kernel/arch/aarch64/boot/linker.tpl.ld</code>精细设计了.init等段的大小和位置。</p>
+<p><img src="/2024/07/27/ipads_os/image-20240729003451663.png" alt="image-20240729003451663"></p>
+<p>在cmake文件可看到bootloader大概包含这些东西：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">list</span>(</span><br><span class="line">    APPEND</span><br><span class="line">    _init_sources</span><br><span class="line">    init/start.S</span><br><span class="line">    init/mmu.c</span><br><span class="line">    init/tools.S</span><br><span class="line">    init/init_c.c</span><br><span class="line">    peripherals/uart.c)</span><br><span class="line"></span><br><span class="line">chcore_target_sources_out_objects(<span class="variable">$&#123;kernel_target&#125;</span> PRIVATE init_objects</span><br><span class="line">                                  <span class="variable">$&#123;_init_sources&#125;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>然后具体通过ld配置文件控制每个段的具体位置和装载位置。</p>
+</li>
+<li><p><code>_start</code>（在<code>start.S</code>中）</p>
+<p>primary CPU执行主要的初始化流程，其他CPU等待至完成。</p>
+</li>
+<li><p><code>arm64_elX_to_el1</code>（在<code>tools.S</code>中）</p>
+<p>负责特权级别的切换，启动时为EL3-&gt;EL1。</p>
+<blockquote>
+<p>AArch64 架构中，特权级被称为异常级别（Exception Level，EL），四个异常级别分别为 EL0、EL1、EL2、EL3，其中 EL3 为最高异常级别，常用于安全监控器（Secure Monitor），EL2 其次，常用于虚拟机监控器（Hypervisor），EL1 是内核常用的异常级别，也就是通常所说的内核态，EL0 是最低异常级别，也就是通常所说的用户态。</p>
+</blockquote>
+<p>切换特权级要做的不多，只需修改相关寄存器即可。对于aarch64来说，它假定的特权级切换流程如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">假设处理器当前在EL1（异常级别1）运行，并且发生了一个异常导致处理器切换到EL3（异常级别3）来处理该异常。</span><br><span class="line"></span><br><span class="line">处理器在进入EL3时：</span><br><span class="line">1. 保存当前状态到SPSR_EL3</span><br><span class="line">2. 保存返回地址到ELR_EL3</span><br><span class="line"></span><br><span class="line">在处理完异常后，执行`ERET`指令，处理器会：</span><br><span class="line">1. 从SPSR_EL3获取原有处理器状态。</span><br><span class="line">2. 从ELR_EL3获取原有返回地址。</span><br><span class="line">3. 切换目标特权级别（从SPSR获取），跳转回原先的程序执行。</span><br></pre></td></tr></table></figure>
+
+<p>所以在这里，我们相当于需要手动填写一下EL3相关寄存器就行。</p>
+<p>原所有代码感觉还是非常优美地封装了(EL3、EL2、EL1)-&gt;EL1这几种case的。</p>
+<p>如果是EL2切回EL1，看起来其切换逻辑大概是，还是经典eret，只不过把ELR_EL2换成指向一个ret指令的label。也即先进行一个eret，再进行一个ret，那就是类似emm，应该是叫VM Exit之类的。</p>
+<p>如果是EL1切回EL1，那就只需要进行一个普通的ret就行，那就是函数调用。</p>
+</li>
+<li><p><code>_start</code>（在<code>start.S</code>中）</p>
+<p>准备好C语言环境需要用的栈，然后去执行C代码。</p>
+<blockquote>
+<p>思考题：为什么要在进入 C 函数之前设置启动栈。如果不设置，会发生什么？</p>
+<p>调试可知，不设置sp=0，会覆盖未知地址</p>
+</blockquote>
+</li>
+<li><p><code>init_c</code>（在<code>init_c.c</code>中）</p>
+<ol>
+<li><p>clear bss</p>
+<blockquote>
+<p>思考题 5：在实验 1 中，其实不调用 <code>clear_bss</code> 也不影响内核的执行，请思考不清理 <code>.bss</code> 段在之后的何种情况下会导致内核无法工作。</p>
+<p>感觉多核（此时别的CPU会一直spin），或者说直接用到这些未初始化的全局变量的时候</p>
+</blockquote>
+</li>
+<li><p>初始化串口</p>
+<p>我之前也写过简单的串口，aarch64也是属于外设和内存统一编址。</p>
+</li>
+<li><p>内存映射相关</p>
+<ol>
+<li><p><code>init_kernel_pt</code>设置好页表</p>
+<p>首先先记一下chcore的内存管理图方便未来查阅吧。</p>
+<p><img src="/2024/07/27/ipads_os/lab1-trans.svg" alt="lab1-trans"></p>
+<p><img src="/2024/07/27/ipads_os/lab1-pte-1.png" alt="lab1-pte-1"></p>
+<p><img src="/2024/07/27/ipads_os/lab1-pte-2.png" alt="lab1-pte-2"></p>
+<blockquote>
+<p>操作系统内核通常运行在虚拟内存的高地址。在内核运行时，访问内核代码和数据，对任意物理内存和外设内存（MMIO）进行读写，都使用高地址。</p>
+<p>因此，在内核启动时，首先需要对<strong>内核自身、其余可用物理内存和外设内存</strong>进行虚拟地址映射，最简单的映射方式是一对一的映射，即将虚拟地址 <code>0xffff_0000_0000_0000 + addr</code> 映射到 <code>addr</code>。需要注意的是，在 ChCore 实验中我们使用了 <code>0xffff_ff00_0000_0000</code> 作为内核虚拟地址的开始（注意开头 <code>f</code> 数量的区别），不过这不影响我们对知识点的理解。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>物理地址范围</th>
+<th>对应设备</th>
+<th>映射粒度</th>
+<th>类别</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0x00000000</code>~`0x3f000000`</td>
+<td>物理内存（SDRAM）</td>
+<td>2MB</td>
+<td>normal</td>
+</tr>
+<tr>
+<td><code>0x3f000000</code>~`0x40000000`</td>
+<td>共享外设内存</td>
+<td>2MB</td>
+<td>device</td>
+</tr>
+<tr>
+<td><code>0x40000000</code>~`0xffffffff`</td>
+<td>本地（每个 CPU 核独立）外设内存</td>
+<td>1GB</td>
+<td>device</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>我们需要在 <code>init_kernel_pt</code> 为内核配置从 <code>0x00000000</code> 到 <code>0x80000000</code>（<code>0x40000000</code> 后的 1G，ChCore 只需使用这部分地址中的本地外设）的映射，其中 <code>0x00000000</code> 到 <code>0x3f000000</code> 映射为 normal memory，<code>0x3f000000</code> 到 <code>0x80000000</code>映射为 device memory，其中 <code>0x00000000</code> 到 <code>0x40000000</code> 以 2MB 块粒度映射，<code>0x40000000</code> 到 <code>0x80000000</code> 以 1GB 块粒度映射。</p>
+</blockquote>
+<p>在kernel中看它意思，我们貌似只采取到L2，故而最终也是以2MB块的形式访存。</p>
+<p>至于为什么本地外设要整个1GB，emmm，说实在的我真不大清楚，这点留到写完实验后再来思考吧。TODO。我感觉可能还是因为，比如说<code>0x40000000</code> 到 <code>0x80000000</code> 这部分一般就不怎么用，然后再后面就属于用户空间内核管不着了（）</p>
+<p>然后这边的映射关系也是很线性，相当于直接把低地址这些摁抬上高地址了，简单粗暴。</p>
+</li>
+<li><p><code>el1_mmu_activate</code>开启MMU</p>
+<p>反正也大概是把页表地址填入相关寄存器，然后再设置一下控制寄存器就OK了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/* Write ttbr with phys addr of the translation table */</span><br><span class="line">adrp    x8, boot_ttbr0_l0</span><br><span class="line">msr     ttbr0_el1, x8</span><br><span class="line">adrp    x8, boot_ttbr1_l0</span><br><span class="line">msr     ttbr1_el1, x8</span><br><span class="line">isb</span><br><span class="line"></span><br><span class="line">mrs     x8, sctlr_el1</span><br><span class="line">/* Enable MMU */</span><br><span class="line">orr     x8, x8, #SCTLR_EL1_M</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>思考题 11：请思考在 <code>init_kernel_pt</code> 函数中为什么还要为低地址配置页表，并尝试验证自己的解释。</p>
+<p>因为在开启完MMU、跳转到高地址（还得再过几步）之前，还需要使用原有的栈和驱动内存。</p>
+<p>如果我们未初始化的话，开启MMU的时候会是0：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240728220231646.png" alt="image-20240728220231646"></p>
+<p>然后sp保存的又是低地址，所以需要前往低地址页表寄存器，导致之后栈访存指令GG：</p>
+<p>ldp     x29, x30, [sp], #16</p>
+<p>驱动内存也应该是同理可得，大概。</p>
+</blockquote>
+</li>
+</ol>
+</li>
+<li><p><code>start_kernel</code></p>
+<p>感觉也是一个看起来略神秘的东西。TODO</p>
+<p>可以看到看起来也是先构造了一个高地址的sp：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffffff000008e000 &lt;start_kernel&gt;:</span><br><span class="line"># 造出来之后sp=ffffff000008f060，貌似指向一段el1_vector区域，不知道在干嘛，难道是异常向量表？总之TODO</span><br><span class="line">ffffff000008e000:	58000302 	ldr	x2, ffffff000008e060 &lt;secondary_cpu_boot+0x38&gt;</span><br><span class="line">ffffff000008e004:	91400442 	add	x2, x2, #0x1, lsl #12</span><br><span class="line">ffffff000008e008:	9100005f 	mov	sp, x2</span><br></pre></td></tr></table></figure>
+
+<p>然后将高地址的新页表地址覆盖<code>ttbr0_el1</code>？看起来像是控制不管你是低地址还是高地址都只能给我用高地址内存的样子，然后就跳到main那边了，这看起来就是指导书说的切到高地址。不大确定。</p>
+<p>然后最后，就跳到main，启动成功了。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="小品环节"><a href="#小品环节" class="headerlink" title="小品环节"></a>小品环节</h2><h3 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h3><p>这里记录一下我一个很幽默的无脑行为，最后发现是一场乌龙，给大伙笑一笑算了哈哈哈。</p>
+<p>具体是这样，我在做实验之前先开始配环境，然后实验内容做啥都还一眼没看。再加上以前做lab的经历，还有看指导书的意思【注：貌似是看了不对版本的指导书】，我就误以为配完环境直接<code>make qemu</code>就可以简单跑起来（事实上还需要先写完lab1），然后看到欢迎信息了。</p>
+<p>然后，我这docker pull又一直失败，我不得不尝试多种方法来曲线救国，但总归还是不大安心，所以后面我压根没想到这可能是代码问题，一直觉得是环境问题，最后折腾了两个小时才发现原来是还得写Lab1才能启动……</p>
+<p>我这很容易不知不觉就陷进细节开始钻牛角尖的毛病是时候该改改了。不过这长达两个小时的折腾过程也让我学了挺多工具（包括我也是第一次使用docker、第一次更细致地了解qemu的用法），所以这里暂且先记录下来。</p>
+<h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>本次环境配置的大概思路是这样的。docker仅仅是负责提供一个交叉编译环境，最后输出一个<code>kernel.img</code>文件。然后我们用qemu启动整个ChCore。qemu命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-aarch64 -machine raspi3 -nographic -serial mon:stdio -m size=1G -kernel ./build/kernel.img</span><br></pre></td></tr></table></figure>
+
+<p>前置环节：根据<a target="_blank" rel="noopener" href="https://ipads.se.sjtu.edu.cn/courses/os/">指导书</a>配置。</p>
+<h4 id="网络问题探究"><a href="#网络问题探究" class="headerlink" title="网络问题探究"></a>网络问题探究</h4><p>首先尝试发现docker硬是pull不下来，<a target="_blank" rel="noopener" href="https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors">配置阿里云镜像</a>无果，<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6b148fdec361">配置pull时代理（采用了方法1）</a>无果。</p>
+<p>不大清楚为什么……</p>
+<h4 id="直接编译"><a href="#直接编译" class="headerlink" title="直接编译"></a>直接编译</h4><p>不得已，选择直接用gcc-aarch64编译。寻找一番可知修改<code>chbuild</code>脚本中的选项即可：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">_main</span></span>() &#123;</span><br><span class="line">    run_in_docker=<span class="literal">true</span>	<span class="comment"># 改为 false</span></span><br></pre></td></tr></table></figure>
+
+<p>编译成功通过，然而，<code>make qemu</code>不知道为什么卡住，但Ctrl+AX依然可以响应：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240728143318801.png" alt="image-20240728143318801"></p>
+<p>联想到当初做XV6也有类似问题，是因为qemu版本不匹配。我一开始qemu是6.2.0，但更换qemu版本（试了5.1.0、3.1.0）依然还是不行，百思不得其解，想着会不会是确实编译器版本也有影响，所以准备另寻他路。</p>
+<h4 id="自建容器"><a href="#自建容器" class="headerlink" title="自建容器"></a>自建容器</h4><p>上个方法不大行得通，所以我换了个思路。docker pull不下来，我就开始自己创建一个新容器。</p>
+<p>在github搜索，找到了<a target="_blank" rel="noopener" href="https://github.com/WilliamX1/ChCore/blob/bcc523dc1597feab014a41482b27fca329b1e20e/scripts/build/Dockerfile#L4">往年的ChCore-Lab</a>，提供了Dockerfile。然后可能因为docker在普通用户模式下运行，所以我需要给容器加一个跟当前用户id一致的用户。我这边是1000：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在该文件基础上增加</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> groupadd -g 1000 group123</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> useradd -u 1000 -g 1000 user123</span></span><br></pre></td></tr></table></figure>
+
+<p>总之成功把容器整出来了。根据其修改<code>chbuild</code>脚本容器名即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ docker image <span class="built_in">ls</span></span><br><span class="line">REPOSITORY       TAG       IMAGE ID       CREATED       SIZE</span><br><span class="line">chcore_builder   latest    38d06c761f8c   2 hours ago   716MB</span><br><span class="line"><span class="comment"># in chbuild</span></span><br><span class="line">docker run -i <span class="variable">$use_tty</span> --<span class="built_in">rm</span> \</span><br><span class="line">    -u $(<span class="built_in">id</span> -u <span class="variable">$&#123;USER&#125;</span>):$(<span class="built_in">id</span> -g <span class="variable">$&#123;USER&#125;</span>) \</span><br><span class="line">    -v $(<span class="built_in">pwd</span>):$(<span class="built_in">pwd</span>) -w $(<span class="built_in">pwd</span>) \</span><br><span class="line">    --security-opt=seccomp:unconfined \</span><br><span class="line">    chcore_builder \</span><br><span class="line">    <span class="variable">$self</span> <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>此处还有一个小插曲，<code>make build</code>之后还爆了奇奇怪怪的错。还好很快发现是我在尝试方法2的时候忘了clean了，不然又得排查老半天。。。</p>
+<p>然后总之，也是成功编译出了kernel img，然而依然<code>make qemu</code>卡住。。。。。</p>
+<p>我感觉应该不是qemu版本问题，估计是编译出的kernel img有啥问题，所以我准备具体看看qemu究竟卡在哪了。</p>
+<h4 id="探究qemu"><a href="#探究qemu" class="headerlink" title="探究qemu"></a>探究qemu</h4><p><code>qemu_wrapper.sh</code>的逻辑还蛮经典。</p>
+<p>我加了句打印get到了qemu具体的运行命令，然后给它加了个<code>-d</code>选项用来调试。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$qemu</span> --version</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$&#123;qemu&#125;</span> <span class="variable">$&#123;qemu_options&#125;</span>&quot;</span></span><br><span class="line">qemu-system-aarch64 -machine raspi3 -nographic -serial mon:stdio -m size=1G -kernel ./build/kernel.img -d all</span><br></pre></td></tr></table></figure>
+
+<p>【其实这里可以用GDB的。我那时因为不知道具体到底什么问题，所以用了-d参数。】</p>
+<p>然后我发现有几个CPU（Trace编号不同）都卡在了<code>PC=000000000008000c</code>。我感觉这长得很像一个很特殊的数字，于是查到了往年sjtu学生的<a target="_blank" rel="noopener" href="https://ipads.se.sjtu.edu.cn/ospi/discussion/u/LYJ#:~:text=8000c%3A%2094000000%20bl%208000c%20%3Csecondary_hang%3E">讨论</a>，以及<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/411538727#:~:text=intorduce%20multi%2Dprocessors%20*/-,secondary_hang%3A,-bl%20secondary_hang">这个</a>，得知这是一段内核启动常见操作，【当然现在貌似没有这个函数了】也即有一个primary CPU负责初始化流程，其他CPU就等待，而这正是等待的逻辑。</p>
+<p>从帖子中我了解到主CPU存储在X8寄存器，所以我就去重点关注<code>X8=0</code>的Trace，最终发现主CPU在执行完<code>PC=0000000000088080</code>的代码之后不知道怎么回事可能就出错了，之后PC的值变成了200，并且qemu提示<code>Taking exception 1 [Undefined Instruction]</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Trace 0: 0x7f68840012c0 [0000000000000000/0000000000088080/0xb0000000] arm64_elX_to_el1</span><br><span class="line"> PC=0000000000088080 X00=0000000000000000 X01=0000000000000000</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>为什么这里会变成200？指导书中有提示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">内核会发生地址翻译错误（Translation Fault），进而尝试跳转到异常处理函数（Exception Handler），</span><br><span class="line">该异常处理函数的地址为异常向量表基地址（`vbar_el1` 寄存器）加上 `0x200`。</span><br><span class="line"></span><br><span class="line">此时我们没有设置异常向量表（`vbar_el1` 寄存器的值是0），因此执行流会来到 `0x200` 地址，此处的代码为非法指令，会再次触发异常并跳转到 `0x200` 地址。</span><br><span class="line">使用 GDB 调试，在 GDB 中输入 `<span class="built_in">continue</span>` 后，按 Ctrl-C，可以观察到内核在 `0x200` 处无限循环。</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>然后，我注意到出错大概是在<code>arm64_elX_to_el1</code>这个符号邻近。我一看我去这不切换特权级吗？于是赶紧去把<code>arm64_elX_to_el1</code>这个函数搜出来了，并且一行行对比定位到出错的地方，然后就发现：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240728150226658.png" alt="image-20240728150226658"></p>
+<p>绷不住了！原来这是还没实现的内容呀:laughing:</p>
+<h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><p>总之<code>make qemu</code>跑不起来大概不是我环境问题，实现完lab1应该就OK了。不过一下尝试了三四五种配环境思路，也是一个不可多得的体验了。</p>
 
         </div>
 
