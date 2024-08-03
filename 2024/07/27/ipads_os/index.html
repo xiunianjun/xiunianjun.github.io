@@ -458,6 +458,14 @@
 <p><img src="/2024/07/27/ipads_os/image-20240728150226658.png" alt="image-20240728150226658"></p>
 <p>绷不住了！原来这是还没实现的内容呀:laughing:</p>
 <h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><p>总之<code>make qemu</code>实现完lab1就跑起来了，是我看错指导书版本误会误大发了（建议银杏书官网和实验官网update一下……不过github那边也没指路让我去参考这两个就是了，哈哈……）。不过一下尝试了三四五种配环境思路，还学习了怎么用docker，也是一个不可多得的体验了。</p>
+<h4 id="还有高手"><a href="#还有高手" class="headerlink" title="还有高手"></a>还有高手</h4><p>自那之后我就一直都使用的老版本builder容器（看了看那都是v1.0了）或者直接不run在docker来做实验，安然无事到了lab2。lab3中有要求一个<code>read_procmgr_elf_tool</code>，这个就是纯纯的sjtu提供的容器中自带的了，所以我也不得已继续花半天继续回到docker的问题……</p>
+<p>Recall，之前是docker pull不下来，设了pull的代理和阿里云镜像仓库代理都没用。所以我主要还是先在尝试自建代理服务这一路，相关文章：</p>
+<p><a target="_blank" rel="noopener" href="https://baijiahao.baidu.com/s?id=1802363672117972863&wfr=spider&for=pc">自建Docker镜像加速服务，免费且简单，服务器VPS、NAS皆可用</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/read/cv35326945/?jump_opus=1">Docker加速解决方法</a></p>
+<p>这个貌似确实比以前快了一些，但依旧还是会失败。焦头烂额了许久，最后终于找到了一个虽然略曲折但能行的方法：</p>
+<p><a target="_blank" rel="noopener" href="https://wkdaily.cpolar.cn/archives/gc">使用Github Action 构建docker镜像</a></p>
+<p>相当于是白嫖了下github的workflow，让它打包上传到github然后再从github下载。不得不说也是思路清奇，有一种所有网络问题都可以这么解的感觉。</p>
+<p>然后从这下下来的会打两层包，一层zip一层tar.gz，解压完这两层之后再用<code>docker load -i filename</code>即可。</p>
 <h1 id="Lab2-内存管理"><a href="#Lab2-内存管理" class="headerlink" title="Lab2: 内存管理"></a>Lab2: 内存管理</h1><p>TODO 结合整体架构，再进行一遍内存管理的梳理</p>
 <p>本实验主要目的在于让同学们熟悉内核启动过程中对<strong>内存的初始化</strong>和内核启动后对<strong>物理内存和页表的管理</strong>，包括三个部分：物理内存管理、页表管理、缺页异常处理。</p>
 <p>本实验（以及之后的实验）使用<code>expect</code>工具进行自动化评分，你可能需要先在你的环境中安装<code>expect</code>，具体方法因你使用的环境而异。</p>
@@ -561,7 +569,16 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> map_range_in_pgtbl(...) _map_range_in_pgtbl(__VA_ARGS__, 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _map_range_in_pgtbl(pgtbl, va, pa, len, flags, ...) map_range_in_pgtbl_impl(pgtbl, va, pa, len, flags)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">map_range_in_pgtbl_impl</span><span class="params">(<span class="type">void</span> *pgtbl, <span class="type">int</span> va, <span class="type">int</span> pa, <span class="type">size_t</span> len, <span class="type">int</span> flags)</span>;</span><br></pre></td></tr></table></figure>
 
 <p>奈何用完之后才想起来别的文件是预编译为链接文件的，而宏作用在更早的阶段，所以这样是不行的，会引发链接错误。</p>
-<h1 id="Lab3"><a href="#Lab3" class="headerlink" title="Lab3"></a>Lab3</h1>
+<h1 id="Lab3"><a href="#Lab3" class="headerlink" title="Lab3"></a>Lab3</h1><blockquote>
+<p>在实验 1 和实验 2 中，已经完成了内核的启动和物理内存的管理，以及一个可供用户进程使用的页表实现。现在，我们将一步一步支持用户态程序的运行。</p>
+</blockquote>
+<p>实验 3 相较于实验 1 和实验 2 开放了部分用户态程序的代码，<code>user</code> 文件夹下提供了 <code>chcore-libc</code> 及 <code>system-services</code> 文件夹，并在根目录下添加了 <code>ramdisk</code> 文件夹，下面逐个介绍其作用。</p>
+<ul>
+<li><code>ramdisk</code>。所有在 <code>ramdisk</code> 目录下的文件将被放入内核镜像的文件系统中，完成本实验后，可以在 shell 中使用 <code>ls</code> 命令查看文件。</li>
+<li><code>chcore-libc</code>。libc 是 C 语言标准库(C Standard Library)的缩写，它是一组提供了基本功能和操作的函数的库，用于支持 C 语言的标准。libc 中包含了很多标准的 C 函数，这些函数提供了许多基本的操作，如字符串处理、内存管理、输入输出等。<code>chcore-libc</code> 基于 <code>musl-libc</code> 进行修改以配合内核进行管理及系统调用，所有对 <code>musl-libc</code> 的修改均在 <code>chcore-libc/libchcore</code>中，实际编译时将使用脚本进行覆盖或打补丁。本实验也将在此处设置测试点。</li>
+<li><code>system-services</code>。其中存放一些基本的系统服务，除了在 <code>ramdisk</code> 中已经包含的，还有 <code>tmpfs</code> 和 <code>procmgr</code>。<code>tmpfs</code> 是 ChCore 基本的内存文件系统，后续实验中将会有所涉及，本实验中无需关注。<code>procmgr</code> 是 ChCore 的<strong>进程管理器</strong>，所有代码均以源代码形式给出，其中包含了创建进程、加载 elf 文件等操作，感兴趣的同学可以阅读。</li>
+</ul>
+
         </div>
 
         
