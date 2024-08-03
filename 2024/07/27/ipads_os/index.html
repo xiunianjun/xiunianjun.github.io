@@ -345,6 +345,9 @@
 <li><p><code>init_kernel_pt</code>设置好页表</p>
 <p>首先先记一下chcore的内存管理图方便未来查阅吧。</p>
 <p><img src="/2024/07/27/ipads_os/lab1-trans.svg" alt="lab1-trans"></p>
+<blockquote>
+<p>“Output address”在这里即物理地址，一些地方称为物理页帧号（Page Frame Number，PFN）</p>
+</blockquote>
 <p><img src="/2024/07/27/ipads_os/lab1-pte-1.png" alt="lab1-pte-1"></p>
 <p><img src="/2024/07/27/ipads_os/lab1-pte-2.png" alt="lab1-pte-2"></p>
 <blockquote>
@@ -387,7 +390,7 @@
 <p>然后这边的映射关系也是很线性，相当于直接把低地址这些摁抬上高地址了，简单粗暴。</p>
 </li>
 <li><p><code>el1_mmu_activate</code>开启MMU</p>
-<p>反正也大概是把页表地址填入相关寄存器，然后再设置一下控制寄存器就OK了。</p>
+<p>开启MMU映射其实就是把页表地址填入相关寄存器，然后再设置一下控制寄存器就OK了。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/* Write ttbr with phys addr of the translation table */</span><br><span class="line">adrp    x8, boot_ttbr0_l0</span><br><span class="line">msr     ttbr0_el1, x8</span><br><span class="line">adrp    x8, boot_ttbr1_l0</span><br><span class="line">msr     ttbr1_el1, x8</span><br><span class="line">isb</span><br><span class="line"></span><br><span class="line">mrs     x8, sctlr_el1</span><br><span class="line">/* Enable MMU */</span><br><span class="line">orr     x8, x8, #SCTLR_EL1_M</span><br></pre></td></tr></table></figure>
 
 <blockquote>
@@ -403,12 +406,11 @@
 </ol>
 </li>
 <li><p><code>start_kernel</code></p>
-<p>感觉也是一个看起来略神秘的东西。TODO</p>
 <p>可以看到看起来也是先构造了一个高地址的sp：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffffff000008e000 &lt;start_kernel&gt;:</span><br><span class="line"># 造出来之后sp=ffffff000008f060，貌似指向一段el1_vector区域，不知道在干嘛，难道是异常向量表？总之TODO</span><br><span class="line">ffffff000008e000:	58000302 	ldr	x2, ffffff000008e060 &lt;secondary_cpu_boot+0x38&gt;</span><br><span class="line">ffffff000008e004:	91400442 	add	x2, x2, #0x1, lsl #12</span><br><span class="line">ffffff000008e008:	9100005f 	mov	sp, x2</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ffffff000008e000 &lt;start_kernel&gt;:</span><br><span class="line"># 造出来之后sp=ffffff000008f060，貌似指向一段el1_vector区域，不知道在干嘛，难道是异常向量表？总之TODO</span><br><span class="line">ffffff000008e000:	58000302 	ldr	x2, ffffff000008e060 &lt;secondary_cpu_boot+0x38&gt;</span><br><span class="line">ffffff000008e004:	91400442 	add	x2, x2, #0x1, lsl #12</span><br><span class="line">ffffff000008e008:	9100005f 	mov	sp, x2</span><br><span class="line">ffffff000009470c:	a9bf07e0 	stp	x0, x1, [sp, #-16]!</span><br><span class="line">ffffff0000094710:	f0002aa2 	adrp	x2, ffffff00005eb000 &lt;empty_page&gt;</span><br><span class="line">ffffff0000094714:	d5182002 	msr	ttbr0_el1, x2</span><br></pre></td></tr></table></figure>
 
-<p>然后将高地址的新页表地址覆盖<code>ttbr0_el1</code>？看起来像是控制不管你是低地址还是高地址都只能给我用高地址内存的样子，然后就跳到main那边了，这看起来就是指导书说的切到高地址。不大确定。</p>
-<p>然后最后，就跳到main，启动成功了。</p>
+<p>然后将高地址的新页表地址覆盖<code>ttbr0_el1</code>，作用应该是清零低地址页表，这样一来之后访问地址就相当于非法访问内存越界了，于是乎就开启了全高地址映射。</p>
+<p>然后就跳到main那边了。</p>
 </li>
 </ol>
 </li>
@@ -455,8 +457,111 @@
 <p>然后，我注意到出错大概是在<code>arm64_elX_to_el1</code>这个符号邻近。我一看我去这不切换特权级吗？于是赶紧去把<code>arm64_elX_to_el1</code>这个函数搜出来了，并且一行行对比定位到出错的地方，然后就发现：</p>
 <p><img src="/2024/07/27/ipads_os/image-20240728150226658.png" alt="image-20240728150226658"></p>
 <p>绷不住了！原来这是还没实现的内容呀:laughing:</p>
-<h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><p>总之<code>make qemu</code>跑不起来大概不是我环境问题，实现完lab1应该就OK了。不过一下尝试了三四五种配环境思路，也是一个不可多得的体验了。</p>
+<h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><p>总之<code>make qemu</code>实现完lab1就跑起来了，是我看错指导书版本误会误大发了（建议银杏书官网和实验官网update一下……不过github那边也没指路让我去参考这两个就是了，哈哈……）。不过一下尝试了三四五种配环境思路，还学习了怎么用docker，也是一个不可多得的体验了。</p>
+<h1 id="Lab2-内存管理"><a href="#Lab2-内存管理" class="headerlink" title="Lab2: 内存管理"></a>Lab2: 内存管理</h1><p>TODO 结合整体架构，再进行一遍内存管理的梳理</p>
+<p>本实验主要目的在于让同学们熟悉内核启动过程中对<strong>内存的初始化</strong>和内核启动后对<strong>物理内存和页表的管理</strong>，包括三个部分：物理内存管理、页表管理、缺页异常处理。</p>
+<p>本实验（以及之后的实验）使用<code>expect</code>工具进行自动化评分，你可能需要先在你的环境中安装<code>expect</code>，具体方法因你使用的环境而异。</p>
+<p>ChCore采用了buddy进行大内存分配和在此基础上的slab进行小内存分配。同时，采用了四级页表进行地址的映射。</p>
+<h2 id="物理内存管理"><a href="#物理内存管理" class="headerlink" title="物理内存管理"></a>物理内存管理</h2><h3 id="Buddy-system"><a href="#Buddy-system" class="headerlink" title="Buddy system"></a>Buddy system</h3><p>伙伴系统大概就是按照2的幂次进行order的划分，每个order对应2^order个页。分配的时候拆解，释放的时候合并。具体结构如下图所示：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240730153902396.png" alt="image-20240730153902396"></p>
+<p><img src="/2024/07/27/ipads_os/image-20240729140919170.png" alt="image-20240729140919170"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/ * The layout of each physmem:</span><br><span class="line"> * | metadata (npages * <span class="keyword">sizeof</span>(<span class="keyword">struct</span> page)) | start_vaddr ... (npages *</span><br><span class="line"> * PAGE_SIZE) | */</span><br></pre></td></tr></table></figure>
 
+<p>此为buddy内存分配的一个内存池的典型结构，每页物理内存页对应一个<code>struct page</code>结构体对象。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">page</span> &#123;</span></span><br><span class="line">        <span class="comment">/* Free list */</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">node</span>;</span></span><br><span class="line">        <span class="comment">/* Whether the correspond physical page is free now. */</span></span><br><span class="line">        <span class="type">int</span> allocated;</span><br><span class="line">        <span class="comment">/* The order of the memory chunk that this page belongs to. */</span></span><br><span class="line">        <span class="type">int</span> order;</span><br><span class="line">        <span class="comment">/* Used for ChCore slab allocator. */</span></span><br><span class="line">        <span class="type">void</span> *slab;</span><br><span class="line">        <span class="comment">/* The physical memory pool this page belongs to */</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">phys_mem_pool</span> *<span class="title">pool</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>我们将这些page对象以链表形式组织，对这些meta data的操作管理，来实现对buddy整个内存系统的管理。</p>
+<p>我本来最直观的想法是迭代实现这个向上合并or向下分裂的过程，不过代码注释要求了使用递归（确实让我豁然开朗了一下），我于是也尽量将递归包括主体和对外接口都写得更优美一点了。</p>
+<p>这也是我第一次实现buddy内存分配，以往都是简单知道概念。当时了解到这个算法就觉得非常惊艳，现在真正地去实现它，更感受到它的优美，包括但不限于对伙伴块的识别、合并分裂的实现和相关思想等。总的来说还是干货满满收获巨大，虽然还是遇到了一些曲折（见小品环节）。</p>
+<h3 id="slab"><a href="#slab" class="headerlink" title="slab"></a>slab</h3><p>slab用于管理小内存对象。它为多个阶级的对象大小定义了多个内存池。具体结构可参考下图：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240729223608682.png" alt="image-20240729223608682"></p>
+<p>感觉最复杂的部分还是它已经帮我们写好的数据结构。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对应 kmem_cache</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">slab_pointer</span> &#123;</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">slab_header</span> *<span class="title">current_slab</span>;</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">partial_slab_list</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* slab_header resides in the beginning of each slab (i.e., occupies the first slot). */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">slab_header</span> &#123;</span></span><br><span class="line">        <span class="comment">/* The list of free slots, which can be converted to struct slab_slot_list. */</span></span><br><span class="line">        <span class="type">void</span> *free_list_head;</span><br><span class="line">        <span class="comment">/* Partial slab list. */</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">node</span>;</span></span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> order;</span><br><span class="line">        <span class="type">unsigned</span> <span class="type">short</span> total_free_cnt; <span class="comment">/* MAX: 65536 */</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">short</span> current_free_cnt;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>其中，每个slab的第一个obj被分配存储<code>free_list_head</code>，接下来链接<code>free_list_head</code>。<code>free_list_head</code>没有元数据结构，而是直接在obj首部加一个地址指向下一个空闲的obj。并且这个链表不一定是连续的，每次申请释放的时候直接头插尾插就行了，毕竟整个地址空间其实都算知道，就是slab的地址。</p>
+<p>然后，要获取<code>partial_slab_list</code>的结点对应的<code>slab_header</code>结构体，只需要使用类似这样的宏就可以：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> container_of_safe(ptr, type, field) (&#123; \</span></span><br><span class="line"><span class="meta">	typeof (ptr) __ptr = (ptr); \</span></span><br><span class="line"><span class="meta">	type *__obj = container_of(__ptr, type, field); \</span></span><br><span class="line"><span class="meta">	(__ptr ? __obj : NULL); \</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br></pre></td></tr></table></figure>
+
+<p>另，还用了个这样的结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Each free slot in one slab is regarded as slab_slot_list. */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">slab_slot_list</span> &#123;</span></span><br><span class="line">        <span class="type">void</span> *next_free;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>它不同于buddy的每页都有一个对应的page_t对象，是采用了一个指针直接链接的形式。</p>
+<h2 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h2><p>ChCore在内核空间（<code>0xffff_ff00_0000_0000</code> 之后的地址）中，为了简单起见，虚拟地址和物理地址都是线性映射的，也即转为<code>vaddr + KBASE</code>，<code>KBASE</code>表示了虚拟地址空间的起始地址，故而可以通过<code>virt_to_phys</code>等函数进行映射。然后在此基础上，再将顶层的地址空间映射到栈对应页。</p>
+<p>并且值得注意的是，包括测试环节我们也一直是使用的内核页表，这几个函数真正用在内核中大概还是在启动创建线程之后。</p>
+<p>页表翻译的过程由MMU自动完成，我们只需把页表的物理地址存储在页表寄存器ttbr1_el1或ttbr0_el1即可。</p>
+<blockquote>
+<p>在 AArch64 架构的 EL1 异常级别存在两个页表基址寄存器：<code>ttbr0_el1</code><a target="_blank" rel="noopener" href="https://github.com/SJTU-IPADS/OS-Course-Lab/tree/ChCore-Lab1#user-content-fn-ttbr0_el1-8136733660332040a9f5e53c1035c9a2">1</a> 和 <code>ttbr1_el1</code><a target="_blank" rel="noopener" href="https://github.com/SJTU-IPADS/OS-Course-Lab/tree/ChCore-Lab1#user-content-fn-ttbr1_el1-8136733660332040a9f5e53c1035c9a2">2</a>，分别用作虚拟地址空间低地址和高地址的翻译。那么什么地址范围称为“低地址”，什么地址范围称为“高地址”呢？这由 <code>tcr_el1</code> 翻译控制寄存器<a target="_blank" rel="noopener" href="https://github.com/SJTU-IPADS/OS-Course-Lab/tree/ChCore-Lab1#user-content-fn-tcr_el1-8136733660332040a9f5e53c1035c9a2">3</a>控制，该寄存器提供了丰富的可配置性，可决定 64 位虚拟地址的高多少位为 <code>0</code> 时，使用 <code>ttbr0_el1</code> 指向的页表进行翻译，高多少位为 <code>1</code> 时，使用 <code>ttbr1_el1</code> 指向的页表进行翻译<a target="_blank" rel="noopener" href="https://github.com/SJTU-IPADS/OS-Course-Lab/tree/ChCore-Lab1#user-content-fn-ttbr-sel-8136733660332040a9f5e53c1035c9a2">4</a>。</p>
+<p>0xffff_ff00_0000_0000为ChCore的虚拟地址开头，而0xffff_0000_0000_0000开始为高地址，所以是ttbr1_el1控制内核地址空间，ttbr0_el1控制用户地址空间。</p>
+</blockquote>
+<p>值得注意的是在mappages的时候需要在第三层就退出，然后手动映射，不然会导致在<code>get_next_ptp</code>中它帮我们申请一页物理地址不是我们想要的内存，导致内存泄漏。</p>
+<p>这边可以回顾一下xv6的接口，是控制最后一次不alloc，然后返回下一次的pte。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pte_t</span> *<span class="title function_">walk</span><span class="params">(<span class="type">pagetable_t</span> pagetable, uint64 va, <span class="type">int</span> alloc)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (va &gt;= MAXVA) panic(<span class="string">&quot;walk&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> level = <span class="number">2</span>; level &gt; <span class="number">0</span>; level--) &#123;</span><br><span class="line">    <span class="type">pte_t</span> *pte = &amp;pagetable[PX(level, va)];</span><br><span class="line">    <span class="keyword">if</span> (*pte &amp; PTE_V) &#123;</span><br><span class="line">      pagetable = (<span class="type">pagetable_t</span>)PTE2PA(*pte);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (!alloc || (pagetable = (<span class="type">pde_t</span> *)kalloc()) == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      <span class="built_in">memset</span>(pagetable, <span class="number">0</span>, PGSIZE);</span><br><span class="line">      *pte = PA2PTE(pagetable) | PTE_V;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &amp;pagetable[PX(<span class="number">0</span>, va)];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="缺页中断"><a href="#缺页中断" class="headerlink" title="缺页中断"></a>缺页中断</h2><blockquote>
+<p>当处理器发生缺页异常时，它会将发生错误的虚拟地址存储于 <code>FAR_ELx</code> 寄存器中，并触发相应的异常处理流程。ChCore 对该异常的处理最终实现在 <code>kernel/arch/aarch64/irq/pgfault.c</code> 中的 <code>do_page_fault</code> 函数。本次实验暂时不涉及前面的异常初步处理及转发相关内容，我们仅需要关注操作系统是如何处缺页异常的。</p>
+<p><img src="/2024/07/27/ipads_os/image-20240801125324310.png" alt="image-20240801125324310"></p>
+</blockquote>
+<p>这部分填空也是比较简单，在此不提具体的实现细节，不过可以了解一下这边中断相关和vmr相关的整体框架。</p>
+<p>ChCore是多线程微内核实现，一个进程拥有一个vmspace，为进程虚拟地址空间的抽象，每个进程的vmspace指针都存在其对应的per-CPU字段中。一个vmspace被切分为多个vmregion，代表一段逻辑连续、权限相同的内存，然后vmr记录了这段region对应的物理对象（PMO），PMO里又记录了相应的物理地址。</p>
+<p>因此，想要处理缺页异常，首先需要找到当前进程发生页错误的虚拟地址所处的 VMR，进而才能得知其对应的物理地址，从而在页表中完成映射。</p>
+<blockquote>
+<p>TODO    其实这里我还是不大懂，已知页表和va那直接查页表不就行了吗，为啥还得这么复杂搞什么PMO……希望继续做下去实验能给我答案。</p>
+</blockquote>
+<p>缺页处理主要针对 <code>PMO_SHM</code> 和 <code>PMO_ANONYM</code> 类型的 PMO，这两种 PMO 的物理页是在访问时按需分配的。</p>
+<p>缺页处理逻辑为首先尝试检查 PMO 中当前 fault 地址对应的物理页是否存在（通过 <code>get_page_from_pmo</code> 函数尝试获取 PMO 中 offset 对应的物理页）。若对应物理页未分配，则需要分配一个新的物理页，再将页记录到 PMO 中，并增加页表映射。若对应物理页已分配，则只需要修改页表映射即可。</p>
+<h2 id="小品环节-1"><a href="#小品环节-1" class="headerlink" title="小品环节"></a>小品环节</h2><h3 id="Buddy-system-1"><a href="#Buddy-system-1" class="headerlink" title="Buddy system"></a>Buddy system</h3><p>【详情见buddy相关初次commit】</p>
+<p>本来是打算仅有低地址的buddy（或者说第偶数个？）真正代表了本块的order数。这样的话可以减少一次order赋值，增加些微的效率，如下图所示（最左那个内部省略，4121，跟右边差不多）。</p>
+<p><img src="/2024/07/27/ipads_os/image-20240730124409354.png" alt="image-20240730124409354"></p>
+<p>然而之后发现这样其实算是不对称的。。。因为这隐形规定了你split的时候需要先split最右，然后merge的时候也需要从右向左merge（也即必须前一个块就位了你这个块才能merge），也即split的时候是先割地址更高的块，而merge要求先回收低地址的块。</p>
+<p>所以，当先释放高地址的块，再释放低地址的块的时候，会出问题，导致只能merge递归一次而不能继续向上递归：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">order[0] free = 0</span><br><span class="line">order[1] free = 0</span><br><span class="line">order[2] free = 0</span><br><span class="line">order[3] free = 2</span><br><span class="line">order[4] free = 2</span><br><span class="line">order[5] free = 1</span><br><span class="line">order[6] free = 0</span><br><span class="line">order[7] free = 1</span><br><span class="line">order[8] free = 0</span><br><span class="line">order[9] free = 0</span><br><span class="line">order[10] free = 0</span><br><span class="line">order[11] free = 0</span><br><span class="line">order[12] free = 1</span><br><span class="line">order[13] free = 29</span><br></pre></td></tr></table></figure>
+
+<h3 id="细粒度内核页表"><a href="#细粒度内核页表" class="headerlink" title="细粒度内核页表"></a>细粒度内核页表</h3><blockquote>
+<p>思考题 6：为了简单起见，在 ChCore 实验 Lab1 中没有为内核页表使用细粒度的映射，而是直接沿用了启动时的粗粒度页表，请思考这样做有什么问题。</p>
+</blockquote>
+<p>感觉还是效率问题吧。。。有点像经典的读放大问题。</p>
+<p>隔壁xv6是直接进行完细粒度映射，才开启MMU的。</p>
+<blockquote>
+<p>挑战题 7：使用前面实现的 <code>page_table.c</code> 中的函数，在内核启动后的 <code>main</code> 函数中重新配置内核页表，进行细粒度的映射。</p>
+</blockquote>
+<p>TODO</p>
+<p>粗粒度的映射转化为细粒度的映射，本质上其实是将每个L2页表的块表项转化为指向一张L3页表的页表项，也即快表项和L3页表的一一映射。同时，内核这部分地址空间又比较敏感比较重要，所以其实策略有两种（也都大差不差）：</p>
+<ol>
+<li><p>建一个全新的三级页表，最后再修改<code>ttbr1_el1</code>寄存器</p>
+<blockquote>
+<p>注，0xffff_ff00_0000_0000为ChCore的虚拟地址开头，而0xffff_0000_0000_0000开始为高地址，所以是ttbr1_el1而非ttbr0_el1控制。</p>
+</blockquote>
+<p><img src="/2024/07/27/ipads_os/image-20240801011820364.png" alt="image-20240801011820364"></p>
+<p>这个精准卡在改完页表之后的下一行。。。</p>
+</li>
+<li><p>在原有基础上修改，只不过，walk到L2就停下，然后新建一张L3页表，等映射完一张L3页表的所有表项后才更换L2页表的块表项，也即本来一次映射的是PAGE_SIZE，现在映射的是<code>PAGE_SIZE*PTE_NUM</code>。</p>
+<p>这个貌似卡在访问栈出错了之类的，刷新tlb也没屁用</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Taking exception <span class="number">3</span> [Prefetch Abort]</span><br><span class="line">...<span class="keyword">from</span> EL1 <span class="keyword">to</span> EL1</span><br><span class="line">...<span class="keyword">with</span> ESR <span class="number">0x21</span>/<span class="number">0x8600000f</span></span><br><span class="line">...<span class="keyword">with</span> FAR <span class="number">0xffffff0000091bb8</span></span><br><span class="line">...<span class="keyword">with</span> ELR <span class="number">0xffffff0000091bb8</span></span><br><span class="line">...<span class="keyword">to</span> EL1 PC <span class="number">0x200</span> PSTATE <span class="number">0x3c5</span></span><br><span class="line">Taking exception <span class="number">3</span> [Prefetch Abort]</span><br><span class="line">...<span class="keyword">from</span> EL1 <span class="keyword">to</span> EL1</span><br><span class="line">...<span class="keyword">with</span> ESR <span class="number">0x21</span>/<span class="number">0x86000004</span></span><br><span class="line">...<span class="keyword">with</span> FAR <span class="number">0x200</span></span><br><span class="line">...<span class="keyword">with</span> ELR <span class="number">0x200</span></span><br><span class="line">...<span class="keyword">to</span> EL1 PC <span class="number">0x200</span> PSTATE <span class="number">0x3c5</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Taking exception <span class="number">3</span> [Prefetch Abort]</span><br><span class="line">...<span class="keyword">from</span> EL1 <span class="keyword">to</span> EL1</span><br><span class="line">...<span class="keyword">with</span> ESR <span class="number">0x21</span>/<span class="number">0x8600000f</span></span><br><span class="line">...<span class="keyword">with</span> FAR <span class="number">0xffffff000008f10c</span></span><br><span class="line">...<span class="keyword">with</span> ELR <span class="number">0xffffff000008f10c</span></span><br><span class="line">...<span class="keyword">to</span> EL1 PC <span class="number">0x200</span> PSTATE <span class="number">0x3c5</span></span><br></pre></td></tr></table></figure>
+
+<p>这两个地方都是用了sp的地方。。【第一个在get_pages的第一句，第二个在紧随ret之前的某句，并且gdb调和实际运行的地方不一样】然而我看sp地址也很正常，所以真的搞不明白，只是把一页映射到sp上啊，也不会损失什么吧。。。更何况我地址也没问题，真是人类迷惑行为。</p>
+</li>
+</ol>
+<p>我这两种方法都试了，奈何不知道为什么一直卡主不动。。。（我也不知道什么问题，貌似直接没办法从我写的一个专门作用于这种映射的函数返回到main里，产生了个非法地址越界，看起来好像是栈出了问题但我也不知道怎么回事。。。）</p>
+<p>真的搞不懂，感觉各种细枝末节包括权限设置什么的都没错。</p>
+<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffffff0000096438 &lt;set_ttbr0_el1&gt;:</span><br><span class="line"><span class="symbol">ffffff0000096438:</span>	d5182000 	msr	ttbr0_el1, x0</span><br><span class="line"><span class="symbol">ffffff000009643c:</span>	d5033fdf 	isb</span><br><span class="line"><span class="symbol">ffffff0000096440:</span>	d65f03c0 	<span class="keyword">ret</span></span><br><span class="line"><span class="symbol">ffffff0000096444:</span>	<span class="number">00000000</span> 	udf	<span class="meta">#0</span></span><br></pre></td></tr></table></figure>
+
+<p>0xffffff000008f10c</p>
+<p>ffffff000008f108</p>
+<p>ffffff000008ee6c</p>
+<p>想想真没问题吗。。。。我感觉是没问题啊。。。。总之我着实不知道怎么回事，还是先交给时间吧</p>
+<p>都是从0开始映射，映射到这个指定值</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffffff0003f00000 	可以<span class="keyword">return</span></span><br><span class="line">ffffff0005e00000 	可以<span class="keyword">return</span></span><br><span class="line">ffffff0005f00000   	main里<span class="keyword">return</span>失败</span><br><span class="line">ffffff0006e00000   	第二次<span class="keyword">return</span>失败</span><br><span class="line">ffffff0007e00000 	<span class="keyword">return</span>失败</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/07/27/ipads_os/image-20240801114707723.png" alt="image-20240801114707723"></p>
+<p><img src="/2024/07/27/ipads_os/image-20240801114718975.png" alt="image-20240801114718975"></p>
+<p>而且很奇怪，在main中查出来和init里的权限是相反的。。。。</p>
+<h3 id="PM"><a href="#PM" class="headerlink" title="PM"></a>PM</h3><p>本来学了个类似这样的可变参数宏的新活想用上去：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> map_range_in_pgtbl(...) _map_range_in_pgtbl(__VA_ARGS__, 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _map_range_in_pgtbl(pgtbl, va, pa, len, flags, ...) map_range_in_pgtbl_impl(pgtbl, va, pa, len, flags)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">map_range_in_pgtbl_impl</span><span class="params">(<span class="type">void</span> *pgtbl, <span class="type">int</span> va, <span class="type">int</span> pa, <span class="type">size_t</span> len, <span class="type">int</span> flags)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>奈何用完之后才想起来别的文件是预编译为链接文件的，而宏作用在更早的阶段，所以这样是不行的，会引发链接错误。</p>
+<h1 id="Lab3"><a href="#Lab3" class="headerlink" title="Lab3"></a>Lab3</h1>
         </div>
 
         
