@@ -13,7 +13,7 @@
 
 
 
-<title>IPADS-OSLab | 修年</title>
+<title>ChCore | 修年</title>
 
 
 
@@ -207,7 +207,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">IPADS-OSLab</h1>
+            <h1 class="post-title">ChCore</h1>
             
                 <div class="post-meta">
                     
@@ -524,7 +524,7 @@
 <p>所以，当先释放高地址的块，再释放低地址的块的时候，会出问题，导致只能merge递归一次而不能继续向上递归：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">order[0] free = 0</span><br><span class="line">order[1] free = 0</span><br><span class="line">order[2] free = 0</span><br><span class="line">order[3] free = 2</span><br><span class="line">order[4] free = 2</span><br><span class="line">order[5] free = 1</span><br><span class="line">order[6] free = 0</span><br><span class="line">order[7] free = 1</span><br><span class="line">order[8] free = 0</span><br><span class="line">order[9] free = 0</span><br><span class="line">order[10] free = 0</span><br><span class="line">order[11] free = 0</span><br><span class="line">order[12] free = 1</span><br><span class="line">order[13] free = 29</span><br></pre></td></tr></table></figure>
 
-<h3 id="细粒度内核页表"><a href="#细粒度内核页表" class="headerlink" title="细粒度内核页表"></a>细粒度内核页表</h3><blockquote>
+<h3 id="细粒度内核页表TODO"><a href="#细粒度内核页表TODO" class="headerlink" title="细粒度内核页表TODO"></a>细粒度内核页表TODO</h3><blockquote>
 <p>思考题 6：为了简单起见，在 ChCore 实验 Lab1 中没有为内核页表使用细粒度的映射，而是直接沿用了启动时的粗粒度页表，请思考这样做有什么问题。</p>
 </blockquote>
 <p>感觉还是效率问题吧。。。有点像经典的读放大问题。</p>
@@ -572,12 +572,134 @@
 <h1 id="Lab3"><a href="#Lab3" class="headerlink" title="Lab3"></a>Lab3</h1><blockquote>
 <p>在实验 1 和实验 2 中，已经完成了内核的启动和物理内存的管理，以及一个可供用户进程使用的页表实现。现在，我们将一步一步支持用户态程序的运行。</p>
 </blockquote>
-<p>实验 3 相较于实验 1 和实验 2 开放了部分用户态程序的代码，<code>user</code> 文件夹下提供了 <code>chcore-libc</code> 及 <code>system-services</code> 文件夹，并在根目录下添加了 <code>ramdisk</code> 文件夹，下面逐个介绍其作用。</p>
+<p>实验 3 相较于实验 1 和实验 2 开放了部分用户态程序的代码，<code>user</code> 文件夹下提供了 <code>chcore-libc</code> 及 <code>system-services</code> 文件夹，并在根目录下添加了 <code>ramdisk</code> 文件夹。</p>
 <ul>
-<li><code>ramdisk</code>。所有在 <code>ramdisk</code> 目录下的文件将被放入内核镜像的文件系统中，完成本实验后，可以在 shell 中使用 <code>ls</code> 命令查看文件。</li>
-<li><code>chcore-libc</code>。libc 是 C 语言标准库(C Standard Library)的缩写，它是一组提供了基本功能和操作的函数的库，用于支持 C 语言的标准。libc 中包含了很多标准的 C 函数，这些函数提供了许多基本的操作，如字符串处理、内存管理、输入输出等。<code>chcore-libc</code> 基于 <code>musl-libc</code> 进行修改以配合内核进行管理及系统调用，所有对 <code>musl-libc</code> 的修改均在 <code>chcore-libc/libchcore</code>中，实际编译时将使用脚本进行覆盖或打补丁。本实验也将在此处设置测试点。</li>
-<li><code>system-services</code>。其中存放一些基本的系统服务，除了在 <code>ramdisk</code> 中已经包含的，还有 <code>tmpfs</code> 和 <code>procmgr</code>。<code>tmpfs</code> 是 ChCore 基本的内存文件系统，后续实验中将会有所涉及，本实验中无需关注。<code>procmgr</code> 是 ChCore 的<strong>进程管理器</strong>，所有代码均以源代码形式给出，其中包含了创建进程、加载 elf 文件等操作，感兴趣的同学可以阅读。</li>
+<li><code>ramdisk</code>。所有在 <code>ramdisk</code> 目录下的文件将被放入内核镜像的文件系统中。</li>
+<li><code>chcore-libc</code>。基于 <code>musl-libc</code> 进行修改以配合内核进行管理及系统调用，所有对 <code>musl-libc</code> 的修改均在 <code>chcore-libc/libchcore</code>中，实际编译时将使用脚本进行override。</li>
+<li><code>system-services</code>。存放一些基本的系统服务，除了在 <code>ramdisk</code> 中已经包含的，还有 <code>tmpfs</code> 和 <code>procmgr</code>。<code>tmpfs</code> 是 ChCore 基本的内存文件系统，后续实验中将会有所涉及。<code>procmgr</code> 是 ChCore 的<strong>进程管理器</strong>，所有代码均以源代码形式给出，其中包含了创建进程、加载 elf 文件等操作，感兴趣的同学可以阅读。</li>
 </ul>
+<h2 id="访问控制"><a href="#访问控制" class="headerlink" title="访问控制"></a>访问控制</h2><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>在 ChCore 中，内核提供给用户的一切资源均采用 <strong>Capability</strong> 机制进行管理。ChCore 微内核采用“Everything is an object”的设计理念，它将用户态能够进行操作的资源统一抽象成<strong>内核对象（kernel object）</strong>。这和UNIX操作系统中经典抽象“Everything is a file”类似，都是旨在提供简洁而统一的资源抽象。</p>
+<p>ChCore微内核中共提供了7种类型的内核对象，分别是 cap 组对象（cap_group）、线程对象（thread）、物理内存对象（pmo）、地址空间对象（vmspace）、通信对象（connection 和 notification）、中断对象（irq）。每种内核对象定义了若干可以被用户态调用的操作方法，比如为线程对象设置优先级等调度信息、将一个物理内存对象映射到一个地址空间对象中等。</p>
+<p>为了能够使用户态调用内核对象定义的方法，ChCore 微内核需要提供<strong>内核对象命名机制</strong>，即为一个内核对象提供<strong>在用户态相应的标识符</strong>。类似地，宏内核操作系统中的文件对象（file）在用户态的识别符是 fd，这就是一种命名机制。ChCore 采用 <strong>Capability</strong> 作为内核对象在用户态的标识符。</p>
+<p>在 ChCore 微内核操作系统上运行的应用程序在内核态对应一个 cap 组对象，该对象中记录着该应用程序能够操作的全部内核对象。也即，<strong>ChCore 的一个进程是一些对特定内核对象享有相同的 Capability 的线程的集合，通过 capability 的设计，每个进程拥有独立的内核对象命名空间。</strong>ChCore 中的每个进程至少包含一个主线程，也可能有多个子线程，而每个线程则从属且仅从属于一个进程。同时，子进程也视为父进程的cap group中的一个slot。</p>
+<blockquote>
+<p>它这类比还蛮有意思的。在Linux中，包括内存管理、文件系统、进程本身、IO外设等的Metadata，都可以是文件（或者也不能这么说，我感觉文件形式更多时候其实还是只作为一个面向用户态的接口的……）；而在ChCore中，这些Metadata则以对象的形式表现。文件描述符fd是用于访问一个文件，实际上就代表了当前上下文对该文件具有一种可以访问的“Capability”。</p>
+<p>而且，进程的含义其实是对整个系统的一个小型抽象，有自己的逻辑和数据。这个cap_group的角度也是非常精准。</p>
+</blockquote>
+<p>在实现中，一个 <code>cap_group</code> 作为一个进程的抽象，是指针数组，存储指向内核对象的指针。</p>
+<p>Capability 在用户态看来是 cap 组的索引。当授权某个进程访问一个内核对象时，操作系统内核首先在这个进程对应的 cap 组中分配一个空闲的索引，然后把内核对象的指针填写到该索引位置，最后把索引值作为 capability 返回给用户态即可。【这就是非常FD的操作了】</p>
+<p>用户态进程中的所有线程隶属于同一个 cap 组，而该 cap 组中非空闲的索引值即为该进程拥有的所有 capability，也就是该进程中所有线程能够操作的内核对象、即所有能够访问的资源。【这里其实也体现了线程和进程的概念之差，拥有共通共享的一些资源】</p>
+<p>每个进程获取 capability 的方式有三种。</p>
+<ol>
+<li>在被创建时由父进程赋予；（fork）</li>
+<li>在运行时向微内核申请获得；（grant）</li>
+<li>由其他进程授予。（grant传播）</li>
+</ol>
+<p>Capability还能实现进程协作。比如说，若该内核对象是一个物理内存对象，则两个进程可以通过把它映射到各自的地址空间中从而建立<strong>共享内存</strong>；若该内核对象是一个通信对象，则两个进程可以通过调用其提供的方法进行<strong>IPC交互</strong>。【66666这个角度很有意思】</p>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><p>一个内核对象由<code>struct object</code>代表，其具体数据存储在<code>opaque</code>中。而一个内核对象对应在每个cap group的代表是<code>struct object_slot</code>，存储了对<code>struct object</code>的指针以及其他相关信息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 内核对象</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">object</span> &#123;</span></span><br><span class="line">	u64 type;</span><br><span class="line">	u64 size;</span><br><span class="line">	<span class="comment">/* Link all slots point to this object */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">copies_head</span>;</span></span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">long</span> refcount;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * opaque marks the end of this struct and the real object will be</span></span><br><span class="line"><span class="comment">	 * stored here. Now its address will be 8-byte aligned.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	u64 opaque[];	<span class="comment">// 可变长度成员字段</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// cap group指向内核对象的slot</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">object_slot</span> &#123;</span></span><br><span class="line">	<span class="type">int</span> slot_id;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">cap_group</span> *<span class="title">cap_group</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">object</span> *<span class="title">object</span>;</span></span><br><span class="line">	<span class="comment">/* link copied slots pointing to the same object */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">copies</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// cap group的指针数组</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">slot_table</span> &#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> slots_size;</span><br><span class="line">	<span class="comment">// xiunian: pointer array</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">object_slot</span> **<span class="title">slots</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> *full_slots_bmp;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> *slots_bmp;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">rwlock</span> <span class="title">table_guard</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// cap group</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cap_group</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">slot_table</span> <span class="title">slot_table</span>;</span>	<span class="comment">// pointer array</span></span><br><span class="line">	<span class="type">int</span> thread_cnt;	<span class="comment">// The number of threads</span></span><br><span class="line">	<span class="type">badge_t</span> badge;	<span class="comment">// pid</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="特权与异常"><a href="#特权与异常" class="headerlink" title="特权与异常"></a>特权与异常</h2><p>AArch64采用“异常级别”这一概念定义程序执行时所拥有的特权级别，从低到高分别是 EL0、EL1、EL2 和 EL3。ChCore 中仅使用了其中的两个异常级别：EL0 和 EL1。其中，EL1 是内核模式，<code>kernel</code> 目录下的内核代码运行于此异常级别。EL0 是用户模式，<code>user</code> 目录下的用户库与用户程序代码运行在用户模式下。</p>
+<p>在 AArch64 架构中，异常是指低特权级软件（如用户程序）请求高特权软件（例如内核中的异常处理程序）采取某些措施以确保程序平稳运行的系统事件【这个概括还挺精确的】，包含<strong>同步异常</strong>和<strong>异步异常</strong>：</p>
+<ul>
+<li>同步异常：<strong>通过直接执行指令产生的异常</strong>。同步异常的来源包括同步中止（synchronous abort）和一些特殊指令。当直接执行一条指令时，若取指令或数据访问过程失败，则会产生同步中止。此外，部分指令（包括 <code>svc</code> 等）通常被用户程序用于主动制造异常以请求高特权级别软件提供服务（如<strong>系统调用</strong>）。</li>
+<li>异步异常：<strong>与正在执行的指令无关的异常</strong>。异步异常的来源包括普通中 IRQ、快速中断 FIQ 和系统错误 SError。IRQ 和 FIQ 是由其他与处理器连接的硬件产生的中断，系统错误则包含多种可能的原因。本实验不涉及此部分。</li>
+</ul>
+<p>发生异常后，处理器需要找到与发生的异常相对应的异常处理程序代码并执行。在 AArch64 中，存储于内存之中的异常处理程序代码被叫做异常向量（exception vector），而所有的异常向量被存储在一张异常向量表（exception vector table）中。AArch64 中的每个异常级别都有其自己独立的异常向量表，其虚拟地址由该异常级别下的异常向量基地址寄存器（<code>VBAR_EL3</code>，<code>VBAR_EL2</code> 和 <code>VBAR_EL1</code>）决定。每个异常向量表中包含 16 个条目，每个条目里存储着发生对应异常时所需执行的异常处理程序代码。如下图所示：</p>
+<p><img src="/2024/07/27/ipads_os/3-exception.png" alt="3-exception.png"></p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="1-用户进程和线程"><a href="#1-用户进程和线程" class="headerlink" title="1.用户进程和线程"></a>1.用户进程和线程</h3><p>在 ChCore 中，第一个被创建的进程是 <code>procmgr</code>，是 ChCore 核心的系统服务。本实验将以创建 <code>procmgr</code> 为例探索在 ChCore 中如何创建进程，以及成功创建第一个进程后如何实现内核态向用户态的切换。</p>
+<p>在内核完成必要的初始化之后，内核将会跳转到创建第一个用户程序的操作中，该操作通过调用 <code>create_root_thread</code> 函数完成，本函数完成第一个用户进程的创建。</p>
+<p>创建用户程序至少需要包括创建对应的 <code>cap_group</code>、加载用户程序镜像并且切换到程序。</p>
+<p><code>create_root_thread</code>的操作包括：</p>
+<ol>
+<li>从<code>procmgr</code>镜像中读取程序信息</li>
+<li>调用<code>create_root_cap_group</code>创建第一个 <code>cap_group</code> 进程</li>
+<li>创建第一个线程，加载着<code>procmgr</code>系统服务</li>
+</ol>
+<p>此外，用户程序也可以通过 <code>sys_create_cap_group</code> 系统调用创建一个全新的 <code>cap_group</code>。</p>
+<p>由于 <code>cap_group</code> 也是一个内核对象，因此在创建 <code>cap_group</code> 时，需要通过 <code>obj_alloc</code> 分配全新的 <code>cap_group</code> 和 <code>vmspace</code> 对象（<code>TYPE_CAP_GROUP</code> 与 <code>TYPE_VMSPACE</code>）。对分配得到的 <code>cap_group</code> 对象，需要通过 <code>cap_group_init</code> 函数初始化并且设置必要的参数(Tip: size 参数已定义好 <code>BASE_OBJECT_NUM</code>)。对分配得到的 <code>vmspace</code> 对象则需要调用 <code>cap_alloc</code> 分配对应的槽（slot）。</p>
+<blockquote>
+<p>这部分的描述，可以看<code>docs/capability.md</code>，里面描述了cap的一般步骤：</p>
+<ol>
+<li><code>obj_alloc</code> allocates an object and returns a data area with user-defined length.</li>
+<li>Init the object within the data area.</li>
+<li><code>cap_alloc</code> allocate a cap for the inited object.</li>
+</ol>
+</blockquote>
+<p>然而，完成 <code>cap_group</code> 的分配之后，用户程序并没有办法直接运行，因为<code>cap_group</code>只是一个资源集合的概念。<strong>线程才是内核中的调度执行单位</strong>，因此还需要进行线程的创建，将用户程序 ELF 的各程序段加载到内存中。</p>
+<blockquote>
+<p>练习 2: 在 <code>kernel/object/thread.c</code> 中完成 <code>create_root_thread</code> 函数，将用户程序 ELF 加载到刚刚创建的进程地址空间中。</p>
+</blockquote>
+<p>此处大概是这样的逻辑，先在内核地址空间虚拟地址kva映射对应的一块物理内存pa，然后在内核中将elf程序copy到pa中（<code>procmgr</code>已经包含在了kernel image中，所以只需一个<code>memcpy</code>即可），最后再把这个pa映射到用户虚拟地址空间中（每个section的具体地址在elf程序头表的ph_vaddr字段指定）。</p>
+<p>值得注意的是，貌似在ChCore的建立第一个进程这一阶段用的是一个魔改版的elf格式？<strong>详情见小品环节1。</strong></p>
+<blockquote>
+<p>不过这里还是简单放一下经典elf文件格式吧。</p>
+<p>ELF文件结构主要包括三个部分：ELF头、程序头表（可选，用于可执行文件和共享库）、节头表（用于目标文件和可执行文件）。</p>
+<ul>
+<li><p><strong>ELF头（ELF Header）</strong>：包含文件类型、架构、入口点、程序头表和节头表的偏移、表大小等基本信息。</p>
+</li>
+<li><p><strong>程序头表（Program Header Table）</strong>：描述程序执行所需的段（segments），如代码段、数据段等。</p>
+</li>
+<li><p><strong>节头表（Section Header Table）</strong>：描述文件中的各个节（sections），如符号表、字符串表等。</p>
+</li>
+</ul>
+<p><img src="/2024/07/27/ipads_os/d60c5639833356815b58909463619f7d.png" alt="img"></p>
+<p><img src="/2024/07/27/ipads_os/f66156cab150064bb3fe37b4c0d61d04.png" alt="img"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">elf32_hdr</span>&#123;</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> e_ident[EI_NIDENT];     <span class="comment">/* 魔数和相关信息 */</span></span><br><span class="line">    Elf32_Half    e_type;                 <span class="comment">/* 目标文件类型 */</span></span><br><span class="line">    Elf32_Half    e_machine;              <span class="comment">/* 硬件体系 */</span></span><br><span class="line">    Elf32_Word    e_version;              <span class="comment">/* 目标文件版本 */</span></span><br><span class="line">    Elf32_Addr    e_entry;                <span class="comment">/* 程序进入点 */</span></span><br><span class="line">    Elf32_Off     e_phoff;                <span class="comment">/* 程序头部偏移量 */</span></span><br><span class="line">    Elf32_Off     e_shoff;                <span class="comment">/* 节头部偏移量 */</span></span><br><span class="line">    Elf32_Word    e_flags;                <span class="comment">/* 处理器特定标志 */</span></span><br><span class="line">    Elf32_Half    e_ehsize;               <span class="comment">/* ELF头部长度 */</span></span><br><span class="line">    Elf32_Half    e_phentsize;            <span class="comment">/* 程序头部中一个条目的长度 */</span></span><br><span class="line">    Elf32_Half    e_phnum;                <span class="comment">/* 程序头部条目个数  */</span></span><br><span class="line">    Elf32_Half    e_shentsize;            <span class="comment">/* 节头部中一个条目的长度 */</span></span><br><span class="line">    Elf32_Half    e_shnum;                <span class="comment">/* 节头部条目个数 */</span></span><br><span class="line">    Elf32_Half    e_shstrndx;             <span class="comment">/* 节头部字符表索引 */</span></span><br><span class="line">&#125; Elf32_Ehdr;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">elf32_phdr</span>&#123;</span></span><br><span class="line">  Elf32_Word  p_type;        <span class="comment">/* 段类型 */</span></span><br><span class="line">  Elf32_Off   p_offset;      <span class="comment">/* 段位置相对于文件开始处的偏移量 */</span></span><br><span class="line">  Elf32_Addr  p_vaddr;       <span class="comment">/* 段在内存中的地址 */</span></span><br><span class="line">  Elf32_Addr  p_paddr;       <span class="comment">/* 段的物理地址 */</span></span><br><span class="line">  Elf32_Word  p_filesz;      <span class="comment">/* 段在文件中的长度 */</span></span><br><span class="line">  Elf32_Word  p_memsz;       <span class="comment">/* 段在内存中的长度 */</span></span><br><span class="line">  Elf32_Word  p_flags;       <span class="comment">/* 段的标记 */</span></span><br><span class="line">  Elf32_Word  p_align;       <span class="comment">/* 段在内存中对齐标记 */</span></span><br><span class="line">&#125; Elf32_Phdr;</span><br></pre></td></tr></table></figure>
+
+</blockquote>
+<p>再之后调用<code>init_thread_ctx</code>进行上下文初始化，然后通过<code>sched</code>选取到第一个程序进行运行，最后再一系列辗转调用eret回到用户态，从而开始运行。</p>
+<p>然而，此时 ChCore 尚未配置从用户模式（EL0）切换到内核模式（EL1）的相关内容，在尝试执行 <code>svc</code> 指令时会出错，故而接下来完成对异常处理的配置。</p>
+<h3 id="2-异常向量表"><a href="#2-异常向量表" class="headerlink" title="2.异常向量表"></a>2.异常向量表</h3><p>在 ChCore 中，仅使用了 EL0 和 EL1 两个异常级别，因此仅需要对 EL1 异常向量表进行初始化即可。</p>
+<p>在本实验中，ChCore 内除系统调用外所有的同步异常均交由 <code>handle_entry_c</code> 函数进行处理。遇到异常时，硬件将根据 ChCore 的配置执行对应的汇编代码，将异常类型和当前异常处理程序条目类型作为参数传递，对于 sync_el1h 类型的异常，跳转 <code>handle_entry_c</code> 使用 C 代码处理异常。对于 irq_el1t、fiq_el1t、fiq_el1h、error_el1t、error_el1h、sync_el1t 则跳转 <code>unexpected_handler</code> 处理异常。</p>
+<p>由注释：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">* The selected <span class="built_in">stack</span> pointer can be indicated by a suffix to the Exception Level:</span><br><span class="line">*  - t: SP_EL0 is used</span><br><span class="line">*  - h: SP_ELx is used</span><br></pre></td></tr></table></figure>
+
+<p>可知依次需要跳转的标签名的后缀顺序为t-h-64-32，并且每个跳转指令之间需要按照0x80对齐，所以需要间隔31个nop指令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">b sync_el1t</span><br><span class="line">.rept 31</span><br><span class="line">nop</span><br><span class="line">.endr</span><br><span class="line">b irq_el1t</span><br><span class="line">.rept 31</span><br><span class="line">nop</span><br><span class="line">.endr</span><br><span class="line">b fiq_el1t</span><br><span class="line">.rept 31</span><br><span class="line">nop</span><br><span class="line">.endr</span><br><span class="line">b error_el1t</span><br><span class="line">.rept 31</span><br><span class="line">nop</span><br><span class="line">.endr</span><br></pre></td></tr></table></figure>
+
+<p>然后我也是之后看别人的代码才发现，原来还可以这么写，学到了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.macro	exception_entry	label</span><br><span class="line">	/* Each entry of the exeception table should be 0x80 aligned */</span><br><span class="line">	.align	7</span><br><span class="line">	b	\label</span><br><span class="line">.endm</span><br><span class="line"></span><br><span class="line">	exception_entry sync_el1t</span><br><span class="line">	exception_entry irq_el1t</span><br><span class="line">	exception_entry fiq_el1t</span><br><span class="line">	exception_entry error_el1t</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-系统调用"><a href="#3-系统调用" class="headerlink" title="3.系统调用"></a>3.系统调用</h3><p>通过异常进入到内核后，ChCore在<code>exception_enter</code> 宏进行现场保存，在<code>exception_exit</code>宏进行现场恢复。保存时在栈中应准备<code>ARCH_EXEC_CONT_SIZE</code>大小的空间。</p>
+<p>完成保存后，需要进行<strong>内核栈切换</strong>，首先从<code>TPIDR_EL1</code>寄存器中读取到当前核的<code>per_cpu_info</code>（参考<code>kernel/include/arch/aarch64/arch/machine/smp.h</code>），从而拿到其中的<code>cpu_stack</code>地址。</p>
+<p>在本实验中新加入了 <code>libc</code> 文件，用户态程序可以链接其编译生成的<code>libc.so</code>，并通过 <code>libc</code> 进行系统调用从而进行向内核态的异常切换。实验接下来将对 <code>printf</code> 函数（<code>user/chcore-libc/musl-libc/src/stdio/printf.c</code>）的调用链进行分析与探索。</p>
+<p><code>printf</code> 函数调用了 <code>vfprintf</code>，其中文件描述符参数为 <code>stdout</code>。这说明在 <code>vfprintf</code> 中将使用 <code>stdout</code> 的某些操作函数。</p>
+<p>在 <code>user/chcore-libc/musl-libc/src/stdio/stdout.c</code>中可以看到 <code>stdout</code> 的 <code>write</code> 操作被定义为 <code>__stdout_write</code>，之后调用到 <code>__stdio_write</code> 函数。</p>
+<p>最终 <code>printf</code> 函数将调用到 <code>chcore_stdout_write</code>。</p>
+<blockquote>
+<p>思考 7: 尝试描述 <code>printf</code> 如何调用到 <code>chcore_stdout_write</code> 函数。</p>
+<p>提示：<code>chcore_write</code> 中使用了文件描述符，<code>stdout</code> 描述符的设置在<code>user/chcore-libc/musl-libc/src/chcore-port/syscall_dispatcher.c</code> 中。</p>
+<p>可以看到在<code>user/chcore-libc/musl-libc/src/chcore-port/syscall_dispatcher.c</code>中设置了stdout的默认fdop：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">fd_ops</span> <span class="title">stdout_ops</span> =</span> &#123;</span><br><span class="line">        .read = chcore_stdio_read,</span><br><span class="line">        .write = chcore_stdout_write,</span><br><span class="line">        .close = chcore_stdout_close,</span><br><span class="line">        .poll = chcore_stdio_poll,</span><br><span class="line">        .ioctl = chcore_stdio_ioctl,</span><br><span class="line">        .fcntl = chcore_stdio_fcntl,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><code>chcore_stdout_write</code> 中的核心函数为 <code>put</code>，此函数的作用是向终端输出一个字符串。</p>
+<p>从 <code>printf</code> 的例子我们也可以看到<strong>从通用 api 向系统相关 abi 的调用过程</strong>，并最终通过系统调用完成从用户态向内核态的异常切换。</p>
+<h2 id="小品环节-2"><a href="#小品环节-2" class="headerlink" title="小品环节"></a>小品环节</h2><h3 id="ELF加载"><a href="#ELF加载" class="headerlink" title="ELF加载"></a>ELF加载</h3><p>不知道为什么，<code>procmgr</code>被设计为不是正规的ELF文件格式，而是魔改版ELF……</p>
+<p>具体来说，我们可以看看编译生成<code>procmgr</code>镜像的cmake代码：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">add_custom_target</span>(</span><br><span class="line">    create-procmgr-bin ALL</span><br><span class="line">    <span class="keyword">COMMAND</span> echo <span class="string">&quot;build procmgr binary...&quot;</span></span><br><span class="line">    <span class="keyword">COMMAND</span> read_procmgr_elf_tool <span class="variable">$&#123;CMAKE_CURRENT_BINARY_DIR&#125;</span>/procmgr.srv</span><br><span class="line">    <span class="keyword">COMMAND</span> chmod <span class="number">666</span> elf_info.temp</span><br><span class="line">    <span class="keyword">COMMAND</span> cat elf_info.temp procmgr.bin &gt; procmgr</span><br><span class="line">    <span class="keyword">COMMAND</span> rm -f <span class="variable">$&#123;CMAKE_CURRENT_BINARY_DIR&#125;</span>/elf_info.temp</span><br><span class="line">    <span class="keyword">COMMAND</span> echo <span class="string">&quot;build procmgr success!&quot;</span></span><br><span class="line">    DEPENDS procmgr.srv procmgr.bin)</span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>procmgr.srv</code>为正统的ELF格式，通过<code>readelf</code>工具可读。它只包含elf header和程序头表。</p>
+<blockquote>
+<p>可以通过<code>readelf -h build/user/system-services/system-servers/procmgr/procmgr.srv</code>和<code>readelf -l build/user/system-services/system-servers/procmgr/procmgr.srv</code>来读取其elf头和程序头表。</p>
+</blockquote>
+<p>然后可以看到，他这里大概是做了这么个操作，首先是使用了他们docker环境自带的一个工具<code>read_procmgr_elf_tool</code>将这个.srv文件转化为了<code>elf_info.temp</code>，再把这个.tmp和.bin文件合二为一成为最终的<code>procmgr</code>映像。</p>
+<p>我们可以来看看这个.tmp文件里到底存了啥，跟正宗elf有什么不一样。</p>
+<p>首先这个是<code>elf_info.temp</code>：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240805231453013.png" alt="image-20240805231453013"></p>
+<p>这个是<code>procmgr.srv</code>：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240805230347173.png" alt="image-20240805230347173"></p>
+<p>可以看到，蓝色部分其实就跟.tmp文件的内容差不多，.tmp文件大概是对ELF格式进行了一定的魔改。具体来说，它照搬了程序头表基本不变（自.tmp文件的0x40开始的位置，小端），然后又对标准的ELF Header进行了增删魔改（而且还变成了大端形式），最终形成了这么一个大小为48(elf header)+56*3(phdr size)=216大小的首部。</p>
+<p>这还不是最幽默的，还有一点，就是他还改了程序头表的<code>ph_offset</code>字段！</p>
+<p><code>ph_offset</code>字段的原意是该程序头对应的segment离文件开始的偏移量，并且会按照其<code>ph_align</code>字段进行地址对齐。在.srv中，每个程序头表项的align都为0x1000（PAGE_SIZE），故而，其offset字段情况如下图所示：</p>
+<p><img src="/2024/07/27/ipads_os/image-20240806160045163.png" alt="image-20240806160045163"></p>
+<p>然而，生成的<code>elf_info.temp</code>的第一个offset字段被置为了0，也就是说一个segment的起始地址应该为 文件起始地址+216(首部大小)+offset。</p>
+<p><img src="/2024/07/27/ipads_os/image-20240805232202424.png" alt="image-20240805232202424"></p>
+<p><img src="/2024/07/27/ipads_os/image-20240805232224641.png" alt="image-20240805232224641"></p>
+<p>以上的这几种细节，以及全然未提及相关信息的指导书（只说加载ELF程序……但我寻思这也不是ELF啊），使我在这部分struggle了许久，对offset改来改去毫无思路，不清楚为什么读出来会是0，也不清楚是否需要按页对齐（反正对不对齐其实试出来都是错的hhh）。最终发现错误也比较偶然，大概是盯着那堆ELF相关宏抓耳挠腮时，开始好奇这个<code>#define ROOT_BIN_HDR_SIZE 216</code>的216是怎么来的，算了一下发现标准的ELF格式其实应该是232(64+56*3)才对，然后又想到之前配环境一通折腾时就看不懂的那段cmake指令，以及细看才发现前面读elf header时更是古怪（原谅我写的时候前面直接跳过没仔细看了……），才意识到原来用的不是标准ELF，而是魔改版的……</p>
+<p>不过，我不大懂这里为啥要用魔改版这么复杂曲折，隔壁xv6不挺好的吗？难道是为了读取方便统一用8字节……总之放一个TODO在这。</p>
 
         </div>
 
