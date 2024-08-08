@@ -503,8 +503,6 @@
 </blockquote>
 <p>值得注意的是在mappages的时候需要在第三层就退出，然后手动映射，不然会导致在<code>get_next_ptp</code>中它帮我们申请一页物理地址不是我们想要的内存，导致内存泄漏。</p>
 <p>这边可以回顾一下xv6的接口，是控制最后一次不alloc，然后返回下一次的pte。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pte_t</span> *<span class="title function_">walk</span><span class="params">(<span class="type">pagetable_t</span> pagetable, uint64 va, <span class="type">int</span> alloc)</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (va &gt;= MAXVA) panic(<span class="string">&quot;walk&quot;</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> level = <span class="number">2</span>; level &gt; <span class="number">0</span>; level--) &#123;</span><br><span class="line">    <span class="type">pte_t</span> *pte = &amp;pagetable[PX(level, va)];</span><br><span class="line">    <span class="keyword">if</span> (*pte &amp; PTE_V) &#123;</span><br><span class="line">      pagetable = (<span class="type">pagetable_t</span>)PTE2PA(*pte);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (!alloc || (pagetable = (<span class="type">pde_t</span> *)kalloc()) == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      <span class="built_in">memset</span>(pagetable, <span class="number">0</span>, PGSIZE);</span><br><span class="line">      *pte = PA2PTE(pagetable) | PTE_V;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &amp;pagetable[PX(<span class="number">0</span>, va)];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <h2 id="缺页中断"><a href="#缺页中断" class="headerlink" title="缺页中断"></a>缺页中断</h2><blockquote>
 <p>当处理器发生缺页异常时，它会将发生错误的虚拟地址存储于 <code>FAR_ELx</code> 寄存器中，并触发相应的异常处理流程。ChCore 对该异常的处理最终实现在 <code>kernel/arch/aarch64/irq/pgfault.c</code> 中的 <code>do_page_fault</code> 函数。本次实验暂时不涉及前面的异常初步处理及转发相关内容，我们仅需要关注操作系统是如何处缺页异常的。</p>
 <p><img src="/2024/07/27/ipads_os/image-20240801125324310.png" alt="image-20240801125324310"></p>
@@ -569,7 +567,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> map_range_in_pgtbl(...) _map_range_in_pgtbl(__VA_ARGS__, 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _map_range_in_pgtbl(pgtbl, va, pa, len, flags, ...) map_range_in_pgtbl_impl(pgtbl, va, pa, len, flags)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">map_range_in_pgtbl_impl</span><span class="params">(<span class="type">void</span> *pgtbl, <span class="type">int</span> va, <span class="type">int</span> pa, <span class="type">size_t</span> len, <span class="type">int</span> flags)</span>;</span><br></pre></td></tr></table></figure>
 
 <p>奈何用完之后才想起来别的文件是预编译为链接文件的，而宏作用在更早的阶段，所以这样是不行的，会引发链接错误。</p>
-<h1 id="Lab3"><a href="#Lab3" class="headerlink" title="Lab3"></a>Lab3</h1><blockquote>
+<h1 id="Lab3-进程与线程"><a href="#Lab3-进程与线程" class="headerlink" title="Lab3: 进程与线程"></a>Lab3: 进程与线程</h1><blockquote>
 <p>在实验 1 和实验 2 中，已经完成了内核的启动和物理内存的管理，以及一个可供用户进程使用的页表实现。现在，我们将一步一步支持用户态程序的运行。</p>
 </blockquote>
 <p>实验 3 相较于实验 1 和实验 2 开放了部分用户态程序的代码，<code>user</code> 文件夹下提供了 <code>chcore-libc</code> 及 <code>system-services</code> 文件夹，并在根目录下添加了 <code>ramdisk</code> 文件夹。</p>
@@ -607,6 +605,13 @@
 </ul>
 <p>发生异常后，处理器需要找到与发生的异常相对应的异常处理程序代码并执行。在 AArch64 中，存储于内存之中的异常处理程序代码被叫做异常向量（exception vector），而所有的异常向量被存储在一张异常向量表（exception vector table）中。AArch64 中的每个异常级别都有其自己独立的异常向量表，其虚拟地址由该异常级别下的异常向量基地址寄存器（<code>VBAR_EL3</code>，<code>VBAR_EL2</code> 和 <code>VBAR_EL1</code>）决定。每个异常向量表中包含 16 个条目，每个条目里存储着发生对应异常时所需执行的异常处理程序代码。如下图所示：</p>
 <p><img src="/2024/07/27/ipads_os/3-exception.png" alt="3-exception.png"></p>
+<blockquote>
+<p>FIQ（Fast Interrupt Request）是一种 ARM 架构中的中断类型，是特权模式中的一种，同时也属于异常模式一类。旨在提供比标准中断（IRQ）更高的优先级和更快的响应时间，用于高速数据传输或通道处理。</p>
+<p>FIQ和IRQ是两种不同类型的中断，ARM为了支持这两种不同的中断，提供了对应的叫做FIQ和IRQ处理器模式（ARM有7种处理模式）。</p>
+<p>为使FIQ模式响应更快，FIQ模式具有更多的影子（Shadow）寄存器。</p>
+<p><img src="/2024/07/27/ipads_os/image-20240807115729322.png" alt="image-20240807115729322"></p>
+<p>FIQ 的优先级高于常规的 IRQ（Interrupt Request）。</p>
+</blockquote>
 <h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="1-用户进程和线程"><a href="#1-用户进程和线程" class="headerlink" title="1.用户进程和线程"></a>1.用户进程和线程</h3><p>在 ChCore 中，第一个被创建的进程是 <code>procmgr</code>，是 ChCore 核心的系统服务。本实验将以创建 <code>procmgr</code> 为例探索在 ChCore 中如何创建进程，以及成功创建第一个进程后如何实现内核态向用户态的切换。</p>
 <p>在内核完成必要的初始化之后，内核将会跳转到创建第一个用户程序的操作中，该操作通过调用 <code>create_root_thread</code> 函数完成，本函数完成第一个用户进程的创建。</p>
 <p>创建用户程序至少需要包括创建对应的 <code>cap_group</code>、加载用户程序镜像并且切换到程序。</p>
@@ -699,7 +704,144 @@
 <p><img src="/2024/07/27/ipads_os/image-20240805232202424.png" alt="image-20240805232202424"></p>
 <p><img src="/2024/07/27/ipads_os/image-20240805232224641.png" alt="image-20240805232224641"></p>
 <p>以上的这几种细节，以及全然未提及相关信息的指导书（只说加载ELF程序……但我寻思这也不是ELF啊），使我在这部分struggle了许久，对offset改来改去毫无思路，不清楚为什么读出来会是0，也不清楚是否需要按页对齐（反正对不对齐其实试出来都是错的hhh）。最终发现错误也比较偶然，大概是盯着那堆ELF相关宏抓耳挠腮时，开始好奇这个<code>#define ROOT_BIN_HDR_SIZE 216</code>的216是怎么来的，算了一下发现标准的ELF格式其实应该是232(64+56*3)才对，然后又想到之前配环境一通折腾时就看不懂的那段cmake指令，以及细看才发现前面读elf header时更是古怪（原谅我写的时候前面直接跳过没仔细看了……），才意识到原来用的不是标准ELF，而是魔改版的……</p>
-<p>不过，我不大懂这里为啥要用魔改版这么复杂曲折，我翻了翻<a target="_blank" rel="noopener" href="https://github.com/WilliamX1/ChCore/blob/lab3/kernel/object/thread.c">往年的实验版本</a>包括隔壁xv6也都是用的标准ELF格式。难道是为了读取方便统一用8字节，或者节省image大小……但指导书怎么没提及这一点呢，莫非是我孤陋寡闻了……总之放一个TODO在这。</p>
+<p>不过，我不大懂这里为啥要用魔改版这么复杂曲折，我翻了翻<a target="_blank" rel="noopener" href="https://github.com/WilliamX1/ChCore/blob/lab3/kernel/object/thread.c">往年的实验版本</a>包括隔壁xv6也都是用的标准ELF格式。难道是为了读取方便统一用8字节，或者节省image大小……但指导书怎么没提及这一点呢，莫非是我孤陋寡闻了……</p>
+<blockquote>
+<p>后续：</p>
+<p>procmgr负责进程生态的管理，如果要新建进程，也是向procmgr发送相关消息即可，它会先读入elf，再调用<code>elf_so_loader_launch_process</code>，最终调用<code>launch_process_with_pmos_caps</code>函数进行和内核差不多的操作，如创建内存空间创建主线程等。这里就是一个非常纯粹的微内核了，创建进程这种大活都被放到了userspace。</p>
+<p>可能就是因为这样，内核就仅保留一个小的魔改版elf了。</p>
+</blockquote>
+<h1 id="Lab4-多核调度与IPC"><a href="#Lab4-多核调度与IPC" class="headerlink" title="Lab4: 多核调度与IPC"></a>Lab4: 多核调度与IPC</h1><p>在本实验中，ChCore将支持在多核处理器上启动；实现多核调度器以调度执行多个线程；最后实现进程间通信IPC。</p>
+<h2 id="多核启动"><a href="#多核启动" class="headerlink" title="多核启动"></a>多核启动</h2><p>为了让ChCore支持多核，我们需要考虑如下问题：</p>
+<ol>
+<li><p>如何启动多核，让每个核心执行初始化代码并开始执行用户代码？ </p>
+<p><code>wait_until_smp_enabled</code>→<code>secondary_init_c</code>→</p>
+<p><img src="/2024/07/27/ipads_os/image-20240806193556997.png" alt="image-20240806193556997"></p>
+<p><img src="/2024/07/27/ipads_os/image-20240806193002773.png" alt="image-20240806193002773"></p>
+</li>
+<li><p>如何区分不同核心在内核中保存的数据结构（比如状态，配置，内核对象等）？</p>
+<p>ChCore对于内核中需要每个CPU核心单独存一份的内核对象，利用一个数组来保存，CID作为数组的索引。</p>
+<p>ChCore支持的核心数量为<code>PLAT_CPU_NUM</code>。</p>
+<p>smp_get_cpu_id函数通过访问系统寄存器tpidr_el1来获取调用它的CPU核心的ID。</p>
+</li>
+<li><p> 如何保证内核中对象并发正确性，确保不会由于多个核心同时访问内核对象导致竞争条件？ </p>
+</li>
+</ol>
+<blockquote>
+<p>思考题 2：阅读汇编代码kernel/arch/aarch64/boot/raspi3/init/start.S, init_c.c以及kernel/arch/aarch64/main.c，解释用于阻塞其他CPU核心的secondary_boot_flag是物理地址还是虚拟地址？是如何传入函数enable_smp_cores中，又是如何赋值的（考虑虚拟地址/物理地址）？</p>
+</blockquote>
+<p>真无敌了我刚刚就在研究这个，结果他居然正好也问了。</p>
+<p><code>enable_smp_cores</code>中的<code>secondary_boot_flag</code>为虚拟地址，此时已经开启了MMU，所以直接写入然后再保障缓存一致性就没什么问题。</p>
+<p>然后在main中传入的这个<code>boot_flag</code>是物理地址，是通过main函数参数传递进来的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">(<span class="type">paddr_t</span> boot_flag, <span class="type">void</span> *info)</span></span><br><span class="line">	<span class="comment">/* Other cores are busy looping on the boot_flag, wake up those cores */</span></span><br><span class="line">	<span class="title function_">enable_smp_cores</span><span class="params">(boot_flag)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>然后感觉前面的就都是地址了，应该都是靠的参数传。</p>
+<h2 id="多核调度"><a href="#多核调度" class="headerlink" title="多核调度"></a>多核调度</h2><p>【要来到我的老本行了，激动激动】</p>
+<p>ChCore对于调度策略的抽象可以看到也是经典的调度类模式。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Provided Scheduling Policies */</span></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> <span class="title">sched_ops</span> <span class="title">pbrr</span>;</span>	<span class="comment">/* Priority Based Round Robin */</span></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> <span class="title">sched_ops</span> <span class="title">pbfifo</span>;</span>	<span class="comment">/* Priority Based FIFO */</span></span><br><span class="line"><span class="keyword">extern</span> <span class="class"><span class="keyword">struct</span> <span class="title">sched_ops</span> <span class="title">rr</span>;</span>	<span class="comment">/* Simple Round Robin */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sched_ops</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> (*sched_init)(<span class="type">void</span>);</span><br><span class="line">    <span class="comment">// pnt, 将正在运行的线程放回就绪队列，然后在就绪队列中选择下一个需要执行的线程</span></span><br><span class="line">    <span class="type">int</span> (*sched)(<span class="type">void</span>);</span><br><span class="line">    <span class="type">int</span> (*sched_periodic)(<span class="type">void</span>);</span><br><span class="line">    <span class="type">int</span> (*sched_enqueue)(<span class="keyword">struct</span> thread * thread);</span><br><span class="line">    <span class="type">int</span> (*sched_dequeue)(<span class="keyword">struct</span> thread * thread);</span><br><span class="line">    <span class="comment">/* Debug tools */</span></span><br><span class="line">    <span class="type">void</span> (*sched_top)(<span class="type">void</span>) ;<span class="comment">// 打印当前所有核心上的运行线程以及等待线程的函数</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>其他的就没啥好说了，因为毕竟调度这块还是比较经典的宏内核做法，这部分主要就是跟着写了个rr和初始化了一下时钟，大部分还是偏了解为主。这里就记录一点关于FPU的东西吧。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/548957617#:~:text=%E5%9C%A8%E8%AE%BE%E8%AE%A1%E4%B8%8A%E4%B8%8B%E6%96%87%E8%B0%83%E5%BA%A6%E5%99%A8%E7%9A%84%E6%97%B6%E5%80%99%EF%BC%8C%E6%9C%89%E4%B8%89%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88">关于FPU</a></p>
+<p><strong>内核线程没有FPU状态？</strong></p>
+<ol>
+<li><strong>内核线程通常不使用FPU</strong>：在许多操作系统中，内核线程主要负责执行内核态的任务，这些任务通常不涉及浮点运算，因此没有必要为这些线程保存和恢复FPU状态。</li>
+<li><strong>性能考虑</strong>：保存和恢复FPU状态会增加线程切换的开销。如果内核线程不使用FPU，则不需要在切换时处理FPU状态，这可以提升系统性能。</li>
+</ol>
+<p><strong>软件浮点运算</strong></p>
+<p>在没有FPU的情况下，浮点运算是通过一系列的整数运算和逻辑操作实现的。这通常涉及调用特定的库函数或由编译器生成相应的代码来模拟浮点运算。软件浮点运算的特点包括：</p>
+<ol>
+<li><strong>慢速</strong>：因为每一个浮点操作都需要多个机器指令来完成。</li>
+<li><strong>复杂性</strong>：实现浮点运算的函数比较复杂，涉及到多步操作。</li>
+</ol>
+<p><strong>硬件浮点运算（使用FPU）</strong></p>
+<p>FPU是专门用于执行浮点运算的硬件单元。使用FPU的特点包括：</p>
+<ol>
+<li><strong>快速</strong>：浮点运算可以在一个或几个时钟周期内完成，极大地提高了计算速度。</li>
+<li><strong>简便</strong>：编译器可以直接生成使用FPU指令的代码，简化了浮点运算的实现。</li>
+</ol>
+<p>如果需要在内核线程中执行浮点运算，可以通过以下方式实现：</p>
+<ol>
+<li><strong>启用FPU使用</strong>：允许内核线程使用FPU，并在上下文切换时保存和恢复FPU状态。</li>
+<li><strong>特定处理</strong>：在需要时，特定的内核线程可以启用FPU，进行计算，然后禁用FPU，并将结果返回。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">kernel_fpu_begin();      <span class="comment">// 开始使用FPU</span></span><br><span class="line"></span><br><span class="line">b = b * <span class="number">5</span> - <span class="number">1.5</span>;</span><br><span class="line">a = a * <span class="number">100</span> / <span class="number">6</span>;</span><br><span class="line"></span><br><span class="line">kernel_fpu_end();        <span class="comment">// 结束使用FPU</span></span><br></pre></td></tr></table></figure>
+
+</blockquote>
+<h2 id="进程IPC通信"><a href="#进程IPC通信" class="headerlink" title="进程IPC通信"></a>进程IPC通信</h2><p>【激动！】</p>
+<p>在本部分，我们将实现ChCore的进程间通信，从而允许跨地址空间的两个进程可以使用IPC进行信息交换。</p>
+<p><img src="/2024/07/27/ipads_os/IPC-overview.png" alt="img"></p>
+<p>ChCore的IPC接口不是传统的send/recv接口，而是采用了客户端/服务器模型，并且采取了简单的Thread Migration机制。接下来，将以一次IPC通信为例，介绍ChCore的IPC机制。</p>
+<p>在具体的流程之前，我们可以先简单回想一下基于线程迁移的IPC是什么个形式。</p>
+<p>大概是这样，Server那端会提供一个特殊的线程，仅在Client发送IPC请求时才会被调度执行。然后如果需要通信，双方需要先建立连接，从而对通信过程中需要的例如函数、参数以及共享内存等进行一个申请和初始化。连接建立后，Client中的线程A如果想发起IPC调用Server的某些函数，那么A就会把自己直接上下文切换到Server端，在Server端的进程上下文中执行完再迁移回到Client进程的上下文中。与此同时可以通过共享内存来实现信息的交流。</p>
+<p>在ChCore中，Server那端特殊的线程即被称为<code>TYPE_SHADOW</code>。这些线程没有<strong>调度的</strong>上下文（也即时间片之类），会直接继承Client发起请求线程的时间片。与此同时，ChCore还有另一种特殊的shadow线程，类型被标记为<code>TYPE_REGISTER</code>，来实现兼容线程迁移的连接建立（而非传统send/recv）。</p>
+<p>接下来，将介绍ChCore的具体实现。</p>
+<h3 id="主要流程"><a href="#主要流程" class="headerlink" title="主要流程"></a>主要流程</h3><h4 id="Server-init"><a href="#Server-init" class="headerlink" title="Server init"></a>Server init</h4><p>Server调用<code>register_server</code>将自己注册为服务端。具体来说，该函数会通过系统调用<code>sys_register_server</code>注册三个回调函数，写入内核的meta data中（<code>struct thread</code>的<code>general_config</code>字段）。</p>
+<ol>
+<li><p><code>server_destructor</code>：析构器，仅记录其函数指针</p>
+</li>
+<li><p><code>client_register_handler</code>：创建连接回调，会为其创建对应的shadow线程（<code>TYPE_REGISTER</code>，下称register_cb thread）</p>
+</li>
+<li><p><code>server_handler</code>：Server的具体处理逻辑，暂时仅记录其函数指针</p>
+<p>是最体现service本身具体功能的部分了。对于procmgr，其服务功能就是了解进程的状态并且进行管理；而对于pipe，其服务功能就是响应对管道的读写请求。</p>
+</li>
+</ol>
+<p>至此，Server即处于监听状态，shadow线程register cb静默，直到Client端发来连接请求。</p>
+<h4 id="连接建立"><a href="#连接建立" class="headerlink" title="连接建立"></a>连接建立</h4><ol>
+<li><p>Client端初始化</p>
+<p>Client调用<code>register_client</code>来主动建立IPC connection。</p>
+<p>具体来说，该函数及其相关系统调用流程如下：</p>
+<ol>
+<li><p>申请一块物理内存pmo作为共享内存SHM，并且在自己的vmspace中映射</p>
+</li>
+<li><p>在双方的cap group创建SHM对象</p>
+<blockquote>
+<p>PS: 相信大家看到这应该也会和我有同样的疑惑，此处在Client上下文中是怎么获取Server的呢？</p>
+<p>分析请见下一模块<code>相关细节-server cap</code></p>
+</blockquote>
+</li>
+<li><p>在双方的cap group创建IPC connection对象</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ipc_connection</span> &#123;</span></span><br><span class="line">	<span class="comment">// Note that all threads in the client process can use this connection.</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">current_client_thread</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">server_handler_thread</span>;</span></span><br><span class="line">	<span class="type">badge_t</span> client_badge;	<span class="comment">// pid</span></span><br><span class="line">    <span class="comment">// SHM相关信息，如在双方的cap和vaddr，以及SHM大小</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">shm_for_ipc_connection</span> <span class="title">shm</span>;</span></span><br><span class="line">	<span class="comment">/* For resource recycle */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">lock</span> <span class="title">ownership</span>;</span></span><br><span class="line">	<span class="type">cap_t</span> conn_cap_in_client;</span><br><span class="line">	<span class="type">cap_t</span> conn_cap_in_server;</span><br><span class="line">	<span class="type">int</span> state;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></li>
+<li><p>重置register_cb thread</p>
+<p>重置入口、栈地址等，并且设置参数为server handler。</p>
+</li>
+<li><p>上下文切换到register_cb thread，去完成Server端的初始化</p>
+</li>
+</ol>
+</li>
+<li><p>Server端初始化</p>
+<p>Server端通过<code>register_cb thread</code>来进行连接的初始化。</p>
+<p>具体来说，该函数及其相关系统调用<code>sys_ipc_register_cb_return</code>流程如下：</p>
+<ol>
+<li>创建shadow线程server handler</li>
+<li>映射SHM到自己的vmspace</li>
+<li>重置server handler thread</li>
+<li>上下文切换回Client端线程，回到userspace</li>
+</ol>
+</li>
+</ol>
+<p>至此，连接成功建立，shadow线程server handler静默，直到Client端发送ipc请求。</p>
+<h4 id="通信"><a href="#通信" class="headerlink" title="通信"></a>通信</h4><ol>
+<li>Client端在共享内存中写入msg，包含请求函数和相关参数</li>
+<li>调用系统调用<code>ipc_call</code>，上下文切换到Server端执行server handler</li>
+<li>server handler执行结束后调用<code>ipc_return</code>（带返回结果），回到Client端上下文继续执行</li>
+</ol>
+<h3 id="相关细节"><a href="#相关细节" class="headerlink" title="相关细节"></a>相关细节</h3><h4 id="server-cap"><a href="#server-cap" class="headerlink" title="server cap"></a>server cap</h4><p><code>register_client</code>通过系统调用参数的server cap从而获取到其pmo的Server thread。然而既然用到了server cap那就说明server thread处在client的cap group中，那么Client是如何将想要连接的server加入到自己的cap group从而获取server cap的？</p>
+<p>之前的实验告诉我们这两点：</p>
+<ol>
+<li>ChCore的第一个进程是procmgr</li>
+<li>子进程可以继承父进程的cap group</li>
+<li>父进程的cap group会记录其所有子进程的cap</li>
+</ol>
+<p>所以，答案显而易见，世界是一个巨大的ipc：</p>
+<ol>
+<li>所有进程都是procmgr的子孙，故而都能按创建顺序继承部分进程cap。创建顺序是procmgr-&gt;system service-&gt;user process，故而，所有system service都有procmgr的句柄，所有用户进程都有所有系统服务的句柄。</li>
+<li>所有进程都是procmgr的子孙，故而procmgr拥有所有进程的cap信息。client可以通过IPC向procmgr请求它所需要获取的服务的cap，procmgr会帮你填入<code>thread-&gt;cap_buffer</code>（&lt;int, int&gt;映射）。</li>
+</ol>
+<h4 id="thread-migration"><a href="#thread-migration" class="headerlink" title="thread migration"></a>thread migration</h4><p>可以看到，ChCore这边就是一个非常纯粹的Thread Migration实现逻辑。相比于Linux等还有些把进程线程概念稍微等同的倾向（虽然实际实现不怎么等同了），ChCore直接用cap group和thread来彻底切割了，process仅仅提供逻辑和一些资源环境，所以真正执行逻辑的线程就可以进程之间到处乱窜了。</p>
+<p>只不过这个迁移实现确实还是没我之前想得那么高大上（）其实说白话，就相当于client thread主动放弃自己的CPU，然后定向把自己CPU丢给server thread，然后为了确保公平性就共享时间片这样。我原来还觉得可能是实体性的迁移，还觉得太牛逼了怎么实现的，不过你说这是线程迁移吧也确实，所以可能高度抽象的理论和具体实现之间总会有这种期望的落差哈哈……</p>
+<p>然后，关于信息交互，感觉它还算是提供了比较丰富的接口，可以通过共享内存交互，也可以有常规的返回值，还可以通过cap group，在<code>sys_ipc_call</code>的时候会把client的cap copy给server，然后return的时候会把server的cap copy给client。</p>
+<p>不过可以看出，这样的线程迁移确实性能上会有些忧虑。虽然它也算是减少了原有IPC设计上的开销，比如参数的copy、数据传输多次send/recv同步开销以及client线程忙等待，但上下文切换带来的页表切换、特权级切换、Cache/TLB刷新、更少的编译优化还是会让人担忧。</p>
+<p>除此之外，ChCore为了简化实现，将Server端的shadow线程池压缩为只有一个线程了，所以感觉同一时间应该只能处理一个连接，也是为了简洁性起见。</p>
 
         </div>
 
