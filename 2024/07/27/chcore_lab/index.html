@@ -525,7 +525,7 @@
 <h3 id="细粒度内核页表TODO"><a href="#细粒度内核页表TODO" class="headerlink" title="细粒度内核页表TODO"></a>细粒度内核页表TODO</h3><blockquote>
 <p>思考题 6：为了简单起见，在 ChCore 实验 Lab1 中没有为内核页表使用细粒度的映射，而是直接沿用了启动时的粗粒度页表，请思考这样做有什么问题。</p>
 </blockquote>
-<p>感觉还是效率问题吧。。。有点像经典的读放大问题。</p>
+<p>感觉还是效率问题吧。。。有点像经典的读放大问题。然后还有内存碎片问题，这也是经典分页分段之争了。</p>
 <p>隔壁xv6是直接进行完细粒度映射，才开启MMU的。</p>
 <blockquote>
 <p>挑战题 7：使用前面实现的 <code>page_table.c</code> 中的函数，在内核启动后的 <code>main</code> 函数中重新配置内核页表，进行细粒度的映射。</p>
@@ -835,7 +835,7 @@
 </ol>
 <p>所以，答案显而易见，世界是一个巨大的ipc：</p>
 <ol>
-<li>所有进程都是procmgr的子孙，故而都能按创建顺序继承部分进程cap。创建顺序是procmgr-&gt;system service-&gt;user process，故而，所有system service都有procmgr的句柄，所有用户进程都有所有系统服务的句柄。</li>
+<li>所有进程都是procmgr的子孙，故而都能按创建顺序继承部分进程cap【TODO，这点不好说】。创建顺序是procmgr-&gt;system service-&gt;user process，故而，所有system service都有procmgr的句柄，所有用户进程都有所有系统服务的句柄。</li>
 <li>所有进程都是procmgr的子孙，故而procmgr拥有所有进程的cap信息。client可以通过IPC向procmgr请求它所需要获取的服务的cap，procmgr会帮你填入<code>thread-&gt;cap_buffer</code>（&lt;int, int&gt;映射）。</li>
 </ol>
 <h4 id="thread-migration"><a href="#thread-migration" class="headerlink" title="thread migration"></a>thread migration</h4><p>可以看到，ChCore这边就是一个非常纯粹的Thread Migration实现逻辑。相比于Linux等还有些把进程线程概念稍微等同的倾向（虽然实际实现不怎么等同了），ChCore直接用cap group和thread来彻底切割了，process仅仅提供逻辑和一些资源环境，所以真正执行逻辑的线程就可以进程之间到处乱窜了。</p>
