@@ -260,6 +260,7 @@
 <p><img src="/2024/08/11/chcore/image-20240812181929189.png" alt="image-20240812181929189"></p>
 </li>
 </ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>Discussion</strong>：感觉挺多地方两种架构设计理念是差不多的，比如说Linux一些模块的面向对象设计；再比如说虚拟文件系统（proc kobject etc.）可以把内核数据暴露给用户态，通过fd可以IO重定向访问内核对象数据，从而不再仅使用syscall API这么死板，这其实就跟这个capability没什么差别了。还有比如说kernel module，比如说各种各样用户态OS，比如说Linux的模块化编译定制裁剪，再比如说HM的隔离级别，两者其实都在互相吸纳对方架构设计的优点，并且各有各的应用场景不同。我目前还是认为数据中心等scalibility要求高的场景还是用宏内核（Linux or专用OS）比较OK，在偏嵌入式的场景还是微内核或者混合架构的专用RTOS看起来更有前途一些。</p>
 
         </div>
 
