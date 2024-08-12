@@ -229,7 +229,7 @@
 <p><strong>具体实验流程请见<a href="/2024/07/27/chcore_lab">实验流程记录</a>，本文仅作为一个简单的省流和导读。</strong></p>
 <p>我当初的实验代码请见<a target="_blank" rel="noopener" href="https://github.com/xiunianjun/chcore">github</a>，貌似做完了看到它改版略多（）</p>
 </blockquote>
-<p>关键词：ChCore，微内核，OS Lab</p>
+<p>关键词：ChCore，微内核，OS Lab，capability细粒度访问控制（包括cap group、面向对象设计，这个确实相比于syscall灵活不少）、service之间隔离</p>
 <h2 id="内核启动及内存管理"><a href="#内核启动及内存管理" class="headerlink" title="内核启动及内存管理"></a>内核启动及内存管理</h2><p>相关实验：Lab0、Lab1、Lab2</p>
 <p>ChCore基于ARMv8架构，采用buddy system+slab管理物理内存，采用了四级虚拟地址映射。这部分内容都纯粹在内核态实现，跟宏内核没啥区别。</p>
 <p><strong>Discussion</strong>：HM将MM移到用户态实现了，ChCore还是纯纯在内核态。不过值得一提的是，本届OS竞赛上SJTU<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/educg-group-22024-2210153/T202410248992613-905/-/blob/main/docs/memory.md">基于ChCore的参赛作品</a>似乎也像sel4那样把虚拟内存分配这一部分移到了用户态实现，之后有精力再拜读一下几位佬的代码。</p>

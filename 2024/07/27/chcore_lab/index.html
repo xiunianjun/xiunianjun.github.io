@@ -377,7 +377,7 @@
   在kernel中看它意思，我们貌似只采取到L2，故而最终也是以2MB块的形式访存。然后这边的映射关系也是很线性，相当于直接把低地址这些摁抬上高地址了，简单粗暴。
 </code></pre>
 <ol start="2">
-<li><code>el1_mmu_activate</code>开启MMU开启MMU映射其实就是把页表地址填入相关寄存器，然后再设置一下控制寄存器就OK了。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/* Write ttbr with phys addr of the translation table */</span><br><span class="line">   adrp    x8, boot_ttbr0_l0</span><br><span class="line">msr     ttbr0_el1, x8</span><br><span class="line">   adrp    x8, boot_ttbr1_l0</span><br><span class="line">msr     ttbr1_el1, x8</span><br><span class="line">   isb</span><br><span class="line"></span><br><span class="line">   mrs     x8, sctlr_el1</span><br><span class="line">/* Enable MMU */</span><br><span class="line">   orr     x8, x8, #SCTLR_EL1_M</span><br></pre></td></tr></table></figure></li>
+<li><code>el1_mmu_activate</code>开启MMU开启MMU映射其实就是把页表地址填入相关寄存器，然后再设置一下控制寄存器就OK了。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/* Write ttbr with phys addr of the translation table */</span><br><span class="line">adrp    x8, boot_ttbr0_l0</span><br><span class="line">msr     ttbr0_el1, x8</span><br><span class="line">adrp    x8, boot_ttbr1_l0</span><br><span class="line">msr     ttbr1_el1, x8</span><br><span class="line">isb</span><br><span class="line"></span><br><span class="line">mrs     x8, sctlr_el1</span><br><span class="line">/* Enable MMU */</span><br><span class="line">orr     x8, x8, #SCTLR_EL1_M</span><br></pre></td></tr></table></figure></li>
 </ol>
 <blockquote>
 <p>思考题 11：请思考在 <code>init_kernel_pt</code> 函数中为什么还要为低地址配置页表，并尝试验证自己的解释。</p>
@@ -788,7 +788,13 @@
 </ol>
 <h4 id="thread-migration"><a href="#thread-migration" class="headerlink" title="thread migration"></a>thread migration</h4><p>可以看到，ChCore这边就是一个非常纯粹的Thread Migration实现逻辑。相比于Linux等还有些把进程线程概念稍微等同的倾向（虽然实际实现不怎么等同了），ChCore直接用cap group和thread来彻底切割了，process仅仅提供逻辑和一些资源环境，所以真正执行逻辑的线程就可以进程之间到处乱窜了。</p>
 <p>只不过这个迁移实现确实还是没我之前想得那么高大上（）其实说白话，就相当于client thread主动放弃自己的CPU，然后定向把自己CPU丢给server thread，然后为了确保公平性就共享时间片这样。我原来还觉得可能是实体性的迁移，还觉得太牛逼了怎么实现的，不过你说这是线程迁移吧也确实，所以可能高度抽象的理论和具体实现之间总会有这种期望的落差哈哈……</p>
-<p>不过可以看出，这样的线程迁移确实性能上会有些忧虑。虽然它也算是减少了原有IPC设计上的开销，比如参数的copy、数据传输多次send/recv同步开销以及client线程忙等待，但上下文切换带来的页表切换、特权级切换、Cache/TLB刷新、更少的编译优化等性能问题还是会让人担忧。</p>
+<p>不过可以看出，这样的线程迁移确实性能上会有些忧虑。虽然它也算是减少了原有IPC设计上的开销，</p>
+<blockquote>
+<p>thread migration相比传统的IPC可以减少两次调度开销。</p>
+<p>正统的线程间通信大概是这样的流程，有一个notification对象，然后server handler初始化建立完之后就block在这个对象上。client调用一个send，就相当于对这个notification进行一个唤醒操作并且block在上面，server handler醒来然后读共享内存完成任务，之后再notify client就可以。</p>
+<p>值得注意的是唤醒完之后，需要加入调度队列并且再进行上下文切换，所以这样一来一共其实就是两次调度开销+两次上下文切换，相比于thread migration=两次上下文切换。</p>
+</blockquote>
+<p>但其带来的页表切换、特权级切换、Cache/TLB刷新、更少的编译优化等性能问题还是会让人担忧。</p>
 <p>除此之外，值得注意的是，Server端只有一个register cb，但是每个连接都有对应的server handler。故而register的时候是需要retry的。</p>
 <h4 id="信息交互"><a href="#信息交互" class="headerlink" title="信息交互"></a>信息交互</h4><p>关于信息交互，感觉它还算是提供了比较丰富的接口，可以通过共享内存交互，也可以有常规的返回值，还可以通过cap group，在<code>sys_ipc_call</code>的时候会把client的cap copy给server，然后return的时候会把server的cap copy给client。</p>
 <ol>
