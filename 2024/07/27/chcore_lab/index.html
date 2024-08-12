@@ -243,17 +243,27 @@
 </ol>
 <h2 id="具体内容"><a href="#具体内容" class="headerlink" title="具体内容"></a>具体内容</h2><p>通关！</p>
 <p><img src="/2024/07/27/chcore_lab/image-20240727180820446.png" alt="image-20240727180820446"></p>
-<h3 id="phase0"><a href="#phase0" class="headerlink" title="phase0"></a>phase0</h3><p>只需要控制w1和w0的值相等就即可。用GDB调试一下就行。</p>
-<h3 id="phase1"><a href="#phase1" class="headerlink" title="phase1"></a>phase1</h3><p>这次是字符串</p>
+<ol>
+<li><p>phase0</p>
+<p>只需要控制w1和w0的值相等就即可。用GDB调试一下就行。</p>
+</li>
+<li><p>phase1</p>
+<p>这次是字符串</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  40076c:	f9402c21 	ldr	x1, [x1, #88]</span><br><span class="line">  400770:	94008504 	bl	421b80 &lt;strcmp&gt;</span><br><span class="line"># 就是说如果w0不为零就爆炸，也就是说输入的字符串要跟x1所在字符串一样</span><br><span class="line">  400774:	35000060 	cbnz	w0, 400780 &lt;phase_1+0x20&gt;</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2024/07/27/chcore_lab/image-20240726233511926.png" alt="image-20240726233511926"></p>
-<h3 id="phase2"><a href="#phase2" class="headerlink" title="phase2"></a>phase2</h3><p>需要了解其栈结构，并且看懂它这个循环代码。迭代计算斐波那契数列。</p>
-<h3 id="phase3"><a href="#phase3" class="headerlink" title="phase3"></a>phase3</h3><p>phase_3是一个类似分支条件的结构。</p>
+</li>
+<li><p>phase2</p>
+<p>需要了解其栈结构，并且看懂它这个循环代码。迭代计算斐波那契数列。</p>
+</li>
+<li><p>phase3</p>
+<p>phase_3是一个类似分支条件的结构。</p>
 <p>第一个参数为3(w1)，第二个参数x需满足 : (x^(x&gt;&gt;3)) &amp; 0x07（取后三位） == 3(w1)。3 3即可满足要求。</p>
 <p>第一个参数为6，这段计算太复杂了我有点没看懂，略……不过看其他俩的套路应该是6 6。</p>
 <p>第一个参数为2(w1)，第二个参数x需满足 : (x &amp; 0x7) == 2。2 2即可满足要求。</p>
-<h3 id="phase4"><a href="#phase4" class="headerlink" title="phase4"></a>phase4</h3><p>一个简单的对输入字符串加密的程序，给定一个经过两次编码变换的结果字符串，要求逆向求出其原始字符串。</p>
+</li>
+<li><p>phase4</p>
+<p>一个简单的对输入字符串加密的程序，给定一个经过两次编码变换的结果字符串，要求逆向求出其原始字符串。</p>
 <p>helloworlc-&gt;isggstsvke</p>
 <ol>
 <li><p>观察encrypt_method2可知其大概是一个字母变换的函数，并且要求输入只能是仅含小写字母（不能含a）的序列</p>
@@ -272,7 +282,9 @@
 <li><p>encrypt_method1的变换我没太看懂（也有点懒研究哈哈哈），我最终从字母里感觉有点像helloworld（再加上还是10个字哈哈哈）猜出来的。</p>
 </li>
 </ol>
-<h3 id="phase5"><a href="#phase5" class="headerlink" title="phase5"></a>phase5</h3><p>最后一个phase是一个递归函数，使用x0和x1交替传递返回值和参数。</p>
+</li>
+<li><p>phase5</p>
+<p>最后一个phase是一个递归函数，使用x0和x1交替传递返回值和参数。</p>
 <p>观察可知phase_5要求func_5这个递归函数最终返回的是3。查看func_5的逻辑，可以将其转化为类似的伪代码：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (x1 == <span class="number">0</span>)  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">if</span> (x0 == *x1)  explode();</span><br><span class="line"><span class="keyword">if</span> (*x1 &lt;= x0) <span class="keyword">goto</span> END;</span><br><span class="line">x1 = *(x1 + <span class="number">8</span>);</span><br><span class="line">x0 = func(x0, x1);</span><br><span class="line">x0 *= <span class="number">2</span>;</span><br><span class="line"><span class="keyword">return</span>;</span><br><span class="line">END:</span><br><span class="line">x1 = *(x1 + <span class="number">16</span>)</span><br><span class="line">x0 = func(x0, x1);</span><br><span class="line">x0 = x0 * <span class="number">2</span> + <span class="number">1</span></span><br><span class="line"><span class="keyword">return</span></span><br><span class="line">    </span><br><span class="line"><span class="comment">// 更高级语言一点</span></span><br><span class="line"><span class="type">int</span> func (<span class="type">int</span> a, <span class="type">int</span> *b) &#123;</span><br><span class="line">  <span class="keyword">if</span> (*b == <span class="number">0</span>)  <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">  <span class="keyword">if</span> (a == *b)  GG.</span><br><span class="line">  <span class="keyword">if</span> (a &lt; *b) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span> * func(a, (b + <span class="number">8</span>));</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span> * func(a, (b + <span class="number">16</span>)) + <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -283,6 +295,8 @@
 <p><img src="/2024/07/27/chcore_lab/image-20240727180732827.png" alt="image-20240727180732827"></p>
 <p>[49] 0 [20] 0 [92] 0 20 0 [3] 0 [37] 0 92 0 [55] 0 [94] 0 3 0 0 0 0 0 37等等等</p>
 <p>当输入为93的时候轨迹如上，很完美实现它的要求。</p>
+</li>
+</ol>
 <h1 id="Lab1-内核启动"><a href="#Lab1-内核启动" class="headerlink" title="Lab1: 内核启动"></a>Lab1: 内核启动</h1><blockquote>
 <p><a target="_blank" rel="noopener" href="https://static.docs.arm.com/100076/0100/arm_instruction_set_reference_guide_100076_0100_00_en.pdf">ARM手册</a></p>
 </blockquote>
@@ -342,57 +356,29 @@
 </li>
 <li><p>内存映射相关</p>
 <ol>
-<li><p><code>init_kernel_pt</code>设置好页表</p>
-<p>首先先记一下chcore的内存管理图方便未来查阅吧。</p>
-<p><img src="/2024/07/27/chcore_lab/lab1-trans.svg" alt="lab1-trans"></p>
-<blockquote>
-<p>“Output address”在这里即物理地址，一些地方称为物理页帧号（Page Frame Number，PFN）</p>
-</blockquote>
-<p><img src="/2024/07/27/chcore_lab/lab1-pte-1.png" alt="lab1-pte-1"></p>
-<p><img src="/2024/07/27/chcore_lab/lab1-pte-2.png" alt="lab1-pte-2"></p>
+<li><p><code>init_kernel_pt</code>初始化内核页表</p>
 <blockquote>
 <p>操作系统内核通常运行在虚拟内存的高地址。在内核运行时，访问内核代码和数据，对任意物理内存和外设内存（MMIO）进行读写，都使用高地址。</p>
 <p>因此，在内核启动时，首先需要对<strong>内核自身、其余可用物理内存和外设内存</strong>进行虚拟地址映射，最简单的映射方式是一对一的映射，即将虚拟地址 <code>0xffff_0000_0000_0000 + addr</code> 映射到 <code>addr</code>。需要注意的是，在 ChCore 实验中我们使用了 <code>0xffff_ff00_0000_0000</code> 作为内核虚拟地址的开始（注意开头 <code>f</code> 数量的区别），不过这不影响我们对知识点的理解。</p>
 </blockquote>
-<table>
-<thead>
-<tr>
-<th>物理地址范围</th>
-<th>对应设备</th>
-<th>映射粒度</th>
-<th>类别</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>0x00000000</code>~`0x3f000000`</td>
-<td>物理内存（SDRAM）</td>
-<td>2MB</td>
-<td>normal</td>
-</tr>
-<tr>
-<td><code>0x3f000000</code>~`0x40000000`</td>
-<td>共享外设内存</td>
-<td>2MB</td>
-<td>device</td>
-</tr>
-<tr>
-<td><code>0x40000000</code>~`0xffffffff`</td>
-<td>本地（每个 CPU 核独立）外设内存</td>
-<td>1GB</td>
-<td>device</td>
-</tr>
-</tbody></table>
-<blockquote>
-<p>我们需要在 <code>init_kernel_pt</code> 为内核配置从 <code>0x00000000</code> 到 <code>0x80000000</code>（<code>0x40000000</code> 后的 1G，ChCore 只需使用这部分地址中的本地外设）的映射，其中 <code>0x00000000</code> 到 <code>0x3f000000</code> 映射为 normal memory，<code>0x3f000000</code> 到 <code>0x80000000</code>映射为 device memory，其中 <code>0x00000000</code> 到 <code>0x40000000</code> 以 2MB 块粒度映射，<code>0x40000000</code> 到 <code>0x80000000</code> 以 1GB 块粒度映射。</p>
-</blockquote>
-<p>在kernel中看它意思，我们貌似只采取到L2，故而最终也是以2MB块的形式访存。</p>
-<p>至于为什么本地外设要整个1GB，emmm，说实在的我真不大清楚，这点留到写完实验后再来思考吧。TODO。我感觉可能还是因为，比如说<code>0x40000000</code> 到 <code>0x80000000</code> 这部分一般就不怎么用，然后再后面就属于用户空间内核管不着了（）</p>
-<p>然后这边的映射关系也是很线性，相当于直接把低地址这些摁抬上高地址了，简单粗暴。</p>
+<p>物理地址范围 | 对应设备| 映射粒度 | 类别 </p>
 </li>
-<li><p><code>el1_mmu_activate</code>开启MMU</p>
-<p>开启MMU映射其实就是把页表地址填入相关寄存器，然后再设置一下控制寄存器就OK了。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/* Write ttbr with phys addr of the translation table */</span><br><span class="line">adrp    x8, boot_ttbr0_l0</span><br><span class="line">msr     ttbr0_el1, x8</span><br><span class="line">adrp    x8, boot_ttbr1_l0</span><br><span class="line">msr     ttbr1_el1, x8</span><br><span class="line">isb</span><br><span class="line"></span><br><span class="line">mrs     x8, sctlr_el1</span><br><span class="line">/* Enable MMU */</span><br><span class="line">orr     x8, x8, #SCTLR_EL1_M</span><br></pre></td></tr></table></figure>
+</ol>
+</li>
+</ol>
+<p>— | — | — | — </p>
+<pre><code>  `0x00000000`~`0x3f000000` | 物理内存（SDRAM）| 2MB | normal 
+</code></pre>
+<p><code>0x3f000000</code>~`0x40000000` | 共享外设内存| 2MB | device </p>
+<pre><code>  `0x40000000`~`0xffffffff` | 本地（每个 CPU 核独立）外设内存| 1GB | device 
 
+  &gt; 我们需要在 `init_kernel_pt` 为内核配置从 `0x00000000` 到 `0x80000000`（`0x40000000` 后的 1G，ChCore 只需使用这部分地址中的本地外设）的映射，其中 `0x00000000` 到 `0x3f000000` 映射为 normal memory，`0x3f000000` 到 `0x80000000`映射为 device memory，其中 `0x00000000` 到 `0x40000000` 以 2MB 块粒度映射，`0x40000000` 到 `0x80000000` 以 1GB 块粒度映射。
+  
+  在kernel中看它意思，我们貌似只采取到L2，故而最终也是以2MB块的形式访存。然后这边的映射关系也是很线性，相当于直接把低地址这些摁抬上高地址了，简单粗暴。
+</code></pre>
+<ol start="2">
+<li><code>el1_mmu_activate</code>开启MMU开启MMU映射其实就是把页表地址填入相关寄存器，然后再设置一下控制寄存器就OK了。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/* Write ttbr with phys addr of the translation table */</span><br><span class="line">   adrp    x8, boot_ttbr0_l0</span><br><span class="line">msr     ttbr0_el1, x8</span><br><span class="line">   adrp    x8, boot_ttbr1_l0</span><br><span class="line">msr     ttbr1_el1, x8</span><br><span class="line">   isb</span><br><span class="line"></span><br><span class="line">   mrs     x8, sctlr_el1</span><br><span class="line">/* Enable MMU */</span><br><span class="line">   orr     x8, x8, #SCTLR_EL1_M</span><br></pre></td></tr></table></figure></li>
+</ol>
 <blockquote>
 <p>思考题 11：请思考在 <code>init_kernel_pt</code> 函数中为什么还要为低地址配置页表，并尝试验证自己的解释。</p>
 <p>因为在开启完MMU、跳转到高地址（还得再过几步）之前，还需要使用原有的栈和驱动内存。</p>
@@ -402,12 +388,10 @@
 <p>ldp     x29, x30, [sp], #16</p>
 <p>驱动内存也应该是同理可得，大概。</p>
 </blockquote>
-</li>
-</ol>
-</li>
+<ol start="4">
 <li><p><code>start_kernel</code></p>
 <p>可以看到看起来也是先构造了一个高地址的sp：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ffffff000008e000 &lt;start_kernel&gt;:</span><br><span class="line"># 造出来之后sp=ffffff000008f060，貌似指向一段el1_vector区域，不知道在干嘛，难道是异常向量表？总之TODO</span><br><span class="line">ffffff000008e000:	58000302 	ldr	x2, ffffff000008e060 &lt;secondary_cpu_boot+0x38&gt;</span><br><span class="line">ffffff000008e004:	91400442 	add	x2, x2, #0x1, lsl #12</span><br><span class="line">ffffff000008e008:	9100005f 	mov	sp, x2</span><br><span class="line">ffffff000009470c:	a9bf07e0 	stp	x0, x1, [sp, #-16]!</span><br><span class="line">ffffff0000094710:	f0002aa2 	adrp	x2, ffffff00005eb000 &lt;empty_page&gt;</span><br><span class="line">ffffff0000094714:	d5182002 	msr	ttbr0_el1, x2</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ffffff000008e000 &lt;start_kernel&gt;:</span><br><span class="line"># 造出来之后sp=ffffff00003b93f0</span><br><span class="line">ffffff000008e000:	58000302 	ldr	x2, ffffff000008e060 &lt;secondary_cpu_boot+0x38&gt;</span><br><span class="line">ffffff000008e004:	91400442 	add	x2, x2, #0x1, lsl #12	# 自高地址向下增长</span><br><span class="line">ffffff000008e008:	9100005f 	mov	sp, x2</span><br><span class="line">ffffff000009470c:	a9bf07e0 	stp	x0, x1, [sp, #-16]!</span><br><span class="line">ffffff0000094710:	f0002aa2 	adrp	x2, ffffff00005eb000 &lt;empty_page&gt;</span><br><span class="line">ffffff0000094714:	d5182002 	msr	ttbr0_el1, x2</span><br></pre></td></tr></table></figure>
 
 <p>然后将高地址的新页表地址覆盖<code>ttbr0_el1</code>，作用应该是清零低地址页表，这样一来之后访问地址就相当于非法访问内存越界了，于是乎就开启了全高地址映射。</p>
 <p>然后就跳到main那边了。</p>
@@ -466,9 +450,7 @@
 <p><a target="_blank" rel="noopener" href="https://wkdaily.cpolar.cn/archives/gc">使用Github Action 构建docker镜像</a></p>
 <p>相当于是白嫖了下github的workflow，让它打包上传到github然后再从github下载。不得不说也是思路清奇，有一种所有网络问题都可以这么解的感觉。</p>
 <p>然后从这下下来的会打两层包，一层zip一层tar.gz，解压完这两层之后再用<code>docker load -i filename</code>即可。</p>
-<h1 id="Lab2-内存管理"><a href="#Lab2-内存管理" class="headerlink" title="Lab2: 内存管理"></a>Lab2: 内存管理</h1><p>TODO 结合整体架构，再进行一遍内存管理的梳理</p>
-<p>本实验主要目的在于让同学们熟悉内核启动过程中对<strong>内存的初始化</strong>和内核启动后对<strong>物理内存和页表的管理</strong>，包括三个部分：物理内存管理、页表管理、缺页异常处理。</p>
-<p>本实验（以及之后的实验）使用<code>expect</code>工具进行自动化评分，你可能需要先在你的环境中安装<code>expect</code>，具体方法因你使用的环境而异。</p>
+<h1 id="Lab2-内存管理"><a href="#Lab2-内存管理" class="headerlink" title="Lab2: 内存管理"></a>Lab2: 内存管理</h1><p>本实验主要目的在于让同学们熟悉内核启动过程中对<strong>内存的初始化</strong>和内核启动后对<strong>物理内存和页表的管理</strong>，包括三个部分：物理内存管理、页表管理、缺页异常处理。</p>
 <p>ChCore采用了buddy进行大内存分配和在此基础上的slab进行小内存分配。同时，采用了四级页表进行地址的映射。</p>
 <h2 id="物理内存管理"><a href="#物理内存管理" class="headerlink" title="物理内存管理"></a>物理内存管理</h2><h3 id="Buddy-system"><a href="#Buddy-system" class="headerlink" title="Buddy system"></a>Buddy system</h3><p>伙伴系统大概就是按照2的幂次进行order的划分，每个order对应2^order个页。分配的时候拆解，释放的时候合并。具体结构如下图所示：</p>
 <p><img src="/2024/07/27/chcore_lab/image-20240730153902396.png" alt="image-20240730153902396"></p>
@@ -494,14 +476,24 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Each free slot in one slab is regarded as slab_slot_list. */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">slab_slot_list</span> &#123;</span></span><br><span class="line">        <span class="type">void</span> *next_free;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>它不同于buddy的每页都有一个对应的page_t对象，是采用了一个指针直接链接的形式。</p>
-<h2 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h2><p>ChCore在内核空间（<code>0xffff_ff00_0000_0000</code> 之后的地址）中，为了简单起见，虚拟地址和物理地址都是线性映射的，也即转为<code>vaddr + KBASE</code>，<code>KBASE</code>表示了虚拟地址空间的起始地址，故而可以通过<code>virt_to_phys</code>等函数进行映射。然后在此基础上，再将顶层的地址空间映射到栈对应页。</p>
-<p>并且值得注意的是，包括测试环节我们也一直是使用的内核页表，这几个函数真正用在内核中大概还是在启动创建线程之后。</p>
-<p>页表翻译的过程由MMU自动完成，我们只需把页表的物理地址存储在页表寄存器ttbr1_el1或ttbr0_el1即可。</p>
+<h2 id="虚拟内存管理"><a href="#虚拟内存管理" class="headerlink" title="虚拟内存管理"></a>虚拟内存管理</h2><p>页表翻译的过程由MMU自动完成，我们只需把页表的物理地址存储在页表寄存器ttbr1_el1或ttbr0_el1即可。</p>
 <blockquote>
 <p>在 AArch64 架构的 EL1 异常级别存在两个页表基址寄存器：<code>ttbr0_el1</code><a target="_blank" rel="noopener" href="https://github.com/SJTU-IPADS/OS-Course-Lab/tree/ChCore-Lab1#user-content-fn-ttbr0_el1-8136733660332040a9f5e53c1035c9a2">1</a> 和 <code>ttbr1_el1</code><a target="_blank" rel="noopener" href="https://github.com/SJTU-IPADS/OS-Course-Lab/tree/ChCore-Lab1#user-content-fn-ttbr1_el1-8136733660332040a9f5e53c1035c9a2">2</a>，分别用作虚拟地址空间低地址和高地址的翻译。那么什么地址范围称为“低地址”，什么地址范围称为“高地址”呢？这由 <code>tcr_el1</code> 翻译控制寄存器<a target="_blank" rel="noopener" href="https://github.com/SJTU-IPADS/OS-Course-Lab/tree/ChCore-Lab1#user-content-fn-tcr_el1-8136733660332040a9f5e53c1035c9a2">3</a>控制，该寄存器提供了丰富的可配置性，可决定 64 位虚拟地址的高多少位为 <code>0</code> 时，使用 <code>ttbr0_el1</code> 指向的页表进行翻译，高多少位为 <code>1</code> 时，使用 <code>ttbr1_el1</code> 指向的页表进行翻译<a target="_blank" rel="noopener" href="https://github.com/SJTU-IPADS/OS-Course-Lab/tree/ChCore-Lab1#user-content-fn-ttbr-sel-8136733660332040a9f5e53c1035c9a2">4</a>。</p>
 <p>0xffff_ff00_0000_0000为ChCore的虚拟地址开头，而0xffff_0000_0000_0000开始为高地址，所以是ttbr1_el1控制内核地址空间，ttbr0_el1控制用户地址空间。</p>
 </blockquote>
-<p>值得注意的是在mappages的时候需要在第三层就退出，然后手动映射，不然会导致在<code>get_next_ptp</code>中它帮我们申请一页物理地址不是我们想要的内存，导致内存泄漏。</p>
+<p>ChCore采用了如下图所示的四级页表：</p>
+<p><img src="/2024/07/27/chcore_lab/lab1-trans.svg" alt="lab1-trans"></p>
+<p>其中，TTBRx_EL1表示EL1下的页表地址寄存器，根据虚拟地址的后16位可知是需要用到高位还是低位。</p>
+<p>页表项相关字段如下：</p>
+<p>【L0-L2】</p>
+<p><img src="/2024/07/27/chcore_lab/lab1-pte-1.png" alt="lab1-pte-1"></p>
+<p>【L3】</p>
+<p><img src="/2024/07/27/chcore_lab/lab1-pte-2.png" alt="lab1-pte-2"></p>
+<blockquote>
+<p>“Output address”在这里即物理地址，一些地方称为物理页帧号（Page Frame Number，PFN）</p>
+</blockquote>
+<p>值得注意的是，ChCore在内核空间（<code>0xffff_ff00_0000_0000</code> 之后的地址）中，为了简单起见，虚拟地址和物理地址都是线性映射的，也即转为<code>vaddr + KBASE</code>，<code>KBASE</code>表示了虚拟地址空间的起始地址，并且我们已经在内核启动时正确填写了内核页表，故而除了可以通过MMU地址翻译访问内核内存，我们可以直接通过<code>virt_to_phys</code>将虚拟地址转化为物理地址。</p>
+<p>具体实现记得在mappages的时候需要在第三层就退出，然后手动映射，不然会导致在<code>get_next_ptp</code>中它帮我们申请一页物理地址不是我们想要的内存，导致内存泄漏。</p>
 <p>这边可以回顾一下xv6的接口，是控制最后一次不alloc，然后返回下一次的pte。</p>
 <h2 id="缺页中断"><a href="#缺页中断" class="headerlink" title="缺页中断"></a>缺页中断</h2><blockquote>
 <p>当处理器发生缺页异常时，它会将发生错误的虚拟地址存储于 <code>FAR_ELx</code> 寄存器中，并触发相应的异常处理流程。ChCore 对该异常的处理最终实现在 <code>kernel/arch/aarch64/irq/pgfault.c</code> 中的 <code>do_page_fault</code> 函数。本次实验暂时不涉及前面的异常初步处理及转发相关内容，我们仅需要关注操作系统是如何处缺页异常的。</p>
@@ -510,9 +502,6 @@
 <p>这部分填空也是比较简单，在此不提具体的实现细节，不过可以了解一下这边中断相关和vmr相关的整体框架。</p>
 <p>ChCore是多线程微内核实现，一个进程拥有一个vmspace，为进程虚拟地址空间的抽象，每个进程的vmspace指针都存在其对应的per-CPU字段中。一个vmspace被切分为多个vmregion，代表一段逻辑连续、权限相同的内存，然后vmr记录了这段region对应的物理对象（PMO），PMO里又记录了相应的物理地址。</p>
 <p>因此，想要处理缺页异常，首先需要找到当前进程发生页错误的虚拟地址所处的 VMR，进而才能得知其对应的物理地址，从而在页表中完成映射。</p>
-<blockquote>
-<p>TODO    其实这里我还是不大懂，已知页表和va那直接查页表不就行了吗，为啥还得这么复杂搞什么PMO……希望继续做下去实验能给我答案。</p>
-</blockquote>
 <p>缺页处理主要针对 <code>PMO_SHM</code> 和 <code>PMO_ANONYM</code> 类型的 PMO，这两种 PMO 的物理页是在访问时按需分配的。</p>
 <p>缺页处理逻辑为首先尝试检查 PMO 中当前 fault 地址对应的物理页是否存在（通过 <code>get_page_from_pmo</code> 函数尝试获取 PMO 中 offset 对应的物理页）。若对应物理页未分配，则需要分配一个新的物理页，再将页记录到 PMO 中，并增加页表映射。若对应物理页已分配，则只需要修改页表映射即可。</p>
 <h2 id="小品环节-1"><a href="#小品环节-1" class="headerlink" title="小品环节"></a>小品环节</h2><h3 id="Buddy-system-1"><a href="#Buddy-system-1" class="headerlink" title="Buddy system"></a>Buddy system</h3><p>【详情见buddy相关初次commit】</p>
@@ -522,47 +511,6 @@
 <p>所以，当先释放高地址的块，再释放低地址的块的时候，会出问题，导致只能merge递归一次而不能继续向上递归：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">order[0] free = 0</span><br><span class="line">order[1] free = 0</span><br><span class="line">order[2] free = 0</span><br><span class="line">order[3] free = 2</span><br><span class="line">order[4] free = 2</span><br><span class="line">order[5] free = 1</span><br><span class="line">order[6] free = 0</span><br><span class="line">order[7] free = 1</span><br><span class="line">order[8] free = 0</span><br><span class="line">order[9] free = 0</span><br><span class="line">order[10] free = 0</span><br><span class="line">order[11] free = 0</span><br><span class="line">order[12] free = 1</span><br><span class="line">order[13] free = 29</span><br></pre></td></tr></table></figure>
 
-<h3 id="细粒度内核页表TODO"><a href="#细粒度内核页表TODO" class="headerlink" title="细粒度内核页表TODO"></a>细粒度内核页表TODO</h3><blockquote>
-<p>思考题 6：为了简单起见，在 ChCore 实验 Lab1 中没有为内核页表使用细粒度的映射，而是直接沿用了启动时的粗粒度页表，请思考这样做有什么问题。</p>
-</blockquote>
-<p>感觉还是效率问题吧。。。有点像经典的读放大问题。然后还有内存碎片问题，这也是经典分页分段之争了。</p>
-<p>隔壁xv6是直接进行完细粒度映射，才开启MMU的。</p>
-<blockquote>
-<p>挑战题 7：使用前面实现的 <code>page_table.c</code> 中的函数，在内核启动后的 <code>main</code> 函数中重新配置内核页表，进行细粒度的映射。</p>
-</blockquote>
-<p>TODO</p>
-<p>粗粒度的映射转化为细粒度的映射，本质上其实是将每个L2页表的块表项转化为指向一张L3页表的页表项，也即快表项和L3页表的一一映射。同时，内核这部分地址空间又比较敏感比较重要，所以其实策略有两种（也都大差不差）：</p>
-<ol>
-<li><p>建一个全新的三级页表，最后再修改<code>ttbr1_el1</code>寄存器</p>
-<blockquote>
-<p>注，0xffff_ff00_0000_0000为ChCore的虚拟地址开头，而0xffff_0000_0000_0000开始为高地址，所以是ttbr1_el1而非ttbr0_el1控制。</p>
-</blockquote>
-<p><img src="/2024/07/27/chcore_lab/image-20240801011820364.png" alt="image-20240801011820364"></p>
-<p>这个精准卡在改完页表之后的下一行。。。</p>
-</li>
-<li><p>在原有基础上修改，只不过，walk到L2就停下，然后新建一张L3页表，等映射完一张L3页表的所有表项后才更换L2页表的块表项，也即本来一次映射的是PAGE_SIZE，现在映射的是<code>PAGE_SIZE*PTE_NUM</code>。</p>
-<p>这个貌似卡在访问栈出错了之类的，刷新tlb也没屁用</p>
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Taking exception <span class="number">3</span> [Prefetch Abort]</span><br><span class="line">...<span class="keyword">from</span> EL1 <span class="keyword">to</span> EL1</span><br><span class="line">...<span class="keyword">with</span> ESR <span class="number">0x21</span>/<span class="number">0x8600000f</span></span><br><span class="line">...<span class="keyword">with</span> FAR <span class="number">0xffffff0000091bb8</span></span><br><span class="line">...<span class="keyword">with</span> ELR <span class="number">0xffffff0000091bb8</span></span><br><span class="line">...<span class="keyword">to</span> EL1 PC <span class="number">0x200</span> PSTATE <span class="number">0x3c5</span></span><br><span class="line">Taking exception <span class="number">3</span> [Prefetch Abort]</span><br><span class="line">...<span class="keyword">from</span> EL1 <span class="keyword">to</span> EL1</span><br><span class="line">...<span class="keyword">with</span> ESR <span class="number">0x21</span>/<span class="number">0x86000004</span></span><br><span class="line">...<span class="keyword">with</span> FAR <span class="number">0x200</span></span><br><span class="line">...<span class="keyword">with</span> ELR <span class="number">0x200</span></span><br><span class="line">...<span class="keyword">to</span> EL1 PC <span class="number">0x200</span> PSTATE <span class="number">0x3c5</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Taking exception <span class="number">3</span> [Prefetch Abort]</span><br><span class="line">...<span class="keyword">from</span> EL1 <span class="keyword">to</span> EL1</span><br><span class="line">...<span class="keyword">with</span> ESR <span class="number">0x21</span>/<span class="number">0x8600000f</span></span><br><span class="line">...<span class="keyword">with</span> FAR <span class="number">0xffffff000008f10c</span></span><br><span class="line">...<span class="keyword">with</span> ELR <span class="number">0xffffff000008f10c</span></span><br><span class="line">...<span class="keyword">to</span> EL1 PC <span class="number">0x200</span> PSTATE <span class="number">0x3c5</span></span><br></pre></td></tr></table></figure>
-
-<p>这两个地方都是用了sp的地方。。【第一个在get_pages的第一句，第二个在紧随ret之前的某句，并且gdb调和实际运行的地方不一样】然而我看sp地址也很正常，所以真的搞不明白，只是把一页映射到sp上啊，也不会损失什么吧。。。更何况我地址也没问题，真是人类迷惑行为。</p>
-</li>
-</ol>
-<p>我这两种方法都试了，奈何不知道为什么一直卡主不动。。。（我也不知道什么问题，貌似直接没办法从我写的一个专门作用于这种映射的函数返回到main里，产生了个非法地址越界，看起来好像是栈出了问题但我也不知道怎么回事。。。）</p>
-<p>真的搞不懂，感觉各种细枝末节包括权限设置什么的都没错。</p>
-<figure class="highlight avrasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffffff0000096438 &lt;set_ttbr0_el1&gt;:</span><br><span class="line"><span class="symbol">ffffff0000096438:</span>	d5182000 	msr	ttbr0_el1, x0</span><br><span class="line"><span class="symbol">ffffff000009643c:</span>	d5033fdf 	isb</span><br><span class="line"><span class="symbol">ffffff0000096440:</span>	d65f03c0 	<span class="keyword">ret</span></span><br><span class="line"><span class="symbol">ffffff0000096444:</span>	<span class="number">00000000</span> 	udf	<span class="meta">#0</span></span><br></pre></td></tr></table></figure>
-
-<p>0xffffff000008f10c</p>
-<p>ffffff000008f108</p>
-<p>ffffff000008ee6c</p>
-<p>想想真没问题吗。。。。我感觉是没问题啊。。。。总之我着实不知道怎么回事，还是先交给时间吧</p>
-<p>都是从0开始映射，映射到这个指定值</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ffffff0003f00000 	可以<span class="keyword">return</span></span><br><span class="line">ffffff0005e00000 	可以<span class="keyword">return</span></span><br><span class="line">ffffff0005f00000   	main里<span class="keyword">return</span>失败</span><br><span class="line">ffffff0006e00000   	第二次<span class="keyword">return</span>失败</span><br><span class="line">ffffff0007e00000 	<span class="keyword">return</span>失败</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/07/27/chcore_lab/image-20240801114707723.png" alt="image-20240801114707723"></p>
-<p><img src="/2024/07/27/chcore_lab/image-20240801114718975.png" alt="image-20240801114718975"></p>
-<p>而且很奇怪，在main中查出来和init里的权限是相反的。。。。</p>
 <h3 id="PM"><a href="#PM" class="headerlink" title="PM"></a>PM</h3><p>本来学了个类似这样的可变参数宏的新活想用上去：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> map_range_in_pgtbl(...) _map_range_in_pgtbl(__VA_ARGS__, 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _map_range_in_pgtbl(pgtbl, va, pa, len, flags, ...) map_range_in_pgtbl_impl(pgtbl, va, pa, len, flags)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">map_range_in_pgtbl_impl</span><span class="params">(<span class="type">void</span> *pgtbl, <span class="type">int</span> va, <span class="type">int</span> pa, <span class="type">size_t</span> len, <span class="type">int</span> flags)</span>;</span><br></pre></td></tr></table></figure>
 
@@ -835,7 +783,7 @@
 </ol>
 <p>所以，答案显而易见，世界是一个巨大的ipc：</p>
 <ol>
-<li>所有进程都是procmgr的子孙，故而都能按创建顺序继承部分进程cap【TODO，这点不好说】。创建顺序是procmgr-&gt;system service-&gt;user process，故而，所有system service都有procmgr的句柄，所有用户进程都有所有系统服务的句柄。</li>
+<li>所有进程都是procmgr的子孙，故而procmgr拥有所有进程的cap，所有进程也都拥有procmgr的cap（cap[0]）。创建顺序是procmgr-&gt;system service-&gt;user process。</li>
 <li>所有进程都是procmgr的子孙，故而procmgr拥有所有进程的cap信息。client可以通过IPC向procmgr请求它所需要获取的服务的cap，procmgr会帮你填入<code>thread-&gt;cap_buffer</code>（&lt;int, int&gt;映射）。</li>
 </ol>
 <h4 id="thread-migration"><a href="#thread-migration" class="headerlink" title="thread migration"></a>thread migration</h4><p>可以看到，ChCore这边就是一个非常纯粹的Thread Migration实现逻辑。相比于Linux等还有些把进程线程概念稍微等同的倾向（虽然实际实现不怎么等同了），ChCore直接用cap group和thread来彻底切割了，process仅仅提供逻辑和一些资源环境，所以真正执行逻辑的线程就可以进程之间到处乱窜了。</p>
@@ -945,7 +893,8 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">fs_server_ops</span> <span class="title">server_ops</span> =</span> &#123;</span><br><span class="line">        <span class="comment">/* Unimplemented */</span></span><br><span class="line">        .mount = default_server_operation,</span><br><span class="line">        .umount = default_server_operation,</span><br><span class="line">        <span class="comment">/* File Operations */</span></span><br><span class="line">        .creat = tmpfs_creat,</span><br><span class="line">        .open = tmpfs_open,</span><br><span class="line">        .write = tmpfs_write,</span><br><span class="line">		...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>对于本 Lab 你只需要实现最基本的 Posix 文件操作即可，即 Open，Close，Read, Write 以及 LSeek 操作。具体的没啥好说的，就是常规的FS，体力活。</p>
-<h2 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h2><p>TODO  之后有时间可以研究一下file page fault和cache的代码是怎么写的。</p>
+<h1 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h1><p>TODO  之后有时间可以研究一下file page fault和cache的代码是怎么写的。</p>
+<p>还有libc，recycle等等等</p>
 
         </div>
 

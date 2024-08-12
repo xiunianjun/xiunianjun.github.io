@@ -225,8 +225,42 @@
         </header>
 
         <div class="post-content">
-            <h3 id="总结-amp-思考"><a href="#总结-amp-思考" class="headerlink" title="总结&amp;思考"></a>总结&amp;思考</h3><p>TODO</p>
-<h3 id="实验流程记录"><a href="#实验流程记录" class="headerlink" title="实验流程记录"></a><a href="/2024/07/27/chcore_lab">实验流程记录</a></h3>
+            <blockquote>
+<p><strong>具体实验流程请见<a href="/2024/07/27/chcore_lab">实验流程记录</a>，本文仅作为一个简单的省流和导读。</strong></p>
+<p>我当初的实验代码请见<a target="_blank" rel="noopener" href="https://github.com/xiunianjun/chcore">github</a>，貌似做完了看到它改版略多（）</p>
+</blockquote>
+<p>关键词：ChCore，微内核，OS Lab</p>
+<h2 id="内核启动及内存管理"><a href="#内核启动及内存管理" class="headerlink" title="内核启动及内存管理"></a>内核启动及内存管理</h2><p>相关实验：Lab0、Lab1、Lab2</p>
+<p>ChCore基于ARMv8架构，采用buddy system+slab管理物理内存，采用了四级虚拟地址映射。这部分内容都纯粹在内核态实现，跟宏内核没啥区别。</p>
+<p><strong>Discussion</strong>：HM将MM移到用户态实现了，ChCore还是纯纯在内核态。不过值得一提的是，本届OS竞赛上SJTU<a target="_blank" rel="noopener" href="https://gitlab.eduxiji.net/educg-group-22024-2210153/T202410248992613-905/-/blob/main/docs/memory.md">基于ChCore的参赛作品</a>似乎也像sel4那样把虚拟内存分配这一部分移到了用户态实现，之后有精力再拜读一下几位佬的代码。</p>
+<h2 id="资源管理"><a href="#资源管理" class="headerlink" title="资源管理"></a>资源管理</h2><p>相关实验：Lab2、Lab3</p>
+<h3 id="capability"><a href="#capability" class="headerlink" title="capability"></a>capability</h3><p>ChCore 微内核采用“Everything is an object”的设计理念，将内核提供给用户的一切资源统一抽象成内核对象（kernel object）。ChCore微内核中共提供了7种类型的内核对象，分别是 cap 组对象（cap_group）、线程对象（thread）、物理内存对象（pmo）、地址空间对象（vmspace）、通信对象（connection 和 notification）、中断对象（irq）。</p>
+<p>用户以capability作为标识符，通过系统调用来使用相应的内核对象，举例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 内存对象，可以映射后通过虚拟地址读写，也可以直接读写</span></span><br><span class="line"><span class="type">cap_t</span> <span class="title function_">usys_create_pmo</span><span class="params">(<span class="type">unsigned</span> <span class="type">long</span> size, <span class="type">unsigned</span> <span class="type">long</span> type)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">usys_map_pmo</span><span class="params">(<span class="type">cap_t</span> cap_group_cap, <span class="type">cap_t</span> pmo_cap,</span></span><br><span class="line"><span class="params">                 <span class="type">unsigned</span> <span class="type">long</span> addr, <span class="type">unsigned</span> <span class="type">long</span> perm)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">usys_unmap_pmo</span><span class="params">(<span class="type">cap_t</span> cap_group_cap, <span class="type">cap_t</span> pmo_cap,</span></span><br><span class="line"><span class="params">                   <span class="type">unsigned</span> <span class="type">long</span> addr)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">usys_write_pmo</span><span class="params">(<span class="type">cap_t</span> pmo_cap, <span class="type">unsigned</span> <span class="type">long</span> offset,</span></span><br><span class="line"><span class="params">                   <span class="type">void</span> *buf, <span class="type">unsigned</span> <span class="type">long</span> size)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">usys_read_pmo</span><span class="params">(<span class="type">cap_t</span> cap, <span class="type">unsigned</span> <span class="type">long</span> offset, <span class="type">void</span> *buf,</span></span><br><span class="line"><span class="params">                  <span class="type">unsigned</span> <span class="type">long</span> size)</span>;</span><br><span class="line"><span class="comment">// 线程对象，arg中记录handler entry</span></span><br><span class="line"><span class="type">cap_t</span> <span class="title function_">usys_create_thread</span><span class="params">(<span class="type">unsigned</span> <span class="type">long</span> thread_args_p)</span>;</span><br><span class="line"><span class="comment">// 通信对象</span></span><br><span class="line"><span class="type">cap_t</span> <span class="title function_">usys_create_notifc</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">usys_wait</span><span class="params">(<span class="type">cap_t</span> notifc_cap, <span class="type">bool</span> is_block, <span class="type">void</span> *timeout)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">usys_notify</span><span class="params">(<span class="type">cap_t</span> notifc_cap)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>用户态也可以授权、转移和收回capability：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">usys_revoke_cap</span><span class="params">(<span class="type">cap_t</span> obj_cap, <span class="type">bool</span> revoke_copy)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">usys_transfer_caps</span><span class="params">(<span class="type">cap_t</span> dest_group_cap, <span class="type">cap_t</span> *src_caps, <span class="type">int</span> nr_caps,</span></span><br><span class="line"><span class="params">                       <span class="type">cap_t</span> *dst_caps)</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>Discussion</strong>：用户需要借由syscall访问内核对象，而隔壁HM的memory manager移到了用户态实现，所以频繁修改page table之类的内核对象开销还是会非常巨大。HM的解决方法貌似是直接简单粗暴把内核对象的信息给映射出去，user根据权限直接读写就行了。</p>
+<p><img src="/2024/08/11/chcore/image-20240812172659396.png" alt="image-20240812172659396"></p>
+<p>ChCore的mm相当于还是在内核态实现，并且还支持了部分内核对象的数据直接映射（如PMO），所以感觉这个问题影响不大。</p>
+<h3 id="cap-group"><a href="#cap-group" class="headerlink" title="cap group"></a>cap group</h3><p>不同于隔壁Linux还是存在进程这个概念的（比如<code>task_struct</code>结构体既可以表示进程也可以表示线程），ChCore干脆把线程和进程切割了。进程变成了一个capability group，字如其名就是一个存储所有capability集合的东西，而线程则是真正的具有调度实体的执行逻辑的东西。当我们launch一个进程的时候，我们会读取其对应ELF可执行文件进行vmspace的初始化，并且为其创造一个main thread调度运行主要逻辑。</p>
+<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><p>这部分也跟宏内核是差不多的，ChCore也是比较现代地采取了一个schedule class和schedule entity的结构。</p>
+<h2 id="IPC通信"><a href="#IPC通信" class="headerlink" title="IPC通信"></a>IPC通信</h2><p>相关实验：Lab4 Part3、Lab5 Part1</p>
+<p>这部分可以直接去看<a href="https://xiunianjun.github.io/2024/07/27/chcore_lab/#%E8%BF%9B%E7%A8%8BIPC%E9%80%9A%E4%BF%A1:~:text=%E7%BB%93%E6%9D%9F%E4%BD%BF%E7%94%A8FPU-,%E8%BF%9B%E7%A8%8BIPC%E9%80%9A%E4%BF%A1,-%E3%80%90%E6%BF%80%E5%8A%A8%EF%BC%81%E3%80%91">实验记录原文</a>（Lab4: 多核调度与IPC——进程IPC通信）。</p>
+<p><strong>Discussion</strong>：</p>
+<ol>
+<li><p>线程池</p>
+<p>ChCore的server handler没有实现线程池结构，而是即用即建。不过它也做了跟HM类似的优化。HM为了防止OOM发生和使内存分配更高效，令每个thread在创建时就提前绑定频繁使用的system service的栈空间，并且伴之以经典的动态扩容stack pool。ChCore让每个thread与频繁使用的system service（虽然chcore也就这几个service）的连接一对一绑定，而非同一cap group的多个thread共享同一个IPC连接，从而提高效率。</p>
+</li>
+<li><p>IPC性能调优</p>
+<p><img src="/2024/08/11/chcore/image-20240812181939517.png" alt="image-20240812181939517"></p>
+<p><img src="/2024/08/11/chcore/image-20240812181929189.png" alt="image-20240812181929189"></p>
+</li>
+</ol>
+
         </div>
 
         
