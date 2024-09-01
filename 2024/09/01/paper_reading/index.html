@@ -13,7 +13,7 @@
 
 
 
-<title>Deduplication System相关文章 | 修年</title>
+<title>Paper Reading | 修年</title>
 
 
 
@@ -207,7 +207,7 @@
     
     <article class="post-wrap">
         <header class="post-header">
-            <h1 class="post-title">Deduplication System相关文章</h1>
+            <h1 class="post-title">Paper Reading</h1>
             
                 <div class="post-meta">
                     
@@ -216,7 +216,7 @@
 
                     
                         <span class="post-time">
-                        Date: <a href="#">十二月 10, 2023&nbsp;&nbsp;20:25:29</a>
+                        Date: <a href="#">九月 1, 2024&nbsp;&nbsp;10:25:29</a>
                         </span>
                     
                     
@@ -226,9 +226,190 @@
 
         <div class="post-content">
             <blockquote>
-<p>各个超链接导向对应的文章分链接。</p>
+<p>PS：时间顺序</p>
+<p>统一格式：</p>
+<p>会议/期刊’年份 [best paper]</p>
+<p>一句话概述</p>
+<p>关键词：…</p>
+<ol>
+<li>Main Content<ol>
+<li>Background</li>
+<li>Observation</li>
+<li>Solution</li>
+</ol>
+</li>
+<li>Comments<ol>
+<li>分析：<ol>
+<li>亮点：…</li>
+<li>亮点：…</li>
+<li>其他</li>
+</ol>
+</li>
+<li>启发：…</li>
+</ol>
+</li>
+</ol>
 </blockquote>
-<h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a><a href="/2023/12/10/deduplication_overview">综述</a></h1><h1 id="Indexing"><a href="#Indexing" class="headerlink" title="Indexing"></a><a href="/2023/11/11/Indexing">Indexing</a></h1><h1 id="Chunking"><a href="#Chunking" class="headerlink" title="Chunking"></a>Chunking</h1><h2 id="FastCDC"><a href="#FastCDC" class="headerlink" title="FastCDC"></a><a href="/2023/12/08/fastcdc">FastCDC</a></h2><h1 id="Fragment"><a href="#Fragment" class="headerlink" title="Fragment"></a>Fragment</h1><h2 id="data-layout"><a href="#data-layout" class="headerlink" title="data layout"></a>data layout</h2><h3 id="MFDedup"><a href="#MFDedup" class="headerlink" title="MFDedup"></a><a href="/2023/10/11/MFDedup">MFDedup</a></h3><h2 id="Rewriting"><a href="#Rewriting" class="headerlink" title="Rewriting"></a><a href="/2024/05/11/Rewriting">Rewriting</a></h2><h1 id="GC"><a href="#GC" class="headerlink" title="GC"></a><a href="/2023/12/09/deduplication_GC">GC</a></h1>
+<h1 id="240901"><a href="#240901" class="headerlink" title="240901"></a>240901</h1><h2 id="Leap"><a href="#Leap" class="headerlink" title="Leap"></a><a target="_blank" rel="noopener" href="https://www.usenix.org/conference/atc20/presentation/al-maruf">Leap</a></h2><p>ATC’20 best paper</p>
+<p>关键词：dynamic memory prefetch；memory disaggregation；RDMA；algorithm</p>
+<p>一句话概括：提出一个可以预测stride pattern并且容忍部分irregular pattern的memory prefetch算法，将其应用在RDMA的data path之上，取得了很好的效果。</p>
+<ol>
+<li><p>Main Content</p>
+<ol>
+<li><p>Background</p>
+<p>Memory Disaggregation 是一种数据中心架构技术，它将计算资源和内存资源分离，允许它们独立扩展和管理。传统的数据中心服务器通常将计算、存储和内存资源紧密耦合在一起，每个服务器都有自己的处理器、内存和存储。Memory Disaggregation 打破了这种耦合，通过将内存资源独立出来，使得多个计算节点可以共享一个更大、更高效的内存池。利用RDMA来扩大本地内存，这样一来就可以用RDMA的网络请求来代替磁盘交换了。</p>
+</li>
+<li><p>Observation</p>
+<p>通常借助VFS或者VMM接口，data path效率低下，breakdown：</p>
+<p><img src="/2024/09/01/paper_reading/file-20240828111647202.png" alt="file-20240828111647202"></p>
+</li>
+<li><p>Solution</p>
+<p><strong>创建一个新的data path -&gt; 实现读、写、预取等功能 -&gt; 如何高效预取？</strong></p>
+<p><img src="/2024/09/01/paper_reading/file-20240829151239676.png" alt="file-20240829151239676"></p>
+<p>预取算法：trend detection（stride sequence） + 慢启动/拥塞控制</p>
+<ol>
+<li><p>规定初始化window size</p>
+</li>
+<li><p>选取window中的major element（重复次数大于window size / 2 + 1）；若无则扩大window（x2）继续找，直到找到或者到达最大窗口大小。</p>
+<p><img src="/2024/09/01/paper_reading/image-20240901111439753.png" alt="image-20240901111439753"></p>
+</li>
+<li><p>预取</p>
+<p>上次cache命中情况？</p>
+<ol>
+<li><p>命中少/不命中</p>
+<p>和缓缩减预取页数大小（/2）</p>
+</li>
+<li><p>命中多</p>
+<p>扩大预取页数（x2）</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>Comments</p>
+<ol>
+<li><p>分析：</p>
+<ol>
+<li>亮点：算法表现好，可以防止irregular的访问，+对stride pattern的支持</li>
+<li>亮点：算法设计思想，对stride pattern的理解，对“慢启动+拥塞控制”的应用</li>
+<li>疑似包装：我其实不大懂这预取算法有用到RDMA的什么特性吗？看下来感觉这两点有点点割裂，不过其实也还好：<ol>
+<li>独立data path加速</li>
+<li>提出新的预取算法</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>启发：</p>
+<ol>
+<li><p>问题很有意思</p>
+<p>Memory Disaggregation感觉非常完美地代表了传统system的美学，“分布式的固定分配-&gt;集中分配”，恰如传统OS的“分段-&gt;内部碎片严重-&gt;段页结合”；“集中分配-&gt;互相直接窃取(RDMA)”，也正如“运算器为中心-&gt;DMA”。</p>
+<p>然后，本文又聚焦于类似传统内存与磁盘之间的预取问题，提出新的预取算法并且应用到新场景下，着实眼前一亮。</p>
+</li>
+<li><p>思想值得学习</p>
+<ol>
+<li>独立data path：当你发现某个过程需要经历的层数多得可怕，不如想想可否对它进行一个“垂直整合”</li>
+<li>问题建模：内存页排队换入换出&lt;-&gt;网络请求排队</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="DMon"><a href="#DMon" class="headerlink" title="DMon"></a><a target="_blank" rel="noopener" href="https://www.usenix.org/conference/osdi21/presentation/khan">DMon</a></h2><p>OSDI’21</p>
+<p>关键词：memory profiling；static cache prefetch；data locality analysis</p>
+<p>一句话概括：通过memory profiling，找到程序中具有数据局部性问题（包括cache、内存换入换出）的代码段，<strong>自动</strong>对其进行代码修复，重新编译，<strong>开销低</strong>。</p>
+<ol>
+<li><p>Main Content</p>
+<ol>
+<li><p>Background</p>
+<p>memory profiling通用流程：</p>
+<ol>
+<li>收集历史信息</li>
+<li>根据历史信息提取出data pattern等信息，设计解决方案</li>
+<li>执行解决方案</li>
+</ol>
+<p>现有技术：</p>
+<ol>
+<li>compiler</li>
+<li>dynamic profiling</li>
+<li>static sampling</li>
+</ol>
+<p>问题：</p>
+<ol>
+<li>需要人工修改，耗费时间</li>
+<li>静态分析不足以支撑动态执行</li>
+<li>动态分析+修改开销太大</li>
+</ol>
+</li>
+<li><p>Observation</p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2353832">Intel top-down method</a>：决策树进行开销拆分、逐层排查问题。</p>
+</li>
+<li><p>Solution</p>
+<ol>
+<li><p>收集历史信息</p>
+<p>目标：确认是哪一条访存指令的锅+根据该指令确认程序出错位点</p>
+<ol>
+<li><p>监控决策树子集</p>
+<p><img src="/2024/09/01/paper_reading/file-20240831111814664.png" alt="file-20240831111814664"></p>
+</li>
+<li><p>分层分时采样</p>
+<p>跟DAMON差不多，隔一段interval（time slice）进行一次性采样，如该段时间内信息量满足决策树需求，再进入下一层采样</p>
+<p><img src="/2024/09/01/paper_reading/image-20240901115604789.png" alt="image-20240901115604789"></p>
+</li>
+<li><p>获取优化位点</p>
+<p>在Layer 4获取高频访存指令对应的源码位置</p>
+</li>
+</ol>
+</li>
+<li><p>根据历史信息提取出data pattern等信息，设计解决方案</p>
+<ol>
+<li><p>归纳出四种data pattern</p>
+<p><img src="/2024/09/01/paper_reading/image-20240901115927159.png" alt="image-20240901115927159"></p>
+</li>
+<li><p>每一种进行特定优化</p>
+<ol>
+<li><p>direct addressing：数组线性访问</p>
+<p>解决方法：分次数提前预取</p>
+<p><img src="/2024/09/01/paper_reading/file-20240901095155258.png" alt="file-20240901095155258"></p>
+</li>
+<li><p>indirect addressing：数组随机访问（或者说根据某个变量值访问）</p>
+<p>解决方法：分次数提前预取</p>
+<p><img src="/2024/09/01/paper_reading/file-20240901095208956.png" alt="file-20240901095208956"></p>
+</li>
+<li><p>unbalanced access：只访问某个结构体的部分成员（原来如此，所以结构体成员需要控制特别精简）</p>
+<p>解决方法：把不常用的数据换到另一个结构体</p>
+<p><img src="/2024/09/01/paper_reading/file-20240901095224365.png" alt="file-20240901095224365"></p>
+</li>
+<li><p>pointer chasing：一系列结构体chain</p>
+<p>解决方法：把常用数据拉回本结构体</p>
+<p><img src="/2024/09/01/paper_reading/file-20240901095237073.png" alt="file-20240901095237073"></p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>Comments</p>
+<ol>
+<li>分析：<ol>
+<li>亮点：自动化根据profiling数据修复程序，开销还低</li>
+</ol>
+</li>
+<li>启发：<ol>
+<li>结合新的硬件特性很重要</li>
+<li>又是一个经典的固定schema+固定fix方法套路</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+
         </div>
 
         
@@ -251,10 +432,8 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/12/10/deduplication_overview/">综述读后笔记</a>
             
-            
-            <a class="next" rel="next" href="/2023/12/09/deduplication_GC/">GC相关</a>
+            <a class="next" rel="next" href="/2024/08/11/chcore/">ChCore</a>
             
         </section>
 
