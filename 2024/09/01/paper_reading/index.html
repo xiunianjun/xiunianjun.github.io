@@ -228,9 +228,9 @@
             <blockquote>
 <p>PS：时间顺序</p>
 <p>统一格式：</p>
-<p>会议/期刊’年份 [best paper]</p>
-<p>一句话概述</p>
+<p>会议/期刊’年份 [best paper]: 标题</p>
 <p>关键词：…</p>
+<p>一句话概述</p>
 <ol>
 <li>Main Content<ol>
 <li>Background</li>
@@ -250,7 +250,7 @@
 </li>
 </ol>
 </blockquote>
-<h1 id="240901"><a href="#240901" class="headerlink" title="240901"></a>240901</h1><h2 id="Leap"><a href="#Leap" class="headerlink" title="Leap"></a><a target="_blank" rel="noopener" href="https://www.usenix.org/conference/atc20/presentation/al-maruf">Leap</a></h2><p>ATC’20 best paper</p>
+<h1 id="240901"><a href="#240901" class="headerlink" title="240901"></a>240901</h1><h2 id="Leap"><a href="#Leap" class="headerlink" title="Leap"></a><a target="_blank" rel="noopener" href="https://www.usenix.org/conference/atc20/presentation/al-maruf">Leap</a></h2><p>ATC’20 best paper: Effectively Prefetching Remote Memory with Leap</p>
 <p>关键词：dynamic memory prefetch；memory disaggregation；RDMA；algorithm</p>
 <p>一句话概括：提出一个可以预测stride pattern并且容忍部分irregular pattern的memory prefetch算法，将其应用在RDMA的data path之上，取得了很好的效果。</p>
 <ol>
@@ -318,7 +318,7 @@
 </ol>
 </li>
 </ol>
-<h2 id="DMon"><a href="#DMon" class="headerlink" title="DMon"></a><a target="_blank" rel="noopener" href="https://www.usenix.org/conference/osdi21/presentation/khan">DMon</a></h2><p>OSDI’21</p>
+<h2 id="DMon"><a href="#DMon" class="headerlink" title="DMon"></a><a target="_blank" rel="noopener" href="https://www.usenix.org/conference/osdi21/presentation/khan">DMon</a></h2><p>OSDI’21: DMon: Efficient Detection and Correction of Data Locality Problems Using Selective Profiling</p>
 <p>关键词：memory profiling；static cache prefetch；data locality analysis</p>
 <p>一句话概括：通过memory profiling，找到程序中具有数据局部性问题（包括cache、内存换入换出）的代码段，<strong>自动</strong>对其进行代码修复，重新编译，<strong>开销低</strong>。</p>
 <ol>
@@ -406,6 +406,51 @@
 <li>又是一个经典的固定schema+固定fix方法套路</li>
 </ol>
 </li>
+</ol>
+</li>
+</ol>
+<h1 id="20240903"><a href="#20240903" class="headerlink" title="20240903"></a>20240903</h1><h2 id="TreeSLS"><a href="#TreeSLS" class="headerlink" title="TreeSLS"></a><a target="_blank" rel="noopener" href="https://dl.acm.org/doi/abs/10.1145/3600006.3613160">TreeSLS</a></h2><p>SOSP’23: TreeSLS: A Whole-system Persistent Microkernel with Tree-structured State Checkpoint on NVM</p>
+<p>关键词：SLS (single level storage)；increment checkpoint backup；microkernel；NVM</p>
+<p>一句话概述：采取DRAM+NVM设计的SLS，通过COW incremental checkpointing，降低了SLS system的备份check开销。</p>
+<ol>
+<li><p>Main Content</p>
+<ol>
+<li><p>Background</p>
+<p>Single-level Storage (SLS) 是一种存储架构理念。</p>
+<p>在 SLS 模型中，所有的存储资源（如 DRAM、磁盘、SSD、NVM）都被抽象为一个统一的地址空间（单一存储层），然后这个地址空间的每个地址都可以选择具体映射到内存还是磁盘。</p>
+<p>由底层程序通过迁移热数据到内存冷数据到磁盘（动态重映射）来做到隐形的性能提升，然后通过事务机制啊日志啊checkpoint啊NVM什么的这些经典东西统一保障崩溃一致性。</p>
+<p>SLS一般通过checkpoint机制来维护数据一致性。</p>
+</li>
+<li><p>Observation</p>
+<ol>
+<li><p>微内核架构：微内核架构的隔离性使得status exporting变得简单，通过capability tree即可管理所有的system status，故而在SLS情况下，对状态进行checkpoint相较宏内核简单很多。</p>
+</li>
+<li><p>一般SLS备份过久：</p>
+<ol>
+<li>freezing system</li>
+<li>备份内核状态</li>
+</ol>
+<p>尝试：有无异步方法尽量减少停顿？</p>
+</li>
+</ol>
+</li>
+<li><p>Solution</p>
+<ol>
+<li><p>COW checkpoint：进行checkpoint时的本质是判脏，然后写入NVM。判脏的本质是捕获写入页的瞬间，这个过程可以联想通过page fault实现！故而，可以引入COW机制来达到checkpoint的异步备份。</p>
+<p>具体来说，每次checkpoint就把所有页面标记为RDONLY，然后之后每次需要修改页，就会触发page fault，然后在fault中把原来的页给写入到NVM中。<br>相当于，本来每次checkpoint你需要遍历所有脏页进行一一写回嘛（普通增量），现在变成了，等到这页下一次变脏，才写回上一次check的值。也即，在check n ~ check n+1时间区间内，写回的是check的值。</p>
+</li>
+<li><p>hybrid优化：对hot pages，把它们留在DRAM然后进行stop-copy；对于other pages，把它们刷入NVM然后进行COW。</p>
+</li>
+<li><p>External Synchrony：保证在response之前必须将request的状态影响持久化。</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>Comments</p>
+<ol>
+<li>这个老树开新花的COW真的非常非常亮眼！！！光凭这一点我觉得就够了SOSP的含金量了（优雅谁不喜欢hhh），别的倒就是在他之上的包装了。</li>
+<li>感觉也不只是在SLS很有用，它提出的这种COW checkpoint的思想也是应用场景非常various的。</li>
 </ol>
 </li>
 </ol>
