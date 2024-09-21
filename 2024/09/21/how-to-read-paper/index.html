@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title"></h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">九月 21, 2024&nbsp;&nbsp;12:25:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><a target="_blank" rel="noopener" href="https://ics.uci.edu/~cs237/reading/files/howtoread.pdf">原文</a></p>
+<ol>
+<li><p>first pass: general ideas</p>
+<ol>
+<li>5-10 mins</li>
+<li>main content:<ol>
+<li>看作者是谁</li>
+<li>read the abstract、introduction</li>
+<li>read the subtitles</li>
+<li>read the conclusions</li>
+<li>找有没有你之前度过的reference【很有意思的一点】</li>
+</ol>
+</li>
+<li>可以了解到的问题：【注意记得扪心自问】<ol>
+<li>Category: 研究的大概是什么领域的问题？是重在设计思想还是重在工程？</li>
+<li>Context: 有哪些比较主要的相关工作？理论基础是什么样的？</li>
+<li>Correctness: 文章说的东西是对的吗？</li>
+<li>Contributions: 主要贡献在哪？</li>
+<li>Clarity: 文章写得好吗？</li>
+</ol>
+</li>
+<li>回答完上述问题，你就对要不要继续读下去这篇文章心里有数了。<ol>
+<li>放弃的理由：写得不好；不正确；不感兴趣；现在的水平还看不懂</li>
+<li>继续的理由：与自己的领域相关（现在or未来）</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>second pass: grasp the content</p>
+<p>更仔细阅读，但忽略一切无关紧要细节（如实现细节、证明细节）</p>
+<ol>
+<li>1h</li>
+<li>main content:<ol>
+<li>阅读时记下key points &amp;&amp; comments</li>
+<li>仔细观察graphs &amp;&amp; diagrams，查看是否能和conclusion对上</li>
+<li>mark未读的reference papers</li>
+</ol>
+</li>
+<li>是否继续？<ol>
+<li>你感兴趣，但是跟研究领域没太大关系，放弃</li>
+<li>你没看太懂，要么是领域太新，要么是细节你不懂，要么纯纯是你太累了<ol>
+<li>你知道这篇文章对你有启发的概率较低，放弃</li>
+<li>暂时搁置后续再来仔细读</li>
+<li>persevere！</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>third pass: understand in depth</p>
+<p>关键：virtually re-implement！颅内复现！</p>
+<p>可以看出innovation的同时，也能发现hidden drawbacks</p>
+<ol>
+<li><p>4-5h for beginner, 1h for expert</p>
+</li>
+<li><p>main content:</p>
+<ol>
+<li>颅内复现</li>
+<li>识别、质疑，每个句子包含的每个假设</li>
+<li>代入：如果是你自己，会怎么处理这一部分</li>
+</ol>
+</li>
+<li><p>reconstruct the entire structure of the paper from memory</p>
+<p>Be able to pinpoint <u>implicit assumptions</u>, <u>missing citations</u> to relevant work, and <u>potential issues with experimental or analytical techniques</u>.</p>
+</li>
+</ol>
+</li>
+</ol>
+<p>那么如何了解一个新领域？</p>
+<ol>
+<li><p>Step 1</p>
+<p>找3-5篇recent paper，做first pass有一个基本了解，然后去看related works，就能收获一系列recent papers和survey</p>
+</li>
+<li><p>Step 2</p>
+<p>找shared citations和author names，视奸他们主页，看top conference，从conference抓出更多paper</p>
+</li>
+<li><p>Step 3</p>
+<p>对上述几步找到的好文（shared citations、good conference paper）进行second pass阅读，这就是你survey的first edition了。并且注意这个过程需要递归进行，阅读阶段发现了之前漏了的好paper就需要继续补上。</p>
+</li>
+</ol>
+<p>【comment: step1 &amp; step2是一个螺旋过程。】</p>
+<p>Related works:</p>
+<p>If you are reading a paper to do a review, you should also read Timothy Roscoe’s paper on “<a target="_blank" rel="noopener" href="http://people.inf.ethz.ch/troscoe/pubs/reviewwriting.pdf">Writing reviews for systems conferences</a>” .</p>
+<p>If you’re planning to write a technical paper, you should refer both to [Henning Schulzrinne’s comprehensive web site](<a target="_blank" rel="noopener" href="http://www.cs.columbia.edu/">http://www.cs.columbia.edu/</a> hgs/etc/writingstyle.html) and <a target="_blank" rel="noopener" href="http://www.che.iitm.ac.in/misc/dd/writepaper.pdf">George Whitesides’s excellent overview of the process</a>.</p>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2024/08/11/chcore/">ChCore</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
