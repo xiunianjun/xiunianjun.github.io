@@ -17132,7 +17132,7 @@
 </li>
 <li><p>竞赛经历：系统能力竞赛（OS功能）国一</p>
 </li>
-<li><p>科研经历：在投二作（但我其实做得不多，只是有得讲）</p>
+<li><p>科研经历：一段约4个月存储相关（但我其实做得不多，只是有得讲）</p>
 </li>
 <li><p>个人偏好：</p>
 <ul>
@@ -17145,12 +17145,12 @@
 </li>
 </ul>
 <blockquote>
-<p>Projects:</p>
-<p><strong>Competition</strong></p>
+<p><strong>Projects:</strong></p>
+<p>Competition</p>
 <ul>
 <li><a href="/2023/08/27/2023-os-comp/">2023全国大学生计算机系统能力大赛-OS功能</a></li>
 </ul>
-<p><strong>Lab</strong></p>
+<p>Lab</p>
 <ul>
 <li><a href="/2024/08/11/chcore">ChCore</a></li>
 <li><a href="/2023/03/13/cmu15445/">CMU15445</a></li>
