@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="修年">
+
+
+
+
+
+<title>CHIME: A Cache-Efficient and High-Performance Hybrid Index on Disaggregated Memor | 修年</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+      <meta charset="UTF-8">
+    <title>live2d-demo</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Live2DCubismCore -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/frame/live2dcubismcore.min.js"></script>
+    <!-- Include Pixi. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.1/pixi.min.js"></script>
+    <!-- Include Cubism Components. -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismframework.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/live2dcubismpixi.js"></script>
+    <!-- User's Script -->
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/l2d.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/litstronger/live2d-moc3@master/js/main.js"></script>
+    <style>
+    </style>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Xiunian&#39;s Blog</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Xiunian&#39;s Blog</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc" style="right: -4em;">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6; // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function() {
+            tocbot.refresh(obj_merge(tocbot_default_config, {
+                hasInnerContainers: true
+            }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function() {
+        tocbot.init(obj_merge(tocbot_default_config, {
+            collapseDepth: 1
+        }));
+    });
+
+    function expand_toc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, {
+            collapseDepth: expanded ? 1 : DEPTH_MAX
+        }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">CHIME: A Cache-Efficient and High-Performance Hybrid Index on Disaggregated Memor</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">修年</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十二月 26, 2024&nbsp;&nbsp;22:25:29</a>
+                        </span>
+                    
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p>【2024.12.27 report】</p>
+<p>CHIME: A Cache-Efficient and High-Performance Hybrid Index on Disaggregated Memory (<strong>SOSP’24</strong>)</p>
+<h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386053-19.png" alt="img"></p>
+<ol>
+<li><p>DM: disaggregated memory，分离式内存</p>
+</li>
+<li><p>计算节点和内存节点</p>
+</li>
+<li><p>计算端大部分内存访问都在内存节点，快速网络访问，少部分内存做cache</p>
+</li>
+<li><p>本文场景：</p>
+<ol>
+<li>Storage system: database，kvstore</li>
+<li>One-side RDMA</li>
+<li>需要索引：range queries (1&lt;=k&lt;=5) + point queries (k==4)</li>
+</ol>
+</li>
+<li><p>现有的DM索引：基数树 (radix tree)；B+树；learned index（ML算法辅助）</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-1.png" alt="img"><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-2.png" alt="img"></p>
+</li>
+<li><p>查询流程：</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-3.png" alt="img"></p>
+<ol>
+<li>迭代式查询</li>
+<li>本地cache减少查询次数</li>
+<li>内存端近乎无计算资源，故而节点处理都必须在计算端完成（需要读取整个结点数据）</li>
+</ol>
+</li>
+<li><p>性能指标</p>
+<ol>
+<li>查找次数：Cache Consumption。计算端的cache消耗量，会缓存index node的地址（index caching）</li>
+<li>网络带宽：并发读写情况，单次读写数据量（带宽）越小，<strong>吞吐量</strong>越高。Read Amplification（无效/有效）。只需查找某一段数据。索引数据块粒度越粗，读放大越大<ol>
+<li><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-4.png" alt="img"></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h1 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h1><p>Trade-off between the computing-side cache consumption and the memory-side read amplifications for range indexes on DM!</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-5.png" alt="img"></p>
+<ol>
+<li><p>Cache Consumption</p>
+<p>Index cache：缓存索引节点地址</p>
+<p>B+树一个叶子索引节点对应一大段数据，基数树则一一对应，所以相同数据范围，B+树对应索引节点少，cache消耗量少</p>
+</li>
+<li><p>Read Amplification</p>
+<p>每次取整个节点；叶节点存储数据</p>
+</li>
+</ol>
+<h1 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h1><p><strong>Hybrid</strong>: 粗中有细，B+树叶子节点再用一层哈希</p>
+<ol>
+<li><p>Internal nodes: B+树</p>
+<p> 大多数都可以保存在计算端内存cache中（eval数据，不到100M）</p>
+</li>
+<li><p>Leaf nodes: Hopscotch Hashing（跳房子哈希）</p>
+<p> 包含数据，用哈希表来消除</p>
+</li>
+</ol>
+<p>跳房子哈希：</p>
+<ol>
+<li><p>解决哈希碰撞</p>
+</li>
+<li><p><strong>邻域（H），保障数据一定在该邻域内</strong></p>
+<p> Eg. 哈希值结果为1，H=4，那么他保障数据一定出现在槽位1/2/3/4内。</p>
+</li>
+</ol>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-6.png" alt="img"></p>
+<p><strong>Challenges:</strong></p>
+<ol>
+<li><p><strong>如何高效并发控制？</strong></p>
+<ol>
+<li><p>原机制：</p>
+<ol>
+<li>版本号实现乐观并发控制：写操作独占锁，读操作不加锁</li>
+<li>写操作：版本号+1</li>
+<li>读操作：① 读版本号 ② 读数据 ③ 再读版本号，验证一致；否则retry</li>
+</ol>
+</li>
+<li><p><strong>问题：版本号机制依赖于读写粒度的一致性！</strong></p>
+</li>
+<li><p>分类</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-7.png" alt="img"></p>
+</li>
+<li><p>解法</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-8.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-9.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-10.png" alt="img"></p>
+</li>
+</ol>
+</li>
+<li><p><strong>如何消除额外元数据读写？</strong></p>
+<ol>
+<li><p>hash（RDMA masked-CAS verbs）</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-11.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-12.png" alt="img"></p>
+</li>
+<li><p>leaf（duplicate）</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-13.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-14.png" alt="img"></p>
+</li>
+</ol>
+</li>
+<li><p><strong>如何进一步减少邻域读放大？</strong>（计算端缓存hot index）</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-15.png" alt="img"></p>
+</li>
+</ol>
+<h1 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a>Evaluation</h1><p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-16.png" alt="img"></p>
+<p>理论最优：无限cache的基数树</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-17.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-18.png" alt="img"></p>
+<h1 id="Comments"><a href="#Comments" class="headerlink" title="Comments"></a>Comments</h1><ol>
+<li>个人感觉更多适用于inline情况，也即key和value一起连续存储在叶节点。</li>
+<li>索引放大更重要还是叶节点放大更重要、cache consumption是否关键，更多还是看use case。</li>
+<li>CHIME对learned index的适配好像比较粗糙。如果结合二者思想，CHIME+learned index（也许更像一种有序哈希表结构）是否有机会做到更好？因为跳房子哈希，似乎也保障了一个“有限误差范围”（邻域）</li>
+</ol>
+
+        </div>
+
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/research/"># research</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2025/01/06/paper-reading/system/xstore/">XStore: Fast RDMA-based Ordered Key-Value Store using Remote Learned Cache</a>
+            
+            
+            <a class="next" rel="next" href="/2024/10/06/%E4%BF%9D%E7%A0%94/">2025 CS保研/申请（System）</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 修年 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>

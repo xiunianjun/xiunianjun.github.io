@@ -17323,4 +17323,334 @@
 <p>希望未来能继续努力，祝看到这里的朋友们一切顺利！</p>
 ]]></content>
   </entry>
+  <entry>
+    <title>CHIME: A Cache-Efficient and High-Performance Hybrid Index on Disaggregated Memor</title>
+    <url>/2024/12/26/paper-reading/system/CHIME/</url>
+    <content><![CDATA[<p>【2024.12.27 report】</p>
+<p>CHIME: A Cache-Efficient and High-Performance Hybrid Index on Disaggregated Memory (<strong>SOSP’24</strong>)</p>
+<h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386053-19.png" alt="img"></p>
+<ol>
+<li><p>DM: disaggregated memory，分离式内存</p>
+</li>
+<li><p>计算节点和内存节点</p>
+</li>
+<li><p>计算端大部分内存访问都在内存节点，快速网络访问，少部分内存做cache</p>
+</li>
+<li><p>本文场景：</p>
+<ol>
+<li>Storage system: database，kvstore</li>
+<li>One-side RDMA</li>
+<li>需要索引：range queries (1&lt;=k&lt;=5) + point queries (k==4)</li>
+</ol>
+</li>
+<li><p>现有的DM索引：基数树 (radix tree)；B+树；learned index（ML算法辅助）</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-1.png" alt="img"><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-2.png" alt="img"></p>
+</li>
+<li><p>查询流程：</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-3.png" alt="img"></p>
+<ol>
+<li>迭代式查询</li>
+<li>本地cache减少查询次数</li>
+<li>内存端近乎无计算资源，故而节点处理都必须在计算端完成（需要读取整个结点数据）</li>
+</ol>
+</li>
+<li><p>性能指标</p>
+<ol>
+<li>查找次数：Cache Consumption。计算端的cache消耗量，会缓存index node的地址（index caching）</li>
+<li>网络带宽：并发读写情况，单次读写数据量（带宽）越小，<strong>吞吐量</strong>越高。Read Amplification（无效/有效）。只需查找某一段数据。索引数据块粒度越粗，读放大越大<ol>
+<li><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-4.png" alt="img"></li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h1 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h1><p>Trade-off between the computing-side cache consumption and the memory-side read amplifications for range indexes on DM!</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-5.png" alt="img"></p>
+<ol>
+<li><p>Cache Consumption</p>
+<p>Index cache：缓存索引节点地址</p>
+<p>B+树一个叶子索引节点对应一大段数据，基数树则一一对应，所以相同数据范围，B+树对应索引节点少，cache消耗量少</p>
+</li>
+<li><p>Read Amplification</p>
+<p>每次取整个节点；叶节点存储数据</p>
+</li>
+</ol>
+<h1 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h1><p><strong>Hybrid</strong>: 粗中有细，B+树叶子节点再用一层哈希</p>
+<ol>
+<li><p>Internal nodes: B+树</p>
+<p> 大多数都可以保存在计算端内存cache中（eval数据，不到100M）</p>
+</li>
+<li><p>Leaf nodes: Hopscotch Hashing（跳房子哈希）</p>
+<p> 包含数据，用哈希表来消除</p>
+</li>
+</ol>
+<p>跳房子哈希：</p>
+<ol>
+<li><p>解决哈希碰撞</p>
+</li>
+<li><p><strong>邻域（H），保障数据一定在该邻域内</strong></p>
+<p> Eg. 哈希值结果为1，H=4，那么他保障数据一定出现在槽位1/2/3/4内。</p>
+</li>
+</ol>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-6.png" alt="img"></p>
+<p><strong>Challenges:</strong></p>
+<ol>
+<li><p><strong>如何高效并发控制？</strong></p>
+<ol>
+<li><p>原机制：</p>
+<ol>
+<li>版本号实现乐观并发控制：写操作独占锁，读操作不加锁</li>
+<li>写操作：版本号+1</li>
+<li>读操作：① 读版本号 ② 读数据 ③ 再读版本号，验证一致；否则retry</li>
+</ol>
+</li>
+<li><p><strong>问题：版本号机制依赖于读写粒度的一致性！</strong></p>
+</li>
+<li><p>分类</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-7.png" alt="img"></p>
+</li>
+<li><p>解法</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-8.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-9.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-10.png" alt="img"></p>
+</li>
+</ol>
+</li>
+<li><p><strong>如何消除额外元数据读写？</strong></p>
+<ol>
+<li><p>hash（RDMA masked-CAS verbs）</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386048-11.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-12.png" alt="img"></p>
+</li>
+<li><p>leaf（duplicate）</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-13.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-14.png" alt="img"></p>
+</li>
+</ol>
+</li>
+<li><p><strong>如何进一步减少邻域读放大？</strong>（计算端缓存hot index）</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-15.png" alt="img"></p>
+</li>
+</ol>
+<h1 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a>Evaluation</h1><p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-16.png" alt="img"></p>
+<p>理论最优：无限cache的基数树</p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-17.png" alt="img"></p>
+<p><img src="/2024/12/26/paper-reading/system/CHIME/1736225386049-18.png" alt="img"></p>
+<h1 id="Comments"><a href="#Comments" class="headerlink" title="Comments"></a>Comments</h1><ol>
+<li>个人感觉更多适用于inline情况，也即key和value一起连续存储在叶节点。</li>
+<li>索引放大更重要还是叶节点放大更重要、cache consumption是否关键，更多还是看use case。</li>
+<li>CHIME对learned index的适配好像比较粗糙。如果结合二者思想，CHIME+learned index（也许更像一种有序哈希表结构）是否有机会做到更好？因为跳房子哈希，似乎也保障了一个“有限误差范围”（邻域）</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>research</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>XStore: Fast RDMA-based Ordered Key-Value Store using Remote Learned Cache</title>
+    <url>/2025/01/06/paper-reading/system/xstore/</url>
+    <content><![CDATA[<p>【2025.1.6 report】</p>
+<p><strong>OSDI’20</strong>: <a href="https://www.usenix.org/conference/osdi20/presentation/wei">Fast RDMA-based Ordered Key-Value Store using Remote Learned Cache</a></p>
+<p>Xingda Wei, Rong Chen, Haibo Chen</p>
+<p>概述：提出了一种混合 learned index 和 B+ tree 索引架构的 RDMA-based ordered kvstore</p>
+<h1 id="1-背景：Learned-Index"><a href="#1-背景：Learned-Index" class="headerlink" title="1. 背景：Learned Index"></a>1. 背景：Learned Index</h1><p>SIGMOD’18: <a href="https://dl.acm.org/doi/abs/10.1145/3183713.3196909">The Case for Learned Index Structures</a>  开山之作</p>
+<p>提出：可以通过机器学习模型替代范围索引（如B+树）。</p>
+<h3 id="为什么可以替代？"><a href="#为什么可以替代？" class="headerlink" title="为什么可以替代？"></a><strong>为什么可以替代？</strong></h3><ol>
+<li><p><strong>索引本身即可视为预测模型。</strong>通过索引确定数据位置，可以看做是一个预测过程：key值 → 位置pos</p>
+</li>
+<li><p>B树：</p>
+<p>key👉B树👉叶节点（误差范围），然后再在叶节点中进行精确查找获取位置。</p>
+</li>
+</ol>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874684-18.png" alt="img"></p>
+<h3 id="如何替代？"><a href="#如何替代？" class="headerlink" title="如何替代？"></a>如何替代？</h3><ol>
+<li>训练模型：① dataset：key array，② 获取训练过程中的最大最小误差：max_err，min_err</li>
+<li>Workflow: key👉ML Model👉pos👉[pos - <strong>min_err,</strong> pos + <strong>max_err</strong>]，读取该范围内所有数据精确查找</li>
+</ol>
+<p>range index，数据有序</p>
+<p><strong>模型</strong>：数据存储在有序数组，直接通过简单模型拟合<strong>CDF</strong>（累积分布函数）来实现位置预测</p>
+<p><strong>解释</strong>：假设F(x)为预测的累积分布函数（CDF），表示key值小于x的概率；N为数据总数。则F(x)*N表示key值小于x的元素个数，也即当数组有序时，pos = <em>F(x) * N</em> 即为key=x的下标。</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874678-1.png" alt="img"></p>
+<h1 id="2-XStore"><a href="#2-XStore" class="headerlink" title="2. XStore"></a>2. XStore</h1><p>OSDI’20</p>
+<p><strong>场景</strong>：远端内存访问，server端存储ordered kvstore的数据和索引（range index，B+树），多个client端读取kvstore，通过RDMA来加速<strong>读路径</strong>。</p>
+<h2 id="2-1-Insight"><a href="#2-1-Insight" class="headerlink" title="2.1 Insight"></a>2.1 Insight</h2><h4 id="问题：现有-索引结构-不够高效"><a href="#问题：现有-索引结构-不够高效" class="headerlink" title="问题：现有 索引结构 不够高效"></a><strong>问题</strong>：现有 索引结构 <strong>不够高效</strong></h4><p>读操作使用one-sided RDMA，每个RTT只能访问树型索引的一层，需要进行迭代式查询，消耗多个RTT</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-2.png" alt="img"></p>
+<p>为了解决这个问题，引入了<strong>Index cache</strong>，cache索引树部分节点。</p>
+<p>尽管引入index cache，依然不够高效，原因如下：</p>
+<ol>
+<li><strong>Cache consumption</strong>：消耗cache多（654MB for 100M KV pairs）</li>
+<li><strong>Memory-intensive</strong>：遍历树型索引是内存密集型操作，包含O(logN)随机内存访问（CPU花在index cache的时间占比30%）</li>
+<li><strong>Cache invalidation</strong>：写密集场景下，<ol>
+<li>False invalidation：不同数据节点共享查询路径（path sharing），B+树更新索引是递归的，一个数据节点没有被修改，查询路径cache也可能是失效的</li>
+<li>Bandwidth：更新cache时读取的索引节点多，挤占网络带宽</li>
+</ol>
+</li>
+</ol>
+<p>这几个问题随着数据量增大、B+树变大，会更严重</p>
+<h4 id="观点：Learned-Index-更适合作为-Index-Cache"><a href="#观点：Learned-Index-更适合作为-Index-Cache" class="headerlink" title="观点：Learned Index 更适合作为 Index Cache"></a>观点：Learned Index 更适合作为 Index Cache</h4><p>读操作：key-&gt;ML Model-&gt;[pos - min_err, pos + max_err]，client通过一次RDMA读取范围内key，本地查找得到精确地址。</p>
+<ol>
+<li><strong>Cache consumption</strong>：cache模型即可，牺牲精度，换取相比B+树的更少的内存占用（6.7MB VS 600MB）</li>
+<li><strong>Less memory access</strong>：一次计算+O(1)访存就可以得到目标key值，无需多次随机访存/网络roundtrip</li>
+<li><strong>Cache invalidation</strong>：只需提供近似的估计，减少/推迟cache invalidation；模型小，更新消耗带宽少</li>
+</ol>
+<h4 id="挑战：如何适应-dynamic-workload？"><a href="#挑战：如何适应-dynamic-workload？" class="headerlink" title="挑战：如何适应 dynamic workload？"></a>挑战：如何适应 dynamic workload？</h4><p>（进一步减少invalidation开销）</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-3.png" alt="img"></p>
+<ol>
+<li>Learned index 假设数据存储在一个有序数组；range index + CDF；插入时排序开销</li>
+<li>Learned index 误差上下界（min_err, max_err）是静态确定的，修改之后cache invalidation，需要retrain。</li>
+</ol>
+<p>目标：减少这两者的开销</p>
+<h2 id="2-2-Solution"><a href="#2-2-Solution" class="headerlink" title="2.2 Solution"></a>2.2 Solution</h2><h3 id="2-2-1-保证有序"><a href="#2-2-1-保证有序" class="headerlink" title="2.2.1 保证有序"></a>2.2.1 保证有序</h3><p>B+树叶节点<strong>逻辑连续</strong>，可以视为一个逻辑上有序的数组 → B+树叶节点作为dataset训练模型</p>
+<h4 id="Hybrid：B-树索引（server），ML-Model（client）作为-index-cache。"><a href="#Hybrid：B-树索引（server），ML-Model（client）作为-index-cache。" class="headerlink" title="Hybrid：B+树索引（server），ML Model（client）作为 index cache。"></a><strong>Hybrid：B+树索引（server），ML Model（client）作为 index cache。</strong></h4><p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-4.png" alt="img"></p>
+<p>Index Cache 分为两部分：</p>
+<ol>
+<li>XModel：由server端训练，client按需cache</li>
+<li>中间层TT：叶节点地址不连续，为了保持叶节点之间有序，需要在server端维护translation table转换逻辑地址和叶节点地址。由server端维护，client按需cache</li>
+</ol>
+<p>Update 复用B+树结构，减少时间复杂度和并发控制复杂度</p>
+<h3 id="2-2-2-减少-retrain-开销"><a href="#2-2-2-减少-retrain-开销" class="headerlink" title="2.2.2 减少 retrain 开销"></a>2.2.2 减少 retrain 开销</h3><h4 id="分段retrain"><a href="#分段retrain" class="headerlink" title="分段retrain"></a><strong>分段retrain</strong></h4><ol>
+<li> 两层模型，top为一个 NN，第二层为若干个 linear regression (LR)。</li>
+<li>简单模型，开销小；</li>
+<li><strong>Partial retrain:</strong> 当数据发生变化的时候，可以只更新sub module</li>
+</ol>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-5.png" alt="img"></p>
+<h4 id="降低retrain频率"><a href="#降低retrain频率" class="headerlink" title="降低retrain频率"></a><strong>降低retrain频率</strong></h4><ol>
+<li><p> 只在叶节点分裂的时候，才对 sub model 和 TT 进行异步更新</p>
+</li>
+<li><p> <strong>Q:</strong> 节点没有分裂的时候（normal insert），为什么可以用陈旧的 cache (model+TT) 获取正确的结果？</p>
+</li>
+<li><p> <strong>A:</strong></p>
+</li>
+<li><p>正确性定义：能查到所有已有数值。新插入数据<strong>不会误判</strong>为不存在。</p>
+</li>
+<li><p>读取粒度为叶节点，引入两层映射关系：</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-6.png" alt="img"></p>
+<ol>
+<li><p>key值最终映射到一个叶节点；每次RDMA读取粒度为一个叶节点。</p>
+</li>
+<li><p>只有在节点分裂的时候才会改变TT的映射关系（发生data movement），此时才需要重新训练；否则，读取一整个叶节点，然后进行local search，总能找到所有存在的值</p>
+</li>
+<li><p>本质上相当于引入了一层约束，保证数据移动带来的误差不超过一个叶节点。</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-7.png" alt="img"></p>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="2-2-3-Discussion"><a href="#2-2-3-Discussion" class="headerlink" title="2.2.3 Discussion"></a>2.2.3 Discussion</h3><p>关于模型的选择，在两点上存在trade-off：① memory consumption；② retraining cost</p>
+<p>简单的模型更新开销小，但需要堆数量以更细粒度更精准，消耗更多内存；</p>
+<p>复杂的模型更新开销大，但消耗更少的内存。</p>
+<h3 id="2-2-4-Details-SKIP"><a href="#2-2-4-Details-SKIP" class="headerlink" title="2.2.4 Details (SKIP)"></a>2.2.4 Details (SKIP)</h3><ol>
+<li><p><strong>并发控制</strong></p>
+<ol>
+<li>Correctness condition: no lost keys，读的时候原子地返回新值或者旧值就可以</li>
+<li>多读者（client）单写者（单机server），简化并发控制</li>
+<li>事务内存HTM，可以检测到并发RDMA操作</li>
+<li>使用 cacheline versioning 保证RDMA跨cacheline读的原子性</li>
+</ol>
+</li>
+<li><p><strong>如何处理数据增多时，误差不可避免地增大？</strong></p>
+<ol>
+<li> 动态增加sub module的数量，这个过程需要retrain整个两层模型和TT。但不会影响性能，可以边运行边retrain，原因如下：</li>
+<li>TT相当于引入了一层快照，训练过程只需修改TT即可，不会移动数据，所以还可以继续用stale state或者fallback到B+树处理请求</li>
+<li>通过调度，可以推迟冲突的sub module的retrain</li>
+<li>top module（训练开销相对较大）可以在数据不完整情况下retrain</li>
+<li> 值得注意的是，XStore也可以在删除值较多的情况下对model进行shrink resize</li>
+</ol>
+</li>
+<li><p><strong>Optimization: 减少节点分裂时候的fallback</strong></p>
+<p>Speculative execution：其实是一个比较常见的思路。observation是，一般分裂只会移动一部分数据到新的sibling节点，所以只需要在该节点找不到key值且能确保不是non-exist的时候，顺着sibling指针查兄弟节点就行。</p>
+</li>
+<li><p><strong>Range</strong> <strong>query</strong> <strong>+</strong> <strong>corner case</strong></p>
+<p>参见5.2.2的range query过程，以及5.2.3对corner case的描述</p>
+</li>
+<li><p><strong>如何持久化？</strong></p>
+<p>Xcache 只用作读路径优化，对logging没有影响，并且可以rebuild。</p>
+</li>
+<li><p><strong>如何scale out？</strong></p>
+<p>根据key range进行sharding</p>
+</li>
+<li><p><strong>叶节点键值分离存储</strong></p>
+<p>当预测范围跨多个叶节点的时候，需要读取所有叶节点的键值对，会造成一定网络带宽放大，特别是一般情况下value很大很大。而事实上只需要读取key进行验证就够了，所以XStore的做法是先读metadata+key array，再算出value的offset去读，一共两次RTT。</p>
+</li>
+</ol>
+<h2 id="2-3-Evaluation"><a href="#2-3-Evaluation" class="headerlink" title="2.3 Evaluation"></a>2.3 Evaluation</h2><p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-8.png" alt="img"><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-9.png" alt="img"></p>
+<h3 id="2-3-1-Overall"><a href="#2-3-1-Overall" class="headerlink" title="2.3.1 Overall"></a>2.3.1 Overall</h3><ol>
+<li>RDONLY：outperforms SOTA by up to <strong>5.9×</strong> (from 3.7×)</li>
+<li>RW：up to <strong>3.5×</strong> (from 2.7×) throughput speedup</li>
+</ol>
+<h3 id="2-3-2-Retrain开销"><a href="#2-3-2-Retrain开销" class="headerlink" title="2.3.2 Retrain开销"></a>2.3.2 Retrain开销</h3><ol>
+<li>2个线程足够</li>
+<li>peak insertion speed: ↓ 13%</li>
+</ol>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-10.png" alt="img"></p>
+<h3 id="2-3-3-Data-patterns"><a href="#2-3-3-Data-patterns" class="headerlink" title="2.3.3 Data patterns"></a>2.3.3 Data patterns</h3><h4 id="Key-distribution"><a href="#Key-distribution" class="headerlink" title="Key distribution"></a><strong>Key distribution</strong></h4><p>① 均匀分布；② 有噪声；③ 真实数据集</p>
+<p>需要更细粒度的sub module拟合更复杂的分布情况</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-11.png" alt="img"></p>
+<h4 id="Access-pattern"><a href="#Access-pattern" class="headerlink" title="Access pattern"></a><strong>Access pattern</strong></h4><p>① 均匀访问；② 访问最新</p>
+<p>②带来相对频繁的model retrain</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-12.png" alt="img"></p>
+<h3 id="2-3-4-Sensitive-analysis"><a href="#2-3-4-Sensitive-analysis" class="headerlink" title="2.3.4 Sensitive analysis"></a>2.3.4 Sensitive analysis</h3><h4 id="Breakdown"><a href="#Breakdown" class="headerlink" title="Breakdown"></a><strong>Breakdown</strong></h4><p>相比于全cache情况占优</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-13.png" alt="img"></p>
+<h4 id="Memory-usage"><a href="#Memory-usage" class="headerlink" title="Memory usage"></a><strong>Memory usage</strong></h4><ol>
+<li><p>100M个KV的情况：</p>
+</li>
+<li><p>Whole-tree index: <strong>~600****MB</strong></p>
+</li>
+<li><p>Model size: 500K sub-models, <strong>6.7****MB</strong></p>
+<ol>
+<li>  Sub-Model: 14B; two 32-bit floatingpoint model parameters, two 8-bit min- and max-error, and a 32-bit TT size.</li>
+</ol>
+</li>
+<li><p>TT size: <strong>100****MB</strong>，client按需cache</p>
+<ol>
+<li>  15% of the whole-tree index。TT本质上相当于B+树的最后一层索引，并且TT entry比B+树索引节点小，所以内存开销更小。</li>
+</ol>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-14.png" alt="img"></p>
+</li>
+</ol>
+<h4 id="Prediction-error"><a href="#Prediction-error" class="headerlink" title="Prediction error"></a><strong>Prediction error</strong></h4><ol>
+<li> RDONLY: The prediction error of XCACHE is just 0.74.</li>
+<li> RD latest: The prediction error would stably increase to 8.3 for YCSB D</li>
+<li> <strong>一次读取1~2个****叶节点</strong></li>
+</ol>
+<h4 id="Inline-indirect-KVs"><a href="#Inline-indirect-KVs" class="headerlink" title="Inline/indirect KVs"></a><strong>Inline/indirect KVs</strong></h4><p>indirect需要additional one RMDA</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-15.png" alt="img"></p>
+<h1 id="3-Related-work"><a href="#3-Related-work" class="headerlink" title="3. Related work"></a>3. Related work</h1><h3 id="FAST’23-ROLEX"><a href="#FAST’23-ROLEX" class="headerlink" title="FAST’23  ROLEX"></a>FAST’23  ROLEX</h3><p>针对DM场景，拓展XStore的实现。</p>
+<p>他的结构和核心观察（控制读写粒度）都跟xstore差不多，只是去掉了B+树，留下了叶节点，通过delta index来缓解写操作带来的压力。</p>
+<p><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-16.png" alt="img"><img src="/2025/01/06/paper-reading/system/xstore/1736224874679-17.png" alt="img"></p>
+<p>缺陷：每次读数据需要读取更多叶节点</p>
+<h3 id="SOSP’24-CHIME"><a href="#SOSP’24-CHIME" class="headerlink" title="SOSP’24  CHIME"></a>SOSP’24  CHIME</h3><p>hybrid index，用哈希表取代B+树叶子节点，将预测范围缩小在configurable的邻域内，减少<strong>叶节点</strong>数据对网络带宽的放大。</p>
+<p>My note: <a href="./CHIME">CHIME</a></p>
+<h1 id="4-Comments"><a href="#4-Comments" class="headerlink" title="4. Comments"></a>4. Comments</h1><h4 id="新技术在相对传统场景的应用，the-first"><a href="#新技术在相对传统场景的应用，the-first" class="headerlink" title="新技术在相对传统场景的应用，the first"></a><strong>新技术在相对传统场景的应用，the first</strong></h4><p>① 新技术：learned index；② 传统场景：单机server，RDMA加速读操作</p>
+<p><strong>分析很全面</strong></p>
+<ol>
+<li>为什么传统方法不适配；为什么新技术更适配</li>
+<li>新技术面临的挑战与trade-off（memory consumption，retrain cost）</li>
+</ol>
+<p>更多<strong>针对抽象分析</strong>（far memory）而非具体的场景，所以在现在更流行的DM (Disaggregated memory) 上分析依然不过时。</p>
+<h4 id="解决方法精炼、solid"><a href="#解决方法精炼、solid" class="headerlink" title="解决方法精炼、solid"></a><strong>解决方法精炼、solid</strong></h4><p><strong>经典system思想：</strong>分段、读写分离hybrid架构、indirect layer to decouple（TT）；考虑周全，实验完善</p>
+<p><strong>设计与场景适配</strong>：针对传统场景对实现进行了一些剪枝，突出重点</p>
+<ol>
+<li>Dynamic workload的支持<ol>
+<li> xstore 通过B+树实现 in-place update，从而减少排序开销；</li>
+<li> 读写粒度为一个叶节点，减少 retrain 开销。（空间换时间）</li>
+<li> scenario-specified</li>
+</ol>
+</li>
+<li>模型简单性<ol>
+<li>考虑数据冷热，提高对热键的预测精准度；不同key值分布</li>
+<li>有讨论分析</li>
+</ol>
+</li>
+<li>server端的CPU bottleneck<ol>
+<li>server端需要处理写请求，还需要重新训练模型</li>
+<li>面向单机server，CPU资源相对（DM）充足；scale out可以缓解</li>
+</ol>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>research</tag>
+      </tags>
+  </entry>
 </search>
