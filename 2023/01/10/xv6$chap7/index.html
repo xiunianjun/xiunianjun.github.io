@@ -231,7 +231,7 @@
 <p>Linux的调度原理也差不多类似这样。每个CPU都有一个调度类为SCHED_CLASS_IDLE的IDLE进程，IDLE进程体大概就是间歇不断地执行__schedule()函数，CPU空闲时就会不断执行IDLE线程。</p>
 <p>而当有新的任务产生时（或任务被唤醒。可以从此看出task new和task wakeup的共通点，可以联想到竞赛中对该消息的处理方法），它首先通过调度类对应的select_cpu选择一个合适的（可以被抢占&amp;&amp;在该task对应的cpumask中）的cpu，迁移到cpu对应的rq；目标cpu通过IDLE进程体或者中断返回时检查到了NEED_SCHEDULE标记位，从而调用schedule函数pick新任务，然后进行context_switch切换到目标线程。如此周而复始。</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/image-20230118221757367.png" alt="image-20230118221757367"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20230118221757367.png" alt="image-20230118221757367"></p>
 <p>下面就来讲讲这个所谓的“线程”以及xv6的上下文切换是怎么实现的。</p>
 <h3 id="context"><a href="#context" class="headerlink" title="context"></a>context</h3><p>上下文切换的操作对象是上下文，因而首先了解一下上下文的结构。各种寄存器的状态即是上下文context。xv6中的context定义如下:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">context</span> &#123;</span></span><br><span class="line">  uint64 ra;</span><br><span class="line">  uint64 sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// callee-saved</span></span><br><span class="line">  uint64 s0;</span><br><span class="line">  uint64 s1;</span><br><span class="line">  uint64 s2;</span><br><span class="line">  uint64 s3;</span><br><span class="line">  uint64 s4;</span><br><span class="line">  uint64 s5;</span><br><span class="line">  uint64 s6;</span><br><span class="line">  uint64 s7;</span><br><span class="line">  uint64 s8;</span><br><span class="line">  uint64 s9;</span><br><span class="line">  uint64 s10;</span><br><span class="line">  uint64 s11;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -322,8 +322,8 @@
 
 <p>注意，不同于<code>mycpu()</code>，使用<code>myproc()</code>的返回值不需要进行开关中断保护。因为当前进程的指针不论处于哪个CPU都是不变的。</p>
 <h2 id="Sleep-and-wakeup"><a href="#Sleep-and-wakeup" class="headerlink" title="Sleep and wakeup"></a>Sleep and wakeup</h2><p>前面我们已经介绍了进程隔离性的基本图像，接下来要讲xv6是如何让进程之间互动的。xv6使用的是经典的<em>sleep and wakeup</em>，也叫<em>序列协调（sequence coordination）</em>或<em>条件同步机制（conditional synchronization mechanisms</em>。下面，将从最基本的自旋锁实现信号量开始，来逐步讲解xv6的<em>sleep and wakeup</em>机制。</p>
-<h3 id="自旋锁实现信号量"><a href="#自旋锁实现信号量" class="headerlink" title="自旋锁实现信号量"></a>自旋锁实现信号量</h3><p><img src="/2023/01/10/xv6/image-20230120150659730.png" alt="image-20230120150659730"></p>
-<p><img src="/2023/01/10/xv6/image-20230120150715925.png" alt="image-20230120150715925"></p>
+<h3 id="自旋锁实现信号量"><a href="#自旋锁实现信号量" class="headerlink" title="自旋锁实现信号量"></a>自旋锁实现信号量</h3><p><img src="/2023/01/10/xv6$chap7/image-20230120150659730.png" alt="image-20230120150659730"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20230120150715925.png" alt="image-20230120150715925"></p>
 <p>缺点就是自旋太久了，因而我们需要在等待的时候调用yield，直到资源生产出来之后再继续执行。</p>
 <h3 id="不安全的sleep-and-wakeup"><a href="#不安全的sleep-and-wakeup" class="headerlink" title="不安全的sleep and wakeup"></a>不安全的sleep and wakeup</h3><blockquote>
 <p>Let’s imagine a pair of calls, sleep and wakeup, that work as follows:</p>
@@ -337,13 +337,13 @@
 </ol>
 </blockquote>
 <p>这样一来，信号量实现就可修改为这样了：</p>
-<p><img src="/2023/01/10/xv6/image-20230120151051989.png" alt="image-20230120151051989"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20230120151051989.png" alt="image-20230120151051989"></p>
 <p>但是，我们可以注意到，在212-213行这里产生了一个先检查后执行的竞态条件。</p>
 <blockquote>
 <p>如果消费者进程执行到212-213中间，此时生产者进程已经调用结束，也就是说wakeup并没有唤醒任何消费者进程。消费者进程就会一直在sleep中没人唤醒，除非生产者进程再执行一次。这样就会造成<em>lost wake-up</em> 这个问题。</p>
 </blockquote>
 <p>所以，我们可以选择把这个竞态条件也放入s-&gt;lock这个锁区域保护。</p>
-<p><img src="/2023/01/10/xv6/image-20230120151353712.png" alt="image-20230120151353712"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20230120151353712.png" alt="image-20230120151353712"></p>
 <p>但是这样一来又会产生死锁问题。因而，我们可以尝试着修改sleep和wakeup的接口定义。</p>
 <h3 id="sleep-and-wakeup"><a href="#sleep-and-wakeup" class="headerlink" title="sleep and wakeup"></a>sleep and wakeup</h3><blockquote>
 <p>We’ll fix the preceding scheme by changing sleep’s interface: </p>
@@ -352,8 +352,8 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sleep(s,&amp;s-&gt;lock)&#123;</span><br><span class="line"> <span class="comment">// do something</span></span><br><span class="line">	release(&amp;s-&gt;lock);</span><br><span class="line">	<span class="comment">//wait until wakeup</span></span><br><span class="line"> acquire(&amp;s-&gt;lock);</span><br><span class="line"> <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </blockquote>
 <p>这样一来，信号量就可以完美实现了：</p>
-<p><img src="/2023/01/10/xv6/image-20230120151807102.png" alt="image-20230120151807102"></p>
-<p><img src="/2023/01/10/xv6/image-20230120151820455.png" alt="image-20230120151820455"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20230120151807102.png" alt="image-20230120151807102"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20230120151820455.png" alt="image-20230120151820455"></p>
 <blockquote>
 <p>注：严格地说，<code>wakeup</code>只需跟在<code>acquire</code>之后就足够了（也就是说，可以在<code>release</code>之后调用<code>wakeup</code>）</p>
 <p>【想了一下，有一说一确实，放在release前后都不影响】</p>
@@ -483,13 +483,13 @@
 <p>这里完全没有想到，还是吃了基础的亏啊。</p>
 <blockquote>
 <p>如果这里将<code>t-&gt;stack</code>作为sp，那么运行时会出现非常诡异的现象（打印的是abc三个的<code>thread-&gt;state</code>）：</p>
-<p><img src="/2023/01/10/xv6/image-20230120232149776.png" alt="image-20230120232149776"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20230120232149776.png" alt="image-20230120232149776"></p>
 <p>仅有c【经测试，是仅有最后一个启动的线程】在执行，而ab的state都不是理想中的2，而是很奇怪的值。我确实有想过栈溢出问题，但是马上被我否定了。我完全没有想到是那样错的【悲】</p>
 </blockquote>
 <h5 id="关于swtch"><a href="#关于swtch" class="headerlink" title="关于swtch"></a>关于swtch</h5><p>Update，验收时学长问为什么这里的uswitch.S为什么无需保存tn这样的寄存器。答案是因为tn是caller-save的，线程这相当于仅仅是执行一个函数，所以只需保存callee-save的寄存器。</p>
 <p>内核的swtch也只保存了这些callee-save的寄存器，也是同一个道理。</p>
-<p><img src="/2023/01/10/xv6/image-20231219000100763.png" alt="image-20231219000100763"></p>
-<p><img src="/2023/01/10/xv6/image-20231219000047041.png" alt="image-20231219000047041"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20231219000100763.png" alt="image-20231219000100763"></p>
+<p><img src="/2023/01/10/xv6$chap7/image-20231219000047041.png" alt="image-20231219000047041"></p>
 <p>tn寄存器被保存在调用者的栈帧中。感觉也能理解为什么那题作业题说上文进程的现场是由栈保存了。</p>
 <h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><h5 id="增加context结构体定义，修改thread结构体"><a href="#增加context结构体定义，修改thread结构体" class="headerlink" title="增加context结构体定义，修改thread结构体"></a>增加context结构体定义，修改thread结构体</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">context</span> &#123;</span></span><br><span class="line">  uint64 ra;</span><br><span class="line">  uint64 sp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// callee-saved</span></span><br><span class="line">  uint64 s0;</span><br><span class="line">  uint64 s1;</span><br><span class="line">  uint64 s2;</span><br><span class="line">  uint64 s3;</span><br><span class="line">  uint64 s4;</span><br><span class="line">  uint64 s5;</span><br><span class="line">  uint64 s6;</span><br><span class="line">  uint64 s7;</span><br><span class="line">  uint64 s8;</span><br><span class="line">  uint64 s9;</span><br><span class="line">  uint64 s10;</span><br><span class="line">  uint64 s11;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">thread</span> &#123;</span></span><br><span class="line">  <span class="type">char</span>       <span class="built_in">stack</span>[STACK_SIZE]; <span class="comment">/* the thread&#x27;s stack */</span></span><br><span class="line">  <span class="type">int</span>        state;             <span class="comment">/* FREE, RUNNING, RUNNABLE */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">context</span> <span class="title">context</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
@@ -530,7 +530,7 @@
                 <a class="prev" rel="prev" href="/2023/01/10/xv6$chap5/">Interrupts and device drivers</a>
             
             
-            <a class="next" rel="next" href="/2023/01/10/xv6$chap9/">其他的对实验未涉及的思考</a>
+            <a class="next" rel="next" href="/2023/01/10/xv6$chap6/">Locking</a>
             
         </section>
 

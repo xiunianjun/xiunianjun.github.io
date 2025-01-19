@@ -247,7 +247,7 @@
 
 <h2 id="Socket实现"><a href="#Socket实现" class="headerlink" title="Socket实现"></a>Socket实现</h2><p>最top的话可以分为<code>CS144TCPSocket</code>和<code>FullStackSocket</code>。</p>
 <p>继承关系如下图：</p>
-<p><img src="/2023/02/25/cs144/class_socket__inherit__graph.png" alt="Inheritance graph"></p>
+<p><img src="/2023/02/25/cs144$else/class_socket__inherit__graph.png" alt="Inheritance graph"></p>
 <p>其中，<code>TCPSocket</code>是完完全全的包装类，它的所有协议栈都是在内核态中实现（也就是跟我们之后写的没半毛钱关系），它的存在意义应该是用在lab0来写<code>webget</code>的测试。而<code>CS144TCPSocket</code>就是我们在lab0-4用的了，它的数据链路层由内核实现，网络层和运输层由用户实现。<code>FullStackSocket</code>就是加上了我们在lab5做的用户态数据链路层。</p>
 <p>最主要的部分是<code>TCPSpongeSocket</code>的实现，其他就是一些包装类没什么好说的。</p>
 <h3 id="FileDescriptor"><a href="#FileDescriptor" class="headerlink" title="FileDescriptor"></a>FileDescriptor</h3><p>将socket看作是fd，将网络看作是IO，这一抽象简直是太伟大了，牛逼到爆。</p>
@@ -270,7 +270,7 @@
 <ol>
 <li><p>domain</p>
 <p>在本次实验中只会取值前两个，即本地通信和IPv4网络通信</p>
-<p><img src="/2023/02/25/cs144/image-20230309232045195.png" alt="image-20230309232045195"></p>
+<p><img src="/2023/02/25/cs144$else/image-20230309232045195.png" alt="image-20230309232045195"></p>
 </li>
 <li><p>type</p>
 <p>好像比如说取<code>SOCK_DGRAM</code>就是UDP，取<code>SOCK_STREAM</code>就是TCP。</p>
@@ -298,7 +298,7 @@
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_49328056/article/details/123454707">Linux poll机制</a></p>
 <p>怎么说，又一次感受到了“<strong>网络就是IO</strong>”这个抽象的牛逼之处。操作系统的poll机制和poll函数本质上是针对IO读写来设计的，而正因为网络的本质是IO，正因为网络收发数据包、与上层app交互本质还是IO（因为通过文件描述符），才能在这里采用这种方式进行文件读写。</p>
 <p>我的评价是佩服到五体投地好吧</p>
-<p><img src="/2023/02/25/cs144/image-20230310185319115.png" alt="image-20230310185319115"></p>
+<p><img src="/2023/02/25/cs144$else/image-20230310185319115.png" alt="image-20230310185319115"></p>
 <p><strong>poll函数就是IO等待的一种实现机制。</strong></p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">poll</span><span class="params">(<span class="keyword">struct</span> pollfd *fds, <span class="type">nfds_t</span> nfds, <span class="type">int</span> timeout)</span></span>;</span><br></pre></td></tr></table></figure>
 
@@ -340,7 +340,7 @@
 <li><p>记录各类参数</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">datagram_adapter.<span class="built_in">config</span>().destination.<span class="built_in">to_string</span>()</span><br></pre></td></tr></table></figure></li>
 </ol>
-<p><img src="/2023/02/25/cs144/class_fd_adapter_base__inherit__graph.png" alt="Inheritance graph"></p>
+<p><img src="/2023/02/25/cs144$else/class_fd_adapter_base__inherit__graph.png" alt="Inheritance graph"></p>
 <p>具体实现说实话没什么好说的，确实无非也就是上面那几个方法，然后在里面包装下和操作系统提供的tun和tap的接口交互罢了，代码也比较简单，此处就不说了。</p>
 <h2 id="apps"><a href="#apps" class="headerlink" title="apps"></a>apps</h2><p>除了对协议栈的实现之外，在app文件夹下还有许多对我们实现的协议栈的应用实例。我认为了解下应用实例也是很重要的。</p>
 <h3 id="bidirectional-stream-copy"><a href="#bidirectional-stream-copy" class="headerlink" title="bidirectional_stream_copy"></a>bidirectional_stream_copy</h3><p>其作用就是建立stdin/stdout与socket的关联。它从stdin读输入，作为上层app的输入写入socket；从socket读输出，传给上层app，也即stdout输出。它的具体实现在stdin/stdout之间隔了两条bytestream，分别是<code>_inbound</code>和<code>_outbound</code>。</p>
@@ -366,10 +366,10 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/03/13/cmu15445/">CMU15445</a>
+                <a class="prev" rel="prev" href="/2023/03/13/cmu15445$lab3/">Project3   Query Execution</a>
             
             
-            <a class="next" rel="next" href="/2023/02/25/cs144$lab3/">Lab3   TCPSender</a>
+            <a class="next" rel="next" href="/2023/02/25/cs144$lab0/">Lab0</a>
             
         </section>
 

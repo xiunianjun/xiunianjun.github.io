@@ -226,13 +226,13 @@
 
         <div class="post-content">
             <h1 id="Lab2-TCPReceiver"><a href="#Lab2-TCPReceiver" class="headerlink" title="Lab2   TCPReceiver"></a>Lab2   TCPReceiver</h1><h2 id="前置学习"><a href="#前置学习" class="headerlink" title="前置学习"></a>前置学习</h2><h3 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h3><h4 id="承上启下"><a href="#承上启下" class="headerlink" title="承上启下"></a>承上启下</h4><p>在前两个实验中，我们可以说只是做了点算法上的抽象工作，跟TCP协议还是没什么显著的关系的。但来到了本次实验，一切就都不一样了。</p>
-<p><img src="/2023/02/25/cs144/image-20230226194708398.png" alt="image-20230226194708398"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230226194708398.png" alt="image-20230226194708398"></p>
 <p>依然还是这张图。相信此时做过前两个实验之后，看到这张图就会有了不一样的发现。</p>
 <p>我们对TCP协议的实现是由内向外的，先实现里面再实现最外层。前两节实验，我们由内而外实现了<code>ByteStream</code>和<code>StreamReassembler</code>；在这次实验中，我们会实现更外层一点的<code>TCPReceiver</code>。</p>
 <p>根据我们前两次实验内容，我们可以知道，<code>TCPReceiver</code>的功能之一就是，将数据包<code>TCPSegment</code>拆分成一个个<code>data</code>，并且通过<code>seq</code>生成出这些<code>data</code>的<code>index</code>，然后传递给<code>StreamReassembler</code>。</p>
 <h4 id="由外而内"><a href="#由外而内" class="headerlink" title="由外而内"></a>由外而内</h4><h5 id="TCPConnection"><a href="#TCPConnection" class="headerlink" title="TCPConnection"></a>TCPConnection</h5><p>在说明<code>TCPReceiver</code>的其他功能前，不妨先从外面的<code>TCPConnection</code>说起，由外而内回忆一下整个TCP协议过程。</p>
-<p><img src="/2023/02/25/cs144/image-20230226200935395.png" alt="image-20230226200935395"></p>
-<p><img src="/2023/02/25/cs144/image-20230226202631406.png" alt="image-20230226202631406"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230226200935395.png" alt="image-20230226200935395"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230226202631406.png" alt="image-20230226202631406"></p>
 <p>这期间最关键需要理解的，是SYN FIN ACK ack seq这些东西究竟是什么东西。</p>
 <h5 id="对象说明"><a href="#对象说明" class="headerlink" title="对象说明"></a>对象说明</h5><h6 id="seq"><a href="#seq" class="headerlink" title="seq"></a>seq</h6><p>seq用来标识字节流中某个字节的序号，在TCP报文中，它表示的是该报文携带的数据的第一个字节的序号。</p>
 <p>与我们在Lab1实现的<code>StreamReassembler</code>的参数index相比，它有三方面不同：</p>
@@ -247,7 +247,7 @@
 </li>
 </ol>
 <h6 id="SYN"><a href="#SYN" class="headerlink" title="SYN"></a>SYN</h6><p>SYN是TCP“三握手”中服务器端接收到的来自客户端的第一个报文。它是TCP报文中的一个标识位：</p>
-<p><img src="/2023/02/25/cs144/image-20230227135255525.png" alt="image-20230227135255525"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230227135255525.png" alt="image-20230227135255525"></p>
 <p>它用以标识数据传输的开始，并且<strong>携带</strong>seq最初随机的序号ISN。</p>
 <blockquote>
 <p>除了确保收到所有字节的数据外，TCP必须确保也能收到流的开始和结束</p>
@@ -257,7 +257,7 @@
 <h6 id="ack"><a href="#ack" class="headerlink" title="ack"></a>ack</h6><p>ack表示当前endpoint【包括客户端和服务器端】希望接收到的下一个数据流的起始字节的seq。</p>
 <blockquote>
 <p>关于seq和ack，听起来还是有点抽象，不如以连接释放图中ack和seq的值变化为例来说明。</p>
-<p><img src="/2023/02/25/cs144/image-20230226202631406.png" alt="image-20230226202631406"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230226202631406.png" alt="image-20230226202631406"></p>
 <p>为什么一开始seq=u，ack=v，但下一个就是seq=v，ack=u+1？</p>
 <p>这是因为，ack和seq的语义对于客户端和服务器端都是不变的。ack为已经收到的数据的seq+1表示第一个应该接收的值，seq为已经发送的数据的seq+1表示已经发送的值。并且还需要意识到，图中其实有两个数据流（一个是C→S，另一个是S→C），也即有两套seq和ack。</p>
 <ul>
@@ -314,15 +314,15 @@
 </ol>
 <h3 id="64-bit-indexes-←→-32-bit-seqnos"><a href="#64-bit-indexes-←→-32-bit-seqnos" class="headerlink" title="64-bit indexes ←→ 32-bit seqnos"></a>64-bit indexes ←→ 32-bit seqnos</h3><p>从Overview中可以看出来，至关重要的一点就是，将环绕的32bit的seq转化为我们在<code>StreamReassembler</code>中使用的index。</p>
 <p>我们不妨再引入一个中间变量<code>abstract seqno</code>。则<code>seqno</code>、<code>abstract seqno</code>、<code>stream index</code>三者关系如下图：</p>
-<p><img src="/2023/02/25/cs144/image-20230227141242426.png" alt="image-20230227141242426"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230227141242426.png" alt="image-20230227141242426"></p>
 <p>显然从<code>seqno</code>转化为<code>abstract seqno</code>更加复杂。因而，我们要做的第一个实验部分就是实现这个转化。</p>
 <p>我们需要实现类<code>WrappingInt32</code>。它的<code>wrap</code>函数将64位的<code>abstract seqno</code>转化为32位的<code>seqno</code>，它的<code>unwrap</code>将32位的<code>seqno</code>转化为64位的<code>abstract seqno</code>。</p>
 <h2 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h2><h3 id="64-bit-indexes-←→-32-bit-seqnos-1"><a href="#64-bit-indexes-←→-32-bit-seqnos-1" class="headerlink" title="64-bit indexes ←→ 32-bit seqnos"></a>64-bit indexes ←→ 32-bit seqnos</h3><p>这个实验完美地触及到了我的雷点：对这种环绕来环绕去的东西非常头疼……因而昨天晚上做的时候晕晕乎乎的什么也思考不了，今天过来边画了下图才知道要怎么做。</p>
 <p><code>wrap</code>很简单我就不说了。对于<code>unwrap</code>，我的做法是，先让checkpoint和n-isn都处在同一个区间（红圈）内【也即都让它们对2^32取余】，再通过几个东西之间的关系来确定最终的res是否需要+-HEAD_ONE：</p>
 <p>【蓝线表示n-isn，橙线表示红圈区间的中点】</p>
-<p><img src="/2023/02/25/cs144/image-20230227133550293.png" alt="image-20230227133550293"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230227133550293.png" alt="image-20230227133550293"></p>
 <p>具体的就不多说了。直接看下面的代码，多画画图就能明白了。</p>
-<h3 id="TCPReceiver"><a href="#TCPReceiver" class="headerlink" title="TCPReceiver"></a>TCPReceiver</h3><p><img src="/2023/02/25/cs144/image-20230227231044428.png" alt="image-20230227231044428"></p>
+<h3 id="TCPReceiver"><a href="#TCPReceiver" class="headerlink" title="TCPReceiver"></a>TCPReceiver</h3><p><img src="/2023/02/25/cs144$lab2/image-20230227231044428.png" alt="image-20230227231044428"></p>
 <h4 id="心得"><a href="#心得" class="headerlink" title="心得"></a>心得</h4><p>我一开始头晕晕地去写，对很多地方产生了疑问，激情地写下了一些消极的话语。刚刚出去吹了会儿风回来，bug全都改对了，于是狂喜着把消极的话语全部删掉了（）</p>
 <p>怎么说呢，我的错误发生是因为我<strong>没有意识到</strong>sponge的TCP也许算是一个“简化版”。</p>
 <p>在学习本章内容之前，我特地先去回顾了下TCP协议的全过程，并且所有的SYN，FIN等等等概念都是按照网上的概念来的。因而我在面对自己的错误时真的是一脸懵逼……好在，吹完风之后我还是及时醒悟了。</p>
@@ -342,7 +342,7 @@
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(header.fin)&#123;</span><br><span class="line">   	ack += <span class="number">1</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 
 <p>也即一发现FIN报文到了就++，是因为可能会发生这种情况：</p>
-<p><img src="/2023/02/25/cs144/image-20230227224055002.png" alt="image-20230227224055002"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230227224055002.png" alt="image-20230227224055002"></p>
 <p>也即FIN报文虽然到了，但是中间有一段数据还没到，ack应该等于中间那段数据的开头，你这时候想要跳过FIN而把ack+1那肯定是不对的。</p>
 <p>也因而，我们需要记录fin是否有过，并且仅当：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">StreamReassembler::empty</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> buffer.<span class="built_in">empty</span>()&amp;&amp;is_eof; &#125;</span><br></pre></td></tr></table></figure>
@@ -350,8 +350,8 @@
 <p>成立时，才能表示数据传输真正结束，让ack++。</p>
 <h6 id="以abstract-seqno的形式保存ackno"><a href="#以abstract-seqno的形式保存ackno" class="headerlink" title="以abstract seqno的形式保存ackno"></a>以abstract seqno的形式保存ackno</h6><p>说实话我一开始ackno的数据结构是WrappingInt32。为了这么搞，我还得特地维护一个checkpoint变量用来做unwrap的参数，然后ackno也不能用<code>_reassembler.get_left_bound()</code>来获取，总之就搞得非常非常麻烦。这时候我不小心【是故意的还是不小心的？】看到了<a target="_blank" rel="noopener" href="https://github.com/shootfirst/CS144/">感恩</a>的代码，对其用abstract seqno保存ackno这个想法大为赞叹，于是就果断地沿用了（）果然设计思想方面我还是有很大不足啊。</p>
 <h4 id="疑惑"><a href="#疑惑" class="headerlink" title="疑惑"></a>疑惑</h4><h5 id="关于特殊报文"><a href="#关于特殊报文" class="headerlink" title="关于特殊报文"></a>关于特殊报文</h5><p>我一开始被这个图以及百度得到的结果受影响：</p>
-<p><img src="/2023/02/25/cs144/image-20230227224429692.png" alt="image-20230227224429692"></p>
-<p><img src="/2023/02/25/cs144/image-20230227224449780.png" alt="image-20230227224449780"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230227224429692.png" alt="image-20230227224429692"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230227224449780.png" alt="image-20230227224449780"></p>
 <p>认为SYN报文不能携带数据【同理FIN也是】，因而在最初实现的时候看到test case人都麻透了开始怀疑人生……</p>
 <p>不过这也怪我没有意识到实验和业界可能是不一样的，但指导书也没说SYN和FIN到底会不会携带数据……emm，我感觉这一点做得不够详细，也许可以改进一下。</p>
 <h5 id="关于window-size的定义"><a href="#关于window-size的定义" class="headerlink" title="关于window size的定义"></a>关于window size的定义</h5><p>我现在还是搞不懂这东西究竟是什么玩意……</p>
@@ -363,7 +363,7 @@
 <p>所谓的“first <strong>unassembled</strong>”正是ackno。而，我正是理解错了所谓“first <strong>unacceptable</strong>” 的意思，才导致我想了好久好久都没想出来，最后看了答案被薄纱到现在。</p>
 <p>看到这个“first <strong>unacceptable</strong>” ，我的第一反应就是，维护一个变量right_bound，当packet过来的时候，如果packet的index范围(seqno + data.length())比right_bound大就更新。我认为这才叫做“first <strong>unacceptable</strong>”。但其实！我会这么想是因为我英语不好……</p>
 <p>“first <strong>unacceptable</strong>” ，unacceptable，意为<strong>无法接受的</strong>，也就是说，它跟容量有关。第一个无法接受的，就是第一个超出容量的。而结合我们上面的那张图：</p>
-<p><img src="/2023/02/25/cs144/image-20230225232723083-1677510449924-1.png" alt="image-20230225232723083"></p>
+<p><img src="/2023/02/25/cs144$lab2/image-20230225232723083-1677510449924-1.png" alt="image-20230225232723083"></p>
 <p>可以看出，事实上window size就是黑框部分，也即紫框部分减去绿色部分，也即<code>ByteStream</code>的<code>remaining_capacity()</code>……</p>
 <p>而我以为它是<strong>还未收到的</strong>的意思，故而才理解成了上面那样。</p>
 <p>看来英语不好也是原罪23333</p>
@@ -391,10 +391,10 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/02/25/cs144$lab5/">Lab5   NetworkInterface</a>
+                <a class="prev" rel="prev" href="/2023/02/25/cs144$lab4/">Lab4   TCPConnection</a>
             
             
-            <a class="next" rel="next" href="/2023/02/25/cs144$lab4/">Lab4   TCPConnection</a>
+            <a class="next" rel="next" href="/2023/02/25/cs144$lab5/">Lab5   NetworkInterface</a>
             
         </section>
 

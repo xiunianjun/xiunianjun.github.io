@@ -239,7 +239,7 @@
 </blockquote>
 <h4 id="多级粒度锁机制"><a href="#多级粒度锁机制" class="headerlink" title="多级粒度锁机制"></a>多级粒度锁机制</h4><p>假设存在如下需求：事务T需要访问一个有1亿个元组的数据库。</p>
 <p>我们希望T只发出单个请求就能封锁整个数据库，因此这里需要引入允许系统定义<strong>多级粒度</strong>(granularity)锁的机制，并允许定义各种大小的数据项和数据粒度的层次结构。这种层次结构可以图形化地表示为树。</p>
-<p><img src="/2023/03/13/cmu15445/v2-6a8363d4fada6e578c03b3d8d87c4813_1440w.webp" alt="img"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/v2-6a8363d4fada6e578c03b3d8d87c4813_1440w.webp" alt="img"></p>
 <p>树中每个结点都可以单独加锁。当一个事务对一个结点加锁时，该事务也以同样类型的锁<strong>隐式地封锁这个结点的全部子结点</strong>。</p>
 <p>但这样处理存在一个问题：事务T希望封锁整个子树，因此它只需给子树的根结点加锁。但是如果T在子树的某部分持有锁，那么T给该根结点加锁就会失败。<strong>如何判定根结点是否可以加锁呢</strong>？一种可能的方法是搜索整棵树。然而，这个方法破坏了多粒度封锁机制的初衷。另一种方法是引入一种新的锁类型，即<strong>意向锁类型</strong>( intentionlock mode)。</p>
 <p>如果一个结点加上了意向锁，则意味着将要在树的较低层进行显式加锁(也就是说，以更小的粒度加锁)。这里有三种意向锁：</p>
@@ -249,24 +249,24 @@
 <li><strong>Shared+Intention-Exclusive (SIX)<strong>：以该节点为根的子树</strong>已经显式得到了共享锁</strong>，并且<strong>将要</strong>在树的更低层次显示加上互斥锁。</li>
 </ul>
 <p>对某个结点进行加锁之前，需要获取它到根节点路径上的所有相关意向锁，具体规则如下图所示：</p>
-<p><img src="/2023/03/13/cmu15445/webp-1706931395906-19.webp" alt="img"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/webp-1706931395906-19.webp" alt="img"></p>
 <p>引入该机制后，在一个结点显式加锁之前，该结点的全部祖先均需要加上意向锁。当我们希望给某个结点加锁时，事务必须遍历从根到该节点的路径，判断路径上的节点是否被加了意向锁：如果已加，则该显示加锁过程不能成功；如果未加，<strong>则给该路径上的节点加上意向锁</strong>。</p>
 <h4 id="实际实现"><a href="#实际实现" class="headerlink" title="实际实现"></a>实际实现</h4><p>如上节所示，锁定层次结构有多种粒度：</p>
-<p><img src="/2023/03/13/cmu15445/v2-34a703b4147e594149bc2a8d37110327_1440w.webp" alt="img"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/v2-34a703b4147e594149bc2a8d37110327_1440w.webp" alt="img"></p>
 <p>而在bustub中，讨论锁的并发控制，我们通常只考虑table和tuple粒度，也即<strong>表锁与行锁</strong>。</p>
 <p>如果加表锁，则表中所有的行都受到同等程度的影响；如果加行锁，则加锁的范围针对的是表及下属的行。有时对表加锁后，还要在相应的数据行上加锁。</p>
 <p>针对表锁和行锁，我们可以使用上一小节提到的多级粒度锁机制。具体来说，表锁包括意图锁和传统的XS锁，行锁只包括XS锁。在具体上锁操作中，首先获取意图锁表明自己对表中的某些行有读写的需求，等到真正要读写了才会真正获取行锁。也即，它支持多个事务同时对表的不同行进行读写，故而相比传统锁住整个表的XS锁会更高效一些。</p>
 <p>如果使用意图锁，需要对表加上意图锁才能对行加上XS锁，这就相当于是上面那个树结构的简化情况。</p>
 <p>常见的表锁及其含义如下表所示：</p>
-<p><img src="/2023/03/13/cmu15445/v2-0f3d06461969e38d22795ec8b33b3270_1440w.webp" alt="img"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/v2-0f3d06461969e38d22795ec8b33b3270_1440w.webp" alt="img"></p>
 <p>其互斥矩阵如下图所示：</p>
-<p><img src="/2023/03/13/cmu15445/webp.webp" alt="img"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/webp.webp" alt="img"></p>
 <h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>与此同时这里还有几个使用锁的例子：</p>
-<p><img src="/2023/03/13/cmu15445/image-20240203113752672.png" alt="image-20240203113752672"></p>
-<p><img src="/2023/03/13/cmu15445/image-20240203113803390.png" alt="image-20240203113803390"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20240203113752672.png" alt="image-20240203113752672"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20240203113803390.png" alt="image-20240203113803390"></p>
 <h3 id="concurrency"><a href="#concurrency" class="headerlink" title="concurrency"></a>concurrency</h3><p>要了解事务的并发控制，首先了解什么是调度、串行化。</p>
-<p><img src="/2023/03/13/cmu15445/image-20231119160217938.png" alt="image"></p>
-<p><img src="/2023/03/13/cmu15445/image-20231119160636318.png" alt="image"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20231119160217938.png" alt="image"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20231119160636318.png" alt="image"></p>
 <p>事务并发控制大概有以下这几种方法：</p>
 <ol>
 <li><p>基于封锁的并发控制</p>
@@ -279,7 +279,7 @@
 </li>
 </ol>
 <p>在本次实验中，我们就是采用<strong>基于封锁的并发控制</strong>。</p>
-<h4 id="两段封锁协议"><a href="#两段封锁协议" class="headerlink" title="两段封锁协议"></a>两段封锁协议</h4><p><img src="/2023/03/13/cmu15445/image-20231119183734987.png" alt="image"></p>
+<h4 id="两段封锁协议"><a href="#两段封锁协议" class="headerlink" title="两段封锁协议"></a>两段封锁协议</h4><p><img src="/2023/03/13/cmu15445$lab4/image-20231119183734987.png" alt="image"></p>
 <p>在DBMS中，lock manager模块负责管理系统中的锁。每当事务需要加锁或者升级锁的时候，都需要向它发出请求。lock manager 内部维护着一个表，上面记录着当前所有锁的分配信息，用于跟踪哪些事务持有哪些锁，以及哪些事务正在等待获得哪些锁。由于我们想获得可串行化的调度序列，因此我们需要利用lock manager来实施加锁策略，以保证事务操作的正确性和并发度。</p>
 <p>两阶段锁的实现由两阶段组成。</p>
 <ul>
@@ -289,8 +289,8 @@
 <p>通过2PL获得的调度策略是冲突可串行化的。</p>
 <p>但是该方法有着致命的弱点：可能会导致<strong>级联中止</strong> (cascading aborts)。如下图所示的 “脏读”现象。为了保证整个调度是可串行化的，DBMS 需要在 T1 中止后将一些对T1有依赖的事务也中止，这些事务曾经读取过 T1 写入的数据。而这些中止可能进而使得其它正在进行的事务级联地中止。</p>
 <p>为了解决这个问题，可以使用2PL的增强版变种（也即bustub所采取的版本）。该方法要求<strong>事务持有的X锁一直到其提交或者中止时才释放</strong>，从而使得每个事务在结束之前，其写过的数据不能被其它事务读取或者重写。</p>
-<p><img src="/2023/03/13/cmu15445/v2-78b6f9cdb1b36484c3e0217f27730650_1440w.webp" alt="img"></p>
-<h4 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h4><p><img src="/2023/03/13/cmu15445/image-20231119183354649.png" alt="image"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/v2-78b6f9cdb1b36484c3e0217f27730650_1440w.webp" alt="img"></p>
+<h4 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h4><p><img src="/2023/03/13/cmu15445$lab4/image-20231119183354649.png" alt="image"></p>
 <ol>
 <li><p>三个隔离级别含义</p>
 <p><code>READ_UNCOMMITTED</code>、<code>READ_COMMITTED</code>、<code>REPEATED_READ</code>分别对应上图的1/2/3级协议。</p>
@@ -340,11 +340,11 @@
 </ol>
 <h4 id="死锁检测"><a href="#死锁检测" class="headerlink" title="死锁检测"></a>死锁检测</h4><p>基于封锁的并发控制通过<strong>死锁检测</strong>方法来去除隐患的死锁。</p>
 <p>在os课上，我们学过的死锁检测算法是通过构建资源分配图实现的：</p>
-<p><img src="/2023/03/13/cmu15445/image-20240221174955281.png" alt="image-20240221174955281"></p>
-<p><img src="/2023/03/13/cmu15445/image-20240221175201124.png" alt="image-20240221175201124"></p>
-<p><img src="/2023/03/13/cmu15445/image-20240221175444948.png" alt="image-20240221175444948"></p>
-<p><img src="/2023/03/13/cmu15445/image-20240221175123917.png" alt="image-20240221175123917"></p>
-<p><img src="/2023/03/13/cmu15445/image-20240221175212083.png" alt="image-20240221175212083"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20240221174955281.png" alt="image-20240221174955281"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20240221175201124.png" alt="image-20240221175201124"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20240221175444948.png" alt="image-20240221175444948"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20240221175123917.png" alt="image-20240221175123917"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20240221175212083.png" alt="image-20240221175212083"></p>
 <p>然后还有<strong>环路和死锁的关系</strong>：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/654942846">【操作系统】死锁（详细）</a></p>
 <p>① 如果进程-资源分配图中无环路</p>
 <p>——&gt;则此时系统没有发生死锁</p>
@@ -421,8 +421,8 @@
 
 <p>其中的<code>unique_lock</code>值得注意。这东西和lock guard差不多，区别可能就在于<code>std::unique_lock</code> 提供了更多的灵活性，允许手动锁定和释放互斥量，并且在不同的作用域内多次锁定和解锁。一般都会将它传给条件变量的wait函数。</p>
 <p>条件变量的基本流程图原理可见下图（来自<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39277419/article/details/99544724">condition_variable 条件变量</a>）：</p>
-<p><img src="/2023/03/13/cmu15445/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM5Mjc3NDE5,size_16,color_FFFFFF,t_70.jpeg" alt="在这里插入图片描述"></p>
-<p><img src="/2023/03/13/cmu15445/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM5Mjc3NDE5,size_16,color_FFFFFF,t_70-1707395142292-3.jpeg" alt="在这里插入图片描述"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM5Mjc3NDE5,size_16,color_FFFFFF,t_70.jpeg" alt="在这里插入图片描述"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM5Mjc3NDE5,size_16,color_FFFFFF,t_70-1707395142292-3.jpeg" alt="在这里插入图片描述"></p>
 <p>可见，它其实就是在外部上锁，然后内部解锁，等到被唤醒再次获取锁。故而，我们可以用它实现沉睡唤醒机制。</p>
 <h5 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h5><p>由文档可得：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Both <span class="title function_">LockTable</span><span class="params">()</span> and <span class="title function_">LockRow</span><span class="params">()</span> are blocking methods; they should wait till the lock is granted and then <span class="keyword">return</span>. If the transaction was aborted in the meantime, <span class="keyword">do</span> not grant the lock and <span class="keyword">return</span> <span class="literal">false</span>.</span><br><span class="line">Unlocking a resource should also grant any new lock requests <span class="keyword">for</span> the resource (<span class="keyword">if</span> possible).</span><br></pre></td></tr></table></figure>
@@ -432,7 +432,7 @@
 <p>LM的实现要求使用<strong>FIFO顺序</strong>来满足事务请求，而<code>std::condition_variable</code>的<code>notify_one</code>方法是按随机顺序的。所以我们只能手动使用<code>LockRequestQueue.request_queue_</code>队列来模拟FIFO，也即<u>仅当当前线程为队首元素，才进行锁的授权</u>。</p>
 <p>除此之外，还需注意一点，也即要求如果请求队列中有多个锁能被满足，那么需要对它们<u>同时一次性授权</u>。比如说，假定当前请求队列为“SSXSX”，那么此次授权之后的请求队列应为“<u>SS</u>XSX”。（划线表示已授权）</p>
 <p>其中，这个“满足”关系可被理解为<strong>兼容</strong>。锁之间的兼容矩阵如下图所示：</p>
-<p><img src="/2023/03/13/cmu15445/webp.webp" alt="img"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/webp.webp" alt="img"></p>
 <p>故而，结合上述两点后，可得我们最终实现的<strong>沉睡条件</strong>：<u>当且仅当该请求与它前面所有请求都兼容，才能授权该请求</u>。以<code>LockTable()</code>为例，最终形成如下代码（伪码表示）：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">LockManager::LockTable</span><span class="params">(Transaction *txn, LockMode lock_mode, <span class="type">table_oid_t</span> &amp;oid)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">auto</span> it = table_lock_map_.<span class="built_in">find</span>(oid);</span><br><span class="line">  <span class="function">std::unique_lock&lt;std::mutex&gt; <span class="title">req_queue_lock</span><span class="params">(it-&gt;second-&gt;latch_)</span></span>;</span><br><span class="line">  it-&gt;second-&gt;request_queue_.<span class="built_in">push_back</span>(<span class="keyword">new</span> <span class="built_in">LockRequest</span>(txn-&gt;<span class="built_in">GetTransactionId</span>(), lock_mode, oid)); <span class="comment">// 加入当前请求到队尾</span></span><br><span class="line">  <span class="keyword">auto</span> req_it = std::<span class="built_in">prev</span>(it-&gt;second-&gt;request_queue_.<span class="built_in">end</span>());</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 当前锁需要插入</span></span><br><span class="line">  <span class="keyword">switch</span> (lock_mode) &#123; <span class="comment">// 不同的锁类型有不同的机制，在此仅以S/X锁为例</span></span><br><span class="line">      <span class="keyword">case</span> LockMode::EXCLUSIVE: <span class="comment">// X锁不与任何其它锁兼容，故要求当前请求前面的为空</span></span><br><span class="line">        <span class="comment">// 注意这里不能直接判empty。因为有可能在wait过程中请求队列尾插了新的请求</span></span><br><span class="line">        <span class="keyword">while</span> (!(std::<span class="built_in">all_of</span>(it-&gt;second-&gt;request_queue_.<span class="built_in">begin</span>(), req_it, [is_upgraded](LockRequest* req) &#123; <span class="keyword">return</span> <span class="literal">false</span>; &#125;))) &#123;</span><br><span class="line">          it-&gt;second-&gt;cv_.<span class="built_in">wait</span>(req_queue_lock);</span><br><span class="line">        &#125;</span><br><span class="line">          </span><br><span class="line">        <span class="comment">// 注意需要更新it，因为stl的容器增删元素后迭代器不会始终指向原来那个元素……</span></span><br><span class="line">        <span class="keyword">for</span> (req_it = it-&gt;second-&gt;request_queue_.<span class="built_in">begin</span>(); req_it != it-&gt;second-&gt;request_queue_.<span class="built_in">end</span>(); ++req_it) &#123;</span><br><span class="line">          <span class="keyword">if</span> ((*req_it)-&gt;txn_id_ == txn-&gt;<span class="built_in">GetTransactionId</span>()) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> LockMode::SHARED: <span class="comment">// S锁只与S和IS兼容，故要求当前请求前面的为空或者全都是兼容类型</span></span><br><span class="line">        <span class="keyword">while</span> (!(std::<span class="built_in">all_of</span>(it-&gt;second-&gt;request_queue_.<span class="built_in">begin</span>(), req_it, [is_upgraded](LockRequest* req) &#123; <span class="keyword">return</span> req-&gt;lock_mode_ == LockMode::SHARED || req-&gt;lock_mode_ == LockMode::INTENTION_SHARED; &#125;))) &#123;</span><br><span class="line">          it-&gt;second-&gt;cv_.<span class="built_in">wait</span>(req_queue_lock);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (req_it = it-&gt;second-&gt;request_queue_.<span class="built_in">begin</span>(); req_it != it-&gt;second-&gt;request_queue_.<span class="built_in">end</span>(); ++req_it) &#123;</span><br><span class="line">          <span class="keyword">if</span> ((*req_it)-&gt;txn_id_ == txn-&gt;<span class="built_in">GetTransactionId</span>()) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">  (*req_it)-&gt;granted_ = <span class="literal">true</span>; <span class="comment">// 标记为已授权</span></span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -674,7 +674,7 @@
 <figure class="highlight erlang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">insert txn <span class="keyword">begin</span>.</span><br><span class="line">scan txn <span class="keyword">begin</span>.</span><br><span class="line">insert txn commit.</span><br><span class="line">scan txn commit.</span><br></pre></td></tr></table></figure>
 
 <p>看了半天没懂为什么insert txn已经提交scan txn还是看不到它的结果。。。最后发现是这里忘改了呃呃：</p>
-<p><img src="/2023/03/13/cmu15445/image-20240226202841362.png" alt="image-20240226202841362"></p>
+<p><img src="/2023/03/13/cmu15445$lab4/image-20240226202841362.png" alt="image-20240226202841362"></p>
 <h4 id="附：Halloween-Protection"><a href="#附：Halloween-Protection" class="headerlink" title="附：Halloween Protection"></a>附：Halloween Protection</h4><blockquote>
 <p><strong>SeqScan Executor</strong></p>
 <ul>
@@ -701,7 +701,7 @@
 
 <p>前者是以<code>last_page_id</code>为界，而后者以<code>INVALID_PAGE_ID</code>为界。其中，<code>last_page_id</code>表示当前表的最后一页物理页，会在insert之中被修改。这样一来，<code>MakeIterator</code>就能限制遍历的范围为当前创建的所有元组了。</p>
 <p><u>而在Project#4中</u>，我们会实现update的原地更新，所以<strong>无需防范Halloween Problem的发生</strong>，故而无需使用<code>MakeIterator</code>，只使用<code>MakeEagerIterator</code>即可。</p>
-<h3 id="Leaderboard"><a href="#Leaderboard" class="headerlink" title="Leaderboard"></a>Leaderboard</h3><p><img src="/2023/03/13/cmu15445/image-20240227223236821.png" alt="image-20240227223236821"></p>
+<h3 id="Leaderboard"><a href="#Leaderboard" class="headerlink" title="Leaderboard"></a>Leaderboard</h3><p><img src="/2023/03/13/cmu15445$lab4/image-20240227223236821.png" alt="image-20240227223236821"></p>
 <p>只能说前面性能烂了一路，到这里总的只会更烂hhh</p>
 <p>运行命令：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j`<span class="built_in">nproc</span>` terrier-bench</span><br><span class="line">./bin/bustub-terrier-bench --duration 30000 --nft 10000</span><br></pre></td></tr></table></figure>
@@ -752,7 +752,7 @@
                 <a class="prev" rel="prev" href="/2023/03/13/cmu15445$lab2/">Project2   B+Tree</a>
             
             
-            <a class="next" rel="next" href="/2023/03/13/cmu15445$lab3/">Project3   Query Execution</a>
+            <a class="next" rel="next" href="/2023/03/13/cmu15445$lab5/">源码解读</a>
             
         </section>
 

@@ -228,7 +228,7 @@
             <h1 id="源码解读"><a href="#源码解读" class="headerlink" title="源码解读"></a>源码解读</h1><blockquote>
 <p><a target="_blank" rel="noopener" href="https://www.skyzh.dev/blog/2022-10-05-bustub-query-processing/">https://www.skyzh.dev/blog/2022-10-05-bustub-query-processing/</a></p>
 </blockquote>
-<p><img src="/2023/03/13/cmu15445/image-20231227153858926.png" alt="image-20231227153858926"></p>
+<p><img src="/2023/03/13/cmu15445$lab5/image-20231227153858926.png" alt="image-20231227153858926"></p>
 <p>对实验中未涉及的parser、binder、planner、storage等部分进行源码的阅读。</p>
 <p>以前一直觉得事务是个很抽象的东西，看了bustub实现，才总算窥见了一点真相……我以前觉得事务是一个包含了执行代码的某个执行体，一直很好奇它具体是怎么实现的。现在才发现，事务其实并不算执行体，它只是相当于一个record，对某个执行过程进行一系列记录和维护，比如说维护读写集、维护锁集之类的。这样，当整个执行体结束之后，它就记录了整个执行体的结果，从而可以对其进行复原和释放锁之类的了，相当于是一个统筹全局的爸爸。感觉这也体现了一种解耦思想，将代码的执行和与数据库的交互（读写、锁）解耦，是一个非常伟大的思想。</p>
 
@@ -250,7 +250,7 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/03/13/cmu15445$lab3/">Project3   Query Execution</a>
+                <a class="prev" rel="prev" href="/2023/03/13/cmu15445$lab4/">Project4   Concurrency</a>
             
             
             <a class="next" rel="next" href="/2023/03/13/cmu15445/">CMU15445</a>

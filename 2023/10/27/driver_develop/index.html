@@ -332,7 +332,7 @@
 <blockquote>
 <p>然后就去研究了下linux中的gpio……发现了其内部映射。</p>
 </blockquote>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~# cat <span class="regexp">/sys/</span><span class="keyword">class</span><span class="regexp">/gpio/g</span>piochip</span><br><span class="line">gpiochip352<span class="regexp">/  gpiochip384/</span>  gpiochip416<span class="regexp">/  gpiochip448/</span>  gpiochip480/</span><br></pre></td></tr></table></figure>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~# cat /sys/<span class="keyword">class</span>/<span class="symbol">gpio</span>/<span class="symbol">gpiochip</span></span><br><span class="line"><span class="symbol">gpiochip352</span>/  <span class="symbol">gpiochip384</span>/  <span class="symbol">gpiochip416</span>/  <span class="symbol">gpiochip448</span>/  <span class="symbol">gpiochip480</span>/</span><br></pre></td></tr></table></figure>
 
 <p>384是GPIOD，416是C，448是B，480是A，每个间距32。而LED对应的是GPIO C 24，所以号是416+24 = 440。</p>
 <p>416+24 = 440，也就是说，GPIOC24是port C的第24号，也即第25位。</p>

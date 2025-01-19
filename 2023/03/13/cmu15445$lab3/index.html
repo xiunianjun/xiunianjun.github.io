@@ -244,16 +244,16 @@
 <p>(2) an indicator that there are no more tuples. </p>
 <p>With this approach, each executor implements a loop that continues calling <code>Next</code> on its children to retrieve tuples and process them one by one.</p>
 </blockquote>
-<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="Bustub-Framewor"><a href="#Bustub-Framewor" class="headerlink" title="Bustub Framewor"></a>Bustub Framewor</h3><p><img src="/2023/03/13/cmu15445/image-20231227153858926.png" alt="image-20231227153858926"></p>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><h3 id="Bustub-Framewor"><a href="#Bustub-Framewor" class="headerlink" title="Bustub Framewor"></a>Bustub Framewor</h3><p><img src="/2023/03/13/cmu15445$lab3/image-20231227153858926.png" alt="image-20231227153858926"></p>
 <h3 id="AST"><a href="#AST" class="headerlink" title="AST"></a>AST</h3><p>介绍完了bustub的框架之后，它对通过语法树进行查询优化进行了详细的样例介绍。</p>
 <p>首先温习一下什么是语法树（<em>abstract syntax tree, AST</em> ）：</p>
 <p>SQL语句</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Select `title`</span><br><span class="line">From Books, Borrowers, Loans</span><br><span class="line">Where Books.LC_NO = Loans.LC_NO and Borrowers.CARD_NO = Loans.CARD_NO and DATE &lt;= 1/1/78</span><br></pre></td></tr></table></figure>
 
 <p>其语法树表示+优化结果如下图所示：</p>
-<p><img src="/2023/03/13/cmu15445/image-20231227155236633.png" alt="image-20231227155236633"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20231227155236633.png" alt="image-20231227155236633"></p>
 <p>算法如下，其关键思路就是选择投影尽早做，能移多下去就移多下去</p>
-<p><img src="/2023/03/13/cmu15445/image-20231227155806019.png" alt="image-20231227155806019"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20231227155806019.png" alt="image-20231227155806019"></p>
 <p>而这里15445介绍的也是这样的语法树优化算法。</p>
 <p>首先记录一下它这几个专有名词对应的操作：</p>
 <blockquote>
@@ -270,7 +270,7 @@
 
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SELECT colA, MAX(colB) FROM</span><br><span class="line">  (SELECT * FROM __mock_table_1, __mock_table_3 WHERE colA = colE) GROUP BY colA;</span><br><span class="line"></span><br><span class="line">=== OPTIMIZER ===</span><br><span class="line">Agg &#123; types=[max], aggregates=[#<span class="number">0.1</span>], group_by=[#<span class="number">0.0</span>] &#125;</span><br><span class="line">  NestedLoopJoin &#123; type=Inner, predicate=(#<span class="number">0.0</span>=#<span class="number">1.0</span>) &#125;</span><br><span class="line">    MockScan &#123; table=__mock_table_1 &#125;</span><br><span class="line">    MockScan &#123; table=__mock_table_3 &#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2023/03/13/cmu15445/image-20231227160450894.png" alt="image-20231227160450894"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20231227160450894.png" alt="image-20231227160450894"></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM __mock_table_1 WHERE colA &gt; <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">=== OPTIMIZER ===                                     </span><br><span class="line"> Filter &#123; predicate=(#<span class="number">0.0</span>&gt;<span class="number">1</span>) &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER)         </span><br><span class="line">   MockScan &#123; table=__mock_table_1 &#125; | (__mock_table_1.colA:INTEGER, __mock_table_1.colB:INTEGER) </span><br></pre></td></tr></table></figure>
 
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">values (<span class="number">1</span>, <span class="number">2</span>, <span class="string">&#x27;a&#x27;</span>), (<span class="number">3</span>, <span class="number">4</span>, <span class="string">&#x27;b&#x27;</span>);</span><br><span class="line"></span><br><span class="line">=== PLANNER === </span><br><span class="line">Projection &#123; exprs=[#<span class="number">0.0</span>, #<span class="number">0.1</span>, #<span class="number">0.2</span>] &#125; | (__values#<span class="number">0.0</span>:INTEGER, __values#<span class="number">0.1</span>:INTEGER, __values#<span class="number">0.2</span>:VARCHAR) </span><br><span class="line">Values &#123; rows=<span class="number">2</span> &#125; | (__values#<span class="number">0.0</span>:INTEGER, __values#<span class="number">0.1</span>:INTEGER, __values#<span class="number">0.2</span>:VARCHAR)                     </span><br><span class="line">=== OPTIMIZER ===</span><br><span class="line">Values &#123; rows=<span class="number">2</span> &#125; | (__values#<span class="number">0.0</span>:INTEGER, __values#<span class="number">0.1</span>:INTEGER, __values#<span class="number">0.2</span>:VARCHAR)</span><br></pre></td></tr></table></figure>
@@ -341,7 +341,7 @@
 </ul>
 </blockquote>
 <p>而我们本次实验就是需要实现这么一大堆的executor。看来又是个体力活了。</p>
-<h3 id="seq-scan"><a href="#seq-scan" class="headerlink" title="seq_scan"></a>seq_scan</h3><h4 id="一些想法"><a href="#一些想法" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="c-知识"><a href="#c-知识" class="headerlink" title="c++知识"></a>c++知识</h5><p><img src="/2023/03/13/cmu15445/image-20240115121419677.png" alt="image-20240115121419677"></p>
+<h3 id="seq-scan"><a href="#seq-scan" class="headerlink" title="seq_scan"></a>seq_scan</h3><h4 id="一些想法"><a href="#一些想法" class="headerlink" title="一些想法"></a>一些想法</h4><h5 id="c-知识"><a href="#c-知识" class="headerlink" title="c++知识"></a>c++知识</h5><p><img src="/2023/03/13/cmu15445$lab3/image-20240115121419677.png" alt="image-20240115121419677"></p>
 <p>可以看到，前缀++重载的运算符方法和后缀++是不一样的。</p>
 <blockquote>
 <p>这里我理解得还是肤浅了…… 根据 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/625890227#:~:text=%E5%86%8D%E5%AE%9E%E7%8E%B0%20Update-,2.%20%2B%2Bi%20%E4%B8%8E%20i%2B%2B%20%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F,-%E5%9C%A8%E5%AE%9E%E7%8E%B0%20SeqScan">这篇文章</a>，<code>++i</code> 的内部类定义为 <code>T&amp; T:: operator++();</code>，而 <code>i++</code> 的内部类定义为 <code>T T:: operator++(int);</code>[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/625890227#ref_1">1]</a>，<strong>前置操作返回引用，后置操作返回值</strong>。后置操作的 <code>int</code> 参数是一个虚拟参数，用于区分运算符 <code>++</code> 的前置和后置。<strong>理论上，<code>i++</code> 会产生临时对象</strong>，实践中，编译器会对内置类型进行优化；而<strong>对于自定义类型</strong>（如这里的 Iterator），<code>++i</code> 的性能通常优于 <code>i++</code>。</p>
@@ -359,7 +359,7 @@
 <p>也即<strong>MockScanExecutor负责对表指针的管理，function负责实际对表的物理访问</strong>。这样就成功解耦了。</p>
 <h5 id="physical-layer"><a href="#physical-layer" class="headerlink" title="physical layer"></a>physical layer</h5><p>通过实现SeqScan，我们可以初步窥探整个bustub物理层面交互的架构。</p>
 <p>跟之前project中的索引entry一样，实际的数据tuple也保存在page中，其对应类为<code>TablePage</code>。并且是堆文件组织结构：</p>
-<p><img src="/2023/03/13/cmu15445/image-20240115114448798.png" alt="image-20240115114448798"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20240115114448798.png" alt="image-20240115114448798"></p>
 <blockquote>
 <p><code>TablePage</code>的结构值得一提。</p>
 <p>在它的成员定义中，我们可以看到其中有两个柔性数组成员（Flexible array member）：</p>
@@ -562,7 +562,7 @@
 <p><strong>Hint:</strong> As with aggregation, the build side of a hash join is a <em>pipeline breaker</em>. You should again consider whether the <em>build</em> phase of the hash join should be performed in <code>HashJoinExecutor::Init()</code> or <code>HashJoinExecutor::Next()</code>.</p>
 </blockquote>
 <p>具体什么是hash join，可以参考 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/663637344">这篇文章</a>。</p>
-<p><img src="/2023/03/13/cmu15445/v2-bb022b4a6da1743b5f421248a0bae358_r.jpg" alt="img"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/v2-bb022b4a6da1743b5f421248a0bae358_r.jpg" alt="img"></p>
 <p>其大概思路也很简单，hash table就是一个<code>map&lt;key, vector&lt;value&gt;&gt;</code>这样的数据结构，然后将两个输入的关系选举出一个小表作为Build（建立hash table），另一个作为Probe（扫描，并根据hash table-&gt;second进行迭代组合）。它其实就是一个精确了范围的nested loop join的变种，将nested里层的针对整个关系的大循环缩小为针对hash table一个bucket的小循环。</p>
 <p>具体到这里，思路可以是这样的。首先为了简单起见，我们就不进行选举小表的判断了，固定将right child作为Build，left child作为Probe。建表的话，我们就简单粗暴地遍历right table，然后以<code>right_key_expressions_</code>为key<code>Tuple</code>为value直接建表（反正也是in-memory即可。。。）。然后之后，就仿照之前思路即可。</p>
 <h3 id="Optimizing-NestedLoopJoin-to-HashJoin"><a href="#Optimizing-NestedLoopJoin-to-HashJoin" class="headerlink" title="Optimizing NestedLoopJoin to HashJoin"></a>Optimizing NestedLoopJoin to HashJoin</h3><blockquote>
@@ -587,8 +587,8 @@
 <p><u>In the public BusTub repository, we already provide the implementation of several optimizer rules. Please take a look at them as reference.</u></p>
 </blockquote>
 <p>在课程中学到的语法优化，应该也是基于规则的优化，具体见下图及之后列出的无穷无尽个定理：</p>
-<p><img src="/2023/03/13/cmu15445/image-20231119015111213.png" alt="image"></p>
-<p><img src="/2023/03/13/cmu15445/image-20231227155806019.png" alt="image-20231227155806019"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20231119015111213.png" alt="image"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20231227155806019.png" alt="image-20231227155806019"></p>
 <p>（本图新增了一条规则：选择+嵌套笛卡尔积=嵌套连接）</p>
 <p>查看目录<code>src/optimizer/</code>，我们可以看到：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ tree ../src/optimizer/</span><br><span class="line">../src/optimizer/</span><br><span class="line">├── eliminate_true_filter.cpp	<span class="comment"># 消除恒真选择</span></span><br><span class="line">├── merge_filter_nlj.cpp		<span class="comment"># 合并选择和嵌套连接</span></span><br><span class="line">├── merge_filter_scan.cpp		<span class="comment"># 合并选择和scan</span></span><br><span class="line">├── merge_projection.cpp		<span class="comment"># 合并多个投影</span></span><br><span class="line">├── nlj_as_hash_join.cpp		<span class="comment"># 嵌套连接-&gt;hash连接</span></span><br><span class="line">├── nlj_as_index_join.cpp		<span class="comment"># 嵌套连接-&gt;index连接</span></span><br><span class="line">├── optimizer.cpp</span><br><span class="line">├── optimizer_custom_rules.cpp</span><br><span class="line">├── optimizer_internal.cpp</span><br><span class="line">├── order_by_index_scan.cpp</span><br><span class="line">└── sort_limit_as_topn.cpp		<span class="comment"># 针对 top-N queries 进行优化</span></span><br></pre></td></tr></table></figure>
@@ -602,7 +602,7 @@
 
 <p>可见，对语法树运用该merge filter nlj规则是采用自底向上的顺序，并且仅合并那些filter-笛卡尔积的结点。那么接下来，我们可以具体关注<code>RewriteExpressionForJoin</code>的实现。</p>
 <p>首先，我们需要明确bustub中对expression的抽象。以<code>#0.0=#1.0</code>为例，expression的结构树如下所示：</p>
-<p><img src="/2023/03/13/cmu15445/image-20240120104722170.png" alt="image-20240120104722170"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20240120104722170.png" alt="image-20240120104722170"></p>
 <p>每个叶子结点都是一个基本的expression类型，如column value、constant value等等等，整个子树构成一个其他expression类型，如comparation expr、arithmetic expr等等等。</p>
 <p>在未优化前，我们是先做笛卡尔积，再做选择。故而，假设t1有2列，t2有2列，选择条件为<code>t1.col1 = t2.col4</code>，在未优化前，filter结点的expr将为：<code>#0.0=#0.3</code>（两表经过笛卡尔积合在一起了）。故而，在<code>RewriteExpressionForJoin</code>函数中，我们需要根据t1表和t2表分别的列数，将<code>#0.0=#0.3</code>这样的表达式转化为<code>#0.0=#1.1</code>这样的表达式（其实也就是只用处理所有类型为colum expr的叶结点即可）。而由于expression是递归结构，所以我们需要先针对其所有子节点进行处理。故而，<code>RewriteExpressionForJoin</code>的实现如下：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">Optimizer::RewriteExpressionForJoin</span><span class="params">(<span class="type">const</span> AbstractExpressionRef &amp;expr, <span class="type">size_t</span> left_column_cnt, <span class="type">size_t</span> right_column_cnt)</span> -&gt; AbstractExpressionRef </span>&#123;</span><br><span class="line">  <span class="comment">// 首先自底向上地对其所有子节点进行优化，采用DFS</span></span><br><span class="line">  std::vector&lt;AbstractExpressionRef&gt; children;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span> &amp;child : expr-&gt;<span class="built_in">GetChildren</span>()) &#123;</span><br><span class="line">    children.<span class="built_in">emplace_back</span>(<span class="built_in">RewriteExpressionForJoin</span>(child, left_column_cnt, right_column_cnt));</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 仅对那些类型为column expr的叶子结点进行处理</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="type">const</span> <span class="keyword">auto</span> *column_value_expr = <span class="built_in">dynamic_cast</span>&lt;<span class="type">const</span> ColumnValueExpression *&gt;(expr.<span class="built_in">get</span>()); column_value_expr != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    <span class="comment">// #0.1, &quot;0&quot;为tuple_idx，&quot;1&quot;为col_idx</span></span><br><span class="line">    <span class="comment">// 此时tuple_idx一定是0，因为filter结点只有一个子节点</span></span><br><span class="line">    <span class="built_in">BUSTUB_ENSURE</span>(column_value_expr-&gt;<span class="built_in">GetTupleIdx</span>() == <span class="number">0</span>, <span class="string">&quot;tuple_idx cannot be value other than 0 before this stage.&quot;</span>)</span><br><span class="line">    <span class="keyword">auto</span> col_idx = column_value_expr-&gt;<span class="built_in">GetColIdx</span>();</span><br><span class="line">    <span class="keyword">if</span> (col_idx &lt; left_column_cnt) &#123;	</span><br><span class="line">      <span class="keyword">return</span> std::<span class="built_in">make_shared</span>&lt;ColumnValueExpression&gt;(<span class="number">0</span>, col_idx, column_value_expr-&gt;<span class="built_in">GetReturnType</span>());	<span class="comment">// 替换为#0.X</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (col_idx &gt;= left_column_cnt &amp;&amp; col_idx &lt; left_column_cnt + right_column_cnt) &#123;</span><br><span class="line">      <span class="keyword">return</span> std::<span class="built_in">make_shared</span>&lt;ColumnValueExpression&gt;(<span class="number">1</span>, col_idx - left_column_cnt, column_value_expr-&gt;<span class="built_in">GetReturnType</span>());	<span class="comment">// 替换为#1.X</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> bustub::<span class="built_in">Exception</span>(<span class="string">&quot;col_idx not in range&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// xiunian: do nothing if the filter contains no column value expression</span></span><br><span class="line">  <span class="keyword">return</span> expr-&gt;<span class="built_in">CloneWithChildren</span>(children);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -665,11 +665,11 @@
 </blockquote>
 <p>感觉标准做法应该是使用快速排序的partion思想。但是这里的话，我打算使用另一个实现更简单的思路，也即维护一个元素个数为<code>limit_</code>的有序set，每次插入元素同其最小值比较即可，这样的时间复杂度为<code>O(nlogk)</code>。当k不会太大的时候，我觉得这样应该还是会比快排要快些的。</p>
 <h3 id="小插曲"><a href="#小插曲" class="headerlink" title="小插曲"></a>小插曲</h3><p>本来写到这准备开开心心提交了，突然发现自己的版本似乎跟仓库最新不大一样。rebase了感觉一下午（最后甚至还找了个以前写的小bug……），最后才终于提交完获得了full score……</p>
-<p><img src="/2023/03/13/cmu15445/image-20240121200829707.png" alt="image-20240121200829707"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20240121200829707.png" alt="image-20240121200829707"></p>
 <p>bustub仓库中的每个课程版本都是有这样的小tag了，一开始没发现直接大力出奇迹rebase最新，结果整了半天人麻了。。。</p>
-<p><img src="/2023/03/13/cmu15445/image-20240121200726718.png" alt="image-20240121200726718"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/image-20240121200726718.png" alt="image-20240121200726718"></p>
 <h2 id="Leaderboard-Task"><a href="#Leaderboard-Task" class="headerlink" title="Leaderboard Task"></a>Leaderboard Task</h2><p>最终优化结果：</p>
-<img src="/2023/03/13/cmu15445/image-20240202182014046.png" alt="image-20240202182014046" style="zoom:50%;">
+<img src="/2023/03/13/cmu15445$lab3/image-20240202182014046.png" alt="image-20240202182014046" style="zoom:50%;">
 
 <h3 id="Query-1-Where’s-the-Index"><a href="#Query-1-Where’s-the-Index" class="headerlink" title="Query 1: Where’s the Index?"></a>Query 1: Where’s the Index?</h3><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><blockquote>
 <p>Consider the following sample database:</p>
@@ -763,7 +763,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">explain (o) select count(*), max(__mock_t4_1m.x), max(__mock_t4_1m.y), max(__mock_t5_1m.x), max(__mock_t5_1m.y), max(__mock_t6_1m.x), max(__mock_t6_1m.y)</span><br><span class="line">    from __mock_t4_1m, __mock_t5_1m, __mock_t6_1m</span><br><span class="line">        where (__mock_t4_1m.x = __mock_t5_1m.x)</span><br><span class="line">            and (__mock_t6_1m.y = __mock_t5_1m.y)</span><br><span class="line">            and (__mock_t4_1m.y &gt;= 1000000)</span><br><span class="line">            and (__mock_t4_1m.y &lt; 1500000)</span><br><span class="line">            and (__mock_t6_1m.x &lt; 150000)</span><br><span class="line">            and (__mock_t6_1m.x &gt;= 100000);</span><br><span class="line">==============================================================</span><br><span class="line">Agg &#123; types=[count_star, max, max, max, max, max, max], aggregates=[1, #0.0, #0.1, #0.2, #0.3, #0.4, #0.5], group_by=[] &#125;</span><br><span class="line">  HashJoin &#123; type=Inner, left_key=[#0.3], right_key=[#1.1] &#125;</span><br><span class="line">    HashJoin &#123; type=Inner, left_key=[#0.0], right_key=[#1.0] &#125;</span><br><span class="line">      Filter &#123; predicate=((#0.1&gt;=1000000)and(#0.1&lt;1500000)) &#125;</span><br><span class="line">        MockScan &#123; table=__mock_t4_1m &#125;</span><br><span class="line">      MockScan &#123; table=__mock_t5_1m &#125;</span><br><span class="line">    Filter &#123; predicate=((#0.0&lt;150000)and(#0.0&gt;=100000)) &#125;</span><br><span class="line">      MockScan &#123; table=__mock_t6_1m &#125;</span><br></pre></td></tr></table></figure>
 
 <p>这个图画得就很清楚：（<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/629349099">from</a>）</p>
-<p><img src="/2023/03/13/cmu15445/v2-e6f25de30bca4fd6f96a0cd85fc7dbc4_1440w.png" alt="img"></p>
+<p><img src="/2023/03/13/cmu15445$lab3/v2-e6f25de30bca4fd6f96a0cd85fc7dbc4_1440w.png" alt="img"></p>
 <h4 id="实现-8"><a href="#实现-8" class="headerlink" title="实现"></a>实现</h4><h5 id="predicate-push-down"><a href="#predicate-push-down" class="headerlink" title="predicate push down"></a>predicate push down</h5><p>体感上，这个任务的思维难度和规则实现复杂度是远高于q1的，但由于q1涉及范围太广，所以最终两者耗时还是不相上下，写了我大概6、7个小时。</p>
 <p>我的大体思路是，整一个这样的递归主体：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">Optimizer::PredicatePushdown</span><span class="params">(<span class="type">const</span> AbstractPlanNodeRef &amp;plan, AbstractExpressionRef &amp;expr)</span> -&gt; AbstractPlanNodeRef</span></span><br></pre></td></tr></table></figure>
@@ -876,10 +876,10 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/03/13/cmu15445$lab4/">Project4   Concurrency</a>
+                <a class="prev" rel="prev" href="/2023/03/13/cmu15445/">CMU15445</a>
             
             
-            <a class="next" rel="next" href="/2023/03/13/cmu15445$lab5/">源码解读</a>
+            <a class="next" rel="next" href="/2023/02/25/cs144$else/">其他的对实验未涉及的思考</a>
             
         </section>
 

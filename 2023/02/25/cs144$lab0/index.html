@@ -236,11 +236,11 @@
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(is_input_end == <span class="literal">false</span>&amp;&amp;pointer&lt;length)&#123;</span><br><span class="line">    <span class="keyword">if</span>(buffer.<span class="built_in">size</span>() == capacity)   <span class="keyword">break</span>;</span><br><span class="line">    buffer.<span class="built_in">push_back</span>(data[pointer]);</span><br><span class="line">    pointer++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </blockquote>
 <h2 id="Fetch-a-Web-page"><a href="#Fetch-a-Web-page" class="headerlink" title="Fetch a Web page"></a>Fetch a Web page</h2><p>主要是介绍了<code>telnet</code>指令</p>
-<p><img src="/2023/02/25/cs144/194758.png" alt="屏幕截图 2023-02-23 194758"></p>
+<p><img src="/2023/02/25/cs144$lab0/194758.png" alt="屏幕截图 2023-02-23 194758"></p>
 <h2 id="Send-yourself-an-email"><a href="#Send-yourself-an-email" class="headerlink" title="Send yourself an email"></a>Send yourself an email</h2><p>用的是telnet带smtp参</p>
 <h2 id="Listening-and-connecting"><a href="#Listening-and-connecting" class="headerlink" title="Listening and connecting"></a>Listening and connecting</h2><p>上面的telnet是一个client program。接下来我们要把自己放在server的位置上。</p>
 <p>用的是<code>netcat</code>指令。</p>
-<p><img src="/2023/02/25/cs144/image-20230223202202509.png" alt="image-20230223202202509"></p>
+<p><img src="/2023/02/25/cs144$lab0/image-20230223202202509.png" alt="image-20230223202202509"></p>
 <h2 id="Use-socket-to-write-webget"><a href="#Use-socket-to-write-webget" class="headerlink" title="Use socket to write webget"></a>Use socket to write webget</h2><p>这个确实不难，就是这个地方有点坑：</p>
 <blockquote>
 <p>Please note that in HTTP, each line must be ended with “\r\n” (it’s not sufficient to use just “\n” or endl).</p>
@@ -263,19 +263,19 @@
 <h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><p>这东西其实是很简单的，但是我还是花了一定的时间，主要原因有两点，一是我不懂c++，所以一些地方错得我很懵逼，二是因为我是sb。</p>
 <p>下面就记录下三个我印象比较深刻的错误吧。</p>
 <h5 id="错误1-member-initialization-list"><a href="#错误1-member-initialization-list" class="headerlink" title="错误1 member initialization list"></a>错误1 member initialization list</h5><p>构造函数我一开始是这么写的：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113108208.png" alt="image-20230224113108208"></p>
+<p><img src="/2023/02/25/cs144$lab0/image-20230224113108208.png" alt="image-20230224113108208"></p>
 <p>结果爆出了这样的错：</p>
-<p><img src="/2023/02/25/cs144/image-20230224112056879.png" alt="image-20230224112056879"></p>
+<p><img src="/2023/02/25/cs144$lab0/image-20230224112056879.png" alt="image-20230224112056879"></p>
 <p>搜了半天也没看懂怎么回事，去求助了下某场外c艹选手，才知道了还有成员变量初始化列表这玩意，这个东西似乎比较高效安全。</p>
 <p>于是我改成了这么写：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113333962.png" alt="image-20230224113333962"></p>
+<p><img src="/2023/02/25/cs144$lab0/image-20230224113333962.png" alt="image-20230224113333962"></p>
 <p>它告诉我<code>buffer</code>也得初始化。于是我又这么写：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113358856.png" alt="image-20230224113358856"></p>
+<p><img src="/2023/02/25/cs144$lab0/image-20230224113358856.png" alt="image-20230224113358856"></p>
 <p>又是奇奇怪怪的错误，说明vector不能这么初始化。</p>
 <p>场外c艹选手看到了这个：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113456432.png" alt="image-20230224113456432"></p>
+<p><img src="/2023/02/25/cs144$lab0/image-20230224113456432.png" alt="image-20230224113456432"></p>
 <p>所以说vector应该这样初始化：</p>
-<p><img src="/2023/02/25/cs144/image-20230224113549970.png" alt="image-20230224113549970"></p>
+<p><img src="/2023/02/25/cs144$lab0/image-20230224113549970.png" alt="image-20230224113549970"></p>
 <h5 id="错误2-使用了vector作为buffer的载体"><a href="#错误2-使用了vector作为buffer的载体" class="headerlink" title="错误2 使用了vector作为buffer的载体"></a>错误2 使用了<code>vector</code>作为buffer的载体</h5><p>应该使用的是可以从front删除数据的数据结构，比如说deque。【vector也行，但是效率较低】</p>
 <p>具体为什么，可以以数据流为cat为例。执行<code>peek(2)</code>时，使用vector得到的是at，使用deque得到的是ca。</p>
 <h5 id="错误3-错误地阻塞"><a href="#错误3-错误地阻塞" class="headerlink" title="错误3 错误地阻塞"></a>错误3 错误地阻塞</h5><p>一开始在<code>write</code>方法，我是这么写的：</p>
@@ -308,7 +308,7 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/02/25/cs144$lab3/">Lab3   TCPSender</a>
+                <a class="prev" rel="prev" href="/2023/02/25/cs144$else/">其他的对实验未涉及的思考</a>
             
             
             <a class="next" rel="next" href="/2023/02/25/cs144$lab1/">Lab1  StreamReassembler</a>

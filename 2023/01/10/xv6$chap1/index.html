@@ -413,7 +413,7 @@
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_25356929/article/details/113747023">xv6环境搭建</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.bbsmax.com/A/nAJvZNWoJr/">【MIT6.S081/6.828】手把手教你搭建开发环境</a></p>
 </blockquote>
-<h4 id="下载工具链"><a href="#下载工具链" class="headerlink" title="下载工具链"></a>下载工具链</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt-get install git build-essential gdb-multiarch qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu</span> </span><br></pre></td></tr></table></figure>
+<h4 id="下载工具链"><a href="#下载工具链" class="headerlink" title="下载工具链"></a>下载工具链</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt-get install git build-essential gdb-multiarch qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu</span> </span><br></pre></td></tr></table></figure>
 
 <p>测试安装ok：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-riscv64 --version</span></span><br><span class="line">QEMU emulator version 5.1.0</span><br><span class="line">//下面其中之一正常就行</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">riscv64-linux-gnu-gcc --version</span></span><br><span class="line">riscv64-linux-gnu-gcc (Debian 10.3.0-8) 10.3.0</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">riscv64-unknown-elf-gcc --version</span></span><br><span class="line">riscv64-unknown-elf-gcc (GCC) 10.1.0</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">riscv64-unknown-linux-gnu-gcc --version</span></span><br><span class="line">riscv64-unknown-linux-gnu-gcc (GCC) 10.1.0</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
@@ -429,7 +429,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make qemu</span></span><br></pre></td></tr></table></figure>
 
 <p>如果此处发生错误：<code>unrecognized command line option -mno-relax</code>，则按照此说法 <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_25356929/article/details/113747023">xv6环境搭建</a>更新gcc版本</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt install gcc-8-riscv64-linux-gnu</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc /usr/bin/riscv64-linux-gnu-gcc-8 8</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install gcc-8-riscv64-linux-gnu</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> update-alternatives --install /usr/bin/riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc /usr/bin/riscv64-linux-gnu-gcc-8 8</span></span><br></pre></td></tr></table></figure>
 
 <p>再执行一次</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make qemu</span></span><br></pre></td></tr></table></figure>
@@ -439,7 +439,7 @@
 <p>在这里记个强制方法：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -elf | grep qemu</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2023/01/10/xv6/image-20230105153458808.png" alt="image-20230105153458808"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105153458808.png" alt="image-20230105153458808"></p>
 <p>记住第二个的pid</p>
 <p>然后</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kill 3303</span><br></pre></td></tr></table></figure>
@@ -454,11 +454,11 @@
 <h4 id="make-qemu后卡住"><a href="#make-qemu后卡住" class="headerlink" title="make qemu后卡住"></a>make qemu后卡住</h4><p>疑似qemu版本不对。<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/528751993?utm_id=0#:~:text=riscv/pull/126-,%E6%89%A7%E8%A1%8Cmake%20qemu%E5%90%8E%E5%8D%A1%E4%BD%8F,-%E5%8D%A1%E4%BD%8F%E6%98%AF%E5%8F%AF%E4%BB%A5">解决方法</a></p>
 <h3 id="实验内容"><a href="#实验内容" class="headerlink" title="实验内容"></a>实验内容</h3><h4 id="编写sleep-c"><a href="#编写sleep-c" class="headerlink" title="编写sleep.c"></a>编写sleep.c</h4><blockquote>
 <p>Implement the UNIX program <code>sleep</code> for xv6; your <code>sleep</code> should pause for a user-specified number of ticks. A tick is a notion of time defined by the xv6 kernel, namely the time between two interrupts from the timer chip. Your solution should be in the file <code>user/sleep.c</code>.</p>
-<p><img src="/2023/01/10/xv6/image-20230105164146100.png" alt="image-20230105164146100.png"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105164146100.png" alt="image-20230105164146100.png"></p>
 </blockquote>
 <h5 id="体会"><a href="#体会" class="headerlink" title="体会"></a>体会</h5><h6 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h6><p>注意，他要求我们实现的sleep的参数是<strong>ticks的数量</strong>，不是秒数。我花了半天找时钟周期大小这个参数在哪，找了许久没找到，估计是没考虑到这一点。</p>
 <p>比如说，我翻了一下linux0.11的源码，在include/linux/time.h下有这句：</p>
-<p><img src="/2023/01/10/xv6/image-20230105162505574.png" alt="image-20230105162505574.png"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105162505574.png" alt="image-20230105162505574.png"></p>
 <p>说明了时钟频率大小。在xv6好像没有看到对这个的显式说明。</p>
 <h6 id="系统调用过程"><a href="#系统调用过程" class="headerlink" title="系统调用过程"></a>系统调用过程</h6><p>感受了一下xv6的系统调用过程，跟linux0.11还是很相像的。</p>
 <p>这个好像是lab2的内容，我暂且先在此放下我体会到的感受。</p>
@@ -466,16 +466,16 @@
 <li><p>xv6</p>
 <p>首先是从用户态到内核态的切换。</p>
 <p>在user/user.h中有各个系统调用外化的函数签名。在用户程序中调用里面的函数签名，就会执行【说实话，我没看懂为什么这里会知道要从user.h跳到usys.S中执行，也许是Makefile里有写？】user/usys.S中对应的汇编代码，比如说这种：</p>
-<p><img src="/2023/01/10/xv6/image-20230105170701334.png" alt="image-20230105170701334"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105170701334.png" alt="image-20230105170701334"></p>
 <p>然后这个SYS_close这种，其实是系统调用号宏，被定义在kernel/syscall.h中：</p>
-<p><img src="/2023/01/10/xv6/image-20230105171327076.png" alt="image-20230105171327076.pn"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105171327076.png" alt="image-20230105171327076.pn"></p>
 <p><code>li a7,SYS_call</code>就是把SYS_call的值放入a7寄存器，大概就是传参的意思。<code>ecall</code>是从用户态转到内核态的指令。这样一来，就完成了从用户态到内核态的切换。</p>
 <p>然后是在内核态的执行。</p>
 <p>切换到内核态之后的执行步骤跟linux0.11可以说是完全一样。</p>
 <p>首先应该是会去执行kernel/syscall.c中的syscall函数，具体应该是通过ecall引发0x80中断，然后查表得知这个syscall是中断处理函数</p>
-<p><img src="/2023/01/10/xv6/image-20230105172110475.png" alt="image-20230105172110475.pn"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105172110475.png" alt="image-20230105172110475.pn"></p>
 <p>可以看到，syscall获取了a7里的参数，然后查了系统调用表</p>
-<p><img src="/2023/01/10/xv6/image-20230105173019159.png" alt="image-20230105173019159"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105173019159.png" alt="image-20230105173019159"></p>
 <p>然后去sysproc.c文件下执行相应的sys_xxx函数。这个函数指针用得真是牛逼。</p>
 <p>再然后，sys_xxx函数中会从栈中取出调用参数，再跳转到xxx(args)函数中去（这些xxx函数一般在kernel中以单独文件形式出现）。</p>
 <p>这样一来，就完成了一次系统调用。</p>
@@ -483,13 +483,13 @@
 <li><p>linux0.11</p>
 <p>首先是用户态到内核态的切换。</p>
 <p>在用户态中比方说调用system call close()，则会调用lib/close.c下的：</p>
-<p><img src="/2023/01/10/xv6/image-20230105173820813.png" alt="image-20230105173820813"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105173820813.png" alt="image-20230105173820813"></p>
 <p>展开这个宏之后，是这样的：</p>
-<p><img src="/2023/01/10/xv6/image-20230105173845317.png" alt="image-20230105173845317"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105173845317.png" alt="image-20230105173845317"></p>
 <p>具体意思就是把close的系统调用号存入参数寄存器，然后引发0x80中断，进入内核态。</p>
 <p>然后是在内核态的执行。</p>
 <p>查表会得知sys_call函数是0x80中断的中断处理函数，然后就会根据参数里的系统调用名字去找系统调用表执行</p>
-<p><img src="/2023/01/10/xv6/image-20230105174832400.png" alt="image-20230105174832400"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230105174832400.png" alt="image-20230105174832400"></p>
 <p>这部分跟xv6差不多，不再赘述</p>
 </li>
 </ol>
@@ -540,11 +540,11 @@
 
 <p>可以看到，合格的argv的形式应该是：参1 参2 参3 “\0”，最后一个元素要以”\0”标志结束。</p>
 <p>这个应该是编写者约定俗成的。在user/sh.c的parseexec，大概445行左右：</p>
-<p><img src="/2023/01/10/xv6/image-20230106172133338.png" alt="image-20230106172133338"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230106172133338.png" alt="image-20230106172133338"></p>
 <p>shell处理命令时是会默认把最后一个清零的。</p>
 <blockquote>
 <p>确实，后面在学内存的时候，用户空间的构成如图所示：</p>
-<p><img src="/2023/01/10/xv6/image-20230109234930690.png" alt="image-20230109234930690"></p>
+<p><img src="/2023/01/10/xv6$chap1/image-20230109234930690.png" alt="image-20230109234930690"></p>
 <p>可以看到栈那边，参数列完了之后是会有一个用以terminate的空指针的</p>
 </blockquote>
 <h4 id="附加题：改善shell"><a href="#附加题：改善shell" class="headerlink" title="附加题：改善shell"></a>附加题：改善shell</h4><p>看起来又难又多所以我先摸了【润】等之后有时间再回来弄吧</p>

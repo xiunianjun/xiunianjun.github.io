@@ -226,7 +226,7 @@
 
         <div class="post-content">
             <h1 id="编译内核"><a href="#编译内核" class="headerlink" title="编译内核"></a>编译内核</h1><p>安装内核编译所需包：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update &amp;&amp; sudo apt-get install build-essential gcc g++ make libncurses5-dev libssl-dev bison flex bc libelf-dev</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt-get update &amp;&amp; <span class="built_in">sudo</span> apt-get install build-essential gcc g++ make libncurses5-dev libssl-dev bison flex bc libelf-dev</span><br></pre></td></tr></table></figure>
 
 <p>生成内核编译配置文件：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make localmodconfig</span><br></pre></td></tr></table></figure>
@@ -240,10 +240,10 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CONFIG_SYSTEM_REVOCATION_KEYS=<span class="string">&quot;&quot;</span></span><br></pre></td></tr></table></figure></li>
 </ol>
 <p>然后就可以进行内核编译：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make -j8 &amp;&amp; sudo make modules_install &amp;&amp; sudo make install</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make -j8 &amp;&amp; <span class="built_in">sudo</span> make modules_install &amp;&amp; <span class="built_in">sudo</span> make install</span><br></pre></td></tr></table></figure>
 
 <h1 id="修改grub"><a href="#修改grub" class="headerlink" title="修改grub"></a>修改grub</h1><p>打开grub配置文件：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/default/grub</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> vim /etc/default/grub</span><br></pre></td></tr></table></figure>
 
 <p>进行以下修改：</p>
 <ol>
@@ -252,10 +252,10 @@
 <li>将<code>GRUB_TIMEOUT</code>修改成30</li>
 </ol>
 <p>然后保存退出，更新grub：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo update-grub</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> update-grub</span><br></pre></td></tr></table></figure>
 
 <h1 id="进入内核"><a href="#进入内核" class="headerlink" title="进入内核"></a>进入内核</h1><p>完成上述步骤后，重启虚拟机：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo reboot</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> reboot</span><br></pre></td></tr></table></figure>
 
 <p>在进入GRUB界面时选择<code>Advanced Ubuntu</code>，然后选择内核版本6.4.0+即可。</p>
 <h1 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h1><ol>
@@ -263,7 +263,7 @@
 <p>因缺少磁盘驱动挂载文件系统失败</p>
 </li>
 <li><p>init进程启动失败，error code为-8</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Starting init: /sbin/init exists but couldn<span class="number">&#x27;</span>t execute <span class="title function_">it</span> <span class="params">(error <span class="number">-8</span>)</span></span><br><span class="line">然后init进程被杀死了，然后就进入BusyBox Shell</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Starting init: /sbin/init exists but couldn<span class="string">&#x27;t execute it (error -8)</span></span><br><span class="line"><span class="string">然后init进程被杀死了，然后就进入BusyBox Shell</span></span><br></pre></td></tr></table></figure>
 
 <p>最后发现是不知道为什么它将启动参数中的text误认为init进程的启动参数了，最后的解决方案是删掉启动参数里的text（具体方法可以看GRUB介绍部分，看完大概就懂了）</p>
 </li>

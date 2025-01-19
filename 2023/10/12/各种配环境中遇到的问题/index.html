@@ -170,7 +170,7 @@
 <li><p><a href="/2023/08/12/kernel_compile/">内核编译</a></p>
 </li>
 <li><p>防火墙</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo ufw status numbered <span class="comment"># 查看</span></span><br><span class="line">sudo ufw delete 数字 <span class="comment"># 删除某条记录</span></span><br><span class="line"><span class="comment"># 开放IP地址XX.XX.XX.XX的22 tcp端口</span></span><br><span class="line">sudo ufw allow from XX.XX.XX.XX to any port 22 proto tcp</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> ufw status numbered <span class="comment"># 查看</span></span><br><span class="line"><span class="built_in">sudo</span> ufw delete 数字 <span class="comment"># 删除某条记录</span></span><br><span class="line"><span class="comment"># 开放IP地址XX.XX.XX.XX的22 tcp端口</span></span><br><span class="line"><span class="built_in">sudo</span> ufw allow from XX.XX.XX.XX to any port 22 proto tcp</span><br></pre></td></tr></table></figure></li>
 <li><p>docker</p>
 <p><a target="_blank" rel="noopener" href="https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors">配置阿里云镜像</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6b148fdec361">配置pull时代理（采用了方法1）</a></p>
@@ -182,7 +182,7 @@
 <li><p><a href="/2023/10/07/git/">git</a></p>
 </li>
 <li><p>清理postgresql的pg_wal日志：<a target="_blank" rel="noopener" href="https://www.jb51.net/database/3217365sx.htm">https://www.jb51.net/database/3217365sx.htm</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo /usr/lib/postgresql/14/bin/pg_controldata /var/lib/postgresql/14/main/</span><br><span class="line">sudo pg_archivecleanup -d /var/lib/postgresql/14/main/pg_wal 最新日志</span><br></pre></td></tr></table></figure></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> /usr/lib/postgresql/14/bin/pg_controldata /var/lib/postgresql/14/main/</span><br><span class="line"><span class="built_in">sudo</span> pg_archivecleanup -d /var/lib/postgresql/14/main/pg_wal 最新日志</span><br></pre></td></tr></table></figure></li>
 </ol>
 
         </div>

@@ -230,9 +230,9 @@
 <p>这里是自底向上讲起的。之后可以看看hit网课的自顶向下。</p>
 </blockquote>
 <blockquote>
-<p><img src="/2023/01/10/xv6/image-20230121160555370.png" alt="image-20230121160555370"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230121160555370.png" alt="image-20230121160555370"></p>
 </blockquote>
-<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p><img src="/2023/01/10/xv6/image-20230121160641718.png" alt="image-20230121160641718"></p>
+<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p><img src="/2023/01/10/xv6$chap8/image-20230121160641718.png" alt="image-20230121160641718"></p>
 <blockquote>
 <p>The disk layer reads and writes blocks on an virtio hard drive. </p>
 <p>The buffer cache layer <strong>caches</strong> disk blocks and <strong>synchronizes</strong> access to them, making sure that only one kernel process at a time can modify the data stored in any particular block. </p>
@@ -242,7 +242,7 @@
 <p>The pathname layer provides hierarchical path names like /usr/rtm/xv6/fs.c, and resolves them with <strong>recursive</strong> lookup. </p>
 <p>The file descriptor layer <strong>abstracts</strong> many Unix resources (e.g., pipes, devices, fifiles, etc.) using the file system interface, simplifying the lives of application programmers.</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230121162324747.png" alt="image-20230121162324747"></p>
 <blockquote>
 <p>The file system must have a plan for where it stores inodes and content blocks on the disk. To do so, xv6 divides the disk into several sections, as Figure 8.2 shows.</p>
 <p>The file system does not use block 0 (it holds the boot sector). </p>
@@ -261,7 +261,7 @@
 <p>The code is in <code>bio.c</code>.</p>
 <p>Buffer cache中保存磁盘块的缓冲区数量固定，这意味着如果文件系统请求还未存放在缓存中的块，Buffer cache必须回收当前保存其他块内容的缓冲区。Buffer cache为新块回收最近使用最少的缓冲区。这样做的原因是认为最近使用最少的缓冲区是最不可能近期再次使用的缓冲区。</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/image-20230124151719288.png" alt="image-20230124151719288"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230124151719288.png" alt="image-20230124151719288"></p>
 <h3 id="数据结构定义"><a href="#数据结构定义" class="headerlink" title="数据结构定义"></a>数据结构定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">buf</span> &#123;</span></span><br><span class="line">  <span class="type">int</span> valid;   <span class="comment">// has data been read from disk?缓冲区是否包含块的副本</span></span><br><span class="line">  <span class="type">int</span> disk;    <span class="comment">// does disk &quot;own&quot; buf?缓冲区内容是否已交给磁盘</span></span><br><span class="line">  uint dev;</span><br><span class="line">  uint blockno;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sleeplock</span> <span class="title">lock</span>;</span></span><br><span class="line">  uint refcnt;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">prev</span>;</span> <span class="comment">// LRU cache list</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">next</span>;</span></span><br><span class="line">  uchar data[BSIZE];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>这应该代表着一个磁盘块。</p>
@@ -302,7 +302,7 @@
 <p>如果日志标记为包含完整操作，则恢复代码会将写操作复制到磁盘文件系统中它们所属的位置，然后擦除日志。如果日志没有标记为包含完整操作，则恢复代码将忽略该日志，然后擦除日志。</p>
 </blockquote>
 <p>这就保证了原子性。</p>
-<h3 id="Log-design"><a href="#Log-design" class="headerlink" title="Log design"></a>Log design</h3><p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747"></p>
+<h3 id="Log-design"><a href="#Log-design" class="headerlink" title="Log design"></a>Log design</h3><p><img src="/2023/01/10/xv6$chap8/image-20230121162324747.png" alt="image-20230121162324747"></p>
 <p>superblock记录了log的存储位置。</p>
 <blockquote>
 <p>它由一个头块（header block）和一系列更新块的副本（logged block）组成。</p>
@@ -334,7 +334,7 @@
 <p>在每次启动的时候，都会执行log的初始化，届时可以顺便恢复数据。</p>
 <p>完美实现了日志的功能。</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/image-20230123212753931.png" alt="image-20230123212753931"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230123212753931.png" alt="image-20230123212753931"></p>
 <h4 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Contents of the header block, used for both the on-disk header block</span></span><br><span class="line"><span class="comment">// and to keep track in memory of logged block# before commit.</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">logheader</span> &#123;</span></span><br><span class="line">  <span class="type">int</span> n;</span><br><span class="line">  <span class="comment">// 扇区号也即blockno的数组</span></span><br><span class="line">  <span class="type">int</span> block[LOGSIZE];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 代表log磁盘块</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">log</span> &#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">spinlock</span> <span class="title">lock</span>;</span></span><br><span class="line">  <span class="type">int</span> start;<span class="comment">// log磁盘块的开始。start开始的第一块为log header，之后皆为写入的block</span></span><br><span class="line">  <span class="type">int</span> size;</span><br><span class="line">  <span class="type">int</span> outstanding; <span class="comment">// how many FS sys calls are executing.</span></span><br><span class="line">  <span class="type">int</span> committing;  <span class="comment">// in commit(), please wait.</span></span><br><span class="line">  <span class="type">int</span> dev;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">logheader</span> <span class="title">lh</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">log</span> <span class="title">log</span>;</span></span><br></pre></td></tr></table></figure>
 
 <h4 id="关键函数"><a href="#关键函数" class="headerlink" title="关键函数"></a>关键函数</h4><h5 id="begin-op"><a href="#begin-op" class="headerlink" title="begin_op()"></a>begin_op()</h5><blockquote>
@@ -391,7 +391,7 @@
 <h3 id="bitmap"><a href="#bitmap" class="headerlink" title="bitmap"></a>bitmap</h3><blockquote>
 <p>文件和目录内容存储在磁盘块中，磁盘块必须从空闲池中分配。xv6的块分配器在磁盘上维护一个空闲位图，每一位代表一个块。0表示对应的块是空闲的；1表示它正在使用中。</p>
 <p>引导扇区、超级块、日志块、inode块和位图块的比特位是由程序<code>mkfs</code>初始化设置的：</p>
-<p><img src="/2023/01/10/xv6/image-20230123234919055.png" alt="image-20230123234919055"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230123234919055.png" alt="image-20230123234919055"></p>
 </blockquote>
 <h3 id="allocator"><a href="#allocator" class="headerlink" title="allocator"></a>allocator</h3><p>类似于memory allocator，块分配器也提供了两个函数：<code>bfree</code>和<code>balloc</code>。</p>
 <h4 id="balloc"><a href="#balloc" class="headerlink" title="balloc"></a>balloc</h4><blockquote>
@@ -405,7 +405,7 @@
 <h2 id="Inode-layer"><a href="#Inode-layer" class="headerlink" title="Inode layer"></a>Inode layer</h2><h3 id="inode"><a href="#inode" class="headerlink" title="inode"></a>inode</h3><blockquote>
 <p>术语inode（即索引结点）可以具有两种相关含义之一。它可能是指包含文件大小和数据块编号列表的磁盘上的数据结构【on-disk inode】。或者“inode”可能指内存中的inode【in-memory inode】，它包含磁盘上inode的副本以及内核中所需的额外信息。</p>
 </blockquote>
-<p><img src="/2023/01/10/xv6/image-20230121162324747.png" alt="image-20230121162324747"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230121162324747.png" alt="image-20230121162324747"></p>
 <h4 id="on-disk-inode"><a href="#on-disk-inode" class="headerlink" title="on-disk inode"></a>on-disk inode</h4><blockquote>
 <p>The on-disk inodes are packed into a contiguous area of disk called the inode blocks. </p>
 <p>Every inode is the <strong>same size,</strong> so it is easy, given a number n, to find the nth inode on the disk. In fact, this number n, called the <strong>inode number</strong> or <strong>i-number</strong>, is how inodes are <strong>identifified</strong> in the implementation.</p>
@@ -424,7 +424,7 @@
 <h3 id="Code-inode"><a href="#Code-inode" class="headerlink" title="Code: inode"></a>Code: inode</h3><blockquote>
 <p>主要是在讲inode layer这一层的方法，以及给上层提供的接口。</p>
 </blockquote>
-<h4 id="Overview-1"><a href="#Overview-1" class="headerlink" title="Overview"></a>Overview</h4><p><img src="/2023/01/10/xv6/image-20230124153309132.png" alt="image-20230124153309132"></p>
+<h4 id="Overview-1"><a href="#Overview-1" class="headerlink" title="Overview"></a>Overview</h4><p><img src="/2023/01/10/xv6$chap8/image-20230124153309132.png" alt="image-20230124153309132"></p>
 <h4 id="底层接口"><a href="#底层接口" class="headerlink" title="底层接口"></a>底层接口</h4><blockquote>
 <p><code>iget</code> <code>iput</code> </p>
 </blockquote>
@@ -469,7 +469,7 @@
 </blockquote>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// On-disk inode structure</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  uint addrs[NDIRECT+<span class="number">1</span>];   <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2023/01/10/xv6/image-20230124163025094.png" alt="image-20230124163025094"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230124163025094.png" alt="image-20230124163025094"></p>
 <h4 id="bmap"><a href="#bmap" class="headerlink" title="bmap"></a>bmap</h4><blockquote>
 <p>函数<code>bmap</code>负责封装这个寻找数据块的过程，以便实现我们将很快看到的如<code>readi</code>和<code>writei</code>这样的更高级例程。</p>
 <p><code>bmap(struct inode *ip, uint bn)</code>返回inode<code>ip</code>的第<code>bn</code>个数据块的磁盘块号。如果<code>ip</code>还没有这样的块，<code>bmap</code>会分配一个。</p>
@@ -499,7 +499,7 @@
 <p><strong>也就是说这一层其实本质上是一个大小一定的map</strong>，该map自身也存放在inode中，大小为inode的大小，每个表项entry<strong>映射了目录名和文件inode</strong>。所以接下来介绍的函数我们完全可以从hashmap增删改查的角度去理解。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Directory is a file containing a sequence of dirent structures.</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DIRSIZ 14</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dirent</span> &#123;</span></span><br><span class="line">  ushort inum;<span class="comment">// 如果为0，说明该entry free</span></span><br><span class="line">  <span class="type">char</span> name[DIRSIZ];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2023/01/10/xv6/image-20230124173241241.png" alt="image-20230124173241241"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230124173241241.png" alt="image-20230124173241241"></p>
 <h3 id="相关函数"><a href="#相关函数" class="headerlink" title="相关函数"></a>相关函数</h3><h4 id="dirlookup"><a href="#dirlookup" class="headerlink" title="dirlookup"></a>dirlookup</h4><blockquote>
 <p>函数<code>dirlookup</code>在directory中搜索具有给定名称的entry。</p>
 <p>它返回的指向enrty.inum相应的inode是非独占的【通过iget获取】，也即无锁状态。它还会把<code>*poff</code>设置为所需的entry的字节偏移量。</p>
@@ -626,7 +626,7 @@
 </blockquote>
 <h4 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h4><p>意外地很简单（）在此不多做赘述，直接上代码。</p>
 <p>唯一要注意的一点就是记得在<code>itrunc</code>中free掉</p>
-<p><img src="/2023/01/10/xv6/image-20230124232433793.png" alt="image-20230124232433793"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230124232433793.png" alt="image-20230124232433793"></p>
 <h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><h5 id="修改定义"><a href="#修改定义" class="headerlink" title="修改定义"></a>修改定义</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in fs.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NDIRECT 11</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NINDIRECT (BSIZE / sizeof(uint))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NDOUBLEINDIRECT ((BSIZE/sizeof(uint))*(BSIZE/sizeof(uint)))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXFILE (NDIRECT + NINDIRECT + NDOUBLEINDIRECT)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// On-disk inode structure</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  uint addrs[NDIRECT+<span class="number">2</span>];   <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// in file.h</span></span><br><span class="line"><span class="comment">// in-memory copy of an inode</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">inode</span> &#123;</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  uint addrs[NDIRECT+<span class="number">2</span>];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -670,9 +670,9 @@
 <h5 id="一些错误"><a href="#一些错误" class="headerlink" title="一些错误"></a>一些错误</h5><p>其实没什么好说的，虽然debug过程挺久，但是靠常规的printf追踪就都可以看出来是哪里错了。下面我说说一个我印象比较深刻的吧。</p>
 <p><code>symlinktest</code>中有一个检测点是，软链接不能成环，也即b-&gt;a-&gt;b是非法的。于是，我就选择了用快慢指针来检测环形链表这个思想，用来看是否出现环。</p>
 <p>在<code>symlinktest</code>的另一个检测点中：</p>
-<p><img src="/2023/01/10/xv6/image-20230125173143735.png" alt="image-20230125173143735"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230125173143735.png" alt="image-20230125173143735"></p>
 <p>我出现了如下错误：</p>
-<p><img src="/2023/01/10/xv6/image-20230125162542807.png" alt="image-20230125162542807"></p>
+<p><img src="/2023/01/10/xv6$chap8/image-20230125162542807.png" alt="image-20230125162542807"></p>
 <p>此时的结构是1[27]-&gt;2[28]-&gt;3[29]-&gt;4，[]内为inode的inum。</p>
 <p>快慢指针的实现方式是当cnt为奇数的时候，慢指针才会移动。而上图中，cnt==0时，两个指针的值都发生了变化，这就非常诡异。</p>
 <p>这其实是因为slow指针所指向的那个inode被释放了，然后又被fast指针的下一个inode捡过来用了，从而导致值覆盖。</p>
@@ -681,7 +681,7 @@
 
 <p>在这里，我错误地调用了<code>ilockput</code>，从而使inode的ref–，使得它在下一次fast指针调用<code>namei</code>，<code>namei</code>调用<code>iget</code>时，该inode被当做free inode使用，于是就这么寄了。</p>
 <p>所以我们需要把<code>ilockput</code>的调用换成<code>ilock</code>，这样一来就能防止inode被free。至于什么时候再iput？我想还是交给操作系统启动时的清理工作来做吧23333【开摆】</p>
-<h4 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h4><p><img src="/2023/01/10/xv6/image-20230125165612112.png" alt="image-20230125165612112"></p>
+<h4 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h4><p><img src="/2023/01/10/xv6$chap8/image-20230125165612112.png" alt="image-20230125165612112"></p>
 <h5 id="添加定义"><a href="#添加定义" class="headerlink" title="添加定义"></a>添加定义</h5><h6 id="fcntl-c"><a href="#fcntl-c" class="headerlink" title="fcntl.c"></a>fcntl.c</h6><p>open参数</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 意为只用获取软链接文件本身，而不用顺着软链接去找它的target文件</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> O_NOFOLLOW 0x100</span></span><br></pre></td></tr></table></figure>
 
@@ -941,10 +941,10 @@
         </section>
         <section class="post-nav">
             
-                <a class="prev" rel="prev" href="/2023/01/10/xv6$chap4/">Traps and system calls</a>
+                <a class="prev" rel="prev" href="/2023/01/10/xv6/">xv6</a>
             
             
-            <a class="next" rel="next" href="/2023/01/10/xv6$chap5/">Interrupts and device drivers</a>
+            <a class="next" rel="next" href="/2022/10/04/%E5%93%88%E5%B7%A5%E5%A4%A7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AE%9E%E9%AA%8C/">哈工大操作系统实验</a>
             
         </section>
 

@@ -226,7 +226,7 @@
 
         <div class="post-content">
             <h1 id="Project1-Buffer-Pool"><a href="#Project1-Buffer-Pool" class="headerlink" title="Project1   Buffer Pool"></a>Project1   Buffer Pool</h1><p>先放个通关记录~</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330235300907.png" alt="image-20230330235300907"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330235300907.png" alt="image-20230330235300907"></p>
 <blockquote>
 <p>特别鸣谢：</p>
 <p>某不愿透露姓名的友人hhj</p>
@@ -275,7 +275,7 @@
 <p>故而，在具体实现中，为了便于管理，我将此拆分为两个队列：</p>
 <blockquote>
 <p>思路来自：<a target="_blank" rel="noopener" href="https://blog.csdn.net/zhanglong_4444/article/details/88344953">LRU . LFU 和 LRU-K 的解释与区别</a></p>
-<p><img src="/2023/03/13/cmu15445/image-20230323205851168.png" alt="image-20230323205851168"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230323205851168.png" alt="image-20230323205851168"></p>
 <ol>
 <li><p>数据第一次被访问，加入到访问历史列表；</p>
 </li>
@@ -290,16 +290,16 @@
 </ol>
 </blockquote>
 <p>每个页面结构持有一个时间戳队列即可：</p>
-<p><img src="/2023/03/13/cmu15445/image-20231128152139485.png" alt="image-20231128152139485"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20231128152139485.png" alt="image-20231128152139485"></p>
 <h3 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h3><h4 id="刚coding完"><a href="#刚coding完" class="headerlink" title="刚coding完"></a>刚coding完</h4><p>task1的内容就是实现对一堆<code>frame_id</code>的LRU-K算法管理，挺简单的（也可能是测试用例少我错误没排查出来2333）</p>
 <p>我并没有用默认给的模板的<code>unorder_map</code>，也没有用默认给的模板思路（但原理以及最终效果是差不多的，就是没用它的方法），而是选择类似像上面这张图一样，分成两个队列实现，一个队列<code>visit_record_</code>存储那些访问次数&lt;k的数据，另一个队列<code>cache_data_</code>存储那些访问次数&gt;=k的顺序，每次优先淘汰<code>visit_record_</code>中的数据，<u>两个队列都采用LRU的方式管理。与此同时，我觉得LRU管理时间戳只用记录最新访问的就行，所以将历史访问时间戳队列改成了只有一个变量。</u></p>
 <h4 id="终于通过online-test"><a href="#终于通过online-test" class="headerlink" title="终于通过online-test"></a>终于通过online-test</h4><blockquote>
 <p>参考：</p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_63848007/article/details/125426740">FIFO和LRU</a>这里面的实例非常直观地说明了两种算法的差异，可以跟着手推感受一下</p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Altair_alpha/article/details/127745308">pro1</a>这个用的是我上面的那个想法，是错的。但是评论很值得参考：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230329230045194.png" alt="image-20230329230045194"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230329230045194.png" alt="image-20230329230045194"></p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hrbust_cxl/article/details/127138778">pro1</a>这个评论的“偷测试用例”xswl，虽然这次没用，但以后说不定能用上：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230329230139300.png" alt="image-20230329230139300"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230329230139300.png" alt="image-20230329230139300"></p>
 </blockquote>
 <h5 id="正确思路-1"><a href="#正确思路-1" class="headerlink" title="正确思路"></a>正确思路</h5><p>……简单个屁！！</p>
 <p>算法上，上面错误的算法确实很简单；而正确的算法也确实很简单。那么难的是什么呢？我觉得难的还是搞清楚它要我们实现的究竟是上面东西。</p>
@@ -330,7 +330,7 @@
 <p>当多个frame有+inf这个<code> backward k-distance</code>的时候，replacer需要驱逐拥有全部（overall）frame中最早的timestamp的frame。（也就是说选择一个frame，这个frame的<strong>最不近</strong>的访问记录，是所有frame中最近最少访问的）【也即这个frame的history的front是所有frame中最早的，也即使用FIFO算法】</p>
 <p>可见，正确解法确实是没问题的，就是理解上很困难。要是可以配个实例就好了QAQ</p>
 <p>所以说，所谓LRU（Least Recently Used）的直译还是最不近使用，也即最近最少使用。里面这个least不是用来修饰recent表示recent程度深的，相反它表示的是recent的程度浅。英语不好的惨痛教训啊。</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330160207757.png" alt="image-20230330160207757"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330160207757.png" alt="image-20230330160207757"></p>
 <p>最后一下子交了这么多次才过。绷不住了。</p>
 <h2 id="Task2-BufferPoolManager"><a href="#Task2-BufferPoolManager" class="headerlink" title="Task2   BufferPoolManager"></a>Task2   BufferPoolManager</h2><blockquote>
 <p>The <code>BufferPoolManager</code> is responsible for fetching database pages from the <code>DiskManager</code> and storing them in memory.从DiskManager中取出页，然后存入内存。</p>
@@ -355,18 +355,18 @@
 <p>其他部分虽然步骤繁杂，但理解难度不高，而且它提示得也很保姆了，所以不多bb。</p>
 <h4 id="通过online-test"><a href="#通过online-test" class="headerlink" title="通过online-test"></a>通过online-test</h4><p>确实算简单了，我主要倒在没有认真看它的需求，这应该是语文问题（绷</p>
 <p>一个是<code>FetchPage</code>这里：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330162812680.png" alt="image-20230330162812680"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330162812680.png" alt="image-20230330162812680"></p>
 <p>如果所求物理页存在于buffer pool，直接返回+record access即可，不用再写回+读入。因为它的提示这边：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330162941774.png" alt="image-20230330162941774"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330162941774.png" alt="image-20230330162941774"></p>
 <p>这个是句号。也就是说后面那些写回啊read啊，是没找到时才做的，不是并列关系。</p>
 <p>这也很合理，毕竟你找到所需页就说明不用从磁盘读入，也即找到所需页=直接返回即可。</p>
 <p>另一个是<code>UnpinPage</code>这里：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330163031739.png" alt="image-20230330163031739"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330163031739.png" alt="image-20230330163031739"></p>
 <p>不应该写<code>is_dirty_ = is_dirty</code>，因为它的提示这边：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330163058921.png" alt="image-20230330163058921"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330163058921.png" alt="image-20230330163058921"></p>
 <p>可见参数<code>is_dirty</code>为true是需要设置为dirty，为false的话没有别的意义，保持原来值就行。</p>
 <p>还有一个就是，在<code>Page</code>类中声明了friend：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330163337929.png" alt="image-20230330163337929"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330163337929.png" alt="image-20230330163337929"></p>
 <p>故而<code>BufferPoolManager</code>可以直接访问<code>Page</code>的私有成员变量，而无需手动为<code>Page</code>添加Getter/Setter方法。</p>
 <h2 id="Task3-Page-Guard"><a href="#Task3-Page-Guard" class="headerlink" title="Task3   Page Guard"></a>Task3   Page Guard</h2><p>这是要写我们在上面用的那个PageGuard？这让我想起了Lab0的<code>ValueGuard</code>。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ValueGuard</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">ValueGuard</span>(Trie root, <span class="type">const</span> T &amp;value) : <span class="built_in">root_</span>(std::<span class="built_in">move</span>(root)), <span class="built_in">value_</span>(value) &#123;&#125;</span><br><span class="line">  <span class="keyword">auto</span> <span class="keyword">operator</span>*() <span class="type">const</span> -&gt; <span class="type">const</span> T &amp; &#123; <span class="keyword">return</span> value_; &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span>:</span><br><span class="line">  Trie root_;</span><br><span class="line">  <span class="type">const</span> T &amp;value_;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -379,7 +379,7 @@
 <p>In the future projects, multiple threads will be reading and writing from the same pages, thus reader-writer latches are required to ensure the correctness of the data. Note that in the <code>Page</code> class, there are relevant latching methods for this purpose. Similar to unpinning of a page, a programmer can forget to unlatch a page after use. To mitigate the problem, you will implement <code>ReadPageGuard</code> and <code>WritePageGuard</code> which automatically unlatch the pages as soon as they go out of scope.</p>
 </blockquote>
 <h3 id="感想-2"><a href="#感想-2" class="headerlink" title="感想"></a>感想</h3><p>怎么说，其实只用仔细看相关文档和它的要求就不难，但你懂的我的尿性就是不细看文档，所以这里我也用gdb调了蛮久才过的。正确思路没什么好说的，直接记录下我觉得比较有意义的错误吧。</p>
-<h4 id="错误集锦"><a href="#错误集锦" class="headerlink" title="错误集锦"></a>错误集锦</h4><h5 id="析构函数的调用"><a href="#析构函数的调用" class="headerlink" title="析构函数的调用"></a>析构函数的调用</h5><p><img src="/2023/03/13/cmu15445/image-20230330233252372.png" alt="image-20230330233252372"></p>
+<h4 id="错误集锦"><a href="#错误集锦" class="headerlink" title="错误集锦"></a>错误集锦</h4><h5 id="析构函数的调用"><a href="#析构函数的调用" class="headerlink" title="析构函数的调用"></a>析构函数的调用</h5><p><img src="/2023/03/13/cmu15445$lab1/image-20230330233252372.png" alt="image-20230330233252372"></p>
 <p>在这个用例中，退出“}”会调用两次析构函数。</p>
 <h5 id="奇怪的死锁"><a href="#奇怪的死锁" class="headerlink" title="奇怪的死锁"></a>奇怪的死锁</h5><h6 id="debug过程"><a href="#debug过程" class="headerlink" title="debug过程"></a>debug过程</h6><p>我在coding的过程中，遇到了一个很神奇的死锁现象。</p>
 <p>在这里<code>page-&gt;WLatch();</code>这句会死锁，而且还是在第一次调用<code>FetchWritePage()</code>时死锁的：</p>
@@ -390,14 +390,14 @@
 
 <p>它就不会死锁了。</p>
 <p>这很奇怪，到底是发生了什么？我用GDB调了半天，在<code>RWLatch.WLock()</code>处打了断点，也没发现在这之前有调用过lock()。于是我就去看了下<code>std::shared_mutex</code>的官方文档（当然，这中间想了很久也不知道怎么办）：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230331222601644.png" alt="image-20230331222601644"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230331222601644.png" alt="image-20230331222601644"></p>
 <p>我就怀疑是不是我哪里写错了，所以就干了这种undefined的事，然后就导致死锁了。于是我写了个测试程序：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330195418370.png" alt="image-20230330195418370"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330195418370.png" alt="image-20230330195418370"></p>
 <p>发现，当在调用<code>WLock</code>（也即<code>std::shared_mutex::lock()</code>）之前，如果多调了一次<code>XUnlock</code>（也即<code>std::shared_mutex::unlock()</code>或者<code>std::shared_mutex::unlock_shared()</code>），就会卡住。</p>
 <p>这说明确实发生了不匹配问题。于是我就在<code>Page</code>中添加了两个成员变量用来记录上锁和解锁的次数，并且在gurad test中打印了出来，结果发现：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330233018049.png" alt="image-20230330233018049"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330233018049.png" alt="image-20230330233018049"></p>
 <p>确实发生了不匹配问题，是在这里:</p>
-<p><img src="/2023/03/13/cmu15445/image-20230330233252372.png" alt="image-20230330233252372"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230330233252372.png" alt="image-20230330233252372"></p>
 <p>之后用gdb调下就发现错误了，不赘述了。</p>
 <h6 id="另外的想法"><a href="#另外的想法" class="headerlink" title="另外的想法"></a>另外的想法</h6><p>在出现死锁问题时，我是想着，会不会是测试程序中，对同一页获取了一次<code>ReadGuardPage</code>对象之后，再对同一页获取<code>Read/WriteGuardPage</code>导致的呢？于是我就开始思考如何防范这个流程，最后写下了这样的代码：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BufferPoolManager::FetchPageRead</span><span class="params">(<span class="type">page_id_t</span> page_id)</span> -&gt; ReadPageGuard </span>&#123;</span><br><span class="line">  Page *page = <span class="built_in">FetchPage</span>(page_id);</span><br><span class="line">  <span class="type">bool</span> should_release = <span class="literal">true</span>;</span><br><span class="line">  <span class="keyword">if</span> (!page-&gt;rwlatch_.<span class="built_in">try_lock_shared</span>()) &#123;</span><br><span class="line">    <span class="comment">// 说明此时已有read/write锁</span></span><br><span class="line">    should_release = <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123;<span class="keyword">this</span>, pagei, should_release&#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">BufferPoolManager::FetchPageWrite</span><span class="params">(<span class="type">page_id_t</span> page_id)</span> -&gt; WritePageGuard </span>&#123;</span><br><span class="line">  Page *page = <span class="built_in">FetchPage</span>(page_id);</span><br><span class="line">  <span class="type">bool</span> should_release = <span class="literal">true</span>;</span><br><span class="line">  <span class="keyword">if</span> (!page-&gt;rwlatch_.<span class="built_in">try_lock</span>()) &#123;</span><br><span class="line">    <span class="comment">// 获取write锁失败，可能原因：该进程持有write锁、别的进程有read锁、该进程持有read锁</span></span><br><span class="line">    <span class="keyword">if</span> (page-&gt;rwlatch_.<span class="built_in">try_lock_shared</span>()) &#123;</span><br><span class="line">      <span class="comment">// 成功read，说明是别的进程有read锁</span></span><br><span class="line">      page-&gt;rwlatch_.<span class="built_in">unlock_shared</span>();</span><br><span class="line">      <span class="comment">// 等待</span></span><br><span class="line">      page-&gt;rwlatch_.<span class="built_in">lock</span>();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 说明当前进程有read/write锁</span></span><br><span class="line">      should_release = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123;<span class="keyword">this</span>, pagei, should_release&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -414,8 +414,8 @@
 </blockquote>
 <p>lru-k的算法优化是自己想的，并行IO的优化思路全部来自 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/617466684">CMU 15-445 Project 1 (Spring 2023) 优化记录</a>，我只是把这位大佬的思路自己实现了一遍。感觉还是太菜了，面对这种实际场景毫无还手之力一点思路没有QAQ但正是如此，这个细粒度化锁的小task才值得学习。</p>
 <p>放上优化前后性能对比：</p>
-<p><img src="/2023/03/13/cmu15445/image-20230331000020775.png" alt="image-20230331000020775"></p>
-<p><img src="/2023/03/13/cmu15445/image-20230404140838247.png" alt="image-20230404140838247"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230331000020775.png" alt="image-20230331000020775"></p>
+<p><img src="/2023/03/13/cmu15445$lab1/image-20230404140838247.png" alt="image-20230404140838247"></p>
 <h3 id="Better-replacer-algorithm"><a href="#Better-replacer-algorithm" class="headerlink" title="Better replacer algorithm"></a>Better replacer algorithm</h3><blockquote>
 <p>In the leaderboard test, we will have multiple threads accessing the pages on the disk. There are two types of threads running in the benchmark:在具体的benchtest中，可以分为两类线程。</p>
 <ol>
